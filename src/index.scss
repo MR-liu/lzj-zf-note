@@ -1,0 +1,57 @@
+html,body, #root,content, .App{
+  height: 100%;
+}
+
+.html-box {
+  height: 100%;
+  overflow: auto;
+  margin-left: 20px;
+  flex: 1;
+}
+
+content {
+  width: 100%;
+  display: flex;
+}
+
+.nav-box {
+  width: 180px;
+  max-height: 100%;
+  overflow: auto;
+  text-align: center;
+}
+
+.nav {
+  margin: 10px 10px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+
+  a {
+    width: 160px;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 4px;
+    border: 1px solid #adadad;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-bottom: 4px;
+
+    &.active {
+      background-color: blanchedalmond;
+    }
+  }
+}
+
+img {
+  max-width: 800px;
+}
+
+pre {
+  padding: 12px;
+  background-color: #f7f7f7;
+}
+
