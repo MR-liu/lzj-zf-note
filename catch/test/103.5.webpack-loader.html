@@ -1,0 +1,601 @@
+
+        <h2 id="t01.loader">1.loader <a href="#t01.loader"> # </a></h2>
+<ul>
+<li>所谓 loader 只是一个导出为函数的 JavaScript 模块。它接收上一个 loader 产生的结果或者资源文件(resource file)作为入参。也可以用多个 loader 函数组成 loader chain</li>
+<li>compiler 需要得到最后一个 loader 产生的处理结果。这个处理结果应该是 String 或者 Buffer（被转换为一个 string）</li>
+</ul>
+<h3 id="t11.1 loader 运行的总体流程">1.1 loader 运行的总体流程 <a href="#t11.1 loader 运行的总体流程"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/webpackflowloader.jpg" alt="webpackflowloader"></p>
+<p><img src="http://img.zhufengpeixun.cn/loader-runner2.jpg" alt="loader-runner2"></p>
+<h3 id="t21.2 loader-runner">1.2 loader-runner <a href="#t21.2 loader-runner"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/loader-runner#readme">loader-runner</a>是一个执行loader链条的的模块</li>
+</ul>
+<h4 id="t31.2.1 loader 类型">1.2.1 loader 类型 <a href="#t31.2.1 loader 类型"> # </a></h4>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/NormalModuleFactory.js#L159-L339">loader 的叠加顺序</a> = post(后置)+inline(内联)+normal(正常)+pre(前置)</li>
+</ul>
+<h4 id="t41.2.2 特殊配置">1.2.2 特殊配置 <a href="#t41.2.2 特殊配置"> # </a></h4>
+<ul>
+<li><a href="https://webpack.js.org/concepts/loaders/#configuration">loaders/#configuration</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">符号</th>
+<th style="text-align:left">变量</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>-!</code></td>
+<td style="text-align:left">noPreAutoLoaders</td>
+<td style="text-align:left">不要前置和普通 loader</td>
+<td>Prefixing with -! will disable all configured preLoaders and loaders but not postLoaders</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>!</code></td>
+<td style="text-align:left">noAutoLoaders</td>
+<td style="text-align:left">不要普通 loader</td>
+<td>Prefixing with ! will disable all configured normal loaders</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>!!</code></td>
+<td style="text-align:left">noPrePostAutoLoaders</td>
+<td style="text-align:left">不要前后置和普通 loader,只要内联 loader</td>
+<td>Prefixing with !! will disable all configured loaders (preLoaders, loaders, postLoaders)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t51.2.3 pitch">1.2.3 pitch <a href="#t51.2.3 pitch"> # </a></h4>
+<ul>
+<li>比如 a!b!c!module, 正常调用顺序应该是 c、b、a，但是真正调用顺序是 a(pitch)、b(pitch)、c(pitch)、c、b、a,如果其中任何一个 pitching loader 返回了值就相当于在它以及它右边的 loader 已经执行完毕</li>
+<li>比如如果 b 返回了字符串"result b", 接下来只有 a 会被系统执行，且 a 的 loader 收到的参数是 result b</li>
+<li>loader 根据返回值可以分为两种，一种是返回 js 代码（一个 module 的代码，含有类似 module.export 语句）的 loader，还有不能作为最左边 loader 的其他 loader</li>
+<li>有时候我们想把两个第一种 loader chain 起来，比如 style-loader!css-loader!
+问题是 css-loader 的返回值是一串 js 代码，如果按正常方式写 style-loader 的参数就是一串代码字符串</li>
+<li>为了解决这种问题，我们需要在 style-loader 里执行 require(css-loader!resources)</li>
+</ul>
+<p>pitch 与 loader 本身方法的执行顺序图</p>
+<pre><code class="lang-js">|- a-loader <span class="hljs-string">`pitch`</span>
+  |- b-loader <span class="hljs-string">`pitch`</span>
+    |- c-loader <span class="hljs-string">`pitch`</span>
+      |- requested <span class="hljs-built_in">module</span> is picked up <span class="hljs-keyword">as</span> a dependency
+    |- c-loader normal execution
+  |- b-loader normal execution
+|- a-loader normal execution
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/loader_pitch.jpg" alt="loader_pitch"></p>
+<h4 id="t61.2.4 执行流程">1.2.4 执行流程 <a href="#t61.2.4 执行流程"> # </a></h4>
+<h5 id="t71.2.4.1 runner.js">1.2.4.1 runner.js <a href="#t71.2.4.1 runner.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {runLoaders} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'loader-runner'</span>)
+<span class="hljs-comment">//let runLoaders = require('./loader-runner')</span>
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">let</span> filePath = path.resolve(__dirname, <span class="hljs-string">'src'</span>, <span class="hljs-string">'index.js'</span>);<span class="hljs-comment">//入口模块</span>
+<span class="hljs-comment">//定在require方法里的 inline Loader</span>
+<span class="hljs-keyword">let</span> request = <span class="hljs-string">`!!inline1-loader!inline2-loader!<span class="hljs-subst">${filePath}</span>`</span>;
+<span class="hljs-comment">//不同的loader并不loader的类型属性，而是你在使用 的使用了什么样的enforce</span>
+<span class="hljs-keyword">let</span> rules = [
+    {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+        <span class="hljs-attr">use</span>: [<span class="hljs-string">'normal1-loader'</span>, <span class="hljs-string">'normal2-loader'</span>]<span class="hljs-comment">//普通的loader</span>
+    },
+    {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+        <span class="hljs-attr">enforce</span>: <span class="hljs-string">'post'</span>,
+        <span class="hljs-attr">use</span>: [<span class="hljs-string">'post1-loader'</span>, <span class="hljs-string">'post2-loader'</span>]<span class="hljs-comment">//post的loader 后置</span>
+    },
+    {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+        <span class="hljs-attr">enforce</span>: <span class="hljs-string">'pre'</span>,
+        <span class="hljs-attr">use</span>: [<span class="hljs-string">'pre1-loader'</span>, <span class="hljs-string">'pre2-loader'</span>]<span class="hljs-comment">//pre的loader 前置 </span>
+    },
+]
+<span class="hljs-comment">//loader执行的真正顺序是</span>
+<span class="hljs-comment">// post pitch inline pitch normal pitch pre pitch=&gt;pre loader normal loader inline loader post loader</span>
+<span class="hljs-comment">// pitch很少使用</span>
+<span class="hljs-comment">//顺序是 post(后置)+inline(内联)+normal(普通)+pre(前置)</span>
+<span class="hljs-comment">//parts=['inline1-loader','inline2-loader','src/index.js']</span>
+<span class="hljs-keyword">let</span> parts = request.replace(<span class="hljs-regexp">/^-?!+/</span>,<span class="hljs-string">''</span>).split(<span class="hljs-string">'!'</span>);
+<span class="hljs-keyword">let</span> resource = parts.pop();<span class="hljs-comment">//'src/index.js'</span>
+<span class="hljs-comment">//解析loader的绝对路径 C:\5.loader\loaders\inline1-loader.js</span>
+<span class="hljs-keyword">let</span> resolveLoader = <span class="hljs-function"><span class="hljs-params">loader</span> =&gt;</span> path.resolve(__dirname, <span class="hljs-string">'loaders'</span>, loader);
+<span class="hljs-comment">//inlineLoaders=[inline1-loader绝对路径，inline2-loader绝对路径]</span>
+<span class="hljs-keyword">let</span> inlineLoaders = parts;
+<span class="hljs-keyword">let</span> preLoaders = [], normalLoaders = [], postLoaders = [];
+<span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;rules.length;i++){
+    <span class="hljs-keyword">let</span> rule = rules[i];
+    <span class="hljs-keyword">if</span>(rule.test.test(resource)){
+        <span class="hljs-keyword">if</span>(rule.enforce===<span class="hljs-string">'pre'</span>){
+            preLoaders.push(...rule.use);
+        }<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(rule.enforce===<span class="hljs-string">'post'</span>){
+            postLoaders.push(...rule.use);
+        }<span class="hljs-keyword">else</span>{
+            normalLoaders.push(...rule.use);
+        }
+    }
+}
+
+<span class="hljs-comment">/**
+ * 正常 post(后置)+inline(内联)+normal(普通)+pre(前置)
+ * Prefixing with ! will disable all configured normal loaders
+ * post(后置)+inline(内联)+pre(前置)
+ * Prefixing with !! will disable all configured loaders (preLoaders, loaders, postLoaders)
+ * inline(内联)
+ * Prefixing with -! will disable all configured preLoaders and loaders but not postLoaders
+ * post(后置)+inline(内联)
+ */</span>
+<span class="hljs-keyword">let</span> loaders = [];<span class="hljs-comment">//表示最终生效的loader</span>
+<span class="hljs-keyword">if</span>(request.startsWith(<span class="hljs-string">'!!'</span>)){
+    loaders = [...inlineLoaders];
+}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(request.startsWith(<span class="hljs-string">'-!'</span>)){
+    loaders = [...postLoaders,...inlineLoaders];
+}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(request.startsWith(<span class="hljs-string">'!'</span>)){
+    loaders = [...postLoaders,...inlineLoaders,...preLoaders];
+}<span class="hljs-keyword">else</span>{
+    loaders = [...postLoaders,...inlineLoaders,...normalLoaders,...preLoaders];
+}
+loaders  = loaders.map(resolveLoader);
+<span class="hljs-comment">//我们已经 收到了所有的loader绝对路径组成的数组</span>
+runLoaders({
+    resource,<span class="hljs-comment">//要加载和转换的模块</span>
+    loaders,<span class="hljs-comment">//loader的数组</span>
+    <span class="hljs-attr">context</span>:{<span class="hljs-attr">name</span>:<span class="hljs-string">'zhufeng'</span>}, <span class="hljs-comment">//基础上下文件对象</span>
+    <span class="hljs-attr">readResource</span>:fs.readFile.bind(fs) <span class="hljs-comment">//读取硬盘文件的方法</span>
+
+},(err,result)=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.log(result);
+  <span class="hljs-built_in">console</span>.log(result.resourceBuffer.toString(<span class="hljs-string">'utf8'</span>));
+});
+
+</code></pre>
+<h4 id="t81.2.5 loaders">1.2.5 loaders <a href="#t81.2.5 loaders"> # </a></h4>
+<h5 id="t91.2.5.1 pre-loader1.js">1.2.5.1 pre-loader1.js <a href="#t91.2.5.1 pre-loader1.js"> # </a></h5>
+<p>loaders\pre-loader1.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"pre1"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//pre1"</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t101.2.5.2 pre-loader2.js">1.2.5.2 pre-loader2.js <a href="#t101.2.5.2 pre-loader2.js"> # </a></h5>
+<p>loaders\pre-loader2.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"pre2"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//pre2"</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t111.2.5.3 normal-loader1.js">1.2.5.3 normal-loader1.js <a href="#t111.2.5.3 normal-loader1.js"> # </a></h5>
+<p>loaders\normal-loader1.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"normal1"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//normal1"</span>;
+}
+loader.pitch = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'normal1pitch'</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t121.2.5.4 normal-loader2.js">1.2.5.4 normal-loader2.js <a href="#t121.2.5.4 normal-loader2.js"> # </a></h5>
+<p>loaders\normal-loader2.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"normal2"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//normal2"</span>;
+}
+<span class="hljs-comment">/* loader.pitch = function(){
+  return 'normal-loader2-pitch';
+} */</span>
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t131.2.5.5 inline-loader1.js">1.2.5.5 inline-loader1.js <a href="#t131.2.5.5 inline-loader1.js"> # </a></h5>
+<p>loaders\inline-loader1.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"inline1"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//inline1"</span>;
+}
+
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t141.2.5.6 inline-loader2.js">1.2.5.6 inline-loader2.js <a href="#t141.2.5.6 inline-loader2.js"> # </a></h5>
+<p>loaders\inline-loader2.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"inline2"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//inline2"</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t151.2.5.7 post-loader1.js">1.2.5.7 post-loader1.js <a href="#t151.2.5.7 post-loader1.js"> # </a></h5>
+<p>loaders\post-loader1.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"post1"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//post1"</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t161.2.5.8 post-loader2.js">1.2.5.8 post-loader2.js <a href="#t161.2.5.8 post-loader2.js"> # </a></h5>
+<p>loaders\post-loader2.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"post2"</span>);
+  <span class="hljs-keyword">return</span> source + <span class="hljs-string">"//post2"</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/pitchloaderexec.png" alt="pitchloaderexec"></p>
+<h2 id="t172.babel-loader">2.babel-loader <a href="#t172.babel-loader"> # </a></h2>
+<ul>
+<li><a href="https://github.com/babel/babel-loader/blob/master/src/index.js">babel-loader</a></li>
+<li><a href="https://babeljs.io/docs/en/next/babel-core.html">@babel/core</a></li>
+<li><a href="https://babeljs.io/docs/en/babel-plugin-transform-react-jsx/">babel-plugin-transform-react-jsx</a></li>
+<li>previousRequest 前面的loader</li>
+<li>currentRequest 自己和后面的loader</li>
+<li>remainingRequest 后面的loader+资源路径</li>
+<li>data: 和普通的loader函数的第三个参数一样,而且loader执行的全程用的是同一个对象</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">属性</th>
+<th style="text-align:left">值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">this.request</td>
+<td style="text-align:left">/loaders/babel-loader.js!/src/index.js</td>
+</tr>
+<tr>
+<td style="text-align:left">this.resourcePath</td>
+<td style="text-align:left">/src/index.js</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">$ npm i @babel/preset-env @babel/core -D
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source, inputSourceMap,data</span>) </span>{
+  <span class="hljs-comment">//C:\webpack-analysis2\loaders\babel-loader.js!C:\webpack-analysis2\src\index.js</span>
+  <span class="hljs-keyword">const</span> options = {
+    <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-env"</span>],
+    <span class="hljs-attr">inputSourceMap</span>: inputSourceMap,
+    <span class="hljs-attr">sourceMaps</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">//sourceMaps: true 是告诉 babel 要生成 sourcemap</span>
+    <span class="hljs-attr">filename</span>: <span class="hljs-keyword">this</span>.request.split(<span class="hljs-string">"!"</span>)[<span class="hljs-number">1</span>].split(<span class="hljs-string">"/"</span>).pop(),
+  };
+  <span class="hljs-comment">//在webpack.config.js中 增加devtool: 'eval-source-map'</span>
+  <span class="hljs-keyword">let</span> { code, map, ast } = babel.transform(source, options);
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.callback(<span class="hljs-literal">null</span>, code, map, ast);
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<pre><code class="lang-js">resolveLoader: {
+    <span class="hljs-attr">alias</span>: {<span class="hljs-comment">//可以配置别名</span>
+      <span class="hljs-string">"babel-loader"</span>: resolve(<span class="hljs-string">'./build/babel-loader.js'</span>)
+    },<span class="hljs-comment">//也可以配置loaders加载目录</span>
+    <span class="hljs-attr">modules</span>: [path.resolve(<span class="hljs-string">'./loaders'</span>), <span class="hljs-string">'node_modules'</span>]
+},
+{
+    <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+    <span class="hljs-attr">use</span>:[<span class="hljs-string">'babel-loader'</span>]
+}
+</code></pre>
+<h2 id="t183. file">3. file <a href="#t183. file"> # </a></h2>
+<ul>
+<li><code>file-loader</code> 并不会对文件内容进行任何转换，只是复制一份文件内容，并根据配置为他生成一个唯一的文件名。</li>
+</ul>
+<h3 id="t193.1 file-loader">3.1 file-loader <a href="#t193.1 file-loader"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/loader-utils">loader-utils</a></li>
+<li><a href="https://github.com/webpack-contrib/file-loader/blob/master/src/index.js">file-loader</a></li>
+<li><a href="https://webpack.js.org/guides/public-path/#on-the-fly">public-path</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { getOptions, interpolateName } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">content</span>) </span>{
+  <span class="hljs-keyword">let</span> options = getOptions(<span class="hljs-keyword">this</span>) || {};
+  <span class="hljs-keyword">let</span> url = interpolateName(<span class="hljs-keyword">this</span>, options.filename || <span class="hljs-string">"[hash].[ext]"</span>, {
+    content,
+  });
+  <span class="hljs-keyword">this</span>.emitFile(url, content);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`module.exports = <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(url)}</span>`</span>;
+}
+loader.raw = <span class="hljs-literal">true</span>;
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<ul>
+<li>通过 <code>loaderUtils.interpolateName</code> 方法可以根据 options.name 以及文件内容生成一个唯一的文件名 url（一般配置都会带上 hash，否则很可能由于文件重名而冲突）</li>
+<li>通过 <code>this.emitFile(url, content)</code> 告诉 webpack 我需要创建一个文件，webpack 会根据参数创建对应的文件，放在 <code>public path</code> 目录下</li>
+<li>返回 <code>module.exports = ${JSON.stringify(url)}</code>,这样就会把原来的文件路径替换为编译后的路径</li>
+</ul>
+<h3 id="t203.2 url-loader">3.2 url-loader <a href="#t203.2 url-loader"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { getOptions } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-keyword">var</span> mime = <span class="hljs-built_in">require</span>(<span class="hljs-string">"mime"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-keyword">let</span> options = getOptions(<span class="hljs-keyword">this</span>) || {};
+  <span class="hljs-keyword">let</span> { limit, fallback = <span class="hljs-string">"file-loader"</span> } = options;
+  <span class="hljs-keyword">if</span> (limit) {
+    limit = <span class="hljs-built_in">parseInt</span>(limit, <span class="hljs-number">10</span>);
+  }
+  <span class="hljs-keyword">const</span> mimetype = mime.getType(<span class="hljs-keyword">this</span>.resourcePath);
+  <span class="hljs-keyword">if</span> (!limit || source.length &lt; limit) {
+    <span class="hljs-keyword">let</span> base64 = <span class="hljs-string">`data:<span class="hljs-subst">${mimetype}</span>;base64,<span class="hljs-subst">${source.toString(<span class="hljs-string">"base64"</span>)}</span>`</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`module.exports = <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(base64)}</span>`</span>;
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">let</span> fileLoader = <span class="hljs-built_in">require</span>(fallback || <span class="hljs-string">"file-loader"</span>);
+    <span class="hljs-keyword">return</span> fileLoader.call(<span class="hljs-keyword">this</span>, source);
+  }
+}
+loader.raw = <span class="hljs-literal">true</span>;
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h3 id="t213.3 样式处理">3.3 样式处理 <a href="#t213.3 样式处理"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack-contrib/css-loader/blob/master/lib/loader.js">css-loader</a> 的作用是处理 css 中的 @import 和 url 这样的外部资源</li>
+<li><a href="https://github.com/webpack-contrib/style-loader/blob/master/index.js">style-loader</a> 的作用是把样式插入到 DOM 中，方法是在 head 中插入一个 style 标签，并把样式写入到这个标签的 innerHTML 里</li>
+<li><a href="https://github.com/webpack-contrib/less-loader">less-loader</a> 把 less 编译成 css</li>
+<li><a href="https://webpack.js.org/api/loaders/#pitching-loader">pitching-loader</a></li>
+<li><a href="https://github.com/webpack/loader-utils">loader-utils</a></li>
+<li><a href="https://webpack.js.org/concepts/loaders/#configuration">!!</a></li>
+</ul>
+<pre><code class="lang-js">$ npm i less postcss css-selector-tokenizer -D
+</code></pre>
+<h4 id="t223.3.2 使用 less-loader">3.3.2 使用 less-loader <a href="#t223.3.2 使用 less-loader"> # </a></h4>
+<h5 id="t233.3.2.1 index.js">3.3.2.1 index.js <a href="#t233.3.2.1 index.js"> # </a></h5>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">"./index.less"</span>;
+</code></pre>
+<h5 id="t243.3.2.2 src\index.less">3.3.2.2 src\index.less <a href="#t243.3.2.2 src\index.less"> # </a></h5>
+<p>src\index.less</p>
+<pre><code class="lang-less"><span class="hljs-variable">@color:</span> red;
+<span class="hljs-selector-id">#root</span> {
+  <span class="hljs-attribute">color</span>: <span class="hljs-variable">@color</span>;
+}
+</code></pre>
+<h5 id="t253.3.2.3 src\index.html">3.3.2.3 src\index.html <a href="#t253.3.2.3 src\index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"avatar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+<h5 id="t263.3.2.4 webpack.config.js">3.3.2.4 webpack.config.js <a href="#t263.3.2.4 webpack.config.js"> # </a></h5>
+<p>webpack.config.js</p>
+<pre><code class="lang-js">{
+  <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.less$/</span>,
+  <span class="hljs-attr">use</span>: [
+    <span class="hljs-string">'style-loader'</span>,
+    <span class="hljs-string">'less-loader'</span>
+  ]
+}
+</code></pre>
+<h5 id="t273.3.2.5 less-loader.js">3.3.2.5 less-loader.js <a href="#t273.3.2.5 less-loader.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> less = <span class="hljs-built_in">require</span>(<span class="hljs-string">"less"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-keyword">let</span> callback = <span class="hljs-keyword">this</span>.async();
+  less.render(source, { <span class="hljs-attr">filename</span>: <span class="hljs-keyword">this</span>.resource }, (err, output) =&gt; {
+    callback(err, output.css);
+  });
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t283.3.2.6 style-loader">3.3.2.6 style-loader <a href="#t283.3.2.6 style-loader"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-keyword">let</span> script = <span class="hljs-string">`
+      let style = document.createElement("style");
+      style.innerHTML = <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(source)}</span>;
+    document.head.appendChild(style);
+    module.exports = "";
+    `</span>;
+  <span class="hljs-keyword">return</span> script;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h4 id="t293.3.5 两个左侧模块连用">3.3.5 两个左侧模块连用 <a href="#t293.3.5 两个左侧模块连用"> # </a></h4>
+<h5 id="t303.3.5.1 less-loader.js">3.3.5.1 less-loader.js <a href="#t303.3.5.1 less-loader.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> less = <span class="hljs-built_in">require</span>(<span class="hljs-string">"less"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{
+  <span class="hljs-keyword">let</span> callback = <span class="hljs-keyword">this</span>.async();
+  less.render(source, { <span class="hljs-attr">filename</span>: <span class="hljs-keyword">this</span>.resource }, (err, output) =&gt; {
+    callback(err, <span class="hljs-string">`module.exports = <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(output.css)}</span>`</span>);
+  });
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h5 id="t313.3.5.2 style-loader.js">3.3.5.2 style-loader.js <a href="#t313.3.5.2 style-loader.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> loaderUtils = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{}
+<span class="hljs-comment">//https://github.com/webpack/webpack/blob/v4.39.3/lib/NormalModuleFactory.js#L339</span>
+loader.pitch = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">remainingRequest, previousRequest, data</span>) </span>{
+  <span class="hljs-comment">//C:\webpack-analysis2\loaders\less-loader.js!C:\webpack-analysis2\src\index.less</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"previousRequest"</span>, previousRequest); <span class="hljs-comment">//之前的路径</span>
+  <span class="hljs-comment">//console.log('currentRequest', currentRequest);//当前和后面的路径</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"remainingRequest"</span>, remainingRequest); <span class="hljs-comment">//剩下的路径</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"data"</span>, data);
+  <span class="hljs-comment">// !! noPrePostAutoLoaders 不要前后置和普通loader</span>
+  <span class="hljs-comment">//__webpack_require__(/*! !../loaders/less-loader.js!./index.less */ "./loaders/less-loader.js!./src/index.less");</span>
+  <span class="hljs-keyword">let</span> style = <span class="hljs-string">`
+    var style = document.createElement("style");
+    style.innerHTML = require(<span class="hljs-subst">${loaderUtils.stringifyRequest(
+      <span class="hljs-keyword">this</span>,
+      <span class="hljs-string">"!!"</span> + remainingRequest
+    )}</span>);
+    document.head.appendChild(style);
+ `</span>;
+  <span class="hljs-keyword">return</span> style;
+};
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h2 id="t324. loader-runner实现">4. loader-runner实现 <a href="#t324. loader-runner实现"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/loader-runner/blob/v2.4.0/lib/LoaderRunner.js">LoaderRunner.js</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/NormalModuleFactory.js#L180">NormalModuleFactory.js</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/NormalModule.js#L292">NormalModule.js</a></li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/3f34c35da4cc3049ed2c414abbae9b99" alt=""></p>
+<p><img src="https://img.zhufengpeixun.com/72bd5f659d64616ea7990c5de87bfe21" alt=""></p>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ * 把loader转成loader对象
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>loader loader的绝对路径
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createLoaderObject</span>(<span class="hljs-params">loader</span>) </span>{
+    <span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> = <span class="hljs-built_in">require</span>(loader);
+    <span class="hljs-keyword">let</span> normal = <span class="hljs-built_in">module</span>;
+    <span class="hljs-keyword">let</span> pitch = <span class="hljs-built_in">module</span>.pitch;
+    <span class="hljs-keyword">let</span> raw = <span class="hljs-built_in">module</span>.raw;
+    <span class="hljs-keyword">let</span> loaderObject = {
+        <span class="hljs-attr">path</span>: loader, <span class="hljs-comment">//loader的绝对路径</span>
+        normal,<span class="hljs-comment">//loader的normal函数</span>
+        pitch, <span class="hljs-comment">//loader的pitch函数</span>
+        raw,<span class="hljs-comment">//是否要转成Buffer, raw=true参数就要转成Buffer,raw=false参数就要转成字符串</span>
+        <span class="hljs-attr">data</span>: {},<span class="hljs-comment">//每个load都有一个自己的data自定义对象,用来可以存放一些自定义的数据</span>
+        <span class="hljs-attr">pitchExecuted</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">//此loader的pitch方法是否已经执行过了</span>
+        <span class="hljs-attr">normalExecuted</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">//此loader的normal方法是否已经执行过了</span>
+    }
+    <span class="hljs-keyword">return</span> loaderObject;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iterateNormalLoaders</span>(<span class="hljs-params">options, loaderContext, args, runLoadersCallback</span>) </span>{
+    <span class="hljs-keyword">if</span> (loaderContext.loaderIndex &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> runLoadersCallback(<span class="hljs-literal">null</span>, ...args);
+    }
+    <span class="hljs-keyword">let</span> currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];<span class="hljs-comment">//获取当前的索引对应的loader</span>
+    <span class="hljs-keyword">if</span> (currentLoaderObject.normalExecuted) {<span class="hljs-comment">//如果说当前的loader已经执行过了,则执行下一个loader对应的pitch</span>
+        loaderContext.loaderIndex--;
+        <span class="hljs-keyword">return</span> iterateNormalLoaders(options, loaderContext,args, runLoadersCallback);
+    }
+    <span class="hljs-keyword">let</span> fn = currentLoaderObject.normal;<span class="hljs-comment">//获取当前的loader的normal函数</span>
+    currentLoaderObject.normalExecuted = <span class="hljs-literal">true</span>;<span class="hljs-comment">//表示当前的loader的normal函数已经执行过了</span>
+    <span class="hljs-comment">// 如果这个loader有normal方法</span>
+    <span class="hljs-comment">//fn可以同步也可以异步</span>
+    convertArgs(args, currentLoaderObject.raw);
+    runSyncOrAsync(fn, loaderContext, args, (err, ...args) =&gt; {<span class="hljs-comment">//args可能有值,也可有没有值,可能有一个值,也可能有多个值 </span>
+        <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> runLoadersCallback(err);
+        <span class="hljs-keyword">return</span> iterateNormalLoaders(options, loaderContext, args, runLoadersCallback);
+    });
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">convertArgs</span>(<span class="hljs-params">args, raw</span>) </span>{
+    <span class="hljs-keyword">if</span> (raw &amp;&amp; !Buffer.isBuffer(args[<span class="hljs-number">0</span>])) {
+        args[<span class="hljs-number">0</span>] = Buffer.from(args[<span class="hljs-number">0</span>]);<span class="hljs-comment">//如果这个normal函数想要buffer,但是参数不是Buffer</span>
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!raw &amp;&amp; Buffer.isBuffer(args[<span class="hljs-number">0</span>])) {<span class="hljs-comment">//想要字符串，但是是个buffer</span>
+        args[<span class="hljs-number">0</span>] = args[<span class="hljs-number">0</span>].toString(<span class="hljs-string">'utf8'</span>);
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processResource</span>(<span class="hljs-params">options, loaderContext, runLoadersCallback</span>) </span>{
+    options.readResource(loaderContext.resource, (err, buffer) =&gt; {
+        loaderContext.loaderIndex = loaderContext.loaders.length - <span class="hljs-number">1</span>;
+        options.resourceBuffer = buffer;<span class="hljs-comment">//要加载的文件的原始文件内容</span>
+        iterateNormalLoaders(options, loaderContext, [buffer], runLoadersCallback);
+    });
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iteratePitchLoaders</span>(<span class="hljs-params">options, loaderContext, runLoadersCallback</span>) </span>{
+    <span class="hljs-comment">//如果当前索引已经 大于等loader的数量了,则表示所有的loader pitch执行完了</span>
+    <span class="hljs-keyword">if</span> (loaderContext.loaderIndex &gt;= loaderContext.loaders.length) {
+        <span class="hljs-keyword">return</span> processResource(options, loaderContext, runLoadersCallback);
+    }
+    <span class="hljs-keyword">let</span> currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];<span class="hljs-comment">//获取当前的索引对应的loader</span>
+    <span class="hljs-keyword">if</span> (currentLoaderObject.pitchExecuted) {<span class="hljs-comment">//如果说当前的loader已经执行过了,则执行下一个loader对应的pitch</span>
+        loaderContext.loaderIndex++;
+        <span class="hljs-keyword">return</span> iteratePitchLoaders(options, loaderContext, runLoadersCallback);
+    }
+    <span class="hljs-keyword">let</span> fn = currentLoaderObject.pitch;<span class="hljs-comment">//获取当前的loader的pitch函数</span>
+    currentLoaderObject.pitchExecuted = <span class="hljs-literal">true</span>;<span class="hljs-comment">//表示当前的loader的pitch函数已经执行过了</span>
+    <span class="hljs-keyword">if</span> (!fn) {<span class="hljs-comment">//如果当前的loader没有pitch,直接执行下一个loader的pitch方法 </span>
+        <span class="hljs-keyword">return</span> iteratePitchLoaders(options, loaderContext, runLoadersCallback);
+    }
+    <span class="hljs-comment">// 如果这个loader有pitch方法</span>
+    <span class="hljs-comment">//fn可以同步也可以异步</span>
+    runSyncOrAsync(fn, loaderContext, [
+        loaderContext.remainingRequest, loaderContext.previousRequest, loaderContext.data
+    ], (err, ...args) =&gt; {<span class="hljs-comment">//args可能有值,也可有没有值,可能有一个值,也可能有多个值 </span>
+        <span class="hljs-keyword">if</span> (args.length &gt; <span class="hljs-number">0</span> &amp;&amp; args.some(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> !!item)) {<span class="hljs-comment">//有任何一个有值就可以</span>
+            <span class="hljs-comment">//跳过后续的pitch和读文件,直接掉头执行前一个loader的normal</span>
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> iteratePitchLoaders(options, loaderContext, runLoadersCallback);
+        }
+    });
+}
+<span class="hljs-comment">/**
+ * 以同步或者异步的方式执行fn
+ * context.fn(args);callback()
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>fn 要执行的函数
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>context fn执行的时候的this指针
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>args 传递给fn的参数
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>callback fn执行完成后的回调 
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">runSyncOrAsync</span>(<span class="hljs-params">fn, context, args, callback</span>) </span>{
+    <span class="hljs-keyword">let</span> isSync = <span class="hljs-literal">true</span>;<span class="hljs-comment">//默认是同步执行</span>
+    context.callback = <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+        callback(<span class="hljs-literal">null</span>, ...args);
+    }
+    context.async = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        isSync = <span class="hljs-literal">false</span>;<span class="hljs-comment">//把同步变成异步</span>
+        <span class="hljs-keyword">return</span> context.callback;
+    }
+    <span class="hljs-keyword">var</span> result = fn.apply(context, args);<span class="hljs-comment">//用指定的参数和this对象执行函数,返回一个结果</span>
+    <span class="hljs-comment">// isSync为true表示是同步,同步意味着执行完当前函数后,会直接自动执行callback回调</span>
+    <span class="hljs-comment">// isSync为false表示是同步,那意味着扫行当前函数后什么都不做了</span>
+    <span class="hljs-keyword">if</span> (isSync) {
+        <span class="hljs-keyword">if</span> (result === <span class="hljs-literal">undefined</span>) {
+            <span class="hljs-keyword">return</span> callback();
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, result);
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">runLoaders</span>(<span class="hljs-params">options, finalCallback</span>) </span>{
+    <span class="hljs-keyword">let</span> resource = options.resource;<span class="hljs-comment">//加载的文件 src\index.js</span>
+    <span class="hljs-keyword">let</span> loaders = options.loaders || [];<span class="hljs-comment">//</span>
+    <span class="hljs-keyword">let</span> loaderContext = options.context || {};<span class="hljs-comment">//loader函数执行时的上下文对象</span>
+    <span class="hljs-keyword">let</span> readResource = options.readResource || fs.readFile;<span class="hljs-comment">//用来读加载的文件的方法</span>
+    <span class="hljs-keyword">let</span> loaderObjects = loaders.map(createLoaderObject);
+    loaderContext.resource = resource;<span class="hljs-comment">//加载的文件</span>
+    loaderContext.readResource = readResource;
+    loaderContext.loaders = loaderObjects;
+    loaderContext.loaderIndex = <span class="hljs-number">0</span>;<span class="hljs-comment">//当前正在执行的loader的索引</span>
+    loaderContext.callback = <span class="hljs-literal">null</span>;<span class="hljs-comment">//后面在执行 loader的时候会赋值 返回多个值</span>
+    loaderContext.async = <span class="hljs-literal">null</span>;<span class="hljs-comment">//后面在执行 loader的时候会赋值 把loader的执行从同步变成异步</span>
+    <span class="hljs-built_in">Object</span>.defineProperty(loaderContext, <span class="hljs-string">'request'</span>, {
+        <span class="hljs-keyword">get</span>() {<span class="hljs-comment">//request = 所有的loader!要加载的模块</span>
+            <span class="hljs-keyword">return</span> loaderContext.loaders.map(l = l.path).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+        }
+    });
+    <span class="hljs-built_in">Object</span>.defineProperty(loaderContext, <span class="hljs-string">'remainingRequest'</span>, {
+        <span class="hljs-keyword">get</span>() {<span class="hljs-comment">//request = 所有的loader!要加载的模块</span>
+            <span class="hljs-keyword">return</span> loaderContext.loaders.slice(loaderContext.loaderIndex + <span class="hljs-number">1</span>).map(<span class="hljs-function"><span class="hljs-params">loader</span> =&gt;</span> loader.path).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+        }
+    });
+    <span class="hljs-built_in">Object</span>.defineProperty(loaderContext, <span class="hljs-string">'currentRequest'</span>, {
+        <span class="hljs-keyword">get</span>() {<span class="hljs-comment">//request = 所有的loader!要加载的模块 currentRequest 不是仅仅自己,而包括自己和后续的</span>
+            <span class="hljs-keyword">return</span> loaderContext.loaders.slice(loaderContext.loaderIndex).map(<span class="hljs-function"><span class="hljs-params">loader</span> =&gt;</span> loader.path).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+        }
+    });
+    <span class="hljs-built_in">Object</span>.defineProperty(loaderContext, <span class="hljs-string">'previousRequest'</span>, {
+        <span class="hljs-keyword">get</span>() {<span class="hljs-comment">//从第一个loader到当前的loader,不包含当前的loader</span>
+            <span class="hljs-keyword">return</span> loaderContext.loaders.slice(<span class="hljs-number">0</span>, loaderContext.loaderIndex).map(<span class="hljs-function"><span class="hljs-params">loader</span> =&gt;</span> loader.path).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+        }
+    });
+
+    <span class="hljs-built_in">Object</span>.defineProperty(loaderContext, <span class="hljs-string">'data'</span>, {
+        <span class="hljs-keyword">get</span>() {<span class="hljs-comment">//从第一个loader到当前的loader,不包含当前的loader</span>
+            <span class="hljs-keyword">return</span> loaderContext.loaders[loaderContext.loaderIndex].data;
+        }
+    });
+    <span class="hljs-keyword">let</span> processOptions = {
+        <span class="hljs-attr">resourceBuffer</span>: <span class="hljs-literal">null</span>,<span class="hljs-comment">//存放原始内容对应的Buffer 用loader转换前的内容Buffer</span>
+        readResource  <span class="hljs-comment">//fs.readFile</span>
+    }
+    <span class="hljs-comment">//开始从左往后执行每个loader的pitch方法</span>
+    iteratePitchLoaders(processOptions, loaderContext, (err, result) =&gt; {
+        finalCallback(
+            err, {
+            result,
+            <span class="hljs-attr">resourceBuffer</span>: processOptions.resourceBuffer
+        }
+        );
+    });
+}
+
+
+exports.runLoaders = runLoaders;
+</code></pre>
+
+    

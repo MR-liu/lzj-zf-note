@@ -1,0 +1,711 @@
+
+        <h2 id="t01.chunk">1.chunk <a href="#t01.chunk"> # </a></h2>
+<ul>
+<li>chunkGroup 由 chunk 组成，一个 chunkGroup 可以包含多个 chunk，在生成/优化 chunk graph 时会用到</li>
+<li>chunk 由 module 组成，一个 chunk 可以包含多个 module,它是 webpack 编译打包后输出的最终文件</li>
+<li>module 就是不同的资源文件，包含了你的代码中提供的例如：js/css/图片 等文件，在编译环节，webpack 会根据不同 module 之间的依赖关系去组合生成 chunk</li>
+</ul>
+<h2 id="t12.seal">2.seal <a href="#t12.seal"> # </a></h2>
+<ul>
+<li>根据 addEntry 方法中收集到入口文件组成的 _preparedEntrypoints 数组</li>
+</ul>
+<pre><code class="lang-js">seal(callback) {
+        <span class="hljs-keyword">this</span>.hooks.beforeChunks.call();
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> preparedEntrypoint <span class="hljs-keyword">of</span> <span class="hljs-keyword">this</span>._preparedEntrypoints) {
+            <span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = preparedEntrypoint.module;<span class="hljs-comment">//入口模块</span>
+            <span class="hljs-keyword">const</span> name = preparedEntrypoint.name;<span class="hljs-comment">//入口点名称 main</span>
+            <span class="hljs-keyword">const</span> chunk = <span class="hljs-keyword">this</span>.addChunk(name);<span class="hljs-comment">//新建chunk并添加到chunks中 </span>
+            <span class="hljs-keyword">const</span> entrypoint = <span class="hljs-keyword">new</span> Entrypoint(name);<span class="hljs-comment">//生成入口点，其实是一个chunkGroup</span>
+            entrypoint.setRuntimeChunk(chunk);<span class="hljs-comment">//设置运行时chunk</span>
+            entrypoint.addOrigin(<span class="hljs-literal">null</span>, name, preparedEntrypoint.request);<span class="hljs-comment">//增加来源 ./src/index.js</span>
+            <span class="hljs-keyword">this</span>.namedChunkGroups.set(name, entrypoint);<span class="hljs-comment">//key为chunk名称，值为chunkGroup</span>
+            <span class="hljs-keyword">this</span>.entrypoints.set(name, entrypoint);<span class="hljs-comment">//入口点key为chunk名称，值为chunkGroup</span>
+            <span class="hljs-keyword">this</span>.chunkGroups.push(entrypoint);<span class="hljs-comment">//添加一个新的chunkGroup</span>
+            GraphHelpers.connectChunkGroupAndChunk(entrypoint, chunk);<span class="hljs-comment">//建立起 chunkGroup 和 chunk 之间的关系</span>
+            GraphHelpers.connectChunkAndModule(chunk, <span class="hljs-built_in">module</span>);<span class="hljs-comment">//建立起 chunk 和 module 之间的关系</span>
+            chunk.entryModule = <span class="hljs-built_in">module</span>;<span class="hljs-comment">//代码块的入口模块</span>
+            chunk.name = name;<span class="hljs-comment">//代码块的名称</span>
+            <span class="hljs-keyword">this</span>.assignDepth(<span class="hljs-built_in">module</span>);
+        }
+}
+
+</code></pre>
+<h2 id="t23.buildChunkGraph">3.buildChunkGraph <a href="#t23.buildChunkGraph"> # </a></h2>
+<ul>
+<li>遍历 <code>module graph</code> 模块依赖图建立起 <code>basic chunk graph</code> 依赖图</li>
+<li>遍历第一步创建的 <code>chunk graph</code> 依赖图，依据之前的 <code>module graph</code> 来优化 <code>chunk graph</code></li>
+</ul>
+<h3 id="t33.1 文件">3.1 文件 <a href="#t33.1 文件"> # </a></h3>
+<h4 id="t43.1.1 index.js">3.1.1 index.js <a href="#t43.1.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> common <span class="hljs-keyword">from</span> <span class="hljs-string">'./common.js'</span>;
+<span class="hljs-keyword">import</span>(<span class="hljs-string">'./lazy.js'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(result))
+</code></pre>
+<h4 id="t53.1.2 common.js">3.1.2 common.js <a href="#t53.1.2 common.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> title <span class="hljs-keyword">from</span> <span class="hljs-string">'./title.js'</span>
+</code></pre>
+<h4 id="t63.1.3 lazy.js">3.1.3 lazy.js <a href="#t63.1.3 lazy.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> title <span class="hljs-keyword">from</span> <span class="hljs-string">'./title.js'</span>;
+<span class="hljs-keyword">import</span>(<span class="hljs-string">'./common.js'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(result))
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> lazy = <span class="hljs-string">'lazy'</span>;
+</code></pre>
+<h4 id="t73.1.4 title.js">3.1.4 title.js <a href="#t73.1.4 title.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> title = <span class="hljs-string">'title'</span>;
+</code></pre>
+<h3 id="t83.2 module graph">3.2 module graph <a href="#t83.2 module graph"> # </a></h3>
+<ul>
+<li>对这次 compilation 收集到的 modules 进行一次遍历</li>
+<li>在遍历 module 的过程中，会对这个 module 的 dependencies 依赖进行处理</li>
+<li>同时还会处理这个 module 的 blocks(即在你的代码通过异步 API 加载的模块),个异步 block 都会被加入到遍历的过程当中，被当做一个 module 来处理</li>
+<li>遍历的过程结束后会建立起基本的 module graph，包含普通的 module 及异步 module(block)，最终存储到一个 map 表(blockInfoMap)当中</li>
+<li><a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/buildChunkGraph.js#L138">buildChunkGraph</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/extraceBlockInfoMap.jpg" alt="extraceBlockInfoMap"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> extraceBlockInfoMap = <span class="hljs-function"><span class="hljs-params">compilation</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> iteratorDependency = <span class="hljs-function"><span class="hljs-params">d</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> ref = compilation.getDependencyReference(currentModule, d);
+        <span class="hljs-keyword">if</span> (!ref) {
+            <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-comment">//没有模块的跳过</span>
+        <span class="hljs-keyword">const</span> refModule = ref.module;
+        <span class="hljs-keyword">if</span> (!refModule) {
+            <span class="hljs-keyword">return</span>;
+        }
+        blockInfoModules.add(refModule);
+    };
+
+    <span class="hljs-keyword">const</span> iteratorBlockPrepare = <span class="hljs-function"><span class="hljs-params">b</span> =&gt;</span> {
+        blockInfoBlocks.push(b);
+        blockQueue.push(b);<span class="hljs-comment">//将 block 加入到 blockQueue 当中，从而进入到下一次的遍历过程当中</span>
+    };
+
+    <span class="hljs-keyword">let</span> currentModule;
+    <span class="hljs-keyword">let</span> block;
+    <span class="hljs-keyword">let</span> blockQueue;
+    <span class="hljs-keyword">let</span> blockInfoModules;
+    <span class="hljs-keyword">let</span> blockInfoBlocks;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> <span class="hljs-keyword">of</span> compilation.modules) {<span class="hljs-comment">//循环所有的模块</span>
+        blockQueue = [<span class="hljs-built_in">module</span>];<span class="hljs-comment">//基于此模块创建一个数组blockQueue</span>
+        currentModule = <span class="hljs-built_in">module</span>;<span class="hljs-comment">//当前模块等于此模块</span>
+        <span class="hljs-keyword">while</span> (blockQueue.length &gt; <span class="hljs-number">0</span>) {
+            block = blockQueue.pop();<span class="hljs-comment">//取出一个模块</span>
+            blockInfoModules = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();<span class="hljs-comment">//唯一的模块集合</span>
+            blockInfoBlocks = [];<span class="hljs-comment">//块数组</span>
+
+            <span class="hljs-keyword">if</span> (block.variables) {<span class="hljs-comment">//变量</span>
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> variable <span class="hljs-keyword">of</span> block.variables) {
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> dep <span class="hljs-keyword">of</span> variable.dependencies) iteratorDependency(dep);
+                }
+            }
+
+            <span class="hljs-keyword">if</span> (block.dependencies) {<span class="hljs-comment">//普通依赖</span>
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> dep <span class="hljs-keyword">of</span> block.dependencies) iteratorDependency(dep);
+            }
+
+            <span class="hljs-keyword">if</span> (block.blocks) {<span class="hljs-comment">//异步代码块依赖</span>
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> b <span class="hljs-keyword">of</span> block.blocks) iteratorBlockPrepare(b);
+            }
+
+            <span class="hljs-keyword">const</span> blockInfo = {
+                <span class="hljs-attr">modules</span>: blockInfoModules,
+                <span class="hljs-attr">blocks</span>: blockInfoBlocks
+            };
+            blockInfoMap.set(block, blockInfo);
+        }
+    }
+
+    <span class="hljs-keyword">return</span> blockInfoMap;
+};
+</code></pre>
+<p>blockInfoMap</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>{  }   index.js
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ImportDependenciesBlock</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AsyncDependenciesBlock</span> </span>{  } lazy.js
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>{  } common.js
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>{  } title.js
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ImportDependenciesBlock</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AsyncDependenciesBlock</span> </span>{  } common.js
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>{  } title.js
+</code></pre>
+<h3 id="t93.3 生成chunk graph">3.3 生成chunk graph <a href="#t93.3 生成chunk graph"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/buildChunkGraph.js#L702">buildChunkGraph PART ONE</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/buildChunkGraph2.jpg" alt="buildChunkGraph2"></p>
+<h4 id="t103.3.1 创建queue">3.3.1 创建queue <a href="#t103.3.1 创建queue"> # </a></h4>
+<ul>
+<li>将传入的 entryPoint(chunkGroup) 转化为一个新的 <code>queue</code></li>
+<li>chunkGroupInfoMap chunkGroup信息</li>
+<li>minAvailableModules 最小可跟踪的模块集合</li>
+<li>skippedItems 可以跳过的模块</li>
+<li>chunkGroupCounters key为chunkGroup,值为索引</li>
+<li>blockChunkGroups key为依赖块，值为chunkGroup</li>
+<li>allCreatedChunkGroups 所有创建的chunkGroup</li>
+<li>chunkDependencies key为chunkGroup,值为依赖的chunkGroup数组 {block,chunkGroup}</li>
+<li>queueConnect key为chunkGroup,值为一个依赖的chunkGroup数组</li>
+<li>availableModulesToBeMerged  父chunkGroup的模块</li>
+<li>outdatedChunkGroupInfo 过期的chunkGroup信息</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = chunk.entryModule;
+queue.push({
+    <span class="hljs-attr">action</span>: ENTER_MODULE, <span class="hljs-comment">//(需要被处理的模块类型，不同的处理类型的模块会经过不同的流程处理，初始为 ENTER_MODULE(1))</span>
+    <span class="hljs-attr">block</span>: <span class="hljs-built_in">module</span>,<span class="hljs-comment">//k (入口 module)</span>
+    <span class="hljs-built_in">module</span>,<span class="hljs-comment">//(入口 module)</span>
+    chunk,<span class="hljs-comment">// (seal 阶段一开始为每个入口 module 创建的空 chunk)</span>
+    chunkGroup<span class="hljs-comment">//(entryPoint 即 chunkGroup 类型)</span>
+});
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> visitModules = (
+    compilation,
+    inputChunkGroups,
+    chunkGroupInfoMap,
+    chunkDependencies,
+    blocksWithNestedBlocks,
+    allCreatedChunkGroups
+) =&gt; {
+    <span class="hljs-keyword">const</span> logger = compilation.getLogger(<span class="hljs-string">"webpack.buildChunkGraph.visitModules"</span>);
+    <span class="hljs-keyword">const</span> { namedChunkGroups } = compilation;
+
+    logger.time(<span class="hljs-string">"prepare"</span>);
+    <span class="hljs-keyword">const</span> blockInfoMap = extraceBlockInfoMap(compilation);
+
+    <span class="hljs-comment">/** @type {Map&lt;ChunkGroup, { index: number, index2: number }&gt;} */</span>
+    <span class="hljs-keyword">const</span> chunkGroupCounters = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();<span class="hljs-comment">//计数器</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> chunkGroup <span class="hljs-keyword">of</span> inputChunkGroups) {
+        chunkGroupCounters.set(chunkGroup, {<span class="hljs-comment">//每个chunkGroup有两个索引，默认值都是0</span>
+            <span class="hljs-attr">index</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">index2</span>: <span class="hljs-number">0</span>
+        });
+    }
+
+    <span class="hljs-keyword">let</span> nextFreeModuleIndex = <span class="hljs-number">0</span>;<span class="hljs-comment">//下一个空闲的模块索引</span>
+    <span class="hljs-keyword">let</span> nextFreeModuleIndex2 = <span class="hljs-number">0</span>;<span class="hljs-comment">//下一个空闲的模块索引</span>
+
+    <span class="hljs-comment">/** @type {Map&lt;DependenciesBlock, ChunkGroup&gt;} */</span>
+    <span class="hljs-keyword">const</span> blockChunkGroups = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();
+
+    <span class="hljs-keyword">const</span> ADD_AND_ENTER_MODULE = <span class="hljs-number">0</span>;<span class="hljs-comment">//增加并进入模块</span>
+    <span class="hljs-keyword">const</span> ENTER_MODULE = <span class="hljs-number">1</span>;<span class="hljs-comment">//进入模块</span>
+    <span class="hljs-keyword">const</span> PROCESS_BLOCK = <span class="hljs-number">2</span>;<span class="hljs-comment">//处理代码块</span>
+    <span class="hljs-keyword">const</span> LEAVE_MODULE = <span class="hljs-number">3</span>;<span class="hljs-comment">//离开模块</span>
+
+    <span class="hljs-comment">/**
+     * @param {QueueItem[]} queue the queue array (will be mutated)
+     * @param {ChunkGroup} chunkGroup chunk group
+     * @returns {QueueItem[]} the queue array again
+     */</span>
+    <span class="hljs-keyword">const</span> reduceChunkGroupToQueueItem = <span class="hljs-function">(<span class="hljs-params">queue, chunkGroup</span>) =&gt;</span> {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> chunk <span class="hljs-keyword">of</span> chunkGroup.chunks) {
+            <span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = chunk.entryModule;
+            queue.push({
+                <span class="hljs-attr">action</span>: ENTER_MODULE,
+                <span class="hljs-attr">block</span>: <span class="hljs-built_in">module</span>,
+                <span class="hljs-built_in">module</span>,
+                chunk,
+                chunkGroup
+            });
+        }
+        chunkGroupInfoMap.set(chunkGroup, {
+            chunkGroup,
+            <span class="hljs-attr">minAvailableModules</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(),
+            <span class="hljs-attr">minAvailableModulesOwned</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">availableModulesToBeMerged</span>: [],
+            <span class="hljs-attr">skippedItems</span>: [],
+            <span class="hljs-attr">resultingAvailableModules</span>: <span class="hljs-literal">undefined</span>,
+            <span class="hljs-attr">children</span>: <span class="hljs-literal">undefined</span>
+        });
+        <span class="hljs-keyword">return</span> queue;
+    };
+
+    <span class="hljs-comment">// Start with the provided modules/chunks  把entryPoint(chunkGroup) 转化为一个新的 queue</span>
+    <span class="hljs-comment">/** @type {QueueItem[]} */</span>
+    <span class="hljs-keyword">let</span> queue = inputChunkGroups
+        .reduce(reduceChunkGroupToQueueItem, [])
+        .reverse();
+    <span class="hljs-comment">/** @type {Map&lt;ChunkGroup, Set&lt;ChunkGroup&gt;&gt;} */</span>
+    <span class="hljs-keyword">const</span> queueConnect = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();
+    <span class="hljs-comment">/** @type {Set&lt;ChunkGroupInfo&gt;} */</span>
+    <span class="hljs-keyword">const</span> outdatedChunkGroupInfo = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+    <span class="hljs-comment">/** @type {QueueItem[]} */</span>
+    <span class="hljs-keyword">let</span> queueDelayed = [];
+
+    logger.timeEnd(<span class="hljs-string">"prepare"</span>);
+
+    <span class="hljs-comment">/** @type {Module} */</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span>;
+    <span class="hljs-comment">/** @type {Chunk} */</span>
+    <span class="hljs-keyword">let</span> chunk;
+    <span class="hljs-comment">/** @type {ChunkGroup} */</span>
+    <span class="hljs-keyword">let</span> chunkGroup;
+    <span class="hljs-comment">/** @type {DependenciesBlock} */</span>
+    <span class="hljs-keyword">let</span> block;
+    <span class="hljs-comment">/** @type {Set&lt;Module&gt;} */</span>
+    <span class="hljs-keyword">let</span> minAvailableModules;
+    <span class="hljs-comment">/** @type {QueueItem[]} */</span>
+    <span class="hljs-keyword">let</span> skippedItems;
+
+    <span class="hljs-comment">// For each async Block in graph</span>
+    <span class="hljs-comment">/**
+     * @param {AsyncDependenciesBlock} b iterating over each Async DepBlock
+     * @returns {void}
+     */</span>
+    <span class="hljs-keyword">const</span> iteratorBlock = <span class="hljs-function"><span class="hljs-params">b</span> =&gt;</span> {
+        <span class="hljs-comment">// 1. We create a chunk for this Block</span>
+        <span class="hljs-comment">// but only once (blockChunkGroups map)</span>
+        <span class="hljs-keyword">let</span> c = blockChunkGroups.get(b);
+        <span class="hljs-keyword">if</span> (c === <span class="hljs-literal">undefined</span>) {
+            c = namedChunkGroups.get(b.chunkName);
+            <span class="hljs-keyword">if</span> (c &amp;&amp; c.isInitial()) {
+                compilation.errors.push(
+                    <span class="hljs-keyword">new</span> AsyncDependencyToInitialChunkError(b.chunkName, <span class="hljs-built_in">module</span>, b.loc)
+                );
+                c = chunkGroup;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">//调用addChunkInGroup为这个异步的 block 新建一个 chunk 以及 chunkGroup</span>
+                c = compilation.addChunkInGroup(
+                    b.groupOptions || b.chunkName,
+                    <span class="hljs-built_in">module</span>,
+                    b.loc,
+                    b.request
+                );
+                <span class="hljs-comment">//调用 GraphHelpers 模块提供的 connectChunkGroupAndChunk 建立起这个新建的 chunk 和 chunkGroup 之间的联系</span>
+                <span class="hljs-comment">//这里新建的 chunk 也就是在你的代码当中使用异步API 加载模块时，webpack 最终会单独给这个模块输出一个 chunk，但是此时这个 chunk 为一个空的 chunk，没有加入任何依赖的 module</span>
+                chunkGroupCounters.set(c, { <span class="hljs-attr">index</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">index2</span>: <span class="hljs-number">0</span> });
+                blockChunkGroups.set(b, c);
+                allCreatedChunkGroups.add(c);
+            }
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// TODO webpack 5 remove addOptions check</span>
+            <span class="hljs-keyword">if</span> (c.addOptions) c.addOptions(b.groupOptions);
+            c.addOrigin(<span class="hljs-built_in">module</span>, b.loc, b.request);
+        }
+
+        <span class="hljs-comment">// 2. We store the Block+Chunk mapping as dependency for the chunk</span>
+        <span class="hljs-comment">//建立起当前 module 所属的 chunkGroup 和 block 以及这个 block 所属的 chunkGroup 之间的依赖关系，并存储至 chunkDependencies Map 表中，</span>
+        <span class="hljs-comment">//这个 Map 表主要用于后面优化 chunk graph</span>
+        <span class="hljs-keyword">let</span> deps = chunkDependencies.get(chunkGroup);
+        <span class="hljs-keyword">if</span> (!deps) chunkDependencies.set(chunkGroup, (deps = []));
+        deps.push({
+            <span class="hljs-attr">block</span>: b,
+            <span class="hljs-attr">chunkGroup</span>: c
+        });
+
+        <span class="hljs-comment">// 3. We create/update the chunk group info</span>
+        <span class="hljs-keyword">let</span> connectList = queueConnect.get(chunkGroup);
+        <span class="hljs-keyword">if</span> (connectList === <span class="hljs-literal">undefined</span>) {
+            connectList = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+            queueConnect.set(chunkGroup, connectList);
+        }
+        connectList.add(c);
+
+        <span class="hljs-comment">// 4. We enqueue the DependenciesBlock for traversal</span>
+        <span class="hljs-comment">//向queueDelayed 中添加一个 action 类型为 PROCESS_BLOCK,module 为当前所属的 module，block 为当前 module 依赖的异步模块</span>
+        <span class="hljs-comment">//chunk(chunkGroup 当中的第一个 chunk) 及 chunkGroup 都是处理异步模块生成的新项，而这里向 queueDelayed 数据集当中添加的新项主要就是用于 queue 的外层遍历</span>
+        queueDelayed.push({
+            <span class="hljs-attr">action</span>: PROCESS_BLOCK,
+            <span class="hljs-attr">block</span>: b,
+            <span class="hljs-attr">module</span>: <span class="hljs-built_in">module</span>,
+            <span class="hljs-attr">chunk</span>: c.chunks[<span class="hljs-number">0</span>],
+            <span class="hljs-attr">chunkGroup</span>: c
+        });
+    };
+
+    <span class="hljs-comment">// Iterative traversal of the Module graph</span>
+    <span class="hljs-comment">// Recursive would be simpler to write but could result in Stack Overflows</span>
+    <span class="hljs-comment">//开始进入到外层的遍历当中，即对 queueDelayed 数据集进行处理</span>
+    <span class="hljs-keyword">while</span> (queue.length) {
+        logger.time(<span class="hljs-string">"visiting"</span>);
+        <span class="hljs-comment">//每一轮的内层遍历都对应于同一个 chunkGroup，即每一轮内层的遍历都是对这个 chunkGroup 当中所包含的所有的 module 进行处理</span>
+        <span class="hljs-keyword">while</span> (queue.length) {
+            <span class="hljs-keyword">const</span> queueItem = queue.pop();
+            <span class="hljs-built_in">module</span> = queueItem.module;
+            block = queueItem.block;
+            chunk = queueItem.chunk;
+            <span class="hljs-keyword">if</span> (chunkGroup !== queueItem.chunkGroup) {
+                chunkGroup = queueItem.chunkGroup;
+                <span class="hljs-keyword">const</span> chunkGroupInfo = chunkGroupInfoMap.get(chunkGroup);
+                minAvailableModules = chunkGroupInfo.minAvailableModules;
+                skippedItems = chunkGroupInfo.skippedItems;
+            }
+
+            <span class="hljs-keyword">switch</span> (queueItem.action) {
+                <span class="hljs-keyword">case</span> ADD_AND_ENTER_MODULE: {
+                    <span class="hljs-keyword">if</span> (minAvailableModules.has(<span class="hljs-built_in">module</span>)) {
+                        <span class="hljs-comment">// already in parent chunks</span>
+                        <span class="hljs-comment">// skip it for now, but enqueue for rechecking when minAvailableModules shrinks</span>
+                        skippedItems.push(queueItem);
+                        <span class="hljs-keyword">break</span>;
+                    }
+                    <span class="hljs-comment">// We connect Module and Chunk when not already done</span>
+                    <span class="hljs-keyword">if</span> (chunk.addModule(<span class="hljs-built_in">module</span>)) {
+                        <span class="hljs-built_in">module</span>.addChunk(chunk);
+                    } <span class="hljs-keyword">else</span> {
+                        <span class="hljs-comment">// already connected, skip it</span>
+                        <span class="hljs-keyword">break</span>;
+                    }
+                }
+                <span class="hljs-comment">// fallthrough</span>
+                <span class="hljs-comment">//在 queue 中新增一个 action 为 LEAVE_MODULE 的项会在后面遍历的流程当中使用</span>
+                <span class="hljs-keyword">case</span> ENTER_MODULE: {
+                    <span class="hljs-keyword">if</span> (chunkGroup !== <span class="hljs-literal">undefined</span>) {
+                        <span class="hljs-keyword">const</span> index = chunkGroup.getModuleIndex(<span class="hljs-built_in">module</span>);
+                        <span class="hljs-keyword">if</span> (index === <span class="hljs-literal">undefined</span>) {
+                            chunkGroup.setModuleIndex(
+                                <span class="hljs-built_in">module</span>,
+                                chunkGroupCounters.get(chunkGroup).index++
+                            );
+                        }
+                    }
+
+                    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">module</span>.index === <span class="hljs-literal">null</span>) {
+                        <span class="hljs-built_in">module</span>.index = nextFreeModuleIndex++;
+                    }
+
+                    queue.push({
+                        <span class="hljs-attr">action</span>: LEAVE_MODULE,
+                        block,
+                        <span class="hljs-built_in">module</span>,
+                        chunk,
+                        chunkGroup
+                    });
+                }
+                <span class="hljs-comment">// fallthrough</span>
+                <span class="hljs-comment">//当 ENTRY_MODULE 的阶段进行完后，立即进入到了 PROCESS_BLOCK 阶段</span>
+                <span class="hljs-keyword">case</span> PROCESS_BLOCK: {
+                    <span class="hljs-comment">// 根据 module graph 依赖图保存的模块映射 blockInfoMap 获取这个 module（称为A） 的同步依赖 modules 及异步依赖 blocks</span>
+                    <span class="hljs-keyword">const</span> blockInfo = blockInfoMap.get(block);
+
+                    <span class="hljs-comment">// Buffer items because order need to be reverse to get indicies correct</span>
+                    <span class="hljs-keyword">const</span> skipBuffer = [];
+                    <span class="hljs-keyword">const</span> queueBuffer = [];
+                    <span class="hljs-comment">// Traverse all referenced modules</span>
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> refModule <span class="hljs-keyword">of</span> blockInfo.modules) {
+                        <span class="hljs-comment">/**
+                         * 判断当前这个 module(A) 所属的 chunk 当中是否包含了其依赖 modules 当中的 module(B)，
+                         * 如果不包含的话，那么会在 queue 当中加入新的项，新加入的项目的 action 为 ADD_AND_ENTER_MODULE，
+                         * 即这个新增项在下次遍历的时候，首先会进入到 ADD_AND_ENTER_MODULE 阶段
+                         */</span>
+                        <span class="hljs-keyword">if</span> (chunk.containsModule(refModule)) {
+                            <span class="hljs-comment">// skip early if already connected</span>
+                            <span class="hljs-keyword">continue</span>;
+                        }
+                        <span class="hljs-keyword">if</span> (minAvailableModules.has(refModule)) {
+                            <span class="hljs-comment">// already in parent chunks, skip it for now</span>
+                            skipBuffer.push({
+                                <span class="hljs-attr">action</span>: ADD_AND_ENTER_MODULE,
+                                <span class="hljs-attr">block</span>: refModule,
+                                <span class="hljs-attr">module</span>: refModule,
+                                chunk,
+                                chunkGroup
+                            });
+                            <span class="hljs-keyword">continue</span>;
+                        }
+                        <span class="hljs-comment">// enqueue the add and enter to enter in the correct order</span>
+                        <span class="hljs-comment">// this is relevant with circular dependencies</span>
+                        queueBuffer.push({
+                            <span class="hljs-attr">action</span>: ADD_AND_ENTER_MODULE,
+                            <span class="hljs-attr">block</span>: refModule,
+                            <span class="hljs-attr">module</span>: refModule,
+                            chunk,
+                            chunkGroup
+                        });
+                    }
+                    <span class="hljs-comment">// Add buffered items in reversed order</span>
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = skipBuffer.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {
+                        skippedItems.push(skipBuffer[i]);
+                    }
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = queueBuffer.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {
+                        queue.push(queueBuffer[i]);
+                    }
+
+                    <span class="hljs-comment">//调用iteratorBlock方法来处理这个 module(A) 依赖的所有的异步 blocks</span>
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> block <span class="hljs-keyword">of</span> blockInfo.blocks) iteratorBlock(block);
+
+                    <span class="hljs-keyword">if</span> (blockInfo.blocks.length &gt; <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-built_in">module</span> !== block) {
+                        blocksWithNestedBlocks.add(block);
+                    }
+                    <span class="hljs-keyword">break</span>;
+                }
+                <span class="hljs-keyword">case</span> LEAVE_MODULE: {
+                    <span class="hljs-keyword">if</span> (chunkGroup !== <span class="hljs-literal">undefined</span>) {
+                        <span class="hljs-keyword">const</span> index = chunkGroup.getModuleIndex2(<span class="hljs-built_in">module</span>);
+                        <span class="hljs-keyword">if</span> (index === <span class="hljs-literal">undefined</span>) {
+                            chunkGroup.setModuleIndex2(
+                                <span class="hljs-built_in">module</span>,
+                                chunkGroupCounters.get(chunkGroup).index2++
+                            );
+                        }
+                    }
+
+                    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">module</span>.index2 === <span class="hljs-literal">null</span>) {
+                        <span class="hljs-built_in">module</span>.index2 = nextFreeModuleIndex2++;
+                    }
+                    <span class="hljs-keyword">break</span>;
+                }
+            }
+        }
+        logger.timeEnd(<span class="hljs-string">"visiting"</span>);
+
+        <span class="hljs-keyword">while</span> (queueConnect.size &gt; <span class="hljs-number">0</span>) {
+            logger.time(<span class="hljs-string">"calculating available modules"</span>);
+            <span class="hljs-comment">//计算出这个chunkGroup新的父模块，以便这些子chunkGroup可以获取新的模块</span>
+            <span class="hljs-comment">// Figure out new parents for chunk groups</span>
+            <span class="hljs-comment">// to get new available modules for these children</span>
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [chunkGroup, targets] <span class="hljs-keyword">of</span> queueConnect) {
+                <span class="hljs-keyword">const</span> info = chunkGroupInfoMap.get(chunkGroup);<span class="hljs-comment">//当前信息</span>
+                <span class="hljs-keyword">let</span> minAvailableModules = info.minAvailableModules;<span class="hljs-comment">//(chunkGroup 可追踪的最小 module 数据集)</span>
+
+                <span class="hljs-comment">//为这个点创建一个新的模块数据集,添加所有的本chunkgroup所有的chunk里的模块</span>
+                <span class="hljs-keyword">const</span> resultingAvailableModules = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(minAvailableModules);
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> chunk <span class="hljs-keyword">of</span> chunkGroup.chunks) {
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> chunk.modulesIterable) {
+                        resultingAvailableModules.add(m);
+                    }
+                }
+                info.resultingAvailableModules = resultingAvailableModules;
+                <span class="hljs-keyword">if</span> (info.children === <span class="hljs-literal">undefined</span>) {
+                    info.children = targets;
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> target <span class="hljs-keyword">of</span> targets) {
+                        info.children.add(target);
+                    }
+                }
+
+                <span class="hljs-comment">// 2. Update chunk group info 更新chunkGroup信息</span>
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> target <span class="hljs-keyword">of</span> targets) {
+                    <span class="hljs-keyword">let</span> chunkGroupInfo = chunkGroupInfoMap.get(target);
+                    <span class="hljs-keyword">if</span> (chunkGroupInfo === <span class="hljs-literal">undefined</span>) {
+                        chunkGroupInfo = {
+                            <span class="hljs-attr">chunkGroup</span>: target,
+                            <span class="hljs-attr">minAvailableModules</span>: <span class="hljs-literal">undefined</span>,
+                            <span class="hljs-attr">minAvailableModulesOwned</span>: <span class="hljs-literal">undefined</span>,
+                            <span class="hljs-attr">availableModulesToBeMerged</span>: [],
+                            <span class="hljs-attr">skippedItems</span>: [],
+                            <span class="hljs-attr">resultingAvailableModules</span>: <span class="hljs-literal">undefined</span>,
+                            <span class="hljs-attr">children</span>: <span class="hljs-literal">undefined</span>
+                        };
+                        chunkGroupInfoMap.set(target, chunkGroupInfo);
+                    }
+                    chunkGroupInfo.availableModulesToBeMerged.push(
+                        resultingAvailableModules
+                    );
+                    outdatedChunkGroupInfo.add(chunkGroupInfo);
+                }
+            }
+            queueConnect.clear();
+            logger.timeEnd(<span class="hljs-string">"calculating available modules"</span>);
+
+            <span class="hljs-keyword">if</span> (outdatedChunkGroupInfo.size &gt; <span class="hljs-number">0</span>) {
+                logger.time(<span class="hljs-string">"merging available modules"</span>);<span class="hljs-comment">//合并模块</span>
+                <span class="hljs-comment">// Execute the merge</span>
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> info <span class="hljs-keyword">of</span> outdatedChunkGroupInfo) {
+                    <span class="hljs-keyword">const</span> availableModulesToBeMerged = info.availableModulesToBeMerged;<span class="hljs-comment">//父模块</span>
+                    <span class="hljs-keyword">let</span> cachedMinAvailableModules = info.minAvailableModules;<span class="hljs-comment">//最小化模块集</span>
+
+                    <span class="hljs-comment">// 1. Get minimal available modules</span>
+                    <span class="hljs-comment">// It doesn't make sense to traverse a chunk again with more available modules.</span>
+                    <span class="hljs-comment">// This step calculates the minimal available modules and skips traversal when</span>
+                    <span class="hljs-comment">// the list didn't shrink.</span>
+                    <span class="hljs-keyword">if</span> (availableModulesToBeMerged.length &gt; <span class="hljs-number">1</span>) {
+                        availableModulesToBeMerged.sort(bySetSize);
+                    }
+                    <span class="hljs-keyword">let</span> changed = <span class="hljs-literal">false</span>;
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> availableModules <span class="hljs-keyword">of</span> availableModulesToBeMerged) {
+                        <span class="hljs-keyword">if</span> (cachedMinAvailableModules === <span class="hljs-literal">undefined</span>) {
+                            cachedMinAvailableModules = availableModules;
+                            info.minAvailableModules = cachedMinAvailableModules;
+                            info.minAvailableModulesOwned = <span class="hljs-literal">false</span>;
+                            changed = <span class="hljs-literal">true</span>;
+                        } <span class="hljs-keyword">else</span> {
+                            <span class="hljs-keyword">if</span> (info.minAvailableModulesOwned) {
+                                <span class="hljs-comment">// We own it and can modify it</span>
+                                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> cachedMinAvailableModules) {
+                                    <span class="hljs-keyword">if</span> (!availableModules.has(m)) {
+                                        cachedMinAvailableModules.delete(m);
+                                        changed = <span class="hljs-literal">true</span>;
+                                    }
+                                }
+                            } <span class="hljs-keyword">else</span> {
+                                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> cachedMinAvailableModules) {
+                                    <span class="hljs-keyword">if</span> (!availableModules.has(m)) {
+                                        <span class="hljs-comment">// cachedMinAvailableModules need to be modified</span>
+                                        <span class="hljs-comment">// but we don't own it</span>
+                                        <span class="hljs-comment">// construct a new Set as intersection of cachedMinAvailableModules and availableModules</span>
+                                        <span class="hljs-comment">/** <span class="hljs-doctag">@type <span class="hljs-type">{Set&lt;Module&gt;}</span> </span>*/</span>
+                                        <span class="hljs-keyword">const</span> newSet = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+                                        <span class="hljs-keyword">const</span> iterator = cachedMinAvailableModules[
+                                            <span class="hljs-built_in">Symbol</span>.iterator
+                                        ]();
+                                        <span class="hljs-comment">/** @type {IteratorResult&lt;Module&gt;} */</span>
+                                        <span class="hljs-keyword">let</span> it;
+                                        <span class="hljs-keyword">while</span> (!(it = iterator.next()).done) {
+                                            <span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = it.value;
+                                            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">module</span> === m) <span class="hljs-keyword">break</span>;
+                                            newSet.add(<span class="hljs-built_in">module</span>);
+                                        }
+                                        <span class="hljs-keyword">while</span> (!(it = iterator.next()).done) {
+                                            <span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = it.value;
+                                            <span class="hljs-keyword">if</span> (availableModules.has(<span class="hljs-built_in">module</span>)) {
+                                                newSet.add(<span class="hljs-built_in">module</span>);
+                                            }
+                                        }
+                                        cachedMinAvailableModules = newSet;
+                                        info.minAvailableModulesOwned = <span class="hljs-literal">true</span>;
+                                        info.minAvailableModules = newSet;
+
+                                        <span class="hljs-comment">// Update the cache from the first queue</span>
+                                        <span class="hljs-comment">// if the chunkGroup is currently cached</span>
+                                        <span class="hljs-keyword">if</span> (chunkGroup === info.chunkGroup) {
+                                            minAvailableModules = cachedMinAvailableModules;
+                                        }
+
+                                        changed = <span class="hljs-literal">true</span>;
+                                        <span class="hljs-keyword">break</span>;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    availableModulesToBeMerged.length = <span class="hljs-number">0</span>;
+                    <span class="hljs-keyword">if</span> (!changed) <span class="hljs-keyword">continue</span>;
+
+                    <span class="hljs-comment">// 2. Reconsider skipped items</span>
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> queueItem <span class="hljs-keyword">of</span> info.skippedItems) {
+                        queue.push(queueItem);
+                    }
+                    info.skippedItems.length = <span class="hljs-number">0</span>;
+
+                    <span class="hljs-comment">// 3. Reconsider children chunk groups</span>
+                    <span class="hljs-keyword">if</span> (info.children !== <span class="hljs-literal">undefined</span>) {
+                        <span class="hljs-keyword">const</span> chunkGroup = info.chunkGroup;
+                        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> c <span class="hljs-keyword">of</span> info.children) {
+                            <span class="hljs-keyword">let</span> connectList = queueConnect.get(chunkGroup);
+                            <span class="hljs-keyword">if</span> (connectList === <span class="hljs-literal">undefined</span>) {
+                                connectList = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+                                queueConnect.set(chunkGroup, connectList);
+                            }
+                            connectList.add(c);
+                        }
+                    }
+                }
+                outdatedChunkGroupInfo.clear();
+                logger.timeEnd(<span class="hljs-string">"merging available modules"</span>);
+            }
+        }
+
+        <span class="hljs-comment">//当队列中所有的元素处理完成后处理queueDelayed</span>
+        <span class="hljs-comment">//这个对获取合局正确的索引非常重要</span>
+        <span class="hljs-comment">//异步blocks应该在所有的同步blocks处理完成后再处理</span>
+        <span class="hljs-keyword">if</span> (queue.length === <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">const</span> tempQueue = queue;
+            queue = queueDelayed.reverse();
+            queueDelayed = tempQueue;
+        }
+    }
+};
+</code></pre>
+<h3 id="t113.4 优化chunk graph">3.4 优化chunk graph <a href="#t113.4 优化chunk graph"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/buildChunkGraph.js#L713">buildChunkGraph PART TWO</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1320">afterChunks</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ *
+ * <span class="hljs-doctag">@param <span class="hljs-type">{Set&lt;DependenciesBlock&gt;}</span> </span>blocksWithNestedBlocks block拥有子block的标识
+ * <span class="hljs-doctag">@param <span class="hljs-type">{Map&lt;ChunkGroup, ChunkGroupDep[]&gt;}</span> </span>chunkDependencies chunk groups的依赖
+ * <span class="hljs-doctag">@param <span class="hljs-type">{Map&lt;ChunkGroup, ChunkGroupInfo&gt;}</span> </span>chunkGroupInfoMap chunkgroup到可用的modules的映射
+ */</span>
+<span class="hljs-keyword">const</span> connectChunkGroups = (
+    blocksWithNestedBlocks,
+    chunkDependencies,
+    chunkGroupInfoMap
+) =&gt; {
+    <span class="hljs-comment">/** <span class="hljs-doctag">@type <span class="hljs-type">{Set&lt;Module&gt;}</span> </span>*/</span>
+    <span class="hljs-keyword">let</span> resultingAvailableModules;
+
+    <span class="hljs-comment">/**
+     * 帮助函数，检查是否代码块中是否已经有了所有模块
+     * @param {ChunkGroup} chunkGroup  要检查的chunkGroup
+     * @param {Set&lt;Module&gt;} availableModules 模块集合
+     * @returns {boolean} 如果所有的模块都在这个chunk中存在就返回true
+     */</span>
+    <span class="hljs-keyword">const</span> areModulesAvailable = <span class="hljs-function">(<span class="hljs-params">chunkGroup, availableModules</span>) =&gt;</span> {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> chunk <span class="hljs-keyword">of</span> chunkGroup.chunks) {
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> <span class="hljs-keyword">of</span> chunk.modulesIterable) {
+                <span class="hljs-keyword">if</span> (!availableModules.has(<span class="hljs-built_in">module</span>)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+            }
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    };
+
+    <span class="hljs-comment">// For each edge in the basic chunk graph</span>
+    <span class="hljs-comment">/**
+     * @param {ChunkGroupDep} dep the dependency used for filtering
+     * @returns {boolean} used to filter "edges" (aka Dependencies) that were pointing
+     * to modules that are already available. Also filters circular dependencies in the chunks graph
+     */</span>
+    <span class="hljs-keyword">const</span> filterFn = <span class="hljs-function"><span class="hljs-params">dep</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> depChunkGroup = dep.chunkGroup;
+        <span class="hljs-comment">// TODO is this needed?</span>
+        <span class="hljs-keyword">if</span> (blocksWithNestedBlocks.has(dep.block)) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">if</span> (areModulesAvailable(depChunkGroup, resultingAvailableModules)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>; <span class="hljs-comment">// break all modules are already available</span>
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    };
+
+    <span class="hljs-comment">//遍历所有的deps,检查是否这个chunkGroup是否需要连接</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [chunkGroup, deps] <span class="hljs-keyword">of</span> chunkDependencies) {
+        <span class="hljs-keyword">if</span> (deps.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">continue</span>;
+
+        <span class="hljs-comment">// 1.从map中获取到chunkGroup的信息对象</span>
+        <span class="hljs-keyword">const</span> info = chunkGroupInfoMap.get(chunkGroup);
+        resultingAvailableModules = info.resultingAvailableModules;
+
+        <span class="hljs-comment">// 2. Foreach edge</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; deps.length; i++) {
+            <span class="hljs-keyword">const</span> dep = deps[i];
+
+            <span class="hljs-comment">// Filter inline, rather than creating a new array from `.filter()`</span>
+            <span class="hljs-comment">// TODO check if inlining filterFn makes sense here</span>
+            <span class="hljs-comment">//判断 chunkGroup 提供的 newAvailableModules(可以将 newAvailableModules 理解为这个 chunkGroup 所有 module 的集合setA)和</span>
+            <span class="hljs-comment">// deps 依赖中的 chunkGroup (由异步 block 创建的 chunkGroup)所包含的 chunk 当中所有的 module 集合(setB)包含关系：</span>
+            <span class="hljs-keyword">if</span> (!filterFn(dep)) {
+                <span class="hljs-keyword">continue</span>;
+            }
+            <span class="hljs-keyword">const</span> depChunkGroup = dep.chunkGroup;
+            <span class="hljs-keyword">const</span> depBlock = dep.block;
+
+            <span class="hljs-comment">// 5. 建立起 deps 依赖中的异步 block 和 chunkGroup 的依赖关系</span>
+            GraphHelpers.connectDependenciesBlockAndChunkGroup(
+                depBlock,
+                depChunkGroup
+            );
+
+            <span class="hljs-comment">// 6. chunkGroup 和 deps 依赖中的 chunkGroup 之间的依赖关系 </span>
+            <span class="hljs-comment">//（这个依赖关系也决定了在 webpack 编译完成后输出的文件当中是否会有 deps 依赖中的 chunkGroup 所包含的 chunk）</span>
+            GraphHelpers.connectChunkGroupParentAndChild(chunkGroup, depChunkGroup);
+        }
+    }
+};
+
+<span class="hljs-comment">/**
+ * Remove all unconnected chunk groups
+ * @param {Compilation} compilation the compilation
+ * @param {Iterable&lt;ChunkGroup&gt;} allCreatedChunkGroups all chunk groups that where created before
+ */</span>
+<span class="hljs-keyword">const</span> cleanupUnconnectedGroups = <span class="hljs-function">(<span class="hljs-params">compilation, allCreatedChunkGroups</span>) =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> chunkGroup <span class="hljs-keyword">of</span> allCreatedChunkGroups) {
+        <span class="hljs-keyword">if</span> (chunkGroup.getNumberOfParents() === <span class="hljs-number">0</span>) {<span class="hljs-comment">//开始处理没有依赖关系的 chunkGroup</span>
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> chunk <span class="hljs-keyword">of</span> chunkGroup.chunks) {
+                <span class="hljs-keyword">const</span> idx = compilation.chunks.indexOf(chunk);
+                <span class="hljs-keyword">if</span> (idx &gt;= <span class="hljs-number">0</span>) compilation.chunks.splice(idx, <span class="hljs-number">1</span>);
+                chunk.remove(<span class="hljs-string">"unconnected"</span>);
+            }
+            chunkGroup.remove(<span class="hljs-string">"unconnected"</span>);
+        }
+    }
+};
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/finalchunkgraphs.jpg" alt="finalchunkgraphs"></p>
+
+    

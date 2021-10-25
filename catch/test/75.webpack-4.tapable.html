@@ -1,0 +1,1075 @@
+
+        <h2 id="t01. webpack的插件机制">1. webpack的插件机制 <a href="#t01. webpack的插件机制"> # </a></h2>
+<ul>
+<li>在具体介绍webpack内置插件与钩子可视化工具之前，我们先来了解一下webpack中的插件机制。 webpack实现插件机制的大体方式是：<ul>
+<li>创建 - webpack在其内部对象上创建各种钩子；</li>
+<li>注册 - 插件将自己的方法注册到对应钩子上，交给webpack；</li>
+<li>调用 - webpack编译过程中，会适时地触发相应钩子，因此也就触发了插件的方法。</li>
+</ul>
+</li>
+<li>Webpack本质上是一种事件流的机制，它的工作流程就是将各个插件串联起来，而实现这一切的核心就是Tapable，webpack中最核心的负责编译的Compiler和负责创建bundle的Compilation都是Tapable的实例</li>
+<li>通过事件和注册和监听，触发webpack生命周期中的函数方法</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {
+    SyncHook,
+    SyncBailHook,
+    SyncWaterfallHook,
+    SyncLoopHook,
+    AsyncParallelHook,
+    AsyncParallelBailHook,
+    AsyncSeriesHook,
+    AsyncSeriesBailHook,
+    AsyncSeriesWaterfallHook
+} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+</code></pre>
+<h2 id="t12. tapable分类">2. tapable分类 <a href="#t12. tapable分类"> # </a></h2>
+<h3 id="t22.1 按同步异步分类">2.1 按同步异步分类 <a href="#t22.1 按同步异步分类"> # </a></h3>
+<ul>
+<li>Hook 类型可以分为<code>同步Sync</code>和<code>异步Async</code>，异步又分为<code>并行</code>和<code>串行</code></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/asynctapablesync.jpg" alt="asynctapablesync"></p>
+<h3 id="t32.1 按返回值分类">2.1 按返回值分类 <a href="#t32.1 按返回值分类"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/mytapable.jpg" alt="mytapable"></p>
+<h4 id="t42.1.1 Basic">2.1.1 Basic <a href="#t42.1.1 Basic"> # </a></h4>
+<ul>
+<li>执行每一个事件函数，不关心函数的返回值,有 SyncHook、AsyncParallelHook、AsyncSeriesHook</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/BasicTapable.jpg" alt="BasicTapable"></p>
+<h4 id="t52.1.2 Bail">2.1.2 Bail <a href="#t52.1.2 Bail"> # </a></h4>
+<ul>
+<li>执行每一个事件函数，遇到第一个结果 <code>result !== undefined</code> 则返回，不再继续执行。有：SyncBailHook、AsyncSeriesBailHook, AsyncParallelBailHook</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/BailTapables.jpg" alt="BailTapables"></p>
+<h4 id="t62.1.3 Waterfall">2.1.3 Waterfall <a href="#t62.1.3 Waterfall"> # </a></h4>
+<ul>
+<li>如果前一个事件函数的结果 <code>result !== undefined</code>,则 result 会作为后一个事件函数的第一个参数,有SyncWaterfallHook，AsyncSeriesWaterfallHook</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/waterfallTapables.jpg" alt="waterfallTapables"></p>
+<h4 id="t72.1.4 Loop">2.1.4 Loop <a href="#t72.1.4 Loop"> # </a></h4>
+<ul>
+<li>不停的循环执行事件函数，直到所有函数结果 <code>result === undefined</code>,有SyncLoopHook 和 AsyncSeriesLoopHook </li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/LoopTapables2.jpg" alt="LoopTapables2"></p>
+<h2 id="t83.使用">3.使用 <a href="#t83.使用"> # </a></h2>
+<h3 id="t93.1 SyncHook">3.1 SyncHook <a href="#t93.1 SyncHook"> # </a></h3>
+<ul>
+<li>所有的构造函数都接收一个可选参数，参数是一个参数名的字符串数组</li>
+<li>参数的名字可以任意填写，但是参数数组的长数必须要根实际接受的参数个数一致</li>
+<li>如果回调函数不接受参数，可以传入空数组</li>
+<li>在实例化的时候传入的数组长度长度有用，值没有用途</li>
+<li>执行call时，参数个数和实例化时的数组长度有关</li>
+<li>回调的时候是按先入先出的顺序执行的，先放的先执行</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {SyncHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">const</span> hook = <span class="hljs-keyword">new</span> SyncHook([<span class="hljs-string">'name'</span>,<span class="hljs-string">'age'</span>]);
+hook.tap(<span class="hljs-string">'1'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+});
+hook.tap(<span class="hljs-string">'2'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>;
+});
+hook.tap(<span class="hljs-string">'3'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">3</span>;
+});
+
+hook.call(<span class="hljs-string">'zhufeng'</span>,<span class="hljs-number">10</span>);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-number">1</span> zhufeng <span class="hljs-number">10</span>
+<span class="hljs-number">2</span> zhufeng <span class="hljs-number">10</span>
+<span class="hljs-number">3</span> zhufeng <span class="hljs-number">10</span>
+</code></pre>
+<h3 id="t103.2 SyncBailHook">3.2 SyncBailHook <a href="#t103.2 SyncBailHook"> # </a></h3>
+<ul>
+<li>BailHook中的回调函数也是顺序执行的</li>
+<li>调用call时传入的参数也可以传给回调函数</li>
+<li>当回调函数返回非undefined值的时候会停止调用后续的回调</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {SyncBailHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">const</span> hook = <span class="hljs-keyword">new</span> SyncBailHook([<span class="hljs-string">'name'</span>,<span class="hljs-string">'age'</span>]);
+hook.tap(<span class="hljs-string">'1'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>,name,age);
+    <span class="hljs-comment">//return 1;</span>
+});
+hook.tap(<span class="hljs-string">'2'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>;
+});
+hook.tap(<span class="hljs-string">'3'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">3</span>;
+});
+
+hook.call(<span class="hljs-string">'zhufeng'</span>,<span class="hljs-number">10</span>);
+</code></pre>
+<h3 id="t113.3 SyncWaterfallHook">3.3 SyncWaterfallHook <a href="#t113.3 SyncWaterfallHook"> # </a></h3>
+<ul>
+<li>SyncWaterfallHook表示如果上一个回调函数的结果不为undefined,则可以作为下一个回调函数的第一个参数</li>
+<li>回调函数接受的参数来自于上一个函数的结果</li>
+<li>调用call传入的第一个参数，会被上一个函数的非undefined结果替换</li>
+<li>当回调函数返回非undefined不会停止回调栈的调用</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {SyncWaterfallHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+
+<span class="hljs-keyword">const</span> hook = <span class="hljs-keyword">new</span> SyncWaterfallHook([<span class="hljs-string">'name'</span>,<span class="hljs-string">'age'</span>]);
+hook.tap(<span class="hljs-string">'1'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+});
+hook.tap(<span class="hljs-string">'2'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>,name,age);
+    <span class="hljs-keyword">return</span> ;
+});
+hook.tap(<span class="hljs-string">'3'</span>,(name,age)=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>,name,age);
+    <span class="hljs-keyword">return</span> <span class="hljs-number">3</span>;
+});
+
+hook.call(<span class="hljs-string">'zhufeng'</span>,<span class="hljs-number">10</span>);
+</code></pre>
+<h3 id="t123.4 SyncLoopHook">3.4 SyncLoopHook <a href="#t123.4 SyncLoopHook"> # </a></h3>
+<ul>
+<li>SyncLoopHook的特点是不停的循环执行回调函数，直到函数结果等于undefined</li>
+<li>要注意的是每次循环都是从头开始循环的</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { SyncLoopHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-comment">//当回调函数返回非undefined值的时候会停止调用后续的回调</span>
+
+<span class="hljs-keyword">let</span> hook = <span class="hljs-keyword">new</span> SyncLoopHook([<span class="hljs-string">'name'</span>, <span class="hljs-string">'age'</span>]);
+<span class="hljs-keyword">let</span> counter1 = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> counter2 = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> counter3 = <span class="hljs-number">0</span>;
+hook.tap(<span class="hljs-string">'1'</span>, (name, age) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, <span class="hljs-string">'counter1'</span>, counter1);
+    <span class="hljs-keyword">if</span> (++counter1 == <span class="hljs-number">1</span>) {
+        counter1 = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+});
+hook.tap(<span class="hljs-string">'2'</span>, (name, age) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, <span class="hljs-string">'counter2'</span>, counter2);
+    <span class="hljs-keyword">if</span> (++counter2 == <span class="hljs-number">2</span>) {
+        counter2 = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+});
+hook.tap(<span class="hljs-string">'3'</span>, (name, age) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>, <span class="hljs-string">'counter3'</span>, counter3);
+    <span class="hljs-keyword">if</span> (++counter3 == <span class="hljs-number">3</span>) {
+        counter3 = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+});
+hook.call(<span class="hljs-string">'zhufeng'</span>, <span class="hljs-number">10</span>);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-number">1</span> counter1 <span class="hljs-number">0</span>
+<span class="hljs-number">2</span> counter2 <span class="hljs-number">0</span>
+<span class="hljs-number">1</span> counter1 <span class="hljs-number">0</span>
+<span class="hljs-number">2</span> counter2 <span class="hljs-number">1</span>
+<span class="hljs-number">3</span> counter3 <span class="hljs-number">0</span>
+<span class="hljs-number">1</span> counter1 <span class="hljs-number">0</span>
+<span class="hljs-number">2</span> counter2 <span class="hljs-number">0</span>
+<span class="hljs-number">1</span> counter1 <span class="hljs-number">0</span>
+<span class="hljs-number">2</span> counter2 <span class="hljs-number">1</span>
+<span class="hljs-number">3</span> counter3 <span class="hljs-number">1</span>
+<span class="hljs-number">1</span> counter1 <span class="hljs-number">0</span>
+<span class="hljs-number">2</span> counter2 <span class="hljs-number">0</span>
+<span class="hljs-number">1</span> counter1 <span class="hljs-number">0</span>
+<span class="hljs-number">2</span> counter2 <span class="hljs-number">1</span>
+<span class="hljs-number">3</span> counter3 <span class="hljs-number">2</span>
+</code></pre>
+<h3 id="t133.5 AsyncParallelHook">3.5 AsyncParallelHook <a href="#t133.5 AsyncParallelHook"> # </a></h3>
+<ul>
+<li>异步并行执行钩子</li>
+</ul>
+<h4 id="t143.5.1 tap">3.5.1 tap <a href="#t143.5.1 tap"> # </a></h4>
+<ul>
+<li>同步注册<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncParallelHook}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncParallelHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tap(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+});
+queue.tap(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+});
+queue.tap(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+</li>
+</ul>
+<h4 id="t153.5.2 tapAsync">3.5.2 tapAsync <a href="#t153.5.2 tapAsync"> # </a></h4>
+<ul>
+<li>异步注册，全部任务完成后执行最终的回调<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncParallelHook}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncParallelHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapAsync(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+      callback();
+  },<span class="hljs-number">1000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+      callback();
+  },<span class="hljs-number">2000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+      callback();
+  },<span class="hljs-number">3000</span>)
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+</li>
+</ul>
+<h4 id="t163.5.3 tapPromise">3.5.3 tapPromise <a href="#t163.5.3 tapPromise"> # </a></h4>
+<ul>
+<li>promise注册钩子</li>
+<li>全部完成后执行才算成功</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncParallelHook}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncParallelHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapPromise(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve,reject</span>)</span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+            resolve();
+        },<span class="hljs-number">1000</span>)
+    });
+
+});
+queue.tapPromise(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve,reject</span>)</span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+            resolve();
+        },<span class="hljs-number">2000</span>)
+    });
+});
+queue.tapPromise(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve,reject</span>)</span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+            resolve();
+        },<span class="hljs-number">3000</span>)
+    });
+});
+queue.promise(<span class="hljs-string">'zfpx'</span>).then(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+})
+</code></pre>
+<h3 id="t173.6 AsyncParallelBailHook">3.6 AsyncParallelBailHook <a href="#t173.6 AsyncParallelBailHook"> # </a></h3>
+<ul>
+<li>带保险的异步并行执行钩子</li>
+<li>有一个任务返回值不为空就直接结束</li>
+</ul>
+<h4 id="t183.6.1 tap">3.6.1 tap <a href="#t183.6.1 tap"> # </a></h4>
+<ul>
+<li>如果有一个任务有返回值则调用最终的回调<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncParallelBailHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue=<span class="hljs-keyword">new</span> AsyncParallelBailHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tap(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">"Wrong"</span>;
+});
+queue.tap(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+});
+queue.tap(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t193.6.2 tapAsync">3.6.2 tapAsync <a href="#t193.6.2 tapAsync"> # </a></h4>
+</li>
+<li>有一个任务返回错误就直接调最终的回调<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncParallelBailHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue=<span class="hljs-keyword">new</span> AsyncParallelBailHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapAsync(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+  callback(<span class="hljs-string">'Wrong'</span>);
+});
+queue.tapAsync(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+  callback();
+});
+queue.tapAsync(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+  callback();
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+</li>
+</ul>
+<h4 id="t203.6.3 tapPromise">3.6.3 tapPromise <a href="#t203.6.3 tapPromise"> # </a></h4>
+<ul>
+<li>只要有一个任务有resolve或者reject值，不管成功失败都结束</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncParallelBailHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncParallelBailHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapPromise(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+            resolve(<span class="hljs-number">1</span>);
+        }, <span class="hljs-number">1000</span>)
+    });
+});
+queue.tapPromise(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+            resolve();
+        }, <span class="hljs-number">2000</span>)
+    });
+});
+
+queue.tapPromise(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+            resolve();
+        }, <span class="hljs-number">3000</span>)
+    });
+});
+
+queue.promise(<span class="hljs-string">'zfpx'</span>).then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'成功'</span>, result);
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+}, err =&gt; {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'失败'</span>, err);
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+})
+</code></pre>
+<h3 id="t213.7 AsyncSeriesHook">3.7 AsyncSeriesHook <a href="#t213.7 AsyncSeriesHook"> # </a></h3>
+<ul>
+<li>异步串行钩子</li>
+<li>任务一个一个执行,执行完上一个执行下一个</li>
+</ul>
+<h4 id="t223.7.1 tap">3.7.1 tap <a href="#t223.7.1 tap"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tap(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+});
+queue.tap(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+});
+queue.tap(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+});
+queue.callAsync(<span class="hljs-string">'zhufeng'</span>, err =&gt; {
+    <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t233.7.2 tapAsync">3.7.2 tapAsync <a href="#t233.7.2 tapAsync"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapAsync(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+   setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+       <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+   },<span class="hljs-number">1000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+        callback();
+    },<span class="hljs-number">2000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+        callback();
+    },<span class="hljs-number">3000</span>)
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+    <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t243.7.3 tapPromise">3.7.3 tapPromise <a href="#t243.7.3 tapPromise"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapPromise(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, name);
+            resolve();
+        }, <span class="hljs-number">1000</span>)
+    });
+});
+queue.tapPromise(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, name);
+            resolve();
+        }, <span class="hljs-number">2000</span>)
+    });
+});
+queue.tapPromise(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>, name);
+            resolve();
+        }, <span class="hljs-number">3000</span>)
+    });
+});
+queue.promise(<span class="hljs-string">'zfpx'</span>).then(<span class="hljs-function"><span class="hljs-params">data</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(data);
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h3 id="t253.8 AsyncSeriesBailHook">3.8 AsyncSeriesBailHook <a href="#t253.8 AsyncSeriesBailHook"> # </a></h3>
+<ul>
+<li>只要有一个返回了不为undefined的值就直接结束<h4 id="t263.8.1 tap">3.8.1 tap <a href="#t263.8.1 tap"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncSeriesBailHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesBailHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tap(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">"Wrong"</span>;
+});
+queue.tap(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+});
+queue.tap(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t273.8.1 tapAsync">3.8.1 tapAsync <a href="#t273.8.1 tapAsync"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncSeriesBailHook}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesBailHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapAsync(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+ setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+     <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+     callback(<span class="hljs-string">'wrong'</span>);
+ },<span class="hljs-number">1000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+      callback();
+  },<span class="hljs-number">2000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+      callback();
+  },<span class="hljs-number">3000</span>)
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>,err=&gt;{
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t283.8.1 tapPromise">3.8.1 tapPromise <a href="#t283.8.1 tapPromise"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncSeriesBailHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesBailHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapPromise(<span class="hljs-string">'1'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>)</span>{
+ <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve</span>)</span>{
+     setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+         <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+         resolve();
+     },<span class="hljs-number">1000</span>)
+ });
+});
+queue.tapPromise(<span class="hljs-string">'2'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve,reject</span>)</span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+          reject(<span class="hljs-string">'失败了'</span>);
+      },<span class="hljs-number">2000</span>)
+  });
+});
+queue.tapPromise(<span class="hljs-string">'3'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">name,callback</span>)</span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve</span>)</span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+          resolve();
+      },<span class="hljs-number">3000</span>)
+  });
+});
+queue.promise(<span class="hljs-string">'zfpx'</span>).then(<span class="hljs-function"><span class="hljs-params">data</span>=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(data);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+},error=&gt;{
+  <span class="hljs-built_in">console</span>.log(error);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+</li>
+</ul>
+<h3 id="t293.9 AsyncSeriesWaterfallHook">3.9 AsyncSeriesWaterfallHook <a href="#t293.9 AsyncSeriesWaterfallHook"> # </a></h3>
+<ul>
+<li>只要有一个返回了不为undefined的值就直接结束<h4 id="t303.9.1 tap">3.9.1 tap <a href="#t303.9.1 tap"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesWaterfallHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesWaterfallHook([<span class="hljs-string">'name'</span>, <span class="hljs-string">'age'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tap(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, name, age);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'return1'</span>;
+});
+queue.tap(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data, age</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, data, age);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'return2'</span>;
+});
+queue.tap(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data, age</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>, data, age);
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>, <span class="hljs-number">10</span>, err =&gt; {
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t313.9.1 tapAsync">3.9.1 tapAsync <a href="#t313.9.1 tapAsync"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesWaterfallHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesWaterfallHook([<span class="hljs-string">'name'</span>, <span class="hljs-string">'age'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapAsync(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age, callback</span>) </span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, name, age);
+      callback(<span class="hljs-literal">null</span>, <span class="hljs-number">1</span>);
+  }, <span class="hljs-number">1000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data, age, callback</span>) </span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, data, age);
+      callback(<span class="hljs-literal">null</span>, <span class="hljs-number">2</span>);
+  }, <span class="hljs-number">2000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data, age, callback</span>) </span>{
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>, data, age);
+      callback(<span class="hljs-literal">null</span>, <span class="hljs-number">3</span>);
+  }, <span class="hljs-number">3000</span>)
+});
+queue.callAsync(<span class="hljs-string">'zfpx'</span>, <span class="hljs-number">10</span>, (err, data) =&gt; {
+  <span class="hljs-built_in">console</span>.log(err, data);
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h4 id="t323.9.1 tapPromise">3.9.1 tapPromise <a href="#t323.9.1 tapPromise"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {AsyncSeriesWaterfallHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncSeriesWaterfallHook([<span class="hljs-string">'name'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapPromise(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          <span class="hljs-built_in">console</span>.log(name, <span class="hljs-number">1</span>);
+          resolve(<span class="hljs-number">1</span>);
+      }, <span class="hljs-number">1000</span>);
+  });
+});
+queue.tapPromise(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          <span class="hljs-built_in">console</span>.log(data, <span class="hljs-number">2</span>);
+          resolve(<span class="hljs-number">2</span>);
+      }, <span class="hljs-number">2000</span>);
+  });
+});
+queue.tapPromise(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          <span class="hljs-built_in">console</span>.log(data, <span class="hljs-number">3</span>);
+          resolve(<span class="hljs-number">3</span>);
+      }, <span class="hljs-number">3000</span>);
+  });
+});
+queue.promise(<span class="hljs-string">'zfpx'</span>).then(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+</li>
+</ul>
+<h2 id="t334.SyncHook">4.SyncHook <a href="#t334.SyncHook"> # </a></h2>
+<ol>
+<li>所有的构造函数都接收一个可选参数，参数是一个参数名的字符串数组</li>
+<li>参数的名字可以任意填写，但是参数数组的长数必须要根实际接受的参数个数一致</li>
+<li>如果回调函数不接受参数，可以传入空数组</li>
+<li>在实例化的时候传入的数组长度长度有用，值没有用途</li>
+<li>执行call时，参数个数和实例化时的数组长度有关</li>
+<li>回调的时候是按先入先出的顺序执行的，先放的先执行</li>
+</ol>
+<h3 id="t344.1 使用">4.1 使用 <a href="#t344.1 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">//const { SyncHook } = require("./tapable");</span>
+<span class="hljs-keyword">const</span> { SyncHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> syncHook = <span class="hljs-keyword">new</span> SyncHook([<span class="hljs-string">"name"</span>, <span class="hljs-string">"age"</span>]);
+syncHook.tap(<span class="hljs-string">"1"</span>, (name, age) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, name, age);
+});
+syncHook.tap(<span class="hljs-string">"2"</span>, (name, age) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, name, age);
+});
+syncHook.call(<span class="hljs-string">"zhufeng"</span>, <span class="hljs-number">10</span>);
+</code></pre>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">anonymous</span>(<span class="hljs-params">name, age
+</span>) </span>{
+<span class="hljs-meta">"use strict"</span>;
+<span class="hljs-keyword">var</span> _context;
+<span class="hljs-keyword">var</span> _x = <span class="hljs-keyword">this</span>._x;
+<span class="hljs-keyword">var</span> _fn0 = _x[<span class="hljs-number">0</span>];
+_fn0(name, age);
+<span class="hljs-keyword">var</span> _fn1 = _x[<span class="hljs-number">1</span>];
+_fn1(name, age);
+})
+</code></pre>
+<h3 id="t354.2 实现">4.2 实现 <a href="#t354.2 实现"> # </a></h3>
+<h4 id="t364.2.1 index.js">4.2.1 index.js <a href="#t364.2.1 index.js"> # </a></h4>
+<p>tapable\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> SyncHook = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./SyncHook'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    SyncHook
+}
+</code></pre>
+<h4 id="t374.2.2 Hook.js">4.2.2 Hook.js <a href="#t374.2.2 Hook.js"> # </a></h4>
+<p>tapable\Hook.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Hook</span> </span>{
+    <span class="hljs-keyword">constructor</span>(args) {
+        <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">Array</span>.isArray(args)) args = []; <span class="hljs-comment">//参数</span>
+        <span class="hljs-keyword">this</span>.args = args; <span class="hljs-comment">// 这里存入初始化的参数</span>
+        <span class="hljs-keyword">this</span>.taps = []; <span class="hljs-comment">//这里就是回调栈用到的数组</span>
+        <span class="hljs-keyword">this</span>._x = <span class="hljs-literal">undefined</span>; <span class="hljs-comment">//这个比较重要，后面拼代码会用</span>
+    }
+    tap(options, fn) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> options === <span class="hljs-string">"string"</span>) options = { <span class="hljs-attr">name</span>: options };
+        options.fn = fn;
+        <span class="hljs-keyword">this</span>._insert(options); <span class="hljs-comment">//参数处理完之后，调用_insert，这是关键代码</span>
+    }
+    _insert(item) {
+        <span class="hljs-keyword">this</span>.taps[<span class="hljs-keyword">this</span>.taps.length] = item;
+    }
+    call(...args) {
+        <span class="hljs-keyword">let</span> callMethod = <span class="hljs-keyword">this</span>._createCall();
+        <span class="hljs-keyword">return</span> callMethod.apply(<span class="hljs-keyword">this</span>, args);
+    }
+    _createCall() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.compile({
+            <span class="hljs-attr">taps</span>: <span class="hljs-keyword">this</span>.taps,
+            <span class="hljs-attr">args</span>: <span class="hljs-keyword">this</span>.args
+        });
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = Hook;
+</code></pre>
+<h4 id="t384.2.3 SyncHook">4.2.3 SyncHook <a href="#t384.2.3 SyncHook"> # </a></h4>
+<p>tapable\SyncHook.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Hook = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./Hook"</span>);
+<span class="hljs-keyword">const</span> HookCodeFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./HookCodeFactory"</span>);
+<span class="hljs-keyword">const</span> factory = <span class="hljs-keyword">new</span> HookCodeFactory();
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SyncHook</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Hook</span> </span>{
+    <span class="hljs-keyword">constructor</span>(args) {
+        <span class="hljs-keyword">super</span>(args);
+    }
+    compile(options) {
+        factory.setup(<span class="hljs-keyword">this</span>, options);
+        <span class="hljs-keyword">return</span> factory.create(options);
+    }
+}
+<span class="hljs-built_in">module</span>.exports = SyncHook;
+</code></pre>
+<h4 id="t394.2.4 HookCodeFactory.js">4.2.4 HookCodeFactory.js <a href="#t394.2.4 HookCodeFactory.js"> # </a></h4>
+<p>tapable\HookCodeFactory.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HookCodeFactory</span> </span>{
+    args() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.options.args.join(<span class="hljs-string">","</span>);
+    }
+    setup(instance, options) {
+        <span class="hljs-keyword">this</span>.options = options;
+        instance._x = options.taps.map(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.fn);
+    }
+    header() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"var _x = this._x;\n"</span>;
+    }
+    content() {
+        <span class="hljs-keyword">let</span> code = <span class="hljs-string">""</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> idx = <span class="hljs-number">0</span>; idx &lt; <span class="hljs-keyword">this</span>.options.taps.length; idx++) {
+            code += <span class="hljs-string">`var _fn<span class="hljs-subst">${idx}</span> = _x[<span class="hljs-subst">${idx}</span>];\n
+                 _fn<span class="hljs-subst">${idx}</span>(<span class="hljs-subst">${<span class="hljs-keyword">this</span>.args()}</span>);\n`</span>;
+        }
+        <span class="hljs-keyword">return</span> code;
+    }
+    create() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Function</span>(<span class="hljs-keyword">this</span>.args(), <span class="hljs-keyword">this</span>.header() + <span class="hljs-keyword">this</span>.content());
+    }
+}
+<span class="hljs-built_in">module</span>.exports = HookCodeFactory;
+</code></pre>
+<h2 id="t405. AsyncParallelHook">5. AsyncParallelHook <a href="#t405. AsyncParallelHook"> # </a></h2>
+<h3 id="t415.1 使用">5.1 使用 <a href="#t415.1 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncParallelHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncParallelHook([<span class="hljs-string">'name'</span>, <span class="hljs-string">'age'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapAsync(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age, callback</span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, name, age);
+        callback();
+    }, <span class="hljs-number">1000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age, callback</span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, name, age);
+        callback();
+    }, <span class="hljs-number">2000</span>)
+});
+queue.tapAsync(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age, callback</span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>, name, age);
+        callback();
+    }, <span class="hljs-number">3000</span>)
+});
+queue.callAsync(<span class="hljs-string">'zhufeng'</span>, <span class="hljs-number">10</span>, err =&gt; {
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">anonymous</span>(<span class="hljs-params">name, age, _callback
+</span>) </span>{
+    <span class="hljs-string">"use strict"</span>;
+    <span class="hljs-keyword">var</span> _x = <span class="hljs-keyword">this</span>._x;
+    <span class="hljs-keyword">do</span> {
+        <span class="hljs-keyword">var</span> _counter = <span class="hljs-number">3</span>;
+        <span class="hljs-keyword">var</span> _done = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            _callback();
+        };
+        <span class="hljs-keyword">if</span> (_counter &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">var</span> _fn0 = _x[<span class="hljs-number">0</span>];
+        _fn0(name, age, _err0 =&gt; {
+            <span class="hljs-keyword">if</span> (_err0) {
+                <span class="hljs-keyword">if</span> (_counter &gt; <span class="hljs-number">0</span>) {
+                    _callback(_err0);
+                    _counter = <span class="hljs-number">0</span>;
+                }
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">if</span> (--_counter === <span class="hljs-number">0</span>) _done();
+            }
+        });
+        <span class="hljs-keyword">if</span> (_counter &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">var</span> _fn1 = _x[<span class="hljs-number">1</span>];
+        _fn1(name, age, _err1 =&gt; {
+            <span class="hljs-keyword">if</span> (_err1) {
+                <span class="hljs-keyword">if</span> (_counter &gt; <span class="hljs-number">0</span>) {
+                    _callback(_err1);
+                    _counter = <span class="hljs-number">0</span>;
+                }
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">if</span> (--_counter === <span class="hljs-number">0</span>) _done();
+            }
+        });
+        <span class="hljs-keyword">if</span> (_counter &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">var</span> _fn2 = _x[<span class="hljs-number">2</span>];
+        _fn2(name, age, _err2 =&gt; {
+            <span class="hljs-keyword">if</span> (_err2) {
+                <span class="hljs-keyword">if</span> (_counter &gt; <span class="hljs-number">0</span>) {
+                    _callback(_err2);
+                    _counter = <span class="hljs-number">0</span>;
+                }
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">if</span> (--_counter === <span class="hljs-number">0</span>) _done();
+            }
+        });
+    } <span class="hljs-keyword">while</span> (<span class="hljs-literal">false</span>);
+
+})
+</code></pre>
+<h3 id="t425.2 实现">5.2 实现 <a href="#t425.2 实现"> # </a></h3>
+<h4 id="t435.2.1 tapable\index.js">5.2.1 tapable\index.js <a href="#t435.2.1 tapable\index.js"> # </a></h4>
+<p>tapable\index.js</p>
+<pre><code class="lang-diff">let SyncHook = require('./SyncHook');
+<span class="hljs-addition">+let AsyncParallelHook = require('./AsyncParallelHook');</span>
+module.exports = {
+    SyncHook,
+<span class="hljs-addition">+    AsyncParallelHook</span>
+}
+</code></pre>
+<h4 id="t445.2.2 AsyncParallelHookCodeFactory.js">5.2.2 AsyncParallelHookCodeFactory.js <a href="#t445.2.2 AsyncParallelHookCodeFactory.js"> # </a></h4>
+<p>AsyncParallelHookCodeFactory.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> HookCodeFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./HookCodeFactory"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AsyncParallelHookCodeFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">HookCodeFactory</span> </span>{
+    args({ before, after } = {}) {
+        <span class="hljs-keyword">let</span> allArgs = <span class="hljs-keyword">this</span>.options.args || [];
+        <span class="hljs-keyword">if</span> (before) allArgs = [before, ...allArgs];
+        <span class="hljs-keyword">if</span> (after) allArgs = [...allArgs, after];
+        <span class="hljs-keyword">if</span> (allArgs.length === <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">""</span>;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> allArgs.join(<span class="hljs-string">","</span>);
+        }
+    }
+    create() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Function</span>(
+            <span class="hljs-keyword">this</span>.args({ <span class="hljs-attr">after</span>: <span class="hljs-string">"_callback"</span> }),
+            <span class="hljs-keyword">this</span>.header() + <span class="hljs-keyword">this</span>.content()
+        );
+    }
+    content() {
+        <span class="hljs-keyword">let</span> code = <span class="hljs-string">``</span>;
+        code += <span class="hljs-string">`
+                var _counter = <span class="hljs-subst">${<span class="hljs-keyword">this</span>.options.taps.length}</span>;
+                var _done = () =&gt;{
+                    _callback();
+                };
+                `</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> idx = <span class="hljs-number">0</span>; idx &lt; <span class="hljs-keyword">this</span>.options.taps.length; idx++) {
+            code += <span class="hljs-string">`
+                    var _fn<span class="hljs-subst">${idx}</span> = _x[<span class="hljs-subst">${idx}</span>];
+                    _fn<span class="hljs-subst">${idx}</span>(<span class="hljs-subst">${<span class="hljs-keyword">this</span>.args()}</span>, _err<span class="hljs-subst">${idx}</span> =&gt;{
+                        if (--_counter === 0) _done();
+                    });
+                `</span>;
+        }
+        <span class="hljs-keyword">return</span> code;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = AsyncParallelHookCodeFactory;
+</code></pre>
+<h4 id="t455.2.3 AsyncParallelHook.js">5.2.3 AsyncParallelHook.js <a href="#t455.2.3 AsyncParallelHook.js"> # </a></h4>
+<p>AsyncParallelHook.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Hook = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./Hook"</span>);
+<span class="hljs-keyword">let</span> AsyncParallelHookCodeFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./AsyncParallelHookCodeFactory'</span>);
+
+<span class="hljs-keyword">const</span> factory = <span class="hljs-keyword">new</span> AsyncParallelHookCodeFactory();
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AsyncParallelHook</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Hook</span> </span>{
+    <span class="hljs-keyword">constructor</span>(args) {
+        <span class="hljs-keyword">super</span>(args);
+    }
+    tapAsync(options, fn) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> options === <span class="hljs-string">"string"</span>) options = { <span class="hljs-attr">name</span>: options };
+        options.fn = fn;
+        <span class="hljs-keyword">this</span>._insert(options);
+    }
+    callAsync(...args) {
+        <span class="hljs-keyword">let</span> callMethod = <span class="hljs-keyword">this</span>._createCall();
+        <span class="hljs-keyword">return</span> callMethod.apply(<span class="hljs-keyword">this</span>, args);
+    }
+    compile(options) {
+        factory.setup(<span class="hljs-keyword">this</span>, options);
+        <span class="hljs-keyword">return</span> factory.create(options);
+    }
+}
+<span class="hljs-built_in">module</span>.exports = AsyncParallelHook;
+</code></pre>
+<h2 id="t466. AsyncParallelHook promise">6. AsyncParallelHook promise <a href="#t466. AsyncParallelHook promise"> # </a></h2>
+<h3 id="t476.1 使用">6.1 使用 <a href="#t476.1 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncParallelHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> AsyncParallelHook([<span class="hljs-string">'name'</span>, <span class="hljs-string">'age'</span>]);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+queue.tapPromise(<span class="hljs-string">'1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>, name, age);
+            resolve();
+        }, <span class="hljs-number">1000</span>)
+    });
+});
+queue.tapPromise(<span class="hljs-string">'2'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>, name, age);
+            resolve();
+        }, <span class="hljs-number">2000</span>)
+    });
+});
+queue.tapPromise(<span class="hljs-string">'3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, age</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>, name, age);
+            resolve();
+        }, <span class="hljs-number">3000</span>)
+    });
+});
+queue.promise(<span class="hljs-string">'zhufeng'</span>, <span class="hljs-number">10</span>).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+}, error =&gt; {
+    <span class="hljs-built_in">console</span>.log(error);
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">anonymous</span>(<span class="hljs-params">name, age
+</span>) </span>{
+    <span class="hljs-string">"use strict"</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">_resolve, _reject</span>) =&gt;</span> {
+        <span class="hljs-keyword">var</span> _sync = <span class="hljs-literal">true</span>;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_error</span>(<span class="hljs-params">_err</span>) </span>{
+            <span class="hljs-keyword">if</span> (_sync)
+                _resolve(<span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> _err; }));
+            <span class="hljs-keyword">else</span>
+                _reject(_err);
+        };
+        <span class="hljs-keyword">var</span> _x = <span class="hljs-keyword">this</span>._x;
+        <span class="hljs-keyword">do</span> {
+            <span class="hljs-keyword">var</span> _counter = <span class="hljs-number">3</span>;
+            <span class="hljs-keyword">var</span> _done = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                _resolve();
+            };
+            <span class="hljs-keyword">if</span> (_counter &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">var</span> _fn0 = _x[<span class="hljs-number">0</span>];
+            <span class="hljs-keyword">var</span> _hasResult0 = <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">var</span> _promise0 = _fn0(name, age);
+            <span class="hljs-keyword">if</span> (!_promise0 || !_promise0.then)
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Tap function (tapPromise) did not return promise (returned '</span> + _promise0 + <span class="hljs-string">')'</span>);
+            _promise0.then(<span class="hljs-function"><span class="hljs-params">_result0</span> =&gt;</span> {
+                _hasResult0 = <span class="hljs-literal">true</span>;
+                <span class="hljs-keyword">if</span> (--_counter === <span class="hljs-number">0</span>) _done();
+            }, _err0 =&gt; {
+                <span class="hljs-keyword">if</span> (_hasResult0) <span class="hljs-keyword">throw</span> _err0;
+                <span class="hljs-keyword">if</span> (_counter &gt; <span class="hljs-number">0</span>) {
+                    _error(_err0);
+                    _counter = <span class="hljs-number">0</span>;
+                }
+            });
+            <span class="hljs-keyword">if</span> (_counter &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">var</span> _fn1 = _x[<span class="hljs-number">1</span>];
+            <span class="hljs-keyword">var</span> _hasResult1 = <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">var</span> _promise1 = _fn1(name, age);
+            <span class="hljs-keyword">if</span> (!_promise1 || !_promise1.then)
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Tap function (tapPromise) did not return promise (returned '</span> + _promise1 + <span class="hljs-string">')'</span>);
+            _promise1.then(<span class="hljs-function"><span class="hljs-params">_result1</span> =&gt;</span> {
+                _hasResult1 = <span class="hljs-literal">true</span>;
+                <span class="hljs-keyword">if</span> (--_counter === <span class="hljs-number">0</span>) _done();
+            }, _err1 =&gt; {
+                <span class="hljs-keyword">if</span> (_hasResult1) <span class="hljs-keyword">throw</span> _err1;
+                <span class="hljs-keyword">if</span> (_counter &gt; <span class="hljs-number">0</span>) {
+                    _error(_err1);
+                    _counter = <span class="hljs-number">0</span>;
+                }
+            });
+            <span class="hljs-keyword">if</span> (_counter &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">var</span> _fn2 = _x[<span class="hljs-number">2</span>];
+            <span class="hljs-keyword">var</span> _hasResult2 = <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">var</span> _promise2 = _fn2(name, age);
+            <span class="hljs-keyword">if</span> (!_promise2 || !_promise2.then)
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Tap function (tapPromise) did not return promise (returned '</span> + _promise2 + <span class="hljs-string">')'</span>);
+            _promise2.then(<span class="hljs-function"><span class="hljs-params">_result2</span> =&gt;</span> {
+                _hasResult2 = <span class="hljs-literal">true</span>;
+                <span class="hljs-keyword">if</span> (--_counter === <span class="hljs-number">0</span>) _done();
+            }, _err2 =&gt; {
+                <span class="hljs-keyword">if</span> (_hasResult2) <span class="hljs-keyword">throw</span> _err2;
+                <span class="hljs-keyword">if</span> (_counter &gt; <span class="hljs-number">0</span>) {
+                    _error(_err2);
+                    _counter = <span class="hljs-number">0</span>;
+                }
+            });
+        } <span class="hljs-keyword">while</span> (<span class="hljs-literal">false</span>);
+        _sync = <span class="hljs-literal">false</span>;
+    });
+
+})
+</code></pre>
+<h3 id="t486.2 实现">6.2 实现 <a href="#t486.2 实现"> # </a></h3>
+<h4 id="t496.2.1 tapable\index.js">6.2.1 tapable\index.js <a href="#t496.2.1 tapable\index.js"> # </a></h4>
+<p>tapable\index.js</p>
+<pre><code class="lang-diff">let SyncHook = require('./SyncHook');
+let AsyncParallelHook = require('./AsyncParallelHook');
+<span class="hljs-addition">+let AsyncParallelHookForPromise = require('./AsyncParallelHookForPromise');</span>
+module.exports = {
+    SyncHook,
+    AsyncParallelHook,
+<span class="hljs-addition">+   AsyncParallelHookForPromise</span>
+}
+</code></pre>
+<h4 id="t506.2.2 AsyncParallelHookCodeFactoryForPromise.js">6.2.2 AsyncParallelHookCodeFactoryForPromise.js <a href="#t506.2.2 AsyncParallelHookCodeFactoryForPromise.js"> # </a></h4>
+<p>doc\tapable\AsyncParallelHookCodeFactoryForPromise.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> HookCodeFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./HookCodeFactory"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AsyncParallelHookCodeFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">HookCodeFactory</span> </span>{
+    args({ before, after } = {}) {
+        <span class="hljs-keyword">let</span> allArgs = <span class="hljs-keyword">this</span>.options.args || [];
+        <span class="hljs-keyword">if</span> (before) allArgs = [before, ...allArgs];
+        <span class="hljs-keyword">if</span> (after) allArgs = [...allArgs, after];
+        <span class="hljs-keyword">if</span> (allArgs.length === <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">""</span>;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> allArgs.join(<span class="hljs-string">","</span>);
+        }
+    }
+    create() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Function</span>(<span class="hljs-keyword">this</span>.args(), <span class="hljs-keyword">this</span>.header() + <span class="hljs-keyword">this</span>.content());
+    }
+    content() {
+        <span class="hljs-keyword">let</span> code = <span class="hljs-string">``</span>;
+        code += <span class="hljs-string">`
+                return new Promise((_resolve)=&gt;{
+                    var _counter = <span class="hljs-subst">${<span class="hljs-keyword">this</span>.options.taps.length}</span>;
+                    var _done = ()=&gt;{
+                        _resolve();
+                    };
+                `</span>;
+
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> idx = <span class="hljs-number">0</span>; idx &lt; <span class="hljs-keyword">this</span>.options.taps.length; idx++) {
+            code += <span class="hljs-string">`
+                    var _fn<span class="hljs-subst">${idx}</span> = _x[<span class="hljs-subst">${idx}</span>];
+                    var _promise<span class="hljs-subst">${idx}</span> = _fn<span class="hljs-subst">${idx}</span>(<span class="hljs-subst">${<span class="hljs-keyword">this</span>.args()}</span>);
+                    _promise<span class="hljs-subst">${idx}</span>.then(_result<span class="hljs-subst">${idx}</span> =&gt;{
+                        if (--_counter === 0) _done();
+                    });
+                `</span>;
+        }
+        code += <span class="hljs-string">`
+    });
+    `</span>;
+        <span class="hljs-keyword">return</span> code;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = AsyncParallelHookCodeFactory;
+</code></pre>
+<h4 id="t516.2.3 AsyncParallelHookForPromise.js">6.2.3 AsyncParallelHookForPromise.js <a href="#t516.2.3 AsyncParallelHookForPromise.js"> # </a></h4>
+<p>AsyncParallelHookForPromise.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> AsyncParallelHookCodeFactoryForPromise = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./AsyncParallelHookCodeFactoryForPromise'</span>);
+<span class="hljs-keyword">let</span> Hook = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./Hook'</span>);
+<span class="hljs-keyword">const</span> factory = <span class="hljs-keyword">new</span> AsyncParallelHookCodeFactoryForPromise();
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AsyncParallelHookForPromise</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Hook</span> </span>{
+    <span class="hljs-keyword">constructor</span>(args) {
+        <span class="hljs-keyword">super</span>(args);
+    }
+    tapPromise(options, fn) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> options === <span class="hljs-string">"string"</span>) options = { <span class="hljs-attr">name</span>: options };
+        options.fn = fn;
+        <span class="hljs-keyword">this</span>._insert(options);
+    }
+    promise(...args) {
+        <span class="hljs-keyword">let</span> callMethod = <span class="hljs-keyword">this</span>._createCall();
+        <span class="hljs-keyword">return</span> callMethod.apply(<span class="hljs-keyword">this</span>, args);
+    }
+    compile(options) {
+        factory.setup(<span class="hljs-keyword">this</span>, options);
+        <span class="hljs-keyword">return</span> factory.create(options);
+    }
+}
+<span class="hljs-built_in">module</span>.exports = AsyncParallelHookForPromise;
+</code></pre>
+
+    

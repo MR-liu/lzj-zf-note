@@ -1,0 +1,83 @@
+
+        <h2 id="t01. PostCSS">1. PostCSS <a href="#t01. PostCSS"> # </a></h2>
+<ul>
+<li><a href="https://www.postcss.com.cn/">PostCSS</a>是一个用 JavaScript 工具和插件转换 CSS 代码的工具</li>
+<li>增强代码的可读性</li>
+<li>将未来的 CSS 特性带到今天！</li>
+<li>终结全局  CSS</li>
+<li>避免  CSS 代码中的错误</li>
+<li>强大的网格系统</li>
+<li>postcss会帮我们分析出css的抽象语法树</li>
+</ul>
+<h2 id="t12. 文档">2. 文档 <a href="#t12. 文档"> # </a></h2>
+<ul>
+<li><a href="http://api.postcss.org">api</a></li>
+<li><a href="https://astexplorer.net/#/2uBU1BLuJ1">astexplorer</a></li>
+</ul>
+<h2 id="t23. 类型">3. 类型 <a href="#t23. 类型"> # </a></h2>
+<ul>
+<li>CSS AST主要有3种父类型<ul>
+<li><code>AtRule</code> @xxx的这种类型，如@screen</li>
+<li><code>Comment</code> 注释</li>
+<li><code>Rule</code> 普通的css规则</li>
+</ul>
+</li>
+<li>子类型<ul>
+<li><code>decl</code> 指的是每条具体的css规则</li>
+<li><code>rule</code> 作用于某个选择器上的css规则集合</li>
+</ul>
+</li>
+</ul>
+<h2 id="t34.AST节点">4.AST节点 <a href="#t34.AST节点"> # </a></h2>
+<ul>
+<li>nodes: CSS规则的节点信息集合<ul>
+<li>decl: 每条css规则的节点信息</li>
+<li>prop: 样式名,如width</li>
+<li>value: 样式值,如10px</li>
+</ul>
+</li>
+<li>type: 类型</li>
+<li>source: 包括start和end的位置信息，start和end里都有line和column表示行和列</li>
+<li>selector: type为rule时的选择器</li>
+<li>name: type为atRule时@紧接rule名，譬如@import 'xxx.css'中的import</li>
+<li>params: type为atRule时@紧接rule名后的值，譬如@import 'xxx.css'中的xxx.css</li>
+<li>text: type为comment时的注释内容</li>
+</ul>
+<h2 id="t45.操作方法">5.操作方法 <a href="#t45.操作方法"> # </a></h2>
+<h3 id="t55.1 遍历">5.1 遍历 <a href="#t55.1 遍历"> # </a></h3>
+<ul>
+<li>walk: 遍历所有节点信息，无论是atRule、rule、comment的父类型，还是rule、 decl的子类型</li>
+<li>walkAtRules：遍历所有的AtRules</li>
+<li>walkComments 遍历所有的Comments</li>
+<li>walkDecls 遍历所有的Decls </li>
+<li>walkRules 遍历所有的Rules</li>
+</ul>
+<pre><code class="lang-js">root.walkDecls(<span class="hljs-function"><span class="hljs-params">decl</span> =&gt;</span> {
+    decl.prop = decl.prop.split(<span class="hljs-string">''</span>).reverse().join(<span class="hljs-string">''</span>);
+});
+</code></pre>
+<h3 id="t65.2 处理">5.2 处理 <a href="#t65.2 处理"> # </a></h3>
+<ul>
+<li>postCss给出了很多操作css规则的方法</li>
+<li><a href="http://api.postcss.org/AtRule.html">api</a></li>
+<li>处理css的方式其实有2种：编写postcss plugin，如果你的操作非常简单也可以直接利用<code>postcss.parse</code>方法拿到<code>css ast</code>后分析处理</li>
+</ul>
+<h3 id="t75.3 postcss plugin">5.3 postcss plugin <a href="#t75.3 postcss plugin"> # </a></h3>
+<ul>
+<li>postcss插件如同babel插件一样，有固定的格式</li>
+<li>注册个插件名，并获取插件配置参数<code>opts</code></li>
+<li>返回值是个函数，这个函数主体是你的处理逻辑，有2个参数，一个是root,AST的根节点。另一个是result，返回结果对象，譬如<code>result.css</code>，获得处理结果的css字符串</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> postcss.plugin(<span class="hljs-string">'postcss-plugin-name'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">opts</span>) </span>{
+  opts = opts || {};
+  <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">root, result</span>) </span>{
+    <span class="hljs-comment">// 处理逻辑</span>
+  };
+});
+</code></pre>
+<h3 id="t85.4 直接调用postcss命名空间下的方法">5.4 直接调用postcss命名空间下的方法 <a href="#t85.4 直接调用postcss命名空间下的方法"> # </a></h3>
+<ul>
+<li>可以用postcss.parse来处理一段css文本，拿到css ast，然后进行处理，再通过调用toResult().css拿到处理后的css输出</li>
+</ul>
+
+    

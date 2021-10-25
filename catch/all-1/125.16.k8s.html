@@ -1,0 +1,378 @@
+
+        <h2 id="t01.项目仓库">1.项目仓库 <a href="#t01.项目仓库"> # </a></h2>
+<ul>
+<li>前端技术栈为 React + craco</li>
+<li>后端技术栈为 MySQL + eggjs</li>
+<li><a href="https://gitee.com/zhufengpeixun/cicd-frontend">cicd-frontend</a></li>
+<li><a href="https://gitee.com/zhufengpeixun/cicd-backend">cicd-backend</a></li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/a76602920941e0b8aba1a8b757a4c287" alt="a76602920941e0b8aba1a8b757a4c287"></p>
+<h2 id="t12.添加一个节点">2.添加一个节点 <a href="#t12.添加一个节点"> # </a></h2>
+<ul>
+<li>增加一个node2的节点</li>
+</ul>
+<h2 id="t22 布署MSYQL">2 布署MSYQL <a href="#t22 布署MSYQL"> # </a></h2>
+<h3 id="t32.1 设置污点">2.1 设置污点 <a href="#t32.1 设置污点"> # </a></h3>
+<ul>
+<li>Node2节点机器只用于部署MySQL服务</li>
+<li>可以给节点加污点，只用来布署MySQL服务</li>
+<li>node1增加webserver的污点</li>
+<li>node2增加mysql的污点 </li>
+</ul>
+<pre><code class="lang-js">kubectl taint nodes node1 webserver:NoSchedule
+kubectl taint nodes node2 mysql=<span class="hljs-literal">true</span>:NoSchedule
+</code></pre>
+<h3 id="t42.2 创建数据目录">2.2 创建数据目录 <a href="#t42.2 创建数据目录"> # </a></h3>
+<ul>
+<li>在本地创建MYSQL数据文件夹然后挂载进<code>MySQL</code>容器</li>
+<li>以方便MySQL 数据可以持久化</li>
+<li>在node2上创建mysql数据文件夹</li>
+<li>此文件夹要为<code>空</code>，不然启动MYSQL会失败</li>
+</ul>
+<pre><code class="lang-js">mkdir /<span class="hljs-keyword">var</span>/lib/mysql
+</code></pre>
+<ul>
+<li>将root密码存入 secret 内保存<pre><code class="lang-js">kubectl create secret generic mysql-auth --<span class="hljs-keyword">from</span>-literal=username=root  --<span class="hljs-keyword">from</span>-literal=password=root
+</code></pre>
+</li>
+</ul>
+<p>vi deployment-cicd-mysql.yaml</p>
+<pre><code class="lang-js">apiVersion: apps/v1
+<span class="hljs-attr">kind</span>: Deployment
+<span class="hljs-attr">metadata</span>:
+  name: cicd-mysql
+<span class="hljs-attr">spec</span>:
+  replicas: <span class="hljs-number">1</span>
+  <span class="hljs-attr">selector</span>:
+    matchLabels:
+      app: cicd-mysql
+  <span class="hljs-attr">template</span>:
+    metadata:
+      labels:
+        app: cicd-mysql
+    <span class="hljs-attr">spec</span>:
+      tolerations:
+      - key: <span class="hljs-string">"mysql"</span>
+        <span class="hljs-attr">operator</span>: <span class="hljs-string">"Equal"</span>
+        <span class="hljs-attr">value</span>: <span class="hljs-string">"true"</span>
+        <span class="hljs-attr">effect</span>: <span class="hljs-string">"NoSchedule"</span>
+      <span class="hljs-attr">containers</span>:
+      - name: cicd-mysql
+        <span class="hljs-attr">image</span>: mysql:<span class="hljs-number">5.7</span>
+        <span class="hljs-attr">imagePullPolicy</span>: IfNotPresent
+        <span class="hljs-attr">args</span>:
+        - <span class="hljs-string">"--ignore-db-dir=lost+found"</span>
+        <span class="hljs-attr">ports</span>:
+        - containerPort: <span class="hljs-number">3306</span>
+        <span class="hljs-attr">volumeMounts</span>:
+        - name: mysql-data
+          <span class="hljs-attr">mountPath</span>: <span class="hljs-string">"/var/lib/mysql"</span>
+        <span class="hljs-attr">env</span>:
+        - name: MYSQL_ROOT_PASSWORD
+          <span class="hljs-attr">valueFrom</span>:
+            secretKeyRef:
+              name: mysql-auth
+              <span class="hljs-attr">key</span>: password
+      <span class="hljs-attr">volumes</span>:
+      - name: mysql-data
+        <span class="hljs-attr">hostPath</span>: 
+          path: <span class="hljs-regexp">/var/</span>lib/mysql
+          <span class="hljs-attr">type</span>: Directory          
+</code></pre>
+<pre><code class="lang-js">[root@master project]# kubectl apply -f deployment-cicd-mysql.yaml 
+deployment.apps/cicd-mysql created
+
+//查看容器内的日志 方便查看报错
+kubectl get pods
+kubectl describe pods cicd-mysql-bcb77c759-bdrd8
+kubectl logs cicd-mysql-6cbd4f95-g64hh 
+</code></pre>
+<p>vi service-cicd-mysql.yaml</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">service-cicd-mysql</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-mysql</span>
+  <span class="hljs-attr">ports:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">3306</span>
+    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">3306</span>
+  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span>
+</code></pre>
+<ul>
+<li><p>让配置文件生效</p>
+<pre><code class="lang-js">kubectl apply -f service-cicd-mysql.yaml
+</code></pre>
+</li>
+<li><p>连接数据库初始化数据</p>
+</li>
+<li>-h 为任意节点的公网或内网IP</li>
+</ul>
+<pre><code class="lang-js">mysql -h172<span class="hljs-number">.31</span><span class="hljs-number">.178</span><span class="hljs-number">.169</span> -P32636 -uroot -proot 
+mysql -h118<span class="hljs-number">.190</span><span class="hljs-number">.156</span><span class="hljs-number">.138</span> -P32636 -uroot -proot
+</code></pre>
+<pre><code class="lang-sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">database</span> cicd;
+<span class="hljs-keyword">use</span> cicd;
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`users`</span> (
+  <span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT <span class="hljs-keyword">COMMENT</span> <span class="hljs-string">'ID'</span>,
+  <span class="hljs-string">`name`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">COMMENT</span> <span class="hljs-string">'姓名'</span>,
+  <span class="hljs-string">`age`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">COMMENT</span> <span class="hljs-string">'年龄'</span>,
+  <span class="hljs-string">`sex`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">COMMENT</span> <span class="hljs-string">'性别；1男 2女'</span>,
+  PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>)
+) <span class="hljs-keyword">ENGINE</span>=<span class="hljs-keyword">InnoDB</span> AUTO_INCREMENT=<span class="hljs-number">9</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CHARSET</span>=utf8;
+</code></pre>
+<h2 id="t53 布署后端">3 布署后端 <a href="#t53 布署后端"> # </a></h2>
+<h3 id="t63.1 新建jenkins项目">3.1 新建jenkins项目 <a href="#t63.1 新建jenkins项目"> # </a></h3>
+<ul>
+<li>cicd-backend</li>
+<li>设置git源码地址</li>
+<li>配置git私钥</li>
+<li>配置DOCKER_LOGIN_USERNAME和DOCKER_LOGIN_PASSWORD</li>
+</ul>
+<h3 id="t73.2 添加构建布署">3.2 添加构建布署 <a href="#t73.2 添加构建布署"> # </a></h3>
+<pre><code class="lang-sh"><span class="hljs-meta">#!/bin/bash</span>
+time=$(date <span class="hljs-string">"+%Y%m%d%H%M%S"</span>)
+npm install --registry=https://registry.npm.taobao.org
+docker build -t 115.28.139.92:8082/cicd-backend:<span class="hljs-variable">$time</span> .
+docker login -u <span class="hljs-variable">$DOCKER_LOGIN_USERNAME</span> -p <span class="hljs-variable">$DOCKER_LOGIN_PASSWORD</span> 115.28.139.92:8082
+docker push 115.28.139.92:8082/cicd-backend:<span class="hljs-variable">$time</span>
+</code></pre>
+<h3 id="t83.3 配置信息">3.3 配置信息 <a href="#t83.3 配置信息"> # </a></h3>
+<h4 id="t93.3.1 数据库地址">3.3.1 数据库地址 <a href="#t93.3.1 数据库地址"> # </a></h4>
+<p>vi mysql.config.yaml</p>
+<pre><code class="lang-js">apiVersion: v1
+<span class="hljs-attr">kind</span>: ConfigMap
+<span class="hljs-attr">metadata</span>:
+  name: mysql-config
+<span class="hljs-attr">data</span>:
+  host: <span class="hljs-string">"service-cicd-mysql"</span>  
+  <span class="hljs-attr">port</span>: <span class="hljs-string">"3306"</span>
+  <span class="hljs-attr">database</span>: <span class="hljs-string">"cicd"</span>
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f  mysql.config.yaml
+</code></pre>
+<h4 id="t103.3.2 数据库账号">3.3.2 数据库账号 <a href="#t103.3.2 数据库账号"> # </a></h4>
+<p>vi mysql-auth.yaml</p>
+<pre><code class="lang-js">apiVersion: v1
+<span class="hljs-attr">kind</span>: Secret
+<span class="hljs-attr">metadata</span>:
+  name: mysql-auth
+<span class="hljs-attr">stringData</span>:
+  username: root
+  <span class="hljs-attr">password</span>: root
+<span class="hljs-attr">type</span>: Opaque
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f  mysql.config.yaml
+</code></pre>
+<h4 id="t113.3.3 私有仓库认证">3.3.3 私有仓库认证 <a href="#t113.3.3 私有仓库认证"> # </a></h4>
+<pre><code class="lang-js">kubectl create secret docker-registry private-registry \
+--docker-username=admin \
+--docker-password=admin123 \
+--docker-email=admin@example.org \
+--docker-server=<span class="hljs-number">115.28</span><span class="hljs-number">.139</span><span class="hljs-number">.92</span>:<span class="hljs-number">8082</span>
+</code></pre>
+<h4 id="t123.3.4 后台Deployment">3.3.4 后台Deployment <a href="#t123.3.4 后台Deployment"> # </a></h4>
+<p>vi cicd-backend.yaml </p>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">cicd-backend</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">matchLabels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-backend</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span>
+  <span class="hljs-attr">template:</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-backend</span>
+    <span class="hljs-attr">spec:</span>
+      <span class="hljs-attr">imagePullSecrets:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">private-registry</span>
+      <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">cicd-backend</span>
+        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">"115.28.139.92:8082/cicd-backend:20210321202052"</span>
+        <span class="hljs-attr">ports:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">7001</span>
+        <span class="hljs-attr">env:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MYSQL_HOST</span>
+          <span class="hljs-attr">valueFrom:</span>
+            <span class="hljs-attr">configMapKeyRef:</span>
+              <span class="hljs-attr">name:</span> <span class="hljs-string">mysql-config</span>
+              <span class="hljs-attr">key:</span> <span class="hljs-string">host</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MYSQL_PORT</span>
+          <span class="hljs-attr">valueFrom:</span>
+            <span class="hljs-attr">configMapKeyRef:</span>
+              <span class="hljs-attr">name:</span> <span class="hljs-string">mysql-config</span>
+              <span class="hljs-attr">key:</span> <span class="hljs-string">port</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MYSQL_DATABASE</span>
+          <span class="hljs-attr">valueFrom:</span>
+            <span class="hljs-attr">configMapKeyRef:</span>
+              <span class="hljs-attr">name:</span> <span class="hljs-string">mysql-config</span>
+              <span class="hljs-attr">key:</span> <span class="hljs-string">database</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MYSQL_USER</span>
+          <span class="hljs-attr">valueFrom:</span>
+            <span class="hljs-attr">secretKeyRef:</span>
+             <span class="hljs-attr">name:</span> <span class="hljs-string">mysql-auth</span>
+             <span class="hljs-attr">key:</span> <span class="hljs-string">username</span>     
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MYSQL_PASSWORD</span>
+          <span class="hljs-attr">valueFrom:</span>
+            <span class="hljs-attr">secretKeyRef:</span>
+             <span class="hljs-attr">name:</span> <span class="hljs-string">mysql-auth</span>
+             <span class="hljs-attr">key:</span> <span class="hljs-string">password</span>        
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f  cicd-backend.yaml
+</code></pre>
+<h4 id="t133.3.5 后台Service">3.3.5 后台Service <a href="#t133.3.5 后台Service"> # </a></h4>
+<ul>
+<li>vi service-cicd-backend.yaml</li>
+</ul>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">service-cicd-backend</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-backend</span>
+  <span class="hljs-attr">ports:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">7001</span>
+    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">7001</span>
+  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span>
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f  service-cicd-backend.yaml
+curl http:<span class="hljs-comment">//172.31.178.169:31300/user/list</span>
+</code></pre>
+<h2 id="t144 布署前端">4 布署前端 <a href="#t144 布署前端"> # </a></h2>
+<h3 id="t154.1 安装编译器">4.1 安装编译器 <a href="#t154.1 安装编译器"> # </a></h3>
+<pre><code class="lang-js">yum -y install gcc gcc-c++ kernel-devel
+</code></pre>
+<h3 id="t164.1 新建jenkins项目">4.1 新建jenkins项目 <a href="#t164.1 新建jenkins项目"> # </a></h3>
+<ul>
+<li>cicd-frontend</li>
+<li>设置git源码地址</li>
+<li>配置git私钥</li>
+<li>配置DOCKER_LOGIN_USERNAME和DOCKER_LOGIN_PASSWORD</li>
+</ul>
+<h3 id="t174.1 配置构建步骤">4.1 配置构建步骤 <a href="#t174.1 配置构建步骤"> # </a></h3>
+<pre><code class="lang-sh"><span class="hljs-comment">#!/bin/sh -l</span>
+time=$(date <span class="hljs-string">"+%Y%m%d%H%M%S"</span>)
+npm install --registry=https://registry.npm.taobao.org
+npm run build
+docker build -t 115.28.139.92:8082/cicd-frontend:<span class="hljs-variable">$time</span> .
+docker login -u <span class="hljs-variable">$DOCKER_LOGIN_USERNAME</span> -p <span class="hljs-variable">$DOCKER_LOGIN_PASSWORD</span> 115.28.139.92:8082
+docker push 115.28.139.92:8082/cicd-frontend:<span class="hljs-variable">$time</span>
+</code></pre>
+<h3 id="t184.2 配置构建步骤">4.2 配置构建步骤 <a href="#t184.2 配置构建步骤"> # </a></h3>
+<p>vi cicd-frontend.yaml</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">cicd-frontend</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">matchLabels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-frontend</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span>
+  <span class="hljs-attr">template:</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-frontend</span>
+    <span class="hljs-attr">spec:</span>
+      <span class="hljs-attr">imagePullSecrets:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">private-registry</span>
+      <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">cicd-frontend</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-number">115.28</span><span class="hljs-number">.139</span><span class="hljs-number">.92</span><span class="hljs-string">:8082/cicd-frontend:20210321204724</span>
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f  cicd-frontend.yaml
+</code></pre>
+<p>vi service-cicd-frontend.yaml</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">service-cicd-frontend</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">cicd-frontend</span>
+  <span class="hljs-attr">ports:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">80</span>
+    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span>
+  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span>
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f  service-cicd-frontend.yaml
+</code></pre>
+<pre><code class="lang-js">kubectl <span class="hljs-keyword">get</span> svc
+</code></pre>
+<pre><code class="lang-js">http:<span class="hljs-comment">//118.190.156.138:31753/</span>
+</code></pre>
+<h2 id="t195.集成jenkins">5.集成jenkins <a href="#t195.集成jenkins"> # </a></h2>
+<h3 id="t205.1 添加全局配置文件">5.1 添加全局配置文件 <a href="#t205.1 添加全局配置文件"> # </a></h3>
+<ul>
+<li>系统管理=&gt;Managed files=&gt;Add a new Config=&gt;Custom file</li>
+<li>Name设置为k8s-config</li>
+<li>把master上的<code>~/.kube/config</code>拷贝到Content中</li>
+</ul>
+<h3 id="t215.2 安装kubectl">5.2 安装kubectl <a href="#t215.2 安装kubectl"> # </a></h3>
+<pre><code class="lang-js">cat &lt;&lt;EOF &gt; <span class="hljs-regexp">/etc/yum</span>.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=http:<span class="hljs-comment">//mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64</span>
+enabled=<span class="hljs-number">1</span>
+gpgcheck=<span class="hljs-number">0</span>
+repo_gpgcheck=<span class="hljs-number">0</span>
+gpgkey=http:<span class="hljs-comment">//mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg</span>
+        http:<span class="hljs-comment">//mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span>
+EOF
+yum install -y kubectl
+</code></pre>
+<h3 id="t225.3 绑定配置文件">5.3 绑定配置文件 <a href="#t225.3 绑定配置文件"> # </a></h3>
+<ul>
+<li>打开项目配置</li>
+<li>选择绑定=&gt;Provide Configuration files=&gt;Target选择<code>k8s-config</code>=&gt;Target输入<code>k8s-config.yaml</code></li>
+</ul>
+<h3 id="t235.4 shell">5.4 shell <a href="#t235.4 shell"> # </a></h3>
+<ul>
+<li>使用 <code>kubectl set image</code> 命令快速设置镜像地址版本</li>
+<li>格式为：kubectl set image deployment/[deployment名称] [容器名称]=[镜像版本]</li>
+</ul>
+<pre><code class="lang-diff">#!/bin/bash
+time=$(date "+%Y%m%d%H%M%S")
+npm install --registry=https://registry.npm.taobao.org
+docker build -t 115.28.139.92:8082/cicd-backend:$time .
+docker login -u $DOCKER_LOGIN_USERNAME -p $DOCKER_LOGIN_PASSWORD 115.28.139.92:8082
+docker push 115.28.139.92:8082/cicd-backend:$time
+<span class="hljs-addition">+kubectl --kubeconfig=k8s-config.yaml set image deployment/cicd-backend cicd-backend=115.28.139.92:8082/cicd-backend:$time</span>
+</code></pre>
+<blockquote>
+<p><code>deployment.apps/cicd-backend image updated</code>表示更新成功</p>
+</blockquote>
+<h2 id="t246.推送触发构建">6.推送触发构建 <a href="#t246.推送触发构建"> # </a></h2>
+<h3 id="t256.1 安装插件">6.1 安装插件 <a href="#t256.1 安装插件"> # </a></h3>
+<ul>
+<li>publish over ssh(方便操作远程的服务器)</li>
+<li>gitee</li>
+<li>Last Changes(可视化查看git文件变化)</li>
+</ul>
+<h3 id="t266.2 构建触发器">6.2 构建触发器 <a href="#t266.2 构建触发器"> # </a></h3>
+<ul>
+<li>Gitee webhook触发构建,并记录<code>webhook  URL</code>地址</li>
+<li>生成 Gitee WebHook 密码</li>
+</ul>
+<h2 id="t276.3 配置WebHooks">6.3 配置WebHooks <a href="#t276.3 配置WebHooks"> # </a></h2>
+<ul>
+<li>打开项目的WebHooks管理页面</li>
+<li>配置<code>webhookURL</code>和<code>WebHook 密码</code></li>
+</ul>
+<h2 id="t286.参考">6.参考 <a href="#t286.参考"> # </a></h2>
+<ul>
+<li>强行删除pod<pre><code class="lang-js">kubectl <span class="hljs-keyword">delete</span> pod  cicd-mysql<span class="hljs-number">-84795</span>bc9d7-fpjmp       --force --grace-period=<span class="hljs-number">0</span>
+</code></pre>
+</li>
+</ul>
+
+    

@@ -1,0 +1,423 @@
+
+        <h2 id="t01.初始化项目">1.初始化项目 <a href="#t01.初始化项目"> # </a></h2>
+<pre><code class="lang-js">egg-init --type simple chat-api
+</code></pre>
+<h2 id="t12. 实现后端的登录接口">2. 实现后端的登录接口 <a href="#t12. 实现后端的登录接口"> # </a></h2>
+<h3 id="t22.1 app/model/user.js">2.1 app/model/user.js <a href="#t22.1 app/model/user.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> mongoose = app.mongoose;
+    <span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+
+    <span class="hljs-keyword">const</span> UserSchema = <span class="hljs-keyword">new</span> Schema({
+      <span class="hljs-attr">email</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>  }
+    });
+
+    <span class="hljs-keyword">return</span> mongoose.model(<span class="hljs-string">'User'</span>, UserSchema);
+  }
+</code></pre>
+<h3 id="t32.2 app/controller/user.js">2.2 app/controller/user.js <a href="#t32.2 app/controller/user.js"> # </a></h3>
+<p>app/controller/user.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Controller = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./base'</span>);
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+  <span class="hljs-keyword">async</span> login() {
+      <span class="hljs-keyword">const</span> {ctx,app}=<span class="hljs-keyword">this</span>;
+      <span class="hljs-keyword">let</span> body = ctx.request.body;
+      <span class="hljs-keyword">let</span> oldUser = <span class="hljs-keyword">await</span> ctx.model.User.findOne({<span class="hljs-attr">email</span>: body.email});
+      <span class="hljs-keyword">if</span> (oldUser) {
+          ctx.session.user=oldUser;
+          <span class="hljs-keyword">this</span>.success(oldUser);
+      } <span class="hljs-keyword">else</span> {
+          <span class="hljs-keyword">let</span> newUser=<span class="hljs-keyword">new</span> ctx.model.User(body);
+          <span class="hljs-keyword">await</span> newUser.save();
+          ctx.session.user=newUser;
+          <span class="hljs-keyword">this</span>.success(newUser);
+      }
+  }
+}
+
+<span class="hljs-built_in">module</span>.exports = UserController;
+</code></pre>
+<h3 id="t42.3 app/controller/base.js">2.3 app/controller/base.js <a href="#t42.3 app/controller/base.js"> # </a></h3>
+<p>app/controller/base.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Controller = <span class="hljs-built_in">require</span>(<span class="hljs-string">'egg'</span>).Controller;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BaseController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+    success(data) {
+        <span class="hljs-keyword">this</span>.ctx.body={
+            <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+            data
+          }
+    }
+    error(error) {
+        <span class="hljs-keyword">this</span>.ctx.body={
+            <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+            error
+          }
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = BaseController;
+</code></pre>
+<h2 id="t53. 房间功能">3. 房间功能 <a href="#t53. 房间功能"> # </a></h2>
+<h3 id="t63.1 app/router.js">3.1 app/router.js <a href="#t63.1 app/router.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> { router, controller } = app;
+  router.post(<span class="hljs-string">'/login'</span>,controller.user.login);
+  router.get(<span class="hljs-string">'/rooms'</span>,controller.rooms.list);
+  router.post(<span class="hljs-string">'/rooms'</span>,controller.rooms.create);
+};
+</code></pre>
+<h3 id="t73.2 config/config.default.js">3.2 config/config.default.js <a href="#t73.2 config/config.default.js"> # </a></h3>
+<p>config/config.default.js</p>
+<pre><code class="lang-js">config.mongoose = {
+    <span class="hljs-attr">client</span>: {
+      <span class="hljs-attr">url</span>: <span class="hljs-string">'mongodb://127.0.0.1/chat'</span>,
+      <span class="hljs-attr">options</span>: {},
+    },
+  };
+
+  config.security={
+    <span class="hljs-attr">csrf</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">domainWhiteList</span>:[<span class="hljs-string">'http://127.0.0.1:8000'</span>]
+  }
+</code></pre>
+<h3 id="t83.3 config/plugin.js">3.3 config/plugin.js <a href="#t83.3 config/plugin.js"> # </a></h3>
+<p>config/plugin.js</p>
+<pre><code class="lang-js">exports.mongoose = {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">package</span>: <span class="hljs-string">'egg-mongoose'</span>,
+};
+exports.cors = {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">package</span>: <span class="hljs-string">'egg-cors'</span>,
+};
+</code></pre>
+<h3 id="t93.4 app/controller/rooms.js">3.4 app/controller/rooms.js <a href="#t93.4 app/controller/rooms.js"> # </a></h3>
+<p>app/controller/rooms.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Controller = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./base'</span>);
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RoomController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+  <span class="hljs-keyword">async</span> list() {
+      <span class="hljs-keyword">const</span> {ctx,app}=<span class="hljs-keyword">this</span>;
+      <span class="hljs-keyword">let</span> {keyword=<span class="hljs-string">''</span>}=ctx.query;
+      <span class="hljs-keyword">let</span> query={};
+      <span class="hljs-keyword">if</span> (keyword) {
+          query[<span class="hljs-string">'name'</span>]=<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(keyword);
+      }
+      <span class="hljs-keyword">let</span> list = <span class="hljs-keyword">await</span> app.model.Room.find(query);
+      <span class="hljs-keyword">this</span>.success(list);
+  }
+  <span class="hljs-keyword">async</span> create() {
+      <span class="hljs-keyword">const</span> {ctx,app}=<span class="hljs-keyword">this</span>;
+      <span class="hljs-keyword">let</span> body=ctx.request.body;
+      <span class="hljs-keyword">let</span> oldRoom = <span class="hljs-keyword">await</span> app.model.Room.findOne({<span class="hljs-attr">name</span>: body.name});
+      <span class="hljs-keyword">if</span> (oldRoom) {
+          <span class="hljs-keyword">this</span>.error(<span class="hljs-string">'房间名已经存在'</span>);
+      } <span class="hljs-keyword">else</span> {
+          <span class="hljs-keyword">let</span> newRoom=<span class="hljs-keyword">new</span> app.model.Room(body);
+          <span class="hljs-keyword">await</span> newRoom.save();
+          <span class="hljs-keyword">this</span>.success(newRoom);
+      }
+  }
+}
+
+<span class="hljs-built_in">module</span>.exports = RoomController;
+</code></pre>
+<h3 id="t103.5  app/model/room.js">3.5  app/model/room.js <a href="#t103.5  app/model/room.js"> # </a></h3>
+<p>app/model/room.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> mongoose = app.mongoose;
+    <span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+
+    <span class="hljs-keyword">const</span> RoomSchema = <span class="hljs-keyword">new</span> Schema({
+      <span class="hljs-attr">name</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>  }
+    });
+
+    <span class="hljs-keyword">return</span> mongoose.model(<span class="hljs-string">'Room'</span>, RoomSchema);
+  }
+</code></pre>
+<h2 id="t114.聊天功能">4.聊天功能 <a href="#t114.聊天功能"> # </a></h2>
+<h3 id="t124.1 app/controller/user.js">4.1 app/controller/user.js <a href="#t124.1 app/controller/user.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Controller = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./base'</span>);
+<span class="hljs-keyword">const</span> gravatar=<span class="hljs-built_in">require</span>(<span class="hljs-string">'gravatar'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+  <span class="hljs-keyword">async</span> login() {
+      <span class="hljs-keyword">const</span> {ctx,app}=<span class="hljs-keyword">this</span>;
+      <span class="hljs-keyword">let</span> user = ctx.request.body;
+      <span class="hljs-keyword">let</span> doc = <span class="hljs-keyword">await</span> ctx.model.User.findOne({<span class="hljs-attr">email</span>: user.email});
+      <span class="hljs-keyword">if</span> (!doc) {
+            user.name=user.email.split(<span class="hljs-string">'@'</span>)[<span class="hljs-number">0</span>];
+            user.avatar=gravatar.url(user.email);
+            doc=<span class="hljs-keyword">new</span> ctx.model.User(user);
+            <span class="hljs-keyword">await</span> doc.save();
+      } 
+      <span class="hljs-keyword">let</span> token = app.jwt.sign(doc.toJSON(),app.config.jwt.secret);
+      <span class="hljs-keyword">this</span>.success(token);
+  }
+}
+
+<span class="hljs-built_in">module</span>.exports = UserController;
+</code></pre>
+<h3 id="t134.2 app/model/room.js">4.2 app/model/room.js <a href="#t134.2 app/model/room.js"> # </a></h3>
+<p>app/model/room.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> mongoose = app.mongoose;
+    <span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+    <span class="hljs-keyword">const</span> ObjectId=Schema.Types.ObjectId; 
+    <span class="hljs-keyword">const</span> RoomSchema = <span class="hljs-keyword">new</span> Schema({
+        <span class="hljs-attr">name</span>: {<span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>},
+        <span class="hljs-attr">createAt</span>: {<span class="hljs-attr">type</span>: <span class="hljs-built_in">Date</span>,<span class="hljs-attr">default</span>: <span class="hljs-built_in">Date</span>.now},
+        <span class="hljs-attr">creator</span>:{<span class="hljs-attr">type</span>:ObjectId,<span class="hljs-attr">ref</span>:<span class="hljs-string">'User'</span>}
+    });
+
+    <span class="hljs-keyword">return</span> mongoose.model(<span class="hljs-string">'Room'</span>, RoomSchema);
+}
+</code></pre>
+<h3 id="t144.3 app/model/user.js">4.3 app/model/user.js <a href="#t144.3 app/model/user.js"> # </a></h3>
+<p>app/model/user.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> mongoose = app.mongoose;
+    <span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+    <span class="hljs-keyword">const</span> ObjectId=Schema.Types.ObjectId; 
+    <span class="hljs-keyword">const</span> UserSchema=<span class="hljs-keyword">new</span> Schema({
+        <span class="hljs-attr">name</span>: <span class="hljs-built_in">String</span>,
+        <span class="hljs-attr">avatar</span>:<span class="hljs-built_in">String</span>,
+        <span class="hljs-attr">email</span>: {<span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>},
+        <span class="hljs-attr">room</span>: {<span class="hljs-attr">type</span>: ObjectId,<span class="hljs-attr">ref</span>: <span class="hljs-string">'Room'</span>},
+        <span class="hljs-attr">socket</span>:{<span class="hljs-attr">type</span>:<span class="hljs-built_in">String</span>},
+        <span class="hljs-attr">online</span>:{<span class="hljs-attr">type</span>:<span class="hljs-built_in">Boolean</span>,<span class="hljs-attr">default</span>:<span class="hljs-literal">false</span>}
+    });
+
+    <span class="hljs-keyword">return</span> mongoose.model(<span class="hljs-string">'User'</span>, UserSchema);
+  }
+</code></pre>
+<h3 id="t154.4 app/router.js">4.4 app/router.js <a href="#t154.4 app/router.js"> # </a></h3>
+<p>app/router.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> { router, controller,io } = app;
+  router.post(<span class="hljs-string">'/login'</span>,controller.user.login);
+  router.get(<span class="hljs-string">'/rooms'</span>,controller.rooms.list);
+  router.post(<span class="hljs-string">'/rooms'</span>,controller.rooms.create);
+  io.route(<span class="hljs-string">'getRoom'</span>,io.controller.messages.getRoom);
+  io.route(<span class="hljs-string">'addMessage'</span>,io.controller.messages.addMessage);
+};
+</code></pre>
+<h3 id="t164.5 config/config.default.js">4.5 config/config.default.js <a href="#t164.5 config/config.default.js"> # </a></h3>
+<p>config/config.default.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">appInfo</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> config = exports = {};
+
+  <span class="hljs-comment">// use for cookie sign key, should change to your own and keep security</span>
+  config.keys = appInfo.name + <span class="hljs-string">'_1533636529759_8753'</span>;
+
+  <span class="hljs-comment">// add your config here</span>
+  config.middleware=[];
+
+  config.mongoose = {
+    <span class="hljs-attr">client</span>: {
+      <span class="hljs-attr">url</span>: <span class="hljs-string">'mongodb://127.0.0.1/chat'</span>,
+      <span class="hljs-attr">options</span>: {},
+    },
+  };
+
+  config.security={
+    <span class="hljs-attr">csrf</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">domainWhiteList</span>:[<span class="hljs-string">'http://127.0.0.1:8000'</span>]
+  }
+  config.io = {
+    <span class="hljs-attr">init</span>: { <span class="hljs-attr">wsEngine</span>: <span class="hljs-string">'ws'</span> }, <span class="hljs-comment">// default: ws</span>
+    <span class="hljs-attr">namespace</span>: {
+      <span class="hljs-string">'/'</span>: {
+        <span class="hljs-attr">connectionMiddleware</span>: [<span class="hljs-string">'connect'</span>],
+        <span class="hljs-attr">packetMiddleware</span>: [],
+      }
+    },
+    <span class="hljs-attr">redis</span>: {
+      <span class="hljs-attr">host</span>: <span class="hljs-string">'127.0.0.1'</span>,
+      <span class="hljs-attr">port</span>: <span class="hljs-number">6379</span>
+    },
+  };
+  config.jwt = {
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">'zfpx'</span>
+  }
+  <span class="hljs-keyword">return</span> config;
+};
+
+</code></pre>
+<h3 id="t174.6 config/plugin.js">4.6 config/plugin.js <a href="#t174.6 config/plugin.js"> # </a></h3>
+<p>config/plugin.js</p>
+<pre><code class="lang-js">exports.io = {
+    <span class="hljs-attr">enable</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">package</span>: <span class="hljs-string">'egg-socket.io'</span>,
+};
+
+exports.jwt = {
+    <span class="hljs-attr">enable</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">package</span>:<span class="hljs-string">'egg-jwt'</span>
+}
+</code></pre>
+<h3 id="t184.7 package.json">4.7 package.json <a href="#t184.7 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-js"><span class="hljs-string">"scripts"</span>: {
+    <span class="hljs-string">"start"</span>: <span class="hljs-string">"egg-scripts start --daemon --title=egg-server-chat-api --sticky"</span>,
+    <span class="hljs-string">"stop"</span>: <span class="hljs-string">"egg-scripts stop --title=egg-server-chat-api"</span>,
+    <span class="hljs-string">"dev"</span>: <span class="hljs-string">"egg-bin dev --sticky"</span>,
+    <span class="hljs-string">"debug"</span>: <span class="hljs-string">"egg-bin debug"</span>,
+    <span class="hljs-string">"test"</span>: <span class="hljs-string">"npm run lint -- --fix &amp;&amp; npm run test-local"</span>,
+    <span class="hljs-string">"test-local"</span>: <span class="hljs-string">"egg-bin test"</span>,
+    <span class="hljs-string">"cov"</span>: <span class="hljs-string">"egg-bin cov"</span>,
+    <span class="hljs-string">"lint"</span>: <span class="hljs-string">"eslint ."</span>,
+    <span class="hljs-string">"ci"</span>: <span class="hljs-string">"npm run lint &amp;&amp; npm run cov"</span>,
+    <span class="hljs-string">"autod"</span>: <span class="hljs-string">"autod"</span>
+}
+</code></pre>
+<h3 id="t194.8 app/io/controller/messages.js">4.8 app/io/controller/messages.js <a href="#t194.8 app/io/controller/messages.js"> # </a></h3>
+<p>app/io/controller/messages.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {Controller}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'egg'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MessageController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span></span>{
+    <span class="hljs-keyword">async</span> addMessage() {
+        <span class="hljs-keyword">let</span> {app,ctx}=<span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">let</span> message=ctx.args[<span class="hljs-number">0</span>];<span class="hljs-comment">// {user,room,content}</span>
+        <span class="hljs-keyword">let</span> newMessage=<span class="hljs-keyword">new</span> app.model.Message(message);
+        <span class="hljs-keyword">await</span> newMessage.save();
+        <span class="hljs-keyword">let</span> doc=<span class="hljs-keyword">await</span> app.model.Message.findById(newMessage._id).populate(<span class="hljs-string">'user'</span>);
+        app.io.to(message.room).emit(<span class="hljs-string">'messageAdded'</span>,doc.toJSON());
+    }
+    <span class="hljs-keyword">async</span> getRoom() {
+        <span class="hljs-keyword">let</span> {app,ctx}=<span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">let</span> room=ctx.args[<span class="hljs-number">0</span>];
+        <span class="hljs-keyword">let</span> users=<span class="hljs-keyword">await</span> app.model.User.find({room,<span class="hljs-attr">online</span>:<span class="hljs-literal">true</span>});
+        <span class="hljs-keyword">let</span> messages = <span class="hljs-keyword">await</span> app.model.Message.find({room}).sort({<span class="hljs-attr">createAt</span>:<span class="hljs-number">-1</span>}).populate(<span class="hljs-string">'user'</span>).sort({<span class="hljs-attr">createAt</span>: <span class="hljs-number">-1</span>}).limit(<span class="hljs-number">20</span>);
+        ctx.socket.emit(<span class="hljs-string">'room'</span>,{users,<span class="hljs-attr">messages</span>:messages.reverse()});
+    }
+}
+<span class="hljs-built_in">module</span>.exports=MessageController;
+</code></pre>
+<h3 id="t204.9 app/io/middleware/connect.js">4.9 app/io/middleware/connect.js <a href="#t204.9 app/io/middleware/connect.js"> # </a></h3>
+<p>app/io/middleware/connect.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">// {app_root}/app/io/middleware/packet.js</span>
+<span class="hljs-keyword">const</span> SYSTEM = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'系统'</span>,
+    <span class="hljs-attr">email</span>: <span class="hljs-string">'admin@126.com'</span>,
+    <span class="hljs-attr">avatar</span>: <span class="hljs-string">'http://www.gravatar.com/avatar/1e6fd8e56879c84999cd481255530592'</span>
+}
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">async</span> (ctx, next) =&gt; {
+        <span class="hljs-keyword">const</span> {app,socket,<span class="hljs-attr">query</span>: {room,token}}=ctx;
+        <span class="hljs-keyword">if</span> (token) {
+            <span class="hljs-keyword">let</span> decodeUser=app.jwt.verify(token,app.config.jwt.secret);
+            <span class="hljs-keyword">if</span> (decodeUser) {
+                <span class="hljs-keyword">let</span> oldUser=<span class="hljs-keyword">await</span> app.model.User.findById(decodeUser._id);
+                <span class="hljs-keyword">let</span> oldSocket=oldUser.socket;
+                 <span class="hljs-keyword">if</span> (oldSocket) {
+                    app.io.of(<span class="hljs-string">'/'</span>).adapter.remoteDisconnect(oldSocket, <span class="hljs-literal">true</span>, err =&gt; {
+                        app.logger.error(err);
+                    });
+                } 
+                oldUser.room=room;
+                oldUser.online=<span class="hljs-literal">true</span>;
+                oldUser.socket=socket.id;
+                <span class="hljs-keyword">await</span> oldUser.save();
+                socket.join(room);
+                socket.broadcast.to(room).emit(<span class="hljs-string">'online'</span>,oldUser.toJSON());
+                socket.broadcast.to(room).emit(<span class="hljs-string">'messageAdded'</span>,{
+                    <span class="hljs-attr">user</span>: SYSTEM,
+                    <span class="hljs-attr">content</span>:<span class="hljs-string">`用户<span class="hljs-subst">${oldUser.name}</span>加入聊天室`</span>
+                });
+                <span class="hljs-keyword">await</span> next();
+                socket.leave(room);
+                socket.broadcast.to(room).emit(<span class="hljs-string">'offline'</span>,oldUser._id);
+                socket.broadcast.to(room).emit(<span class="hljs-string">'messageAdded'</span>,{
+                    <span class="hljs-attr">user</span>: SYSTEM,
+                    <span class="hljs-attr">content</span>:<span class="hljs-string">`用户<span class="hljs-subst">${oldUser.name}</span>离开了聊天室`</span>
+                });
+                oldUser.room=<span class="hljs-literal">null</span>;
+                oldUser.online=<span class="hljs-literal">null</span>;
+                oldUser.socket=<span class="hljs-literal">null</span>;
+                <span class="hljs-keyword">await</span> oldUser.save();
+            }<span class="hljs-keyword">else</span> {
+                socket.emit(<span class="hljs-string">'needLogin'</span>,<span class="hljs-string">'你需要先登录'</span>);
+            }
+        } <span class="hljs-keyword">else</span> {
+            socket.emit(<span class="hljs-string">'needLogin'</span>,<span class="hljs-string">'你需要先登录'</span>);
+        }
+    };
+};
+</code></pre>
+<h3 id="t214.10 app/model/message.js">4.10 app/model/message.js <a href="#t214.10 app/model/message.js"> # </a></h3>
+<p>app/model/message.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">app</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> mongoose = app.mongoose;
+    <span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+    <span class="hljs-keyword">const</span> ObjectId=Schema.Types.ObjectId; 
+    <span class="hljs-keyword">const</span> RoomSchema = <span class="hljs-keyword">new</span> Schema({
+        <span class="hljs-attr">user</span>: {<span class="hljs-attr">type</span>: ObjectId,<span class="hljs-attr">ref</span>: <span class="hljs-string">'User'</span>},
+        <span class="hljs-attr">content</span>: <span class="hljs-built_in">String</span>,
+        <span class="hljs-attr">room</span>:{<span class="hljs-attr">type</span>:ObjectId,<span class="hljs-attr">ref</span>:<span class="hljs-string">'room'</span>},
+        <span class="hljs-attr">createAt</span>:{<span class="hljs-attr">type</span>:<span class="hljs-built_in">Date</span>,<span class="hljs-attr">default</span>:<span class="hljs-built_in">Date</span>.now}
+    });
+    <span class="hljs-keyword">return</span> mongoose.model(<span class="hljs-string">'Message'</span>, RoomSchema);
+}
+</code></pre>
+<h3 id="t224.11 server/app.js">4.11 server/app.js <a href="#t224.11 server/app.js"> # </a></h3>
+<p>server/app.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">var</span> app = express();
+<span class="hljs-keyword">var</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">var</span> server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>).createServer(app);
+app.use(express.static(path.join(__dirname, <span class="hljs-string">'public'</span>)));
+<span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io'</span>)(server);
+<span class="hljs-keyword">var</span> port = process.env.PORT || <span class="hljs-number">3000</span>;
+
+server.listen(port, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Server listening at port %d'</span>, port);
+});
+</code></pre>
+<h3 id="t234.12 server/public/index.html">4.12 server/public/index.html <a href="#t234.12 server/public/index.html"> # </a></h3>
+<p>server/public/index.html</p>
+<pre><code class="lang-js">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;button onclick="send()"&gt;发送&lt;/button&gt;
+    &lt;script src="/socket.io/socket.io.js"&gt;&lt;/script&gt;
+    &lt;script&gt;
+        let socket = io('http://localhost:7001/',{query:{room:'default'}});
+        socket.on('connect', function () {
+            console.log('连接成功');
+            socket.emit('getAllMessages');
+        });
+        socket.on('messageAdded', function (message) {
+            console.log(message);
+        });
+        socket.on('allMessages', function (messages) {
+            console.log(messages);
+        });
+        socket.on('message', function (message) {
+            console.log(message);
+        });
+        socket.on('needLogin', function (message) {
+            console.log(message);
+        });
+
+        function send() {
+            socket.emit('addMessage', { content: '你好' });
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+<h2 id="t24参考">参考 <a href="#t24参考"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/chat-api">chat-api</a></li>
+</ul>
+
+    

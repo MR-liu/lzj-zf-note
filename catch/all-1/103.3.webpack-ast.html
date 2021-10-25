@@ -1,0 +1,370 @@
+
+        <h2 id="t01.抽象语法树(Abstract Syntax Tree)">1.抽象语法树(Abstract Syntax Tree) <a href="#t01.抽象语法树(Abstract Syntax Tree)"> # </a></h2>
+<ul>
+<li><code>webpack</code>和<code>Lint</code>等很多的工具和库的核心都是通过<code>Abstract Syntax Tree</code>抽象语法树这个概念来实现对代码的检查、分析等操作的</li>
+</ul>
+<h2 id="t12.抽象语法树用途">2.抽象语法树用途 <a href="#t12.抽象语法树用途"> # </a></h2>
+<ul>
+<li>代码语法的检查、代码风格的检查、代码的格式化、代码的高亮、代码错误提示、代码自动补全等等<ul>
+<li>如 JSLint、JSHint 对代码错误或风格的检查，发现一些潜在的错误</li>
+<li>IDE 的错误提示、格式化、高亮、自动补全等等</li>
+</ul>
+</li>
+<li>代码混淆压缩<ul>
+<li>UglifyJS2 等</li>
+</ul>
+</li>
+<li>优化变更代码，改变代码结构使达到想要的结构<ul>
+<li>代码打包工具 webpack、rollup 等等</li>
+<li>CommonJS、AMD、CMD、UMD 等代码规范之间的转化</li>
+<li>CoffeeScript、TypeScript、JSX 等转化为原生 Javascript</li>
+</ul>
+</li>
+</ul>
+<h2 id="t23.抽象语法树定义">3.抽象语法树定义 <a href="#t23.抽象语法树定义"> # </a></h2>
+<ul>
+<li>这些工具的原理都是通过<code>JavaScript Parser</code>把代码转化为一颗抽象语法树（AST），这颗树定义了代码的结构，通过操纵这颗树，我们可以精准的定位到声明语句、赋值语句、运算语句等等，实现对代码的分析、优化、变更等操作</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ast.jpg" alt="ast"></p>
+<h2 id="t34. JavaScript Parser">4. JavaScript Parser <a href="#t34. JavaScript Parser"> # </a></h2>
+<ul>
+<li><code>JavaScript Parser</code>是把JavaScript源码转化为抽象语法树的解析器。</li>
+<li>浏览器会把JavaScript源码通过解析器转为抽象语法树,再进一步转化为字节码或直接生成机器码。</li>
+<li>一般来说每个JavaScript引擎都会有自己的抽象语法树格式，Chrome 的 v8 引擎，firefox 的 SpiderMonkey 引擎等等，MDN 提供了详细<a href="https://developer.mozilla.org/zh-CN/docs/MDN/Doc_status/SpiderMonkey">SpiderMonkey AST format</a>  的详细说明，算是业界的标准。</li>
+</ul>
+<h3 id="t44.1 常用的 JavaScript Parser">4.1 常用的 JavaScript Parser <a href="#t44.1 常用的 JavaScript Parser"> # </a></h3>
+<ul>
+<li>esprima</li>
+<li>traceur</li>
+<li>acorn</li>
+<li>shift</li>
+</ul>
+<h3 id="t54.2 遍历">4.2 遍历 <a href="#t54.2 遍历"> # </a></h3>
+<pre><code class="lang-js">cnpm i esprima estraverse- S
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> esprima = <span class="hljs-built_in">require</span>(<span class="hljs-string">'esprima'</span>);<span class="hljs-comment">//把JS源代码转成AST语法树</span>
+<span class="hljs-keyword">let</span> estraverse = <span class="hljs-built_in">require</span>(<span class="hljs-string">'estraverse'</span>);<span class="hljs-comment">///遍历语法树,修改树上的节点</span>
+<span class="hljs-keyword">let</span> escodegen = <span class="hljs-built_in">require</span>(<span class="hljs-string">'escodegen'</span>);<span class="hljs-comment">//把AST语法树重新转换成代码</span>
+<span class="hljs-keyword">let</span> code = <span class="hljs-string">`function ast(){}`</span>;
+<span class="hljs-keyword">let</span> ast = esprima.parse(code);
+<span class="hljs-keyword">let</span> indent = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">const</span> padding = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-string">" "</span>.repeat(indent);
+estraverse.traverse(ast,{
+    enter(node){
+        <span class="hljs-built_in">console</span>.log(padding()+node.type+<span class="hljs-string">'进入'</span>);
+        <span class="hljs-keyword">if</span>(node.type === <span class="hljs-string">'FunctionDeclaration'</span>){
+            node.id.name = <span class="hljs-string">'newAst'</span>;
+        }
+        indent+=<span class="hljs-number">2</span>;
+    },
+    leave(node){
+        indent-=<span class="hljs-number">2</span>;
+        <span class="hljs-built_in">console</span>.log(padding()+node.type+<span class="hljs-string">'离开'</span>);
+    }
+});
+</code></pre>
+<pre><code>Program进入
+  FunctionDeclaration进入
+    Identifier进入
+    Identifier离开
+    BlockStatement进入
+    BlockStatement离开
+  FunctionDeclaration离开
+Program离开
+</code></pre><h2 id="t65.babel">5.babel <a href="#t65.babel"> # </a></h2>
+<ul>
+<li>Babel 能够转译 <code>ECMAScript 2015+</code> 的代码，使它在旧的浏览器或者环境中也能够运行</li>
+<li>工作过程分为三个部人<ul>
+<li>Parse(解析) 将源代码转换成抽象语法树，树上有很多的<a href="https://github.com/estree/estree">estree节点</a></li>
+<li>Transform(转换) 对抽象语法树进行转换</li>
+<li>Generate(代码生成) 将上一步经过转换过的抽象语法树生成新的代码</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/ast-compiler-flow.jpg" alt="ast-compiler-flow.jpg"></p>
+<h3 id="t75.1 AST遍历">5.1 AST遍历 <a href="#t75.1 AST遍历"> # </a></h3>
+<ul>
+<li>AST是深度优先遍历</li>
+<li>访问者模式 Visitor 对于某个对象或者一组对象，不同的访问者，产生的结果不同，执行操作也不同</li>
+<li>Visitor 的对象定义了用于 AST 中获取具体节点的方法</li>
+<li>Visitor 上挂载以节点 <code>type</code> 命名的方法，当遍历 AST 的时候，如果匹配上 type，就会执行对应的方法</li>
+</ul>
+<h3 id="t85.2 babel 插件">5.2 babel 插件 <a href="#t85.2 babel 插件"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/@babel/core">@babel/core</a> Babel 的编译器，核心 API 都在这里面，比如常见的 transform、parse</li>
+<li><a href="">babylon</a> Babel 的解析器</li>
+<li><a href="https://github.com/babel/babel/tree/master/packages/babel-types">babel-types</a> 用于 AST 节点的 Lodash 式工具库, 它包含了构造、验证以及变换 AST 节点的方法，对编写处理 AST 逻辑非常有用</li>
+<li><a href="https://www.npmjs.com/package/babel-traverse">babel-traverse</a>用于对 AST 的遍历，维护了整棵树的状态，并且负责替换、移除和添加节点</li>
+<li><a href="https://babeljs.io/docs/en/next/babel-types.html">babel-types-api</a></li>
+<li><a href="https://github.com/brigand/babel-plugin-handbook/blob/master/translations/zh-Hans/README.md#asts">Babel 插件手册</a></li>
+<li><a href="https://babeljs.io/en/repl.html">babeljs.io</a> babel 可视化编译器</li>
+</ul>
+<h4 id="t95.2.1 转换箭头函数">5.2.1 转换箭头函数 <a href="#t95.2.1 转换箭头函数"> # </a></h4>
+<ul>
+<li><a href="https://astexplorer.net/">astexplorer</a></li>
+<li><a href="https://www.npmjs.com/package/babel-plugin-transform-es2015-arrow-functions">babel-plugin-transform-es2015-arrow-functions</a></li>
+<li><a href="https://babeljs.io/en/repl.html">babeljs.io</a> babel 可视化编译器</li>
+<li><a href="https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md">babel-handbook</a></li>
+<li><a href="https://babeljs.io/docs/en/next/babel-types.html">babel-types-api</a></li>
+</ul>
+<p>转换前</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> sum = <span class="hljs-function">(<span class="hljs-params">a,b</span>)=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">return</span> a+b;
+}
+</code></pre>
+<p>转换后</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> _this = <span class="hljs-keyword">this</span>;
+
+<span class="hljs-keyword">const</span> sum = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(_this);
+  <span class="hljs-keyword">return</span> a + b;
+};
+</code></pre>
+<pre><code class="lang-js">npm i @babel/core babel-types -D
+</code></pre>
+<p>实现</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> core = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-keyword">let</span> types = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">let</span>  BabelPluginTransformEs2015ArrowFunctions = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-plugin-transform-es2015-arrow-functions'</span>);
+<span class="hljs-keyword">const</span> sourceCode = <span class="hljs-string">`
+const sum = (a,b)=&gt;{
+    console.log(this);
+    return a+b;
+}
+`</span>;
+<span class="hljs-comment">//babel插件其实是一个对象，它会有一个visitor访问器</span>
+<span class="hljs-keyword">let</span> BabelPluginTransformEs2015ArrowFunctions2 = {
+    <span class="hljs-comment">//每个插件都会有自己的访问器</span>
+    <span class="hljs-attr">visitor</span>:{
+        <span class="hljs-comment">//属性就是节点的类型，babel在遍历到对应类型的节点的时候会调用此函数</span>
+        ArrowFunctionExpression(nodePath){<span class="hljs-comment">//参数是节点的数据</span>
+            <span class="hljs-keyword">let</span> node = nodePath.node;<span class="hljs-comment">//获取 当前路径上的节点</span>
+            <span class="hljs-comment">//处理this指针的问题</span>
+            hoistFunctionEnvironment(nodePath);
+            node.type = <span class="hljs-string">'FunctionExpression'</span>;
+        }
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hoistFunctionEnvironment</span>(<span class="hljs-params">fnPath</span>)</span>{
+   <span class="hljs-keyword">const</span> thisEnvFn = fnPath.findParent(<span class="hljs-function"><span class="hljs-params">p</span>=&gt;</span>{
+       <span class="hljs-comment">//是一个函数，不能是箭头函数 或者 是根节点也可以</span>
+       <span class="hljs-keyword">return</span> (p.isFunction() &amp;&amp; !p.isArrowFunctionExpression())||p.isProgram()
+   });
+   <span class="hljs-comment">//找一找当前作用域哪些地方用到了this的路径</span>
+   <span class="hljs-keyword">let</span> thisPaths = getScopeInfoInformation(fnPath);
+   <span class="hljs-comment">//声明了一个this的别名变量，默认是_this __this</span>
+   <span class="hljs-keyword">let</span> thisBinding = <span class="hljs-string">'_this'</span>;
+   <span class="hljs-keyword">if</span>(thisPaths.length&gt;<span class="hljs-number">0</span>){
+       <span class="hljs-comment">//在thisEnvFn的作用域内添加一个变量，变量名_this,初始化的值为this</span>
+    thisEnvFn.scope.push({
+        <span class="hljs-attr">id</span>:types.identifier(thisBinding),
+        <span class="hljs-attr">init</span>:types.thisExpression()    
+    });
+    thisPaths.forEach(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>{
+        <span class="hljs-comment">//创建一个_this的标识符  </span>
+        <span class="hljs-keyword">let</span> thisBindingRef = types.identifier(thisBinding);
+        <span class="hljs-comment">//把老的路径 上的节点替换成新节点</span>
+        item.replaceWith(thisBindingRef);
+    });
+   }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getScopeInfoInformation</span>(<span class="hljs-params">fnPath</span>)</span>{
+  <span class="hljs-keyword">let</span> thisPaths = [];
+  <span class="hljs-comment">//遍历当前path所有的子节点路径，</span>
+  <span class="hljs-comment">//告诉 babel我请帮我遍历fnPath的子节点，遇到ThisExpression节点就执行函数，并且把对应的路径传进去 </span>
+  fnPath.traverse({
+    ThisExpression(thisPath){
+        thisPaths.push(thisPath);
+    }
+  });
+  <span class="hljs-keyword">return</span> thisPaths;
+}
+
+<span class="hljs-keyword">let</span> targetCode = core.transform(sourceCode,{
+    <span class="hljs-attr">plugins</span>:[BabelPluginTransformEs2015ArrowFunctions2]
+});
+<span class="hljs-built_in">console</span>.log(targetCode.code);
+
+</code></pre>
+<h4 id="t105.2.2 把类编译为 Function">5.2.2 把类编译为 Function <a href="#t105.2.2 把类编译为 Function"> # </a></h4>
+<ul>
+<li><a href="https://www.npmjs.com/package/@babel/plugin-transform-classes">@babel/plugin-transform-classes</a></li>
+</ul>
+<p>es6</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span> </span>{
+  <span class="hljs-keyword">constructor</span>(name) {
+    <span class="hljs-keyword">this</span>.name = name;
+  }
+  getName() {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.name;
+  }
+}
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/classast.png" alt="classast"></p>
+<p>es5</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name</span>) </span>{
+  <span class="hljs-keyword">this</span>.name = name;
+}
+Person.prototype.getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.name;
+};
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/es5class1.png" alt="es5class1">
+<img src="http://img.zhufengpeixun.cn/es5class2.png" alt="es5class2"></p>
+<p>实现</p>
+<pre><code class="lang-js"><span class="hljs-comment">//核心库，提供了语法树的生成和遍历的功能</span>
+<span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-comment">//工具类，可能帮我们生成相应的节点</span>
+<span class="hljs-keyword">let</span> t = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-comment">//babel_plugin-transform-classes</span>
+<span class="hljs-keyword">let</span> TransformClasses = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/plugin-transform-classes'</span>);
+<span class="hljs-keyword">let</span> es6Code = <span class="hljs-string">`class Person{
+    constructor(name){
+        this.name = name;
+    }
+    getName(){
+        return this.name;
+    }
+}
+`</span>;
+<span class="hljs-keyword">let</span> transformClasses2 = {
+    <span class="hljs-attr">visitor</span>: {
+        ClassDeclaration(nodePath) {
+            <span class="hljs-keyword">let</span> {node} = nodePath;
+            <span class="hljs-keyword">let</span> id = node.id;<span class="hljs-comment">//{type:'Identifier',name:'Person'}</span>
+            <span class="hljs-built_in">console</span>.log(id);
+            <span class="hljs-keyword">let</span> methods = node.body.body;
+            <span class="hljs-keyword">let</span> nodes = [];
+            methods.forEach(<span class="hljs-function"><span class="hljs-params">classMethod</span>=&gt;</span>{
+                <span class="hljs-keyword">if</span>(classMethod.kind === <span class="hljs-string">'constructor'</span>){
+                    <span class="hljs-keyword">let</span> constructorFunction = t.functionDeclaration(
+                        id, classMethod.params, classMethod.body,
+                         classMethod.generator, classMethod.async);
+                         nodes.push(constructorFunction);
+                }<span class="hljs-keyword">else</span>{
+                    <span class="hljs-keyword">let</span> prototypeMemberExpression = t.memberExpression(id, t.identifier(<span class="hljs-string">'prototype'</span>));
+                    <span class="hljs-keyword">let</span> keyMemberExpression = t.memberExpression(prototypeMemberExpression, classMethod.key);
+                    <span class="hljs-keyword">let</span> memberFunction = t.functionExpression(
+                        id, classMethod.params, classMethod.body,
+                         classMethod.generator, classMethod.async);
+                    <span class="hljs-keyword">let</span> assignmentExpression=t.assignmentExpression(<span class="hljs-string">"="</span>, 
+                    keyMemberExpression,
+                    memberFunction);
+                    nodes.push(assignmentExpression);
+                }
+            });
+            <span class="hljs-keyword">if</span>(nodes.length==<span class="hljs-number">1</span>){
+                nodePath.replaceWith(nodes[<span class="hljs-number">0</span>]);
+            }<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(nodes.length&gt;<span class="hljs-number">1</span>){
+                nodePath.replaceWithMultiple(nodes);
+            }
+        }
+    }
+}
+
+
+<span class="hljs-keyword">let</span> es5Code = babel.transform(es6Code,{
+    <span class="hljs-attr">plugins</span>:[transformClasses2]
+});
+<span class="hljs-built_in">console</span>.log(es5Code.code);
+</code></pre>
+<h2 id="t116. webpack TreeShaking插件">6. webpack TreeShaking插件 <a href="#t116. webpack TreeShaking插件"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">let</span> { transform } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+</code></pre>
+<h3 id="t126.1 实现按需加载">6.1 实现按需加载 <a href="#t126.1 实现按需加载"> # </a></h3>
+<ul>
+<li><a href="https://www.lodashjs.com/docs/4.17.5.html#concat">lodashjs</a></li>
+<li><a href="https://babeljs.io/docs/en/babel-core">babel-core</a></li>
+<li><a href="https://www.npmjs.com/package/babel-plugin-import">babel-plugin-import</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { flatten, concat } <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash"</span>;
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/treeshakingleft.png" alt="treeshakingleft"></p>
+<p>转换为</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> flatten <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash/flatten"</span>;
+<span class="hljs-keyword">import</span> concat <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash/flatten"</span>;
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/treeshakingright.png" alt="treeshakingright"></p>
+<h3 id="t136.2 webpack 配置">6.2 webpack 配置 <a href="#t136.2 webpack 配置"> # </a></h3>
+<pre><code class="lang-js">cnpm i webpack webpack-cli -D
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(<span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"bundle.js"</span>,
+  },
+  <span class="hljs-attr">module</span>: {
+    <span class="hljs-attr">rules</span>: [
+      {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+        <span class="hljs-attr">use</span>: {
+          <span class="hljs-attr">loader</span>: <span class="hljs-string">"babel-loader"</span>,
+          <span class="hljs-attr">options</span>:{
+                   <span class="hljs-attr">plugins</span>:[
+                     [
+                       path.resolve(__dirname,<span class="hljs-string">'plugins/babel-plugin-import.js'</span>),
+                       {
+                         <span class="hljs-attr">libraryName</span>:<span class="hljs-string">'lodash'</span>
+                       }
+                     ]
+                   ]
+                }
+        },
+      },
+    ],
+  },
+};
+</code></pre>
+<blockquote>
+<p>编译顺序为首先<code>plugins</code>从左往右,然后<code>presets</code>从右往左</p>
+</blockquote>
+<h3 id="t146.3 babel 插件">6.3 babel 插件 <a href="#t146.3 babel 插件"> # </a></h3>
+<p>plugins\babel-plugin-import.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">let</span> types = <span class="hljs-built_in">require</span>(<span class="hljs-string">"babel-types"</span>);
+<span class="hljs-keyword">const</span> visitor = {
+  <span class="hljs-attr">ImportDeclaration</span>: {
+    enter(path, state = { opts }) {
+      <span class="hljs-keyword">const</span> specifiers = path.node.specifiers;
+      <span class="hljs-keyword">const</span> source = path.node.source;
+      <span class="hljs-keyword">if</span> (
+        state.opts.libraryName == source.value &amp;&amp;
+        !types.isImportDefaultSpecifier(specifiers[<span class="hljs-number">0</span>])
+      ) {
+        <span class="hljs-keyword">const</span> declarations = specifiers.map(<span class="hljs-function">(<span class="hljs-params">specifier, index</span>) =&gt;</span> {
+          <span class="hljs-keyword">return</span> types.ImportDeclaration(
+            [types.importDefaultSpecifier(specifier.local)],
+            types.stringLiteral(<span class="hljs-string">`<span class="hljs-subst">${source.value}</span>/<span class="hljs-subst">${specifier.local.name}</span>`</span>)
+          );
+        });
+        path.replaceWithMultiple(declarations);
+      }
+    },
+  },
+};
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">babel</span>) </span>{
+  <span class="hljs-keyword">return</span> {
+    visitor,
+  };
+};
+</code></pre>
+<h2 id="t157. 参考">7. 参考 <a href="#t157. 参考"> # </a></h2>
+<ul>
+<li><a href="https://github.com/brigand/babel-plugin-handbook/blob/master/translations/zh-Hans/README.md#asts">Babel 插件手册</a></li>
+<li><a href="https://github.com/babel/babel/tree/master/packages/babel-types">babel-types</a></li>
+<li><a href="https://astexplorer.net/">不同的 parser 解析 js 代码后得到的 AST</a></li>
+<li><a href="http://resources.jointjs.com/demos/javascript-ast">在线可视化的看到 AST</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/28143410">babel 从入门到入门的知识归纳</a></li>
+<li><a href="https://octman.com/blog/2016-08-27-babel-notes/">Babel 内部原理分析</a></li>
+<li><a href="https://github.com/chikara-chan/babel-plugin-react-scope-binding">babel-plugin-react-scope-binding</a></li>
+<li><a href="https://www.npmjs.com/package/babel-plugin-transform-runtime">transform-runtime</a> Babel 默认只转换新的 JavaScript 语法，而不转换新的 API。例如，Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise 等全局对象，以及一些定义在全局对象上的方法（比如 Object.assign）都不会转译,启用插件 <code>babel-plugin-transform-runtime</code> 后，Babel 就会使用 babel-runtime 下的工具函数</li>
+<li><a href="https://github.com/babel/babylon/blob/master/ast/spec.md">ast-spec</a></li>
+<li><a href="https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md">babel-handbook</a></li>
+</ul>
+
+    

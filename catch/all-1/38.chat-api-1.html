@@ -1,0 +1,83 @@
+
+        <h2 id="t01. 珠峰聊天室接口文档">1. 珠峰聊天室接口文档 <a href="#t01. 珠峰聊天室接口文档"> # </a></h2>
+<ul>
+<li>用户<ul>
+<li><a href="#/login">post /login 登录</a></li>
+<li><a href="#/validate">post /validate 验证用户身份</a></li>
+</ul>
+</li>
+<li>房间<ul>
+<li><a href="添加房间">post /addRoom 添加房间</a></li>
+<li><a href="查看房间列表">get /getAllRooms 查看房间列表</a></li>
+</ul>
+</li>
+<li>消息<ul>
+<li><a href="添加消息">addMessage 添加消息</a></li>
+<li><a href="获得所有消息">getAllMessages 获得所有消息</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="t12.用户">2.用户 <a href="#t12.用户"> # </a></h2>
+<h3 id="t22.1 登录">2.1 登录 <a href="#t22.1 登录"> # </a></h3>
+<h4 id="t32.1.1 请求路径">2.1.1 请求路径 <a href="#t32.1.1 请求路径"> # </a></h4>
+<p>/login</p>
+<h4 id="t42.1.2 请求方法">2.1.2 请求方法 <a href="#t42.1.2 请求方法"> # </a></h4>
+<p>POST</p>
+<h4 id="t52.1.3 请求参数">2.1.3 请求参数 <a href="#t52.1.3 请求参数"> # </a></h4>
+<p>放在请求体里</p>
+<pre><code class="lang-json">{
+   <span class="hljs-attr">"email"</span>:<span class="hljs-string">"zfpx@126.com"</span>,
+}
+</code></pre>
+<h3 id="t62.2 验证用户身份">2.2 验证用户身份 <a href="#t62.2 验证用户身份"> # </a></h3>
+<h4 id="t72.2.1 请求路径">2.2.1 请求路径 <a href="#t72.2.1 请求路径"> # </a></h4>
+<p>/validate</p>
+<h4 id="t82.2.2 请求方法">2.2.2 请求方法 <a href="#t82.2.2 请求方法"> # </a></h4>
+<p>POST</p>
+<h4 id="t92.2.3 请求参数">2.2.3 请求参数 <a href="#t92.2.3 请求参数"> # </a></h4>
+<p>放在请求体里</p>
+<pre><code class="lang-json">{
+   <span class="hljs-attr">"token"</span>:<span class="hljs-string">"xxxxxx"</span>,
+}
+</code></pre>
+<h2 id="t103.房间">3.房间 <a href="#t103.房间"> # </a></h2>
+<h3 id="t113.1 房间">3.1 房间 <a href="#t113.1 房间"> # </a></h3>
+<h4 id="t123.1.1 请求路径">3.1.1 请求路径 <a href="#t123.1.1 请求路径"> # </a></h4>
+<p>/addRoom</p>
+<h4 id="t133.1.2 请求方法">3.1.2 请求方法 <a href="#t133.1.2 请求方法"> # </a></h4>
+<p>POST</p>
+<h4 id="t143.1.3 请求参数">3.1.3 请求参数 <a href="#t143.1.3 请求参数"> # </a></h4>
+<p>放在请求体里</p>
+<pre><code class="lang-json">{
+   <span class="hljs-attr">"name"</span>:<span class="hljs-string">"青涩记忆"</span>,
+}
+</code></pre>
+<h3 id="t153.2 获取所有的房间">3.2 获取所有的房间 <a href="#t153.2 获取所有的房间"> # </a></h3>
+<h4 id="t163.2.1 请求路径">3.2.1 请求路径 <a href="#t163.2.1 请求路径"> # </a></h4>
+<p>/getAllRooms</p>
+<h4 id="t173.2.2 请求方法">3.2.2 请求方法 <a href="#t173.2.2 请求方法"> # </a></h4>
+<p>GET</p>
+<h4 id="t183.2.3 请求参数">3.2.3 请求参数 <a href="#t183.2.3 请求参数"> # </a></h4>
+<p>无</p>
+<h2 id="t194. 消息">4. 消息 <a href="#t194. 消息"> # </a></h2>
+<h3 id="t204.1 添加消息">4.1 添加消息 <a href="#t204.1 添加消息"> # </a></h3>
+<h4 id="t214.1.1 消息类型">4.1.1 消息类型 <a href="#t214.1.1 消息类型"> # </a></h4>
+<p>addMessage</p>
+<h4 id="t224.1.2 请求方法">4.1.2 请求方法 <a href="#t224.1.2 请求方法"> # </a></h4>
+<p>websocket</p>
+<h4 id="t234.1.3 请求参数">4.1.3 请求参数 <a href="#t234.1.3 请求参数"> # </a></h4>
+<pre><code class="lang-json">{
+   <span class="hljs-attr">"content"</span>:<span class="hljs-string">"你好"</span>,
+   <span class="hljs-attr">"user"</span>:<span class="hljs-string">""</span>,
+   <span class="hljs-attr">"room"</span>:<span class="hljs-string">""</span>
+}
+</code></pre>
+<h3 id="t244.2 查看所有的消息列表">4.2 查看所有的消息列表 <a href="#t244.2 查看所有的消息列表"> # </a></h3>
+<h4 id="t254.2.1 消息类型">4.2.1 消息类型 <a href="#t254.2.1 消息类型"> # </a></h4>
+<p>getAllMessages</p>
+<h4 id="t264.2.2 请求方法">4.2.2 请求方法 <a href="#t264.2.2 请求方法"> # </a></h4>
+<p>websocket</p>
+<h4 id="t274.2.3 请求参数">4.2.3 请求参数 <a href="#t274.2.3 请求参数"> # </a></h4>
+<p>无</p>
+
+    

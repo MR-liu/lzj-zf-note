@@ -1,0 +1,637 @@
+
+        <h2 id="t01.软件包管理">1.软件包管理 <a href="#t01.软件包管理"> # </a></h2>
+<ul>
+<li>RPM是RedHat Package Manager（RedHat软件包管理工具）类似Windows里面的"添加/删除程序"</li>
+</ul>
+<h3 id="t11.1 软件包的分类">1.1 软件包的分类 <a href="#t11.1 软件包的分类"> # </a></h3>
+<ul>
+<li>源码包(需要经过编译，把人所编写的源代码编译成机器语言才能运行)<ul>
+<li>优点<ul>
+<li>开源免费</li>
+<li>可以自由配置功能</li>
+<li>编译安装更适合自己系统，更稳定 </li>
+<li>卸载方便</li>
+</ul>
+</li>
+<li>缺点  <ul>
+<li>安装过程比较复杂</li>
+<li>编译过程比较长</li>
+<li>安装过程一旦报错，非常难以排查</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>二进制包(把源代码包经过编译生成0/1二进制，PRM包、系统默认的安装包)<ul>
+<li>优点<ul>
+<li>包管理系统比较简单，只要通过简单的命令就可以实现包的安装、升级、查询和卸载</li>
+<li>安装速度比源码包快很多</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>经过编译则不能看到源代码</li>
+<li>功能选择不灵活</li>
+<li>依赖性比较麻烦</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>脚本安装包(就是把复杂的安装过程写成了脚本，可以一键安装，本质上安装的还是源代码包和二进制包)<ul>
+<li>优点是安装简单</li>
+<li>缺点是失去了自定义性</li>
+</ul>
+</li>
+</ul>
+<h3 id="t21.2 RPM命令管理">1.2 RPM命令管理 <a href="#t21.2 RPM命令管理"> # </a></h3>
+<pre><code class="lang-js">mkdir /mnt/cdrom
+mount /dev/sr0 /mnt/cdrom
+cd /mnt/cdrom/Packages
+</code></pre>
+<h3 id="t31.3 RPM包命名原则">1.3 RPM包命名原则 <a href="#t31.3 RPM包命名原则"> # </a></h3>
+<ul>
+<li>httpd-2.2.15-15.el6.centos.1.i686.rpm<ul>
+<li>httpd软件包名</li>
+<li>2.2.15软件版本</li>
+<li>15 软件发布的次数</li>
+<li>el6.centos 适合的Linux平台</li>
+<li>i686 适合的硬件平台</li>
+<li>rpm rpm 包的扩展名</li>
+</ul>
+</li>
+</ul>
+<h3 id="t41.4  RPM包依赖性">1.4  RPM包依赖性 <a href="#t41.4  RPM包依赖性"> # </a></h3>
+<ul>
+<li>树形依赖 a-&gt;b-&gt;c</li>
+<li>环形依赖 a-&gt;b-&gt;c-&gt;a</li>
+<li>模块依赖 <a href="http://www.rpmfind.net">http://www.rpmfind.net</a></li>
+</ul>
+<pre><code class="lang-js">rpm -ivh mysql-connector-odbc<span class="hljs-number">-5.1</span><span class="hljs-number">.5</span>r1144<span class="hljs-number">-7.</span>el6.i686.rpm 
+rpm -ivh unixODBC<span class="hljs-number">-2.2</span><span class="hljs-number">.14</span><span class="hljs-number">-11.</span>el6.i686.rpm 
+rpm -ivh mysql-connector-odbc<span class="hljs-number">-5.1</span><span class="hljs-number">.5</span>r1144<span class="hljs-number">-7.</span>el6.i686.rpm 
+</code></pre>
+<h3 id="t51.5  包全名">1.5  包全名 <a href="#t51.5  包全名"> # </a></h3>
+<ul>
+<li>如果操作的是没有安装过的软件包时，使用包全名，而且要注意路径正确。</li>
+<li>如果是要操作已经安装的软件包时，要使用包名，是搜索<code>/var/lib/rpm</code>中的数据库</li>
+</ul>
+<h3 id="t61.6 RPM安装">1.6 RPM安装 <a href="#t61.6 RPM安装"> # </a></h3>
+<ul>
+<li>rpm -ivh  包全名</li>
+<li>选项<ul>
+<li>-i(install) 安装</li>
+<li>-v(verbose) 显示详细安装停下</li>
+<li>-h(hash) 显示进度</li>
+<li>--nodeps 不检测依赖性，正式环境不能使用</li>
+</ul>
+</li>
+</ul>
+<h3 id="t71.7 RPM安装">1.7 RPM安装 <a href="#t71.7 RPM安装"> # </a></h3>
+<pre><code class="lang-js">rpm -ivh httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh httpd-manual<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.noarch.rpm 
+</code></pre>
+<pre><code class="lang-js">rpm -ivh httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh apr-util-ldap<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh apr-util<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+
+rpm -ivh apr<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_1<span class="hljs-number">.2</span>.i686.rpm 
+rpm -ivh apr-util<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh apr-util-ldap<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+
+rpm -ivh httpd-tools<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+
+rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh httpd-manual<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.noarch.rpm 
+rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh apr-devel<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_1<span class="hljs-number">.2</span>.i686.rpm 
+rpm -ivh apr-util-devel<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh expat-devel<span class="hljs-number">-2.0</span><span class="hljs-number">.1</span><span class="hljs-number">-11.</span>el6_2.i686.rpm 
+rpm -ivh openldap-devel<span class="hljs-number">-2.4</span><span class="hljs-number">.23</span><span class="hljs-number">-26.</span>el6.i686.rpm 
+rpm -ivh cyrus-sasl-devel<span class="hljs-number">-2.1</span><span class="hljs-number">.23</span><span class="hljs-number">-13.</span>el6.i686.rpm 
+rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh apr-util-devel<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh openldap-devel<span class="hljs-number">-2.4</span><span class="hljs-number">.23</span><span class="hljs-number">-26.</span>el6.i686.rpm 
+rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh apr-util-devel<span class="hljs-number">-1.3</span><span class="hljs-number">.9</span><span class="hljs-number">-3.</span>el6_0<span class="hljs-number">.1</span>.i686.rpm 
+rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm 
+</code></pre>
+<h3 id="t81.8 RPM包升级">1.8 RPM包升级 <a href="#t81.8 RPM包升级"> # </a></h3>
+<ul>
+<li>rpm -Uvh 包全名<ul>
+<li>-U(upgrade) 升级 </li>
+</ul>
+</li>
+<li>如果包没有安装过，则和安装是同等效果</li>
+</ul>
+<pre><code class="lang-js">rpm -ivh httpd-devel<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm
+</code></pre>
+<h3 id="t91.9 卸载">1.9 卸载 <a href="#t91.9 卸载"> # </a></h3>
+<ul>
+<li>rpm -e 包名<ul>
+<li>-e(erase) 卸载</li>
+<li>--nodeps不检查依赖性</li>
+</ul>
+</li>
+<li>安装的时候先安装被依赖包，再安装依赖包</li>
+<li>卸载的时候先卸载依赖包，再卸载被依赖包</li>
+</ul>
+<pre><code class="lang-js">rpm -e httpd
+</code></pre>
+<h3 id="t101.10 查询">1.10 查询 <a href="#t101.10 查询"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">命令</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">rpm -q 包名</td>
+<td style="text-align:left">-q(query) 查询</td>
+<td style="text-align:left">查询包是否安装</td>
+</tr>
+<tr>
+<td style="text-align:left">rpm -qa 包名</td>
+<td style="text-align:left">-a(all) 查询</td>
+<td style="text-align:left">查询所有已经安装的RPM包</td>
+</tr>
+<tr>
+<td style="text-align:left">rpm -qi 包名</td>
+<td style="text-align:left">-i(information)</td>
+<td style="text-align:left">查询软件信息</td>
+</tr>
+<tr>
+<td style="text-align:left">rpm -qip 包名</td>
+<td style="text-align:left">-p(package)</td>
+<td style="text-align:left">查询未安装包的信息</td>
+</tr>
+<tr>
+<td style="text-align:left">rpm -ql 包名</td>
+<td style="text-align:left">-l(list) -p(package)</td>
+<td style="text-align:left">查询安装包都安装了哪些文件</td>
+</tr>
+<tr>
+<td style="text-align:left">rpm -qf 文件名</td>
+<td style="text-align:left">-f(file)</td>
+<td style="text-align:left">查询某个文件属于哪个包</td>
+</tr>
+<tr>
+<td style="text-align:left">rpm -qR 包名</td>
+<td style="text-align:left">-R(requires) -p(package)</td>
+<td style="text-align:left">查询软件名的依赖性</td>
+</tr>
+</tbody>
+</table>
+<p>默认安装位置</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">命令</th>
+<th style="text-align:left">参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">/etc/</td>
+<td style="text-align:left">配置文件的安装目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/usr/bin</td>
+<td style="text-align:left">可执行的命令安装目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/usr/lib</td>
+<td style="text-align:left">程序所使用的函数库保存位置</td>
+</tr>
+<tr>
+<td style="text-align:left">/usr/share/doc</td>
+<td style="text-align:left">基本的软件使用手册保存位置</td>
+</tr>
+<tr>
+<td style="text-align:left">/usr/share/man</td>
+<td style="text-align:left">帮助文件保存位置</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t111.11 校验">1.11 校验 <a href="#t111.11 校验"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">命令</th>
+<th style="text-align:left">参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">rpm -V 包名</td>
+</tr>
+</tbody>
+</table>
+<p><code>/etc/httpd/conf/httpd.conf</code></p>
+<p>验证信息内容</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">S(Size)</td>
+<td style="text-align:left">文件大小是否改变</td>
+</tr>
+<tr>
+<td style="text-align:left">M(Mode)</td>
+<td style="text-align:left">文件的类型或者文件的权限(rwx)是否被改变</td>
+</tr>
+<tr>
+<td style="text-align:left">5(Md5)</td>
+<td style="text-align:left">文件MD5校验和是否改变(文件内容是否改变)</td>
+</tr>
+<tr>
+<td style="text-align:left">D(Device)</td>
+<td style="text-align:left">设备的主从代码是否改变</td>
+</tr>
+<tr>
+<td style="text-align:left">L(Location)</td>
+<td style="text-align:left">文件路径是否改变</td>
+</tr>
+<tr>
+<td style="text-align:left">U(User)</td>
+<td style="text-align:left">文件的属主(所有者)是否改变</td>
+</tr>
+<tr>
+<td style="text-align:left">G(Group)</td>
+<td style="text-align:left">文件的属组是否改变</td>
+</tr>
+<tr>
+<td style="text-align:left">T(Time)</td>
+<td style="text-align:left">文件的修改时间是否改变</td>
+</tr>
+</tbody>
+</table>
+<p>每个设备号又分为主设备号和次设备号。主设备号用来区分不同种类的设备，而次设备号用来区分同一类型的多个设备</p>
+<pre><code class="lang-js"># ll /dev | grep sda
+brw-rw----. 1 root disk      8,   0 4月   6 17:50 sda
+brw-rw----. 1 root disk      8,   1 4月   6 17:50 sda1
+brw-rw----. 1 root disk      8,   2 4月   6 17:50 sda2
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">c(config file)</td>
+<td style="text-align:left">配置文件</td>
+</tr>
+<tr>
+<td style="text-align:left">d(documentation)</td>
+<td style="text-align:left">普通文档</td>
+</tr>
+<tr>
+<td style="text-align:left">g(ghost file)</td>
+<td style="text-align:left">文件根本不应该属于这个软件包</td>
+</tr>
+<tr>
+<td style="text-align:left">L(license file)</td>
+<td style="text-align:left">授权文件</td>
+</tr>
+<tr>
+<td style="text-align:left">r(readme)</td>
+<td style="text-align:left">描述文件</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t121.12 文件提取">1.12 文件提取 <a href="#t121.12 文件提取"> # </a></h3>
+<ul>
+<li>rpm2cpio 包全名 | cpio -idv .文件绝对路径</li>
+<li>rpm2cpid 将rpm包转换为cpio格式的命令</li>
+<li>cpio 是一个标准工具，用于创建软件档案和从档案文件中提取文件</li>
+</ul>
+<pre><code class="lang-js">rpm2cpio httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm | cpio -idv /etc/httpd/conf/httpd.conf
+</code></pre>
+<ul>
+<li>cpio  选项 &lt; [文件|设备]</li>
+<li>选项<ul>
+<li>-i copy-in模式，还原</li>
+<li>-d 还原时自动新建目录</li>
+<li>-v 显示还原过程</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">rpm2cpio /mnt/cdrom/Packages/httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.15</span><span class="hljs-number">-15.</span>el6.centos<span class="hljs-number">.1</span>.i686.rpm | cpio -idv ./etc/httpd/conf/httpd.conf
+cp ./etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf
+</code></pre>
+<h2 id="t133. YUM在线管理">3. YUM在线管理 <a href="#t133. YUM在线管理"> # </a></h2>
+<ul>
+<li>yum = Yellow dog Updater, Modified主要功能是更方便的添加/删除/更新RPM包.它能自动解决包的倚赖性问题.</li>
+<li>这是rpm包的在线管理命令</li>
+<li>将所有的软件名放到官方服务器上，当进行YUM在线安装时，可以自动解决依赖性问题</li>
+<li>/etc/yum.repos.d/<ul>
+<li>CentOS-Base.repo</li>
+<li>CentOS-Debuginfo.repo</li>
+<li>CentOS-Media.repo</li>
+<li>CentOS-Vault.repo</li>
+</ul>
+</li>
+</ul>
+<h3 id="t143.1 CentOS-Base.repo">3.1 CentOS-Base.repo <a href="#t143.1 CentOS-Base.repo"> # </a></h3>
+<pre><code class="lang-js">[base]
+name=CentOS-$releasever - Base
+mirrorlist=http://mirrorlist.centos.org/?release=$releasever&amp;arch=$basearch&amp;repo=os
+#baseurl=http://mirror.centos.org/centos/$releasever/os/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">base</td>
+<td style="text-align:left">容器名称，一定要放在[]中</td>
+</tr>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">容器说明，可以自己随便写</td>
+</tr>
+<tr>
+<td style="text-align:left">mirrorlist</td>
+<td style="text-align:left">镜像站点，可以注释掉</td>
+</tr>
+<tr>
+<td style="text-align:left">baseurl</td>
+<td style="text-align:left">YUM源服务器的地址，默认是CentOS官方的YUM源</td>
+</tr>
+<tr>
+<td style="text-align:left">enable</td>
+<td style="text-align:left">此容器是否生效 不写或者写成enable=1表示生效，写成enable=0表示不生效</td>
+</tr>
+<tr>
+<td style="text-align:left">gpgcheck</td>
+<td style="text-align:left">如果是1就是指 RPM的数字证书生效,如果是0则表示不生效</td>
+</tr>
+<tr>
+<td style="text-align:left">gpgkey</td>
+<td style="text-align:left">数字证书的公钥文件保存位置，不用改</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t154. 光盘搭建YUM源">4. 光盘搭建YUM源 <a href="#t154. 光盘搭建YUM源"> # </a></h2>
+<h3 id="t164.1 挂载光盘">4.1 挂载光盘 <a href="#t164.1 挂载光盘"> # </a></h3>
+<pre><code class="lang-js">mkdir /mnt/cdrom
+mount /dev/cdrom /mnt/cdrom
+</code></pre>
+<h3 id="t174.2 失效在线yum源">4.2 失效在线yum源 <a href="#t174.2 失效在线yum源"> # </a></h3>
+<pre><code class="lang-js">cd /etc/yum.repos.d
+mv CentOS-Base.repo CentOS-Base.repo.bak
+</code></pre>
+<p>查看YUM源里有哪些安装包</p>
+<pre><code class="lang-js">yum list
+</code></pre>
+<p>CentOS-Media.repo </p>
+<pre><code class="lang-js">[c6-media]
+name=CentOS-$releasever - Media
+baseurl=file:<span class="hljs-comment">///mnt/cdrom</span>
+gpgcheck=<span class="hljs-number">1</span>
+enabled=<span class="hljs-number">1</span>
+gpgkey=file:<span class="hljs-comment">///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6</span>
+</code></pre>
+<h2 id="t185. YUM命令">5. YUM命令 <a href="#t185. YUM命令"> # </a></h2>
+<ul>
+<li>yum安装只需要写包名即可</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">命令</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">yum list</td>
+<td style="text-align:left">查询所有可用软件包列表</td>
+</tr>
+<tr>
+<td style="text-align:left">yum search 关键字</td>
+<td style="text-align:left">搜索服务器上所有和关键字相关的包</td>
+</tr>
+<tr>
+<td style="text-align:left">yum -y install 包名</td>
+<td style="text-align:left">-y 自动回答yes install安装</td>
+</tr>
+<tr>
+<td style="text-align:left">yum -y update 包名</td>
+<td style="text-align:left">-y 自动回答yes update升级</td>
+</tr>
+<tr>
+<td style="text-align:left">yum -y remove 包名</td>
+<td style="text-align:left">-y 自动回答yes remove 卸载,卸载有依赖性，所以尽量不要卸载</td>
+</tr>
+<tr>
+<td style="text-align:left">yum grouplist</td>
+<td style="text-align:left">列出所有可用的软件组列表</td>
+</tr>
+<tr>
+<td style="text-align:left">yum groupinstall 软件组名</td>
+<td style="text-align:left">安装指定的组，组名可以用grouplist查询</td>
+</tr>
+<tr>
+<td style="text-align:left">yum groupremove 软件组名</td>
+<td style="text-align:left">卸载指定软件组</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">yum -y install gcc  安装C语言安装包
+yum install update httpd 升级httpd
+</code></pre>
+<pre><code class="lang-js">LANG=en_US
+yum grouplist
+yum groupinstall <span class="hljs-string">"Chinese Support"</span>
+LANG=zh_CN.UTF<span class="hljs-number">-8</span>
+</code></pre>
+<h2 id="t194. 源码包管理">4. 源码包管理 <a href="#t194. 源码包管理"> # </a></h2>
+<h3 id="t204.1 安装方式不同">4.1 安装方式不同 <a href="#t204.1 安装方式不同"> # </a></h3>
+<ul>
+<li>RPM包的安装位置是由软件包作者决定的,不需要指定安装位置</li>
+<li>RPM包安装的服务可以使用系统服务管理命令(service)来管理</li>
+</ul>
+<pre><code class="lang-js">service httpd start
+/etc/init.d/httpd start
+</code></pre>
+<ul>
+<li>源码包安装在指定的位置当中，一般是  <code>/usr/local/软件名</code></li>
+<li>源码包安装的服务不能被服务命令管理，因为没有安装到默认路径中，所以只能用绝对路径进行服务的管理</li>
+<li>httpd和apache关系，简单理解就是apache2以上版本改称为httpd</li>
+</ul>
+<h3 id="t214.2 安装源码包">4.2 安装源码包 <a href="#t214.2 安装源码包"> # </a></h3>
+<h4 id="t224.2.1 安装准备">4.2.1 安装准备 <a href="#t224.2.1 安装准备"> # </a></h4>
+<ul>
+<li>安装C语言编译器<pre><code class="lang-js">yum install -y gcc
+</code></pre>
+</li>
+</ul>
+<h4 id="t234.2.2 安装注意事项">4.2.2 安装注意事项 <a href="#t234.2.2 安装注意事项"> # </a></h4>
+<ul>
+<li>源码包一般放在<code>/usr/local/src</code>目录下</li>
+<li>软件的安装位置 <code>/usr/local</code>,相当于<code>program files</code>目录</li>
+<li>如何确定安装过程是否正常<ul>
+<li>安装过程能正常中止</li>
+<li>出现 <code>error warning</code> 等提示</li>
+</ul>
+</li>
+</ul>
+<h4 id="t244.2.3 安装过程">4.2.3 安装过程 <a href="#t244.2.3 安装过程"> # </a></h4>
+<h5 id="t254.2.3.1 下载">4.2.3.1 下载 <a href="#t254.2.3.1 下载"> # </a></h5>
+<p><a href="http://httpd.apache.org/download.cgi">下载</a>
+<a href="http://archive.apache.org/dist/httpd/">镜像下载</a></p>
+<pre><code class="lang-js">wget http:<span class="hljs-comment">//archive.apache.org/dist/httpd/httpd-2.2.11.tar.gz</span>
+</code></pre>
+<h5 id="t264.2.3.2 解压">4.2.3.2 解压 <a href="#t264.2.3.2 解压"> # </a></h5>
+<pre><code class="lang-js">tar -xzvf httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.11</span>.tar.gz
+</code></pre>
+<h5 id="t274.2.3.3 进入解压目录">4.2.3.3 进入解压目录 <a href="#t274.2.3.3 进入解压目录"> # </a></h5>
+<pre><code class="lang-js">cd httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.11</span>.tar.gz
+</code></pre>
+<h5 id="t284.2.3.4 configure">4.2.3.4 configure <a href="#t284.2.3.4 configure"> # </a></h5>
+<p>软件配置与检查</p>
+<ul>
+<li>定义需要的功能选项</li>
+<li>检测系统环境是否符合安装要求</li>
+<li>把定义好的功能选项和检测系统环境的信息都写入<code>Makefile</code>文件中，用于后续的编辑</li>
+</ul>
+<pre><code class="lang-js">./configure --prefix=<span class="hljs-regexp">/usr/</span>local/httpd
+</code></pre>
+<h5 id="t294.2.3.5 编译和安装">4.2.3.5 编译和安装 <a href="#t294.2.3.5 编译和安装"> # </a></h5>
+<ul>
+<li>把源码编译成二进制文件</li>
+<li>make <ul>
+<li>make clean 一旦编译报错可以执行这一步进行清理</li>
+</ul>
+</li>
+<li>make install </li>
+</ul>
+<pre><code class="lang-js">make
+make install 
+</code></pre>
+<p>安装帮助文件位置</p>
+<pre><code class="lang-js">cat /usr/local/src/httpd<span class="hljs-number">-2.2</span><span class="hljs-number">.11</span>/INSTALL 这里可以查看安装说明
+cat /<span class="hljs-keyword">var</span>/www/html/index.html 这是用YUM或者说rpm安装的httpd
+cat /usr/local/httpd/htdocs/index.html  这是用源码安装的httpd
+</code></pre>
+<h5 id="t304.2.3.6 源码包的卸载">4.2.3.6 源码包的卸载 <a href="#t304.2.3.6 源码包的卸载"> # </a></h5>
+<ul>
+<li>不需要卸载命令，直接删除安装目录即可，不会遗留任何垃圾文件</li>
+</ul>
+<h2 id="t315. 脚本安装包">5. 脚本安装包 <a href="#t315. 脚本安装包"> # </a></h2>
+<ul>
+<li>脚本包安装的也是RPM包和源码包</li>
+<li>优点<ul>
+<li>简单快速方便</li>
+</ul>
+</li>
+<li>缺点<ul>
+<li>不能定义安装的版本</li>
+<li>不能定义需要的功能</li>
+</ul>
+</li>
+</ul>
+<h3 id="t325.1 nginx">5.1 nginx <a href="#t325.1 nginx"> # </a></h3>
+<ul>
+<li>nginx是一款自由的、开源的、高性能的HTTP服务器和反向代理服务器</li>
+<li>nginx可以作为一个HTTP服务器进行网站的发布处理，另外nginx可以作为反向代理进行负载均衡的实现</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">功能</th>
+<th style="text-align:left">Apache/httpd</th>
+<th style="text-align:left">Nginx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Proxy代理</td>
+<td style="text-align:left">非常好</td>
+<td style="text-align:left">非常好</td>
+</tr>
+<tr>
+<td style="text-align:left">Rewriter</td>
+<td style="text-align:left">好</td>
+<td style="text-align:left">非常好</td>
+</tr>
+<tr>
+<td style="text-align:left">Fcgi</td>
+<td style="text-align:left">不好</td>
+<td style="text-align:left">好</td>
+</tr>
+<tr>
+<td style="text-align:left">热部署</td>
+<td style="text-align:left">不支持</td>
+<td style="text-align:left">支持</td>
+</tr>
+<tr>
+<td style="text-align:left">系统压力比较</td>
+<td style="text-align:left">很大</td>
+<td style="text-align:left">很小</td>
+</tr>
+<tr>
+<td style="text-align:left">稳定性</td>
+<td style="text-align:left">好</td>
+<td style="text-align:left">非常好</td>
+</tr>
+<tr>
+<td style="text-align:left">安全性</td>
+<td style="text-align:left">好</td>
+<td style="text-align:left">一般</td>
+</tr>
+<tr>
+<td style="text-align:left">技术支持</td>
+<td style="text-align:left">非常好</td>
+<td style="text-align:left">很少</td>
+</tr>
+<tr>
+<td style="text-align:left">静态文件处理</td>
+<td style="text-align:left">一般</td>
+<td style="text-align:left">非常好</td>
+</tr>
+<tr>
+<td style="text-align:left">Vhosts虚拟主机</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">反向代理</td>
+<td style="text-align:left">一般</td>
+<td style="text-align:left">非常好</td>
+</tr>
+<tr>
+<td style="text-align:left">Session sticky</td>
+<td style="text-align:left">支持</td>
+<td style="text-align:left">不支持</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t335.2 安装lnmp">5.2 安装lnmp <a href="#t335.2 安装lnmp"> # </a></h3>
+<ul>
+<li><a href="https://lnmp.org/">lnmp</a></li>
+<li><a href="https://lnmp.org/install.html">install</a></li>
+</ul>
+<p>下载安装脚本</p>
+<pre><code class="lang-js">wget http:<span class="hljs-comment">//soft.vpser.net/lnmp/lnmp1.5.tar.gz -cO lnmp1.5.tar.gz &amp;&amp; tar zxf lnmp1.5.tar.gz &amp;&amp; cd lnmp1.5 &amp;&amp; ./install.sh lnmp</span>
+</code></pre>
+
+    

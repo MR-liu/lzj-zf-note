@@ -1,0 +1,933 @@
+
+        <h2 id="t01. 初始化项目">1. 初始化项目 <a href="#t01. 初始化项目"> # </a></h2>
+<pre><code class="lang-js">dva <span class="hljs-keyword">new</span> chat
+cd chat 
+npm i 
+npm start
+cnpm i styled-components -S
+</code></pre>
+<h2 id="t12.绘制登录表单">2.绘制登录表单 <a href="#t12.绘制登录表单"> # </a></h2>
+<h3 id="t22.1 login/index.js">2.1 login/index.js <a href="#t22.1 login/index.js"> # </a></h3>
+<p>src/pages/login/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">'styled-components'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> {Form,Input,message,Button} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Login</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    handleSubmit=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        event.preventDefault();
+        <span class="hljs-keyword">this</span>.loginForm.props.form.validateFields(<span class="hljs-function">(<span class="hljs-params">err,values</span>) =&gt;</span> {
+            <span class="hljs-keyword">if</span> (err) {
+                <span class="hljs-keyword">return</span> message.warn(<span class="hljs-string">'登录信息输入不合法!请重新输入!'</span>);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'login/login'</span>});
+            }
+        });
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedLayout</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">WrappedLoginForm</span>
+                    <span class="hljs-attr">handleSubmit</span>=<span class="hljs-string">{this.handleSubmit}</span>
+                    <span class="hljs-attr">wrappedComponentRef</span>=<span class="hljs-string">{inst</span>=&gt;</span>this.loginForm=inst}
+                /&gt;
+            <span class="hljs-tag">&lt;/<span class="hljs-name">WrappedLayout</span>&gt;</span></span>
+       )
+   }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoginForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    render() {
+        <span class="hljs-keyword">const</span> {<span class="hljs-attr">form</span>: {getFieldDecorator},handleSubmit}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>请输入邮箱登录<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                    {
+                      getFieldDecorator('email',{
+                        rules: [
+                            {required:true,message:'请输入邮箱地址'},
+                            {type:'email',message:'请输入合法的邮箱地址'}
+                        ]
+                      })(<span class="hljs-tag">&lt;<span class="hljs-name">Input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"请输入邮箱"</span>/&gt;</span>)
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Button</span> <span class="hljs-attr">htmlType</span>=<span class="hljs-string">"submit"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"primary"</span>&gt;</span>登录<span class="hljs-tag">&lt;/<span class="hljs-name">Button</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">const</span> WrappedLoginForm =  Form.create()(LoginForm);
+<span class="hljs-keyword">const</span> WrappedLayout=styled.div<span class="hljs-string">`
+  width:100%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  form {
+      width:300px;
+      margin-top:-500px;
+      padding:20px;
+      border:1px solid #999;
+      border-radius:5px;
+      box-shadow:1px 1px 2px 1px,-1px -1px 2px 1px;
+      h4{
+          text-align:center;
+          font-weight:normal;
+      }
+      button{
+          width:100%;
+      }
+  }
+`</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span>=&gt;</span>state.login
+)(Login);
+</code></pre>
+<h2 id="t33. 实现登录">3. 实现登录 <a href="#t33. 实现登录"> # </a></h2>
+<h3 id="t43.1  src/pages/login/index.js">3.1  src/pages/login/index.js <a href="#t43.1  src/pages/login/index.js"> # </a></h3>
+<p>src/pages/login/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">'styled-components'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> {Form,Input,message,Button} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Login</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    handleSubmit=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        event.preventDefault();
+        <span class="hljs-keyword">this</span>.loginForm.props.form.validateFields(<span class="hljs-function">(<span class="hljs-params">err,values</span>) =&gt;</span> {
+            <span class="hljs-keyword">if</span> (err) {
+                <span class="hljs-keyword">return</span> message.warn(<span class="hljs-string">'登录信息输入不合法!请重新输入!'</span>);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'login/login'</span>,<span class="hljs-attr">payload</span>:values});
+            }
+        });
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedLayout</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">WrappedLoginForm</span>
+                    <span class="hljs-attr">handleSubmit</span>=<span class="hljs-string">{this.handleSubmit}</span>
+                    <span class="hljs-attr">wrappedComponentRef</span>=<span class="hljs-string">{inst</span>=&gt;</span>this.loginForm=inst}
+                /&gt;
+            <span class="hljs-tag">&lt;/<span class="hljs-name">WrappedLayout</span>&gt;</span></span>
+       )
+   }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoginForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    render() {
+        <span class="hljs-keyword">const</span> {<span class="hljs-attr">form</span>: {getFieldDecorator},handleSubmit}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">h4</span>&gt;</span>请输入邮箱登录<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                    {
+                      getFieldDecorator('email',{
+                        rules: [
+                            {required:true,message:'请输入邮箱地址'},
+                            {type:'email',message:'请输入合法的邮箱地址'}
+                        ]
+                      })(<span class="hljs-tag">&lt;<span class="hljs-name">Input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"请输入邮箱"</span>/&gt;</span>)
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Button</span> <span class="hljs-attr">htmlType</span>=<span class="hljs-string">"submit"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"primary"</span>&gt;</span>登录<span class="hljs-tag">&lt;/<span class="hljs-name">Button</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">const</span> WrappedLoginForm =  Form.create()(LoginForm);
+<span class="hljs-keyword">const</span> WrappedLayout=styled.div<span class="hljs-string">`
+  width:100%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  form {
+      width:300px;
+      padding:20px;
+      border:1px solid #999;
+      border-radius:5px;
+      box-shadow:1px 1px 2px 1px,-1px -1px 2px 1px;
+      h4{
+          text-align:center;
+          font-weight:normal;
+      }
+      button{
+          width:100%;
+      }
+  }
+`</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span>=&gt;</span>state.login
+)(Login);
+</code></pre>
+<h3 id="t53.2 src/pages/login/models/login.js">3.2 src/pages/login/models/login.js <a href="#t53.2 src/pages/login/models/login.js"> # </a></h3>
+<p>src/pages/login/models/login.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> service <span class="hljs-keyword">from</span> <span class="hljs-string">'../services/login'</span>;
+<span class="hljs-keyword">import</span> {routerRedux} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+
+    <span class="hljs-attr">namespace</span>: <span class="hljs-string">'login'</span>,
+
+    <span class="hljs-attr">state</span>: {
+        <span class="hljs-attr">user</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">error</span>:<span class="hljs-literal">null</span>
+    },
+
+    <span class="hljs-attr">subscriptions</span>: {
+      setup({ dispatch, history }) {
+      },
+    },
+
+    <span class="hljs-attr">effects</span>: {
+        *login({payload},{call,put}) {
+            <span class="hljs-keyword">const</span> {data,error,code}=<span class="hljs-keyword">yield</span> call(service.login,payload);
+             <span class="hljs-keyword">if</span> (code == <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setUser'</span>,<span class="hljs-attr">payload</span>:data});
+                <span class="hljs-keyword">yield</span> put(routerRedux.push(<span class="hljs-string">'/rooms'</span>));
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setError'</span>,<span class="hljs-attr">payload</span>:error});
+            } 
+      }
+    },
+
+    <span class="hljs-attr">reducers</span>: {
+        setUser(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">user</span>:payload };
+        },
+        setError(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">error</span>:payload };
+      }
+    },
+};
+</code></pre>
+<h3 id="t63.3 src/pages/login/services/login.js">3.3 src/pages/login/services/login.js <a href="#t63.3 src/pages/login/services/login.js"> # </a></h3>
+<p>src/pages/login/services/login.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> request <span class="hljs-keyword">from</span> <span class="hljs-string">'../../../utils/request'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">login</span>(<span class="hljs-params">payload</span>) </span>{
+    <span class="hljs-keyword">return</span> request(<span class="hljs-string">'/login'</span>,{
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>, 
+        <span class="hljs-attr">body</span>:<span class="hljs-built_in">JSON</span>.stringify(payload)
+    });
+}
+</code></pre>
+<h3 id="t73.4 src/utils/request.js">3.4 src/utils/request.js <a href="#t73.4 src/utils/request.js"> # </a></h3>
+<p>src/utils/request.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> BaseUrl=<span class="hljs-string">'http://localhost:7001'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">request</span>(<span class="hljs-params">url, options</span>) </span>{
+  <span class="hljs-keyword">return</span> fetch(BaseUrl+url, options)
+    .then(checkStatus)
+    .then(parseJSON)
+    .catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> ({ err }));
+}
+</code></pre>
+<h2 id="t84. 实现房间列表功能">4. 实现房间列表功能 <a href="#t84. 实现房间列表功能"> # </a></h2>
+<h3 id="t94.1 pages/rooms/index.js">4.1 pages/rooms/index.js <a href="#t94.1 pages/rooms/index.js"> # </a></h3>
+<p>pages/rooms/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">'styled-components'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> {Form,Input,message,Button,Layout,Menu,Breadcrumb,Card,Row,Col} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> logo <span class="hljs-keyword">from</span> <span class="hljs-string">'../../assets/logo.png'</span>;
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./index.less'</span>;
+<span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'umi/link'</span>;
+<span class="hljs-keyword">const</span> {Header,Content,Footer}=Layout;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Rooms</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    handleSubmit=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        event.preventDefault();
+        <span class="hljs-keyword">this</span>.loginForm.props.form.validateFields(<span class="hljs-function">(<span class="hljs-params">err,values</span>) =&gt;</span> {
+            <span class="hljs-keyword">if</span> (err) {
+                <span class="hljs-keyword">return</span> message.warn(<span class="hljs-string">'登录信息输入不合法!请重新输入!'</span>);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'login/login'</span>,<span class="hljs-attr">payload</span>:values});
+            }
+        });
+    }
+    handleKeywordChange=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'rooms/setKeyword'</span>,<span class="hljs-attr">payload</span>: event.target.value});
+    }
+    createRoom=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'rooms/createRoom'</span>});
+    }
+    render() {
+        <span class="hljs-keyword">const</span> {list=[]}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Header</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{logo}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.logo}/</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Menu</span>
+                        <span class="hljs-attr">theme</span>=<span class="hljs-string">"dark"</span>
+                        <span class="hljs-attr">mode</span>=<span class="hljs-string">"horizontal"</span>
+                        <span class="hljs-attr">defaultSelectedKeys</span>=<span class="hljs-string">{[</span>'/<span class="hljs-attr">rooms</span>']}
+                        <span class="hljs-attr">style</span>=<span class="hljs-string">{{lineHeight:</span>'<span class="hljs-attr">64px</span>'}}
+                    &gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/rooms"</span>&gt;</span>房间列表<span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Menu</span>&gt;</span>    
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Header</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:</span>'<span class="hljs-attr">0</span> <span class="hljs-attr">50px</span>'}}&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Breadcrumb</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{margin:</span> '<span class="hljs-attr">16px</span> <span class="hljs-attr">0</span>'}}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Breadcrumb.Item</span>&gt;</span>房间列表<span class="hljs-tag">&lt;/<span class="hljs-name">Breadcrumb.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Breadcrumb</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">SearchForm</span>
+                          <span class="hljs-attr">createRoom</span>=<span class="hljs-string">{this.createRoom}</span>
+                          <span class="hljs-attr">handleKeywordChange</span>=<span class="hljs-string">{this.handleKeywordChange}</span>
+                          <span class="hljs-attr">size</span>=<span class="hljs-string">{list.length}</span>
+                        /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Card</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Row</span>  <span class="hljs-attr">gutter</span>=<span class="hljs-string">{16}</span>&gt;</span>
+                            {
+                                list.map(room =&gt; (
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{6}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:</span>'<span class="hljs-attr">5px</span> <span class="hljs-attr">0</span>'}}&gt;</span>
+                                        <span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{</span>`/<span class="hljs-attr">rooms</span>/${<span class="hljs-attr">room._id</span>}`}&gt;</span>
+                                            <span class="hljs-tag">&lt;<span class="hljs-name">Card</span>
+                                                <span class="hljs-attr">hoverable</span>
+                                                <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">width:</span> <span class="hljs-attr">240</span> }}
+                                                <span class="hljs-attr">cover</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">img</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"example"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"</span> /&gt;</span>}
+                                            &gt;
+                                                <span class="hljs-tag">&lt;<span class="hljs-name">Card.Meta</span>
+                                                    <span class="hljs-attr">title</span>=<span class="hljs-string">{room.name}</span>
+                                                /&gt;</span>
+                                            <span class="hljs-tag">&lt;/<span class="hljs-name">Card</span>&gt;</span>
+                                        <span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span>
+                                    <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                                ))
+                            }
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Card</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Footer</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{textAlign:</span>'<span class="hljs-attr">center</span>'}}&gt;</span>
+                    珠峰培训 @2018 
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Footer</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+       )
+   }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    render() {
+        <span class="hljs-keyword">const</span> {handleKeywordChange,createRoom,size}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">const</span> formItemLayout={
+            <span class="hljs-attr">labelCol</span>: {<span class="hljs-attr">span</span>: <span class="hljs-number">8</span>},
+            <span class="hljs-attr">wrapperCol</span>:{<span class="hljs-attr">span</span>:<span class="hljs-number">16</span>}
+        }
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"请输入房间名关键字"</span> {<span class="hljs-attr">...formItemLayout</span>}&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Row</span> <span class="hljs-attr">gutter</span>=<span class="hljs-string">{18}</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{12}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"请输入关键字"</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleKeywordChange}</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{12}</span>&gt;</span>
+                            {size==0&amp;&amp;<span class="hljs-tag">&lt;<span class="hljs-name">Button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{createRoom}</span>&gt;</span>创建房间<span class="hljs-tag">&lt;/<span class="hljs-name">Button</span>&gt;</span>}
+
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({
+        <span class="hljs-attr">list</span>: state.rooms.list.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+            <span class="hljs-keyword">return</span> item.name&amp;&amp;item.name.indexOf(state.rooms.keyword)!=<span class="hljs-number">-1</span>;
+        })
+    })
+)(Rooms);
+</code></pre>
+<h3 id="t104.2 pages/rooms/models/rooms.js">4.2 pages/rooms/models/rooms.js <a href="#t104.2 pages/rooms/models/rooms.js"> # </a></h3>
+<p>pages/rooms/models/rooms.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> service <span class="hljs-keyword">from</span> <span class="hljs-string">'../services/rooms'</span>;
+<span class="hljs-keyword">import</span> {routerRedux} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+
+    <span class="hljs-attr">namespace</span>: <span class="hljs-string">'rooms'</span>,
+
+    <span class="hljs-attr">state</span>: {
+        <span class="hljs-attr">list</span>: [],
+        <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">keyword</span>:<span class="hljs-string">''</span>
+    },
+
+    <span class="hljs-attr">subscriptions</span>: {
+        setup({dispatch,history}) {
+            history.listen(<span class="hljs-function">(<span class="hljs-params">{pathname,query}</span>) =&gt;</span> {
+                <span class="hljs-keyword">if</span> (pathname == <span class="hljs-string">'/rooms'</span>) {
+                    dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'list'</span>});
+                }
+            });
+      },
+    },
+
+    <span class="hljs-attr">effects</span>: {
+        *list({payload},{call,put}) {
+            <span class="hljs-keyword">const</span> {data,error,code}=<span class="hljs-keyword">yield</span> call(service.list,payload);
+             <span class="hljs-keyword">if</span> (code == <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'listed'</span>,<span class="hljs-attr">payload</span>:data});
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setError'</span>,<span class="hljs-attr">payload</span>:error});
+            } 
+        },
+        *createRoom({},{call,put,select}) {
+            <span class="hljs-keyword">let</span> keyword=<span class="hljs-keyword">yield</span> select(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state.rooms.keyword);
+            <span class="hljs-keyword">const</span> {data,error,code}=<span class="hljs-keyword">yield</span> call(service.createRoom,{<span class="hljs-attr">name</span>:keyword});
+             <span class="hljs-keyword">if</span> (code == <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'list'</span>});
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setError'</span>,<span class="hljs-attr">payload</span>:error});
+            } 
+      }
+    },
+
+    <span class="hljs-attr">reducers</span>: {
+        listed(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">list</span>:payload };
+        },
+        setError(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">error</span>:payload };
+        },
+        setKeyword(state,{payload}) {
+            <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">keyword</span>:payload};
+        }
+    },
+};
+
+</code></pre>
+<h3 id="t114.3 services/rooms.js">4.3 services/rooms.js <a href="#t114.3 services/rooms.js"> # </a></h3>
+<p>services/rooms.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> request <span class="hljs-keyword">from</span> <span class="hljs-string">'../../../utils/request'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">list</span>(<span class="hljs-params">keyword=<span class="hljs-string">''</span></span>) </span>{
+    <span class="hljs-keyword">return</span> request(<span class="hljs-string">`/rooms`</span>,{
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>
+    });
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createRoom</span>(<span class="hljs-params">values</span>) </span>{
+    <span class="hljs-keyword">return</span> request(<span class="hljs-string">`/rooms`</span>,{
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
+        <span class="hljs-attr">headers</span>:{<span class="hljs-string">"Content-Type"</span>:<span class="hljs-string">"application/json"</span>},
+        <span class="hljs-attr">body</span>:<span class="hljs-built_in">JSON</span>.stringify(values)
+    });
+}
+
+</code></pre>
+<h2 id="t125. 聊天页面">5. 聊天页面 <a href="#t125. 聊天页面"> # </a></h2>
+<h3 id="t135.1 src/pages/login/models/login.js">5.1 src/pages/login/models/login.js <a href="#t135.1 src/pages/login/models/login.js"> # </a></h3>
+<p>src/pages/login/models/login.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> service <span class="hljs-keyword">from</span> <span class="hljs-string">'../services/login'</span>;
+<span class="hljs-keyword">import</span> {routerRedux} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> {decode} <span class="hljs-keyword">from</span> <span class="hljs-string">'jsonwebtoken'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+
+    <span class="hljs-attr">namespace</span>: <span class="hljs-string">'login'</span>,
+
+    <span class="hljs-attr">state</span>: {
+        <span class="hljs-attr">user</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">token</span>:<span class="hljs-literal">null</span>,
+        <span class="hljs-attr">error</span>:<span class="hljs-literal">null</span>
+    },
+
+    <span class="hljs-attr">subscriptions</span>: {
+      setup({ dispatch, history }) {
+      },
+    },
+
+    <span class="hljs-attr">effects</span>: {
+        *login({payload},{call,put}) {
+            <span class="hljs-keyword">const</span> {<span class="hljs-attr">data</span>:token,error,code}=<span class="hljs-keyword">yield</span> call(service.login,payload);
+            <span class="hljs-keyword">if</span> (code==<span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">let</span> user=decode(token);        
+                localStorage.setItem(<span class="hljs-string">'token'</span>,token);
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setUser'</span>,<span class="hljs-attr">payload</span>:user});
+                <span class="hljs-keyword">yield</span> put(routerRedux.push(<span class="hljs-string">'/rooms'</span>));
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setError'</span>,<span class="hljs-attr">payload</span>:error});
+            } 
+        },
+        *validate({payload},{call,put}) {
+            <span class="hljs-keyword">let</span> token=localStorage.getItem(<span class="hljs-string">'token'</span>)||<span class="hljs-string">''</span>;
+            <span class="hljs-keyword">if</span> (token) {
+                <span class="hljs-keyword">let</span> user=decode(token);    
+                <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:<span class="hljs-string">'setUser'</span>,<span class="hljs-attr">payload</span>:user});
+            }<span class="hljs-keyword">else</span>{
+                <span class="hljs-keyword">yield</span> put(routerRedux.push(<span class="hljs-string">'/login'</span>));
+            }
+        },
+        *logout({payload},{call,put}) {
+            <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>: <span class="hljs-string">'setUser'</span>,<span class="hljs-attr">payload</span>: <span class="hljs-literal">null</span>});
+            localStorage.removeItem(<span class="hljs-string">'token'</span>);
+            <span class="hljs-keyword">yield</span> put(routerRedux.push(<span class="hljs-string">'/login'</span>));
+        }
+    },
+
+    <span class="hljs-attr">reducers</span>: {
+        setUser(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">user</span>:payload };
+        },
+        setError(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">error</span>:payload };
+      }
+    },
+};
+
+</code></pre>
+<h3 id="t145.2 src/pages/login/services/login.js">5.2 src/pages/login/services/login.js <a href="#t145.2 src/pages/login/services/login.js"> # </a></h3>
+<p>src/pages/login/services/login.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> request <span class="hljs-keyword">from</span> <span class="hljs-string">'../../../utils/request'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">login</span>(<span class="hljs-params">payload</span>) </span>{
+    <span class="hljs-keyword">return</span> request(<span class="hljs-string">'/login'</span>,{
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>, 
+        <span class="hljs-attr">headers</span>:{<span class="hljs-string">"Content-Type"</span>:<span class="hljs-string">"application/json"</span>},
+        <span class="hljs-attr">body</span>:<span class="hljs-built_in">JSON</span>.stringify(payload)
+    });
+}
+</code></pre>
+<h3 id="t155.3 src/pages/rooms/index.js">5.3 src/pages/rooms/index.js <a href="#t155.3 src/pages/rooms/index.js"> # </a></h3>
+<p>src/pages/rooms/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">'styled-components'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> {Form,Input,message,Button,Layout,Menu,Breadcrumb,Card,Row,Col} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> logo <span class="hljs-keyword">from</span> <span class="hljs-string">'../../assets/logo.png'</span>;
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./index.less'</span>;
+<span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'umi/link'</span>;
+<span class="hljs-keyword">const</span> {Header,Content,Footer}=Layout;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Rooms</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    handleSubmit=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        event.preventDefault();
+        <span class="hljs-keyword">this</span>.loginForm.props.form.validateFields(<span class="hljs-function">(<span class="hljs-params">err,values</span>) =&gt;</span> {
+            <span class="hljs-keyword">if</span> (err) {
+                <span class="hljs-keyword">return</span> message.warn(<span class="hljs-string">'登录信息输入不合法!请重新输入!'</span>);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'login/login'</span>,<span class="hljs-attr">payload</span>:values});
+            }
+        });
+    }
+    handleKeywordChange=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'rooms/setKeyword'</span>,<span class="hljs-attr">payload</span>: event.target.value});
+    }
+    createRoom=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">this</span>.props.dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'rooms/createRoom'</span>});
+    }
+    render() {
+        <span class="hljs-keyword">const</span> {list=[],user}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Header</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{logo}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.logo}/</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Menu</span>
+                        <span class="hljs-attr">theme</span>=<span class="hljs-string">"dark"</span>
+                        <span class="hljs-attr">mode</span>=<span class="hljs-string">"horizontal"</span>
+                        <span class="hljs-attr">defaultSelectedKeys</span>=<span class="hljs-string">{[</span>'/<span class="hljs-attr">rooms</span>']}
+                        <span class="hljs-attr">style</span>=<span class="hljs-string">{{lineHeight:</span>'<span class="hljs-attr">64px</span>'}}
+                    &gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/rooms"</span>&gt;</span>
+                        房间列表
+                                用户: {user&amp;&amp;user.name}
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Menu</span>&gt;</span>    
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Header</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:</span>'<span class="hljs-attr">0</span> <span class="hljs-attr">50px</span>'}}&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Breadcrumb</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{margin:</span> '<span class="hljs-attr">16px</span> <span class="hljs-attr">0</span>'}}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Breadcrumb.Item</span>&gt;</span>房间列表: {user&amp;&amp;user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">Breadcrumb.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Breadcrumb</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">SearchForm</span>
+                          <span class="hljs-attr">createRoom</span>=<span class="hljs-string">{this.createRoom}</span>
+                          <span class="hljs-attr">handleKeywordChange</span>=<span class="hljs-string">{this.handleKeywordChange}</span>
+                          <span class="hljs-attr">size</span>=<span class="hljs-string">{list.length}</span>
+                        /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Card</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Row</span>  <span class="hljs-attr">gutter</span>=<span class="hljs-string">{16}</span>&gt;</span>
+                            {
+                                list.map(room =&gt; (
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{room._id}</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{6}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:</span>'<span class="hljs-attr">5px</span> <span class="hljs-attr">0</span>'}}&gt;</span>
+                                        <span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{</span>`/<span class="hljs-attr">messages</span>/${<span class="hljs-attr">room._id</span>}`}&gt;</span>
+                                            <span class="hljs-tag">&lt;<span class="hljs-name">Card</span>
+                                                <span class="hljs-attr">hoverable</span>
+                                                <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">width:</span> <span class="hljs-attr">240</span> }}
+                                                <span class="hljs-attr">cover</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">img</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">"example"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"</span> /&gt;</span>}
+                                            &gt;
+                                                <span class="hljs-tag">&lt;<span class="hljs-name">Card.Meta</span>
+                                                    <span class="hljs-attr">title</span>=<span class="hljs-string">{room.name}</span>
+                                                /&gt;</span>
+                                            <span class="hljs-tag">&lt;/<span class="hljs-name">Card</span>&gt;</span>
+                                        <span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span>
+                                    <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                                ))
+                            }
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Card</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Footer</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{textAlign:</span>'<span class="hljs-attr">center</span>'}}&gt;</span>
+                    珠峰培训 @2018 
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Footer</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+       )
+   }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    render() {
+        <span class="hljs-keyword">const</span> {handleKeywordChange,createRoom,size}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">const</span> formItemLayout={
+            <span class="hljs-attr">labelCol</span>: {<span class="hljs-attr">span</span>: <span class="hljs-number">8</span>},
+            <span class="hljs-attr">wrapperCol</span>:{<span class="hljs-attr">span</span>:<span class="hljs-number">16</span>}
+        }
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"请输入房间名关键字"</span> {<span class="hljs-attr">...formItemLayout</span>}&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Row</span> <span class="hljs-attr">gutter</span>=<span class="hljs-string">{18}</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{12}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"请输入关键字"</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleKeywordChange}</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{12}</span>&gt;</span>
+                            {size==0&amp;&amp;<span class="hljs-tag">&lt;<span class="hljs-name">Button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{createRoom}</span>&gt;</span>创建房间<span class="hljs-tag">&lt;/<span class="hljs-name">Button</span>&gt;</span>}
+
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({
+        <span class="hljs-attr">list</span>: state.rooms.list.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+            <span class="hljs-keyword">return</span> item.name&amp;&amp;item.name.indexOf(state.rooms.keyword)!=<span class="hljs-number">-1</span>;
+        }),
+        <span class="hljs-attr">user</span>:state.login.user
+    })
+)(Rooms);
+</code></pre>
+<h3 id="t165.4 pages/messages/$id.js">5.4 pages/messages/$id.js <a href="#t165.4 pages/messages/$id.js"> # </a></h3>
+<p>pages/messages/$id.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Layout,Row,Col,Menu,Icon,Breadcrumb,Input,List,Avatar,Spin,Button} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>; 
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./index.less'</span>;
+<span class="hljs-keyword">import</span> messages <span class="hljs-keyword">from</span> <span class="hljs-string">'./models/messages'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">const</span> {Header,Sider,Footer,Content}=Layout;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Messages</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    state={<span class="hljs-attr">collapsed</span>: <span class="hljs-literal">false</span>}
+    onCollapse=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">collapsed</span>:!<span class="hljs-keyword">this</span>.state.collapsed});
+    }
+    handleKeyDown=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">let</span> code=event.keyCode;
+        <span class="hljs-keyword">let</span> content = event.target.value;
+        <span class="hljs-keyword">if</span> (code == <span class="hljs-number">13</span> &amp;&amp; content) {
+            <span class="hljs-keyword">this</span>.props.dispatch({
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'messages/addMessage'</span>,
+                <span class="hljs-attr">payload</span>:{content}
+            });
+        }
+    }
+    render() {
+        <span class="hljs-keyword">let</span> {messages,users,room,user}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.props);
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">minHeight:</span> '<span class="hljs-attr">100vh</span>' }}&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Sider</span>
+                    <span class="hljs-attr">collapsible</span>
+                    <span class="hljs-attr">collapsed</span>=<span class="hljs-string">{this.state.collapsed}</span>
+                    <span class="hljs-attr">onCollapse</span>=<span class="hljs-string">{this.onCollapse}</span>
+                &gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">h3</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles[</span>'<span class="hljs-attr">room-title</span>']} &gt;</span>{room.name}<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Menu</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:</span>'<span class="hljs-attr">10px</span>'}} <span class="hljs-attr">theme</span>=<span class="hljs-string">"dark"</span> <span class="hljs-attr">defaultSelectedKeys</span>=<span class="hljs-string">{[</span>'<span class="hljs-attr">1</span>']} <span class="hljs-attr">mode</span>=<span class="hljs-string">"inline"</span>&gt;</span>
+                        {
+                            users.map(user =&gt; (
+                                <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{user._id}</span>&gt;</span>
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{user.avatar}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{width:32,height:32,borderRadius:</span>'<span class="hljs-attr">5px</span>'}}/&gt;</span>
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{marginLeft:</span> <span class="hljs-attr">15</span>}}&gt;</span>{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                                <span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+                            ))
+                        }
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Menu</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Sider</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{margin:</span> '<span class="hljs-attr">16px</span>',<span class="hljs-attr">backgroundColor:</span> '#<span class="hljs-attr">FFF</span>'}}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">List</span>
+                            <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:15}}</span>
+                            <span class="hljs-attr">itemLayout</span>=<span class="hljs-string">"horizontal"</span>
+                            <span class="hljs-attr">dataSource</span>=<span class="hljs-string">{messages}</span>
+                            <span class="hljs-attr">renderItem</span>=<span class="hljs-string">{</span>
+                                <span class="hljs-attr">message</span> =&gt;</span> (
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">List.Item</span> <span class="hljs-attr">actions</span>=<span class="hljs-string">{[]}</span>&gt;</span>
+                                        <span class="hljs-tag">&lt;<span class="hljs-name">List.Item.Meta</span>
+                                            <span class="hljs-attr">avatar</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Avatar</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{message.user.avatar}</span> /&gt;</span>}
+                                            title={message.user.name}
+                                            description={message.user.email}
+                                        /&gt;
+                                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{message.content}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                                    <span class="hljs-tag">&lt;/<span class="hljs-name">List.Item</span>&gt;</span>
+                                )
+                            }
+                        &gt;
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">List</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Footer</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{textAlign:</span> '<span class="hljs-attr">center</span>'}}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Row</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{3}</span>&gt;</span>
+                                <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{user</span> &amp;&amp; <span class="hljs-attr">user.avatar</span>} <span class="hljs-attr">style</span>=<span class="hljs-string">{{height:30,height:30,borderRadius:5}}/</span>&gt;</span>
+                                {user&amp;&amp; user.name}说:
+                                <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{21}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">onKeyDown</span>=<span class="hljs-string">{this.handleKeyDown}/</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Footer</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span>
+           <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({
+        ...state.messages,
+        <span class="hljs-attr">user</span>:state.login.user
+    })
+)(Messages);
+</code></pre>
+<h3 id="t175.5 src/pages/messages/models/messages.js">5.5 src/pages/messages/models/messages.js <a href="#t175.5 src/pages/messages/models/messages.js"> # </a></h3>
+<p>src/pages/messages/models/messages.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> pathToRegexp <span class="hljs-keyword">from</span> <span class="hljs-string">'path-to-regexp'</span>;
+<span class="hljs-keyword">import</span> io <span class="hljs-keyword">from</span> <span class="hljs-string">'socket.io-client'</span>;
+<span class="hljs-keyword">import</span> {routerRedux} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">let</span> client;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+
+    <span class="hljs-attr">namespace</span>: <span class="hljs-string">'messages'</span>,
+
+    <span class="hljs-attr">state</span>: {
+        <span class="hljs-attr">room</span>: <span class="hljs-literal">null</span>,
+        <span class="hljs-attr">users</span>:[],
+        <span class="hljs-attr">messages</span>:[]
+    },
+
+    <span class="hljs-attr">subscriptions</span>: {
+      setup({dispatch,history}) {
+          history.listen(<span class="hljs-function">(<span class="hljs-params">{pathname,query}</span>) =&gt;</span> {
+              <span class="hljs-keyword">let</span> result=pathToRegexp(<span class="hljs-string">'/messages/:id'</span>).exec(pathname);
+              <span class="hljs-keyword">if</span> (result) {
+                  <span class="hljs-keyword">let</span> room=result[<span class="hljs-number">1</span>];
+                  dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'setRoom'</span>,<span class="hljs-attr">payload</span>: room});
+                  dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'login/validate'</span>});
+                  <span class="hljs-keyword">let</span> socket=io(<span class="hljs-string">'http://127.0.0.1:7001'</span>,{
+                      <span class="hljs-attr">query</span>: {<span class="hljs-attr">token</span>:localStorage.getItem(<span class="hljs-string">'token'</span>)||<span class="hljs-string">''</span>,room}
+                  });
+                  client=socket;
+                  socket.on(<span class="hljs-string">'connect'</span>,() =&gt; {
+                      socket.emit(<span class="hljs-string">'getRoom'</span>,room);
+                  });
+                  socket.on(<span class="hljs-string">'room'</span>,(room) =&gt; {
+                      dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'room'</span>,<span class="hljs-attr">payload</span>:room});
+                  });
+                  socket.on(<span class="hljs-string">'messageAdded'</span>,message =&gt; {
+                      dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'messageAdded'</span>,<span class="hljs-attr">payload</span>:message});
+                  });
+                    socket.on(<span class="hljs-string">'online'</span>,user =&gt; {
+                      dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'addUser'</span>,<span class="hljs-attr">payload</span>:user});
+                  });
+                  socket.on(<span class="hljs-string">'offline'</span>,id =&gt; {
+                      dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'delUser'</span>,<span class="hljs-attr">payload</span>:id});
+                  });
+                  socket.on(<span class="hljs-string">'needLogin'</span>,() =&gt; {
+                      dispatch(routerRedux.push(<span class="hljs-string">'/login'</span>));
+                    });
+                    socket.on(<span class="hljs-string">'disconnect'</span>,() =&gt; {
+                        dispatch({<span class="hljs-attr">type</span>: <span class="hljs-string">'login/logout'</span>});
+                    });
+                    socket.on(<span class="hljs-string">'error'</span>,() =&gt; {
+                      dispatch(routerRedux.push(<span class="hljs-string">'/login'</span>));
+                  });
+              }
+          });
+      }
+    },
+
+    <span class="hljs-attr">effects</span>: {
+      *addMessage({ payload }, { call, put,select }) {
+          <span class="hljs-keyword">const</span> {<span class="hljs-attr">login</span>:{user},<span class="hljs-attr">messages</span>:{room}}=<span class="hljs-keyword">yield</span> select(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state);
+          <span class="hljs-keyword">let</span> message=payload;
+          message.user=user._id;
+          message.room=room;
+          client.emit(<span class="hljs-string">'addMessage'</span>,message);
+      }
+    },
+
+    <span class="hljs-attr">reducers</span>: {
+      setRoom(state, action) {
+          <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">room</span>:action.payload};
+      },
+      room(state,{payload}) {
+          <span class="hljs-keyword">return</span> { ...state, ...payload};
+      },
+      messageAdded(state,action) {
+          <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">messages</span>:[...state.messages,action.payload]};
+     },
+        addUser(state,{payload}) {
+            <span class="hljs-keyword">let</span> existUser=state.users.find(<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> user._id==payload._id);
+          <span class="hljs-keyword">return</span> existUser?state:{...state,<span class="hljs-attr">users</span>:[...state.users,payload]};
+     },
+        delUser(state,{payload}) {
+          <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">users</span>:state.users.filter(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item._id!= payload)};
+     }
+    }
+};
+
+</code></pre>
+<h2 id="t186. 支持表情">6. 支持表情 <a href="#t186. 支持表情"> # </a></h2>
+<h3 id="t196.1 src/pages/messages/$id.js">6.1 src/pages/messages/$id.js <a href="#t196.1 src/pages/messages/$id.js"> # </a></h3>
+<p>src/pages/messages/$id.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Layout,Row,Col,Menu,Icon,Breadcrumb,Input,List,Avatar,Spin,Button,Popover,Card} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>; 
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./index.less'</span>;
+<span class="hljs-keyword">import</span> messages <span class="hljs-keyword">from</span> <span class="hljs-string">'./models/messages'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> expressions <span class="hljs-keyword">from</span> <span class="hljs-string">'./expressions'</span>;
+<span class="hljs-keyword">import</span> styled <span class="hljs-keyword">from</span> <span class="hljs-string">'styled-components'</span>;
+<span class="hljs-keyword">import</span> face <span class="hljs-keyword">from</span> <span class="hljs-string">'../../assets/face.png'</span>;
+<span class="hljs-keyword">const</span> {Header,Sider,Footer,Content}=Layout;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Messages</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    state={<span class="hljs-attr">collapsed</span>: <span class="hljs-literal">false</span>,<span class="hljs-attr">inputVal</span>:<span class="hljs-string">''</span>}
+    onCollapse=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">collapsed</span>:!<span class="hljs-keyword">this</span>.state.collapsed});
+    }
+    sendMessage=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">let</span> content = event.target.value;
+        <span class="hljs-keyword">this</span>.props.dispatch({
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'messages/addMessage'</span>,
+            <span class="hljs-attr">payload</span>:{content}
+        });
+    }
+    handleInputChange=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">inputVal</span>:event.target.value
+        });
+    }
+    fillFace=<span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> {index}=event.currentTarget.dataset;
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">inputVal</span>:<span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-keyword">this</span>.state.inputVal}</span>#(<span class="hljs-subst">${index}</span>)`</span>
+        });
+    }
+    render() {
+        <span class="hljs-keyword">let</span> {messages,users,room,user}=<span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">let</span> faces=(
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Row</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{width:512}}</span>&gt;</span>
+                {
+                    expressions.default.map((item,index) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{3}</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+                                <span class="hljs-attr">data-index</span>=<span class="hljs-string">{index}</span>
+                                <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.fillFace}</span>
+                                <span class="hljs-attr">style</span>=<span class="hljs-string">{{width:</span> '<span class="hljs-attr">64px</span>',<span class="hljs-attr">height:</span> '<span class="hljs-attr">64px</span>',<span class="hljs-attr">backgroundImage:</span> `<span class="hljs-attr">url</span>(${<span class="hljs-attr">face</span>})`,<span class="hljs-attr">backgroundPosition:</span> `<span class="hljs-attr">left</span> ${<span class="hljs-attr">-64</span>*<span class="hljs-attr">index</span>+'<span class="hljs-attr">px</span>'}`}}&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                    ))
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span></span>
+        )
+        <span class="hljs-keyword">let</span> facePanel=(
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Popover</span> <span class="hljs-attr">content</span>=<span class="hljs-string">{faces}</span> <span class="hljs-attr">title</span>=<span class="hljs-string">"表情"</span> <span class="hljs-attr">trigger</span>=<span class="hljs-string">"click"</span>&gt;</span>
+                表情
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Popover</span>&gt;</span></span>
+        )
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">minHeight:</span> '<span class="hljs-attr">100vh</span>' }}&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Sider</span>
+                    <span class="hljs-attr">collapsible</span>
+                    <span class="hljs-attr">collapsed</span>=<span class="hljs-string">{this.state.collapsed}</span>
+                    <span class="hljs-attr">onCollapse</span>=<span class="hljs-string">{this.onCollapse}</span>
+                &gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">h3</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles[</span>'<span class="hljs-attr">room-title</span>']} &gt;</span>{room.name}<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Menu</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:</span>'<span class="hljs-attr">10px</span>'}} <span class="hljs-attr">theme</span>=<span class="hljs-string">"dark"</span> <span class="hljs-attr">defaultSelectedKeys</span>=<span class="hljs-string">{[</span>'<span class="hljs-attr">1</span>']} <span class="hljs-attr">mode</span>=<span class="hljs-string">"inline"</span>&gt;</span>
+                        {
+                            users.map(user =&gt; (
+                                <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{user._id}</span>&gt;</span>
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{user.avatar}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{width:32,height:32,borderRadius:</span>'<span class="hljs-attr">5px</span>'}}/&gt;</span>
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{marginLeft:</span> <span class="hljs-attr">15</span>}}&gt;</span>{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                                <span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+                            ))
+                        }
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Menu</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Sider</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{margin:</span> '<span class="hljs-attr">16px</span>',<span class="hljs-attr">backgroundColor:</span> '#<span class="hljs-attr">FFF</span>'}}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">List</span>
+                            <span class="hljs-attr">style</span>=<span class="hljs-string">{{padding:15}}</span>
+                            <span class="hljs-attr">itemLayout</span>=<span class="hljs-string">"horizontal"</span>
+                            <span class="hljs-attr">dataSource</span>=<span class="hljs-string">{messages}</span>
+                            <span class="hljs-attr">renderItem</span>=<span class="hljs-string">{</span>
+                                <span class="hljs-attr">message</span> =&gt;</span> {
+                                    let content=message.content;
+                                    if (!content || content =='undefined') return  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>;
+                                    content=content.replace(/#\((\d+)\)/g,function (matched,index) {
+                                        let offset=-64*parseInt(index)+'px';
+                                        return `<span class="hljs-tag">&lt;<span class="hljs-name">span</span>
+                                                  <span class="hljs-attr">style</span>=<span class="hljs-string">"display:inline-block;width:64px;height:64px;background-image:url(${face});background-position:left ${offset}"</span>
+                                               &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>`
+                                    });
+                                    return (
+                                        <span class="hljs-tag">&lt;<span class="hljs-name">List.Item</span> <span class="hljs-attr">actions</span>=<span class="hljs-string">{[]}</span>&gt;</span>
+                                        <span class="hljs-tag">&lt;<span class="hljs-name">List.Item.Meta</span>
+                                            <span class="hljs-attr">avatar</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Avatar</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{message.user.avatar}</span> /&gt;</span>}
+                                            title={message.user.name}
+                                            description={message.user.email}
+                                            /&gt;
+                                            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">dangerouslySetInnerHTML</span>=<span class="hljs-string">{{__html:content}}</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                                    <span class="hljs-tag">&lt;/<span class="hljs-name">List.Item</span>&gt;</span>
+                                    )
+                                }
+                            }
+                        &gt;
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">List</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Footer</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{textAlign:</span> '<span class="hljs-attr">center</span>'}}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Row</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{3}</span>&gt;</span>
+                                <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{user</span> &amp;&amp; <span class="hljs-attr">user.avatar</span>} <span class="hljs-attr">style</span>=<span class="hljs-string">{{height:30,height:30,borderRadius:5}}/</span>&gt;</span>
+                                {user&amp;&amp; user.name}说:
+                            <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">Col</span> <span class="hljs-attr">span</span>=<span class="hljs-string">{19}</span>&gt;</span>
+                                <span class="hljs-tag">&lt;<span class="hljs-name">Input</span>
+                                    <span class="hljs-attr">onChange</span>=<span class="hljs-string">{this.handleInputChange}</span>
+                                    <span class="hljs-attr">value</span>=<span class="hljs-string">{this.state.inputVal}</span>
+                                    <span class="hljs-attr">addonBefore</span>=<span class="hljs-string">{facePanel}</span>
+                                    <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"请输入信息"</span>
+                                    <span class="hljs-attr">onPressEnter</span>=<span class="hljs-string">{this.sendMessage}</span>
+                                /&gt;</span>
+                            <span class="hljs-tag">&lt;/<span class="hljs-name">Col</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">Row</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Footer</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span>
+           <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({
+        ...state.messages,
+        <span class="hljs-attr">user</span>:state.login.user
+    })
+)(Messages);
+</code></pre>
+<h3 id="t206.2 src/pages/messages/expressions.js">6.2 src/pages/messages/expressions.js <a href="#t206.2 src/pages/messages/expressions.js"> # </a></h3>
+<p>src/pages/messages/expressions.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+    <span class="hljs-attr">default</span>: [
+        <span class="hljs-string">'呵呵'</span>, <span class="hljs-string">'哈哈'</span>, <span class="hljs-string">'吐舌'</span>, <span class="hljs-string">'啊'</span>, <span class="hljs-string">'酷'</span>, <span class="hljs-string">'怒'</span>, <span class="hljs-string">'开心'</span>, <span class="hljs-string">'汗'</span>, <span class="hljs-string">'泪'</span>, <span class="hljs-string">'黑线'</span>,
+        <span class="hljs-string">'鄙视'</span>, <span class="hljs-string">'不高兴'</span>, <span class="hljs-string">'真棒'</span>, <span class="hljs-string">'钱'</span>, <span class="hljs-string">'疑问'</span>, <span class="hljs-string">'阴险'</span>, <span class="hljs-string">'吐'</span>, <span class="hljs-string">'咦'</span>, <span class="hljs-string">'委屈'</span>, <span class="hljs-string">'花心'</span>,
+        <span class="hljs-string">'呼'</span>, <span class="hljs-string">'笑眼'</span>, <span class="hljs-string">'冷'</span>, <span class="hljs-string">'太开心'</span>, <span class="hljs-string">'滑稽'</span>, <span class="hljs-string">'勉强'</span>, <span class="hljs-string">'狂汗'</span>, <span class="hljs-string">'乖'</span>, <span class="hljs-string">'睡觉'</span>, <span class="hljs-string">'惊哭'</span>,
+        <span class="hljs-string">'升起'</span>, <span class="hljs-string">'惊讶'</span>, <span class="hljs-string">'喷'</span>, <span class="hljs-string">'爱心'</span>, <span class="hljs-string">'心碎'</span>, <span class="hljs-string">'玫瑰'</span>, <span class="hljs-string">'礼物'</span>, <span class="hljs-string">'星星月亮'</span>, <span class="hljs-string">'太阳'</span>, <span class="hljs-string">'音乐'</span>,
+        <span class="hljs-string">'灯泡'</span>, <span class="hljs-string">'蛋糕'</span>, <span class="hljs-string">'彩虹'</span>, <span class="hljs-string">'钱币'</span>, <span class="hljs-string">'咖啡'</span>, <span class="hljs-string">'haha'</span>, <span class="hljs-string">'胜利'</span>, <span class="hljs-string">'大拇指'</span>, <span class="hljs-string">'弱'</span>, <span class="hljs-string">'ok'</span>,
+    ],
+};
+</code></pre>
+<h2 id="t21参考">参考 <a href="#t21参考"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/chat">chat</a></li>
+</ul>
+
+    

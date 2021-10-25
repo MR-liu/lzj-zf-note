@@ -1,0 +1,1472 @@
+
+        <h2 id="t01.为什么要做前端监控">1.为什么要做前端监控 <a href="#t01.为什么要做前端监控"> # </a></h2>
+<ul>
+<li>更快发现问题和解决问题</li>
+<li>做产品的决策依据</li>
+<li>提升前端工程师的技术深度和广度,打造简历亮点</li>
+<li>为业务扩展提供了更多可能性</li>
+</ul>
+<h2 id="t12.前端监控目标">2.前端监控目标 <a href="#t12.前端监控目标"> # </a></h2>
+<h3 id="t22.1 稳定性(stability)">2.1 稳定性(stability) <a href="#t22.1 稳定性(stability)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">错误名称</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">JS错误</td>
+<td style="text-align:left">JS执行错误或者promise异常</td>
+</tr>
+<tr>
+<td style="text-align:left">资源异常</td>
+<td style="text-align:left">script、link等资源加载异常</td>
+</tr>
+<tr>
+<td style="text-align:left">接口错误</td>
+<td style="text-align:left">ajax或fetch请求接口异常</td>
+</tr>
+<tr>
+<td style="text-align:left">白屏</td>
+<td style="text-align:left">页面空白</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t32.2 用户体验(experience)">2.2 用户体验(experience) <a href="#t32.2 用户体验(experience)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">错误名称</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">加载时间</td>
+<td style="text-align:left">各个阶段的加载时间</td>
+</tr>
+<tr>
+<td style="text-align:left">TTFB(time to first byte)(首字节时间)</td>
+<td style="text-align:left">是指浏览器发起第一个请求到数据返回第一个字节所消耗的时间，这个时间包含了网络请求时间、后端处理时间</td>
+</tr>
+<tr>
+<td style="text-align:left">FP(First Paint)(首次绘制)</td>
+<td style="text-align:left">首次绘制包括了任何用户自定义的背景绘制，它是将第一个像素点绘制到屏幕的时刻</td>
+</tr>
+<tr>
+<td style="text-align:left">FCP(First Content Paint)(首次内容绘制)</td>
+<td style="text-align:left">首次内容绘制是浏览器将第一个DOM渲染到屏幕的时间,可以是任何文本、图像、SVG等的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">FMP(First Meaningful paint)(首次有意义绘制)</td>
+<td style="text-align:left">首次有意义绘制是页面可用性的量度标准</td>
+</tr>
+<tr>
+<td style="text-align:left">FID(First Input Delay)(首次输入延迟)</td>
+<td style="text-align:left">用户首次和页面交互到页面响应交互的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">卡顿</td>
+<td style="text-align:left">超过50ms的长任务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t42.3 业务(business)">2.3 业务(business) <a href="#t42.3 业务(business)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">错误名称</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">PV</td>
+<td style="text-align:left">page view 即页面浏览量或点击量</td>
+</tr>
+<tr>
+<td style="text-align:left">UV</td>
+<td style="text-align:left">指访问某个站点的不同IP地址的人数</td>
+</tr>
+<tr>
+<td style="text-align:left">页面的停留时间</td>
+<td style="text-align:left">用户在每一个页面的停留时间</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t53.前端监控流程">3.前端监控流程 <a href="#t53.前端监控流程"> # </a></h2>
+<ul>
+<li>前端埋点</li>
+<li>数据上报</li>
+<li>分析和计算 将采集到的数据进行加工汇总</li>
+<li>可视化展示 将数据按各种维度进行展示</li>
+<li>监控报警  发现问题后按一定的条件触发报警</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/monitorplatform.jpg" alt="monitorplatform"></p>
+<h3 id="t63.1 常见的埋点方案">3.1 常见的埋点方案 <a href="#t63.1 常见的埋点方案"> # </a></h3>
+<h5 id="t73.1.1 代码埋点">3.1.1 代码埋点 <a href="#t73.1.1 代码埋点"> # </a></h5>
+<ul>
+<li>代码埋点，就是以嵌入代码的形式进行埋点,比如需要监控用户的点击事件,会选择在用户点击时,插入一段代码，保存这个监听行为或者直接将监听行为以某一种数据格式直接传递给服务器端</li>
+<li>优点是可以在任意时刻，精确的发送或保存所需要的数据信息</li>
+<li>缺点是工作量较大</li>
+</ul>
+<h5 id="t83.1.2 可视化埋点">3.1.2 可视化埋点 <a href="#t83.1.2 可视化埋点"> # </a></h5>
+<ul>
+<li>通过可视化交互的手段，代替代码埋点</li>
+<li>将业务代码和埋点代码分离，提供一个可视化交互的页面，输入为业务代码，通过这个可视化系统，可以在业务代码中自定义的增加埋点事件等等,最后输出的代码耦合了业务代码和埋点代码</li>
+<li>可视化埋点其实是用系统来代替手工插入埋点代码</li>
+</ul>
+<h5 id="t93.1.3 无痕埋点">3.1.3 无痕埋点 <a href="#t93.1.3 无痕埋点"> # </a></h5>
+<ul>
+<li>前端的任意一个事件都被绑定一个标识，所有的事件都别记录下来</li>
+<li>通过定期上传记录文件,配合文件解析，解析出来我们想要的数据，并生成可视化报告供专业人员分析</li>
+<li>无痕埋点的优点是采集全量数据,不会出现漏埋和误埋等现象</li>
+<li>缺点是给数据传输和服务器增加压力，也无法灵活定制数据结构</li>
+</ul>
+<h2 id="t104.编写监控采集脚本">4.编写监控采集脚本 <a href="#t104.编写监控采集脚本"> # </a></h2>
+<h3 id="t114.1 开通日志服务">4.1 开通日志服务 <a href="#t114.1 开通日志服务"> # </a></h3>
+<ul>
+<li><a href="https://sls.console.aliyun.com/lognext/profile">日志服务(Log Service,简称 SLS)</a>是针对日志类数据一站式服务，用户无需开发就能快捷完成数据采集、消费、投递以及查询分析等功能，帮助提升运维、运营效率，建立 DT 时代海量日志处理能力</li>
+<li><a href="https://help.aliyun.com/product/28958.html">日志服务帮助文档</a></li>
+<li><a href="https://help.aliyun.com/document_detail/31752.html">Web Tracking</a></li>
+</ul>
+<h3 id="t124.2 监控错误">4.2 监控错误 <a href="#t124.2 监控错误"> # </a></h3>
+<h4 id="t134.2.1  错误分类">4.2.1  错误分类 <a href="#t134.2.1  错误分类"> # </a></h4>
+<ul>
+<li>JS错误<ul>
+<li>JS错误</li>
+<li>Promise异常</li>
+</ul>
+</li>
+<li>资源异常<ul>
+<li>监听error</li>
+</ul>
+</li>
+</ul>
+<h4 id="t144.2.2 数据结构设计">4.2.2 数据结构设计 <a href="#t144.2.2 数据结构设计"> # </a></h4>
+<h5 id="t151. jsError">1. jsError <a href="#t151. jsError"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,<span class="hljs-comment">//页面标题</span>
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,<span class="hljs-comment">//页面URL</span>
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590815288710"</span>,<span class="hljs-comment">//访问时间戳</span>
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"Chrome"</span>,<span class="hljs-comment">//用户浏览器类型</span>
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"stability"</span>,<span class="hljs-comment">//大类</span>
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,<span class="hljs-comment">//小类</span>
+  <span class="hljs-attr">"errorType"</span>: <span class="hljs-string">"jsError"</span>,<span class="hljs-comment">//错误类型</span>
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"Uncaught TypeError: Cannot set property 'error' of undefined"</span>,<span class="hljs-comment">//类型详情</span>
+  <span class="hljs-attr">"filename"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,<span class="hljs-comment">//访问的文件名</span>
+  <span class="hljs-attr">"position"</span>: <span class="hljs-string">"0:0"</span>,<span class="hljs-comment">//行列信息</span>
+  <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"btnClick (http://localhost:8080/:20:39)^HTMLInputElement.onclick (http://localhost:8080/:14:72)"</span>,<span class="hljs-comment">//堆栈信息</span>
+  <span class="hljs-attr">"selector"</span>: <span class="hljs-string">"HTML BODY #container .content INPUT"</span><span class="hljs-comment">//选择器</span>
+}
+</code></pre>
+<h5 id="t162. promiseError">2. promiseError <a href="#t162. promiseError"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,<span class="hljs-comment">//页面标题</span>
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,<span class="hljs-comment">//页面URL</span>
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590815290600"</span>,<span class="hljs-comment">//访问时间戳</span>
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"Chrome"</span>,<span class="hljs-comment">//用户浏览器类型</span>
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"stability"</span>,<span class="hljs-comment">//大类</span>
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,<span class="hljs-comment">//小类</span>
+  <span class="hljs-attr">"errorType"</span>: <span class="hljs-string">"promiseError"</span>,<span class="hljs-comment">//错误类型</span>
+  <span class="hljs-attr">"message"</span>: <span class="hljs-string">"someVar is not defined"</span>,<span class="hljs-comment">//类型详情</span>
+  <span class="hljs-attr">"filename"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,<span class="hljs-comment">//访问的文件名</span>
+  <span class="hljs-attr">"position"</span>: <span class="hljs-string">"24:29"</span>,<span class="hljs-comment">//行列信息</span>
+  <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"http://localhost:8080/:24:29^new Promise (&lt;anonymous&gt;)^btnPromiseClick (http://localhost:8080/:23:13)^HTMLInputElement.onclick (http://localhost:8080/:15:86)"</span>,<span class="hljs-comment">//堆栈信息</span>
+  <span class="hljs-attr">"selector"</span>: <span class="hljs-string">"HTML BODY #container .content INPUT"</span><span class="hljs-comment">//选择器</span>
+}
+</code></pre>
+<h5 id="t173. resourceError">3. resourceError <a href="#t173. resourceError"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,<span class="hljs-comment">//页面标题</span>
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,<span class="hljs-comment">//页面URL</span>
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590816168643"</span>,<span class="hljs-comment">//访问时间戳</span>
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"Chrome"</span>,<span class="hljs-comment">//用户浏览器类型</span>
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"stability"</span>,<span class="hljs-comment">//大类</span>
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,<span class="hljs-comment">//小类</span>
+  <span class="hljs-attr">"errorType"</span>: <span class="hljs-string">"resourceError"</span>,<span class="hljs-comment">//错误类型</span>
+  <span class="hljs-attr">"filename"</span>: <span class="hljs-string">"http://localhost:8080/error.js"</span>,<span class="hljs-comment">//访问的文件名</span>
+  <span class="hljs-attr">"tagName"</span>: <span class="hljs-string">"SCRIPT"</span>,<span class="hljs-comment">//标签名</span>
+  <span class="hljs-attr">"timeStamp"</span>: <span class="hljs-string">"76"</span>,<span class="hljs-comment">//时间</span>
+  <span class="hljs-attr">"selector"</span>: <span class="hljs-string">"HTML BODY SCRIPT"</span><span class="hljs-comment">//选择器</span>
+}
+</code></pre>
+<h4 id="t184.2.3 报表">4.2.3 报表 <a href="#t184.2.3 报表"> # </a></h4>
+<ul>
+<li><a href="https://help.aliyun.com/document_detail/29060.html?spm=5176.2020520112.0.0.636c34c07HzVho">查询语句</a></li>
+</ul>
+<pre><code class="lang-js">* | SELECT kind,count(*) <span class="hljs-keyword">as</span> number GROUP BY kind
+</code></pre>
+<h4 id="t194.2.4 实现">4.2.4 实现 <a href="#t194.2.4 实现"> # </a></h4>
+<h5 id="t201. webpack.config.js">1. webpack.config.js <a href="#t201. webpack.config.js"> # </a></h5>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">context</span>: process.cwd(),
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">'./src/index.js'</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">'dist'</span>),
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">'monitor.js'</span>
+    },
+    <span class="hljs-attr">devServer</span>: {
+        <span class="hljs-attr">contentBase</span>: path.resolve(__dirname, <span class="hljs-string">'dist'</span>)
+    },
+    <span class="hljs-attr">module</span>: {},
+    <span class="hljs-attr">plugins</span>: [
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>: <span class="hljs-string">'./src/index.html'</span>,
+            <span class="hljs-attr">inject</span>: <span class="hljs-string">'head'</span>
+        })
+    ]
+}
+</code></pre>
+<h5 id="t212. index.html">2. index.html <a href="#t212. index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>monitor<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"container"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"content"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"点击抛出错误"</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"btnClick()"</span> /&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"点击抛出promise错误"</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"btnPromiseClick()"</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">btnClick</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">window</span>.someVariable.error = <span class="hljs-string">'someVariable'</span>;
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">btnPromiseClick</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+                <span class="hljs-built_in">console</span>.log(someVar.some);
+            });
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"error.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h5 id="t223. src\index.js">3. src\index.js <a href="#t223. src\index.js"> # </a></h5>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'./monitor'</span>
+</code></pre>
+<h5 id="t234. monitor\index.js">4. monitor\index.js <a href="#t234. monitor\index.js"> # </a></h5>
+<p>src\monitor\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { injectJsError } <span class="hljs-keyword">from</span> <span class="hljs-string">'./lib/jsError'</span>;
+injectJsError();
+</code></pre>
+<h5 id="t245. jsError.js">5. jsError.js <a href="#t245. jsError.js"> # </a></h5>
+<p>src\monitor\lib\jsError.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> tracker <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/tracker'</span>;
+<span class="hljs-keyword">import</span> getLastEvent <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/getLastEvent'</span>;
+<span class="hljs-keyword">import</span> getSelector <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/getSelector'</span>;
+<span class="hljs-keyword">import</span> formatTime <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/formatTime'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">injectJsError</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">//一般JS运行时错误使用window.onerror捕获处理</span>
+    <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+        <span class="hljs-keyword">let</span> lastEvent = getLastEvent();
+        <span class="hljs-keyword">if</span> (event.target &amp;&amp; (event.target.src || event.target.href)) {
+            tracker.send({<span class="hljs-comment">//资源加载错误</span>
+                <span class="hljs-attr">kind</span>: <span class="hljs-string">'stability'</span>,<span class="hljs-comment">//稳定性指标</span>
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'error'</span>,<span class="hljs-comment">//resource</span>
+                <span class="hljs-attr">errorType</span>: <span class="hljs-string">'resourceError'</span>,
+                <span class="hljs-attr">filename</span>: event.target.src || event.target.href,<span class="hljs-comment">//加载失败的资源</span>
+                <span class="hljs-attr">tagName</span>: event.target.tagName,<span class="hljs-comment">//标签名</span>
+                <span class="hljs-attr">timeStamp</span>: formatTime(event.timeStamp),<span class="hljs-comment">//时间</span>
+                <span class="hljs-attr">selector</span>: getSelector(event.path || event.target),<span class="hljs-comment">//选择器</span>
+            })
+        } <span class="hljs-keyword">else</span> {
+            tracker.send({
+                <span class="hljs-attr">kind</span>: <span class="hljs-string">'stability'</span>,<span class="hljs-comment">//稳定性指标</span>
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'error'</span>,<span class="hljs-comment">//error</span>
+                <span class="hljs-attr">errorType</span>: <span class="hljs-string">'jsError'</span>,<span class="hljs-comment">//jsError</span>
+                <span class="hljs-attr">message</span>: event.message,<span class="hljs-comment">//报错信息</span>
+                <span class="hljs-attr">filename</span>: event.filename,<span class="hljs-comment">//报错链接</span>
+                <span class="hljs-attr">position</span>: (event.lineNo || <span class="hljs-number">0</span>) + <span class="hljs-string">":"</span> + (event.columnNo || <span class="hljs-number">0</span>),<span class="hljs-comment">//行列号</span>
+                <span class="hljs-attr">stack</span>: getLines(event.error.stack),<span class="hljs-comment">//错误堆栈</span>
+                <span class="hljs-attr">selector</span>: lastEvent ? getSelector(lastEvent.path || lastEvent.target) : <span class="hljs-string">''</span><span class="hljs-comment">//CSS选择器</span>
+            })
+        }
+    }, <span class="hljs-literal">true</span>);<span class="hljs-comment">// true代表在捕获阶段调用,false代表在冒泡阶段捕获,使用true或false都可以</span>
+
+    <span class="hljs-comment">//当Promise 被 reject 且没有 reject 处理器的时候，会触发 unhandledrejection 事件</span>
+    <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'unhandledrejection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+        <span class="hljs-keyword">let</span> lastEvent = getLastEvent();
+        <span class="hljs-keyword">let</span> message = <span class="hljs-string">''</span>;
+        <span class="hljs-keyword">let</span> line = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">let</span> column = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">let</span> file = <span class="hljs-string">''</span>;
+        <span class="hljs-keyword">let</span> stack = <span class="hljs-string">''</span>;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> event.reason === <span class="hljs-string">'string'</span>) {
+            message = event.reason;
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> event.reason === <span class="hljs-string">'object'</span>) {
+            message = event.reason.message;
+        }
+        <span class="hljs-keyword">let</span> reason = event.reason;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reason === <span class="hljs-string">'object'</span>) {
+            <span class="hljs-keyword">if</span> (reason.stack) {
+                <span class="hljs-keyword">var</span> matchResult = reason.stack.match(<span class="hljs-regexp">/at\s+(.+):(\d+):(\d+)/</span>);
+                <span class="hljs-keyword">if</span> (matchResult) {
+                    file = matchResult[<span class="hljs-number">1</span>];
+                    line = matchResult[<span class="hljs-number">2</span>];
+                    column = matchResult[<span class="hljs-number">3</span>];
+                }
+                stack = getLines(reason.stack);
+            }
+        }
+        tracker.send({<span class="hljs-comment">//未捕获的promise错误</span>
+            <span class="hljs-attr">kind</span>: <span class="hljs-string">'stability'</span>,<span class="hljs-comment">//稳定性指标</span>
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'error'</span>,<span class="hljs-comment">//jsError</span>
+            <span class="hljs-attr">errorType</span>: <span class="hljs-string">'promiseError'</span>,<span class="hljs-comment">//unhandledrejection</span>
+            <span class="hljs-attr">message</span>: message,<span class="hljs-comment">//标签名</span>
+            <span class="hljs-attr">filename</span>: file,
+            <span class="hljs-attr">position</span>: line + <span class="hljs-string">':'</span> + column,<span class="hljs-comment">//行列</span>
+            stack,
+            <span class="hljs-attr">selector</span>: lastEvent ? getSelector(lastEvent.path || lastEvent.target) : <span class="hljs-string">''</span>
+        })
+    }, <span class="hljs-literal">true</span>);<span class="hljs-comment">// true代表在捕获阶段调用,false代表在冒泡阶段捕获,使用true或false都可以</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLines</span>(<span class="hljs-params">stack</span>) </span>{
+    <span class="hljs-keyword">if</span> (!stack) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">''</span>;
+    }
+    <span class="hljs-keyword">return</span> stack.split(<span class="hljs-string">'\n'</span>).slice(<span class="hljs-number">1</span>).map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.replace(<span class="hljs-regexp">/^\s+at\s+/g</span>, <span class="hljs-string">''</span>)).join(<span class="hljs-string">'^'</span>);
+}
+</code></pre>
+<h5 id="t256. formatTime.js">6. formatTime.js <a href="#t256. formatTime.js"> # </a></h5>
+<p>src\monitor\util\formatTime.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> (time) =&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${time}</span>`</span>.split(<span class="hljs-string">"."</span>)[<span class="hljs-number">0</span>]
+}
+</code></pre>
+<h5 id="t267. getLastEvent.js">7. getLastEvent.js <a href="#t267. getLastEvent.js"> # </a></h5>
+<p>src\monitor\util\getLastEvent.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> lastEvent;
+[<span class="hljs-string">'click'</span>,<span class="hljs-string">'pointerdown'</span>, <span class="hljs-string">'touchstart'</span>, <span class="hljs-string">'mousedown'</span>, <span class="hljs-string">'keydown'</span>, <span class="hljs-string">'mouseover'</span>].forEach(<span class="hljs-function"><span class="hljs-params">event</span> =&gt;</span> {
+    <span class="hljs-built_in">document</span>.addEventListener(event, (event) =&gt; {
+        lastEvent = event;
+    }, {
+        <span class="hljs-attr">capture</span>: <span class="hljs-literal">true</span>,<span class="hljs-comment">//capture 控制监听器是在捕获阶段执行还是在冒泡阶段执行 </span>
+        <span class="hljs-attr">passive</span>: <span class="hljs-literal">true</span> <span class="hljs-comment">//passive 的意思是顺从的，表示它不会对事件的默认行为说 no</span>
+    });
+});
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> lastEvent;
+};
+</code></pre>
+<h5 id="t278. getSelector.js">8. getSelector.js <a href="#t278. getSelector.js"> # </a></h5>
+<p>src\monitor\util\getSelector.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> getSelector = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">path</span>) </span>{
+    <span class="hljs-keyword">return</span> path.reverse().filter(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">element</span>) </span>{
+        <span class="hljs-keyword">return</span> element !== <span class="hljs-built_in">window</span> &amp;&amp; element !== <span class="hljs-built_in">document</span>;
+    }).map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">element</span>) </span>{
+        <span class="hljs-keyword">var</span> selector;
+        <span class="hljs-keyword">if</span> (element.id) {
+            selector = <span class="hljs-string">`#<span class="hljs-subst">${element.id}</span>`</span>;
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (element.className &amp;&amp; <span class="hljs-keyword">typeof</span> element.className === <span class="hljs-string">'string'</span>) {
+            selector = <span class="hljs-string">'.'</span> + element.className.split(<span class="hljs-string">' '</span>).filter(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{ <span class="hljs-keyword">return</span> !!item }).join(<span class="hljs-string">'.'</span>);
+        } <span class="hljs-keyword">else</span> {
+            selector = element.nodeName;
+        }
+        <span class="hljs-keyword">return</span> selector;
+    }).join(<span class="hljs-string">' '</span>);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">pathsOrTarget</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(pathsOrTarget)) {
+        <span class="hljs-keyword">return</span> getSelector(pathsOrTarget);
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">var</span> paths = [];
+        <span class="hljs-keyword">var</span> element = pathsOrTarget;
+        <span class="hljs-keyword">while</span> (element) {
+            paths.push(element);
+            element = element.parentNode;
+        }
+        <span class="hljs-keyword">return</span> getSelector(paths);
+    }
+}
+</code></pre>
+<h5 id="t289. tracker.js">9. tracker.js <a href="#t289. tracker.js"> # </a></h5>
+<p>src\monitor\util\tracker.js</p>
+<ul>
+<li><a href="https://help.aliyun.com/document_detail/120218.html">PutWebtracking</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> host = <span class="hljs-string">'cn-beijing.log.aliyuncs.com'</span>;
+<span class="hljs-keyword">let</span> project = <span class="hljs-string">'zhufengmonitor'</span>;
+<span class="hljs-keyword">let</span> logstore = <span class="hljs-string">'zhufengmonitor-store'</span>;
+<span class="hljs-keyword">var</span> userAgent = <span class="hljs-built_in">require</span>(<span class="hljs-string">'user-agent'</span>)
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExtraData</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">title</span>: <span class="hljs-built_in">document</span>.title,
+        <span class="hljs-attr">url</span>: location.href,
+        <span class="hljs-attr">timestamp</span>: <span class="hljs-built_in">Date</span>.now(),
+        <span class="hljs-attr">userAgent</span>: userAgent.parse(navigator.userAgent).name
+    };
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SendTracker</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>.url = <span class="hljs-string">`http://<span class="hljs-subst">${project}</span>.<span class="hljs-subst">${host}</span>/logstores/<span class="hljs-subst">${logstore}</span>/track`</span>;
+        <span class="hljs-keyword">this</span>.xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+    }
+    send(data = {}, callback) {
+        <span class="hljs-keyword">let</span> extraData = getExtraData();
+        <span class="hljs-keyword">let</span> logs = { ...extraData, ...data };
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> key <span class="hljs-keyword">in</span> logs) {
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> logs[key] === <span class="hljs-string">'number'</span>) {
+                logs[key] = <span class="hljs-string">""</span> + logs[key];
+            }
+        }
+        <span class="hljs-built_in">console</span>.log(logs);
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(logs, <span class="hljs-literal">null</span>, <span class="hljs-number">2</span>));
+        <span class="hljs-keyword">let</span> body = <span class="hljs-built_in">JSON</span>.stringify({
+            <span class="hljs-attr">__logs__</span>: [logs]
+        });
+        <span class="hljs-keyword">this</span>.xhr.open(<span class="hljs-string">"POST"</span>, <span class="hljs-keyword">this</span>.url, <span class="hljs-literal">true</span>);
+        <span class="hljs-keyword">this</span>.xhr.setRequestHeader(<span class="hljs-string">"Content-Type"</span>, <span class="hljs-string">"application/json;charset=UTF-8"</span>);
+        <span class="hljs-keyword">this</span>.xhr.setRequestHeader(<span class="hljs-string">'x-log-apiversion'</span>, <span class="hljs-string">'0.6.0'</span>);
+        <span class="hljs-keyword">this</span>.xhr.setRequestHeader(<span class="hljs-string">'x-log-bodyrawsize'</span>, body.length);
+        <span class="hljs-keyword">this</span>.xhr.onload = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">if</span> ((<span class="hljs-keyword">this</span>.status &gt;= <span class="hljs-number">200</span> &amp;&amp; <span class="hljs-keyword">this</span>.status &lt;= <span class="hljs-number">300</span>) || <span class="hljs-keyword">this</span>.status == <span class="hljs-number">304</span>) {
+                callback &amp;&amp; callback();
+            }
+        }
+        <span class="hljs-keyword">this</span>.xhr.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'error'</span>, error);
+        }
+        <span class="hljs-keyword">this</span>.xhr.send(body);
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">new</span> SendTracker();
+</code></pre>
+<h3 id="t294.3.接口异常采集脚本">4.3.接口异常采集脚本 <a href="#t294.3.接口异常采集脚本"> # </a></h3>
+<h4 id="t304.3.1 数据设计">4.3.1 数据设计 <a href="#t304.3.1 数据设计"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>, <span class="hljs-comment">//标题</span>
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>, <span class="hljs-comment">//url</span>
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590817024490"</span>, <span class="hljs-comment">//timestamp</span>
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"Chrome"</span>, <span class="hljs-comment">//浏览器版本</span>
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"stability"</span>, <span class="hljs-comment">//大类</span>
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"xhr"</span>, <span class="hljs-comment">//小类</span>
+  <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"load"</span>, <span class="hljs-comment">//事件类型</span>
+  <span class="hljs-attr">"pathname"</span>: <span class="hljs-string">"/success"</span>, <span class="hljs-comment">//路径</span>
+  <span class="hljs-attr">"status"</span>: <span class="hljs-string">"200-OK"</span>, <span class="hljs-comment">//状态码</span>
+  <span class="hljs-attr">"duration"</span>: <span class="hljs-string">"7"</span>, <span class="hljs-comment">//持续时间</span>
+  <span class="hljs-attr">"response"</span>: <span class="hljs-string">"{\"id\":1}"</span>, <span class="hljs-comment">//响应内容</span>
+  <span class="hljs-attr">"params"</span>: <span class="hljs-string">""</span>  <span class="hljs-comment">//参数</span>
+}
+</code></pre>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590817025617"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"Chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"stability"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"xhr"</span>,
+  <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"load"</span>,
+  <span class="hljs-attr">"pathname"</span>: <span class="hljs-string">"/error"</span>,
+  <span class="hljs-attr">"status"</span>: <span class="hljs-string">"500-Internal Server Error"</span>,
+  <span class="hljs-attr">"duration"</span>: <span class="hljs-string">"7"</span>,
+  <span class="hljs-attr">"response"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"params"</span>: <span class="hljs-string">"name=zhufeng"</span>
+}
+</code></pre>
+<h4 id="t314.3.2 实现">4.3.2 实现 <a href="#t314.3.2 实现"> # </a></h4>
+<h5 id="t321. src\index.html">1. src\index.html <a href="#t321. src\index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;monitor&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id="container"&gt;
+        &lt;div class="content"&gt;
+<span class="hljs-addition">+            &lt;input type="button" value="发起ajax成功请求" onclick="sendAjaxSuccess()" /&gt;</span>
+<span class="hljs-addition">+            &lt;input type="button" value="发起ajax失败请求" onclick="sendAjaxError()" /&gt;</span>
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+<span class="hljs-addition">+        function sendAjaxSuccess() {</span>
+<span class="hljs-addition">+            let xhr = new XMLHttpRequest;</span>
+<span class="hljs-addition">+            xhr.open('GET', '/success', true);</span>
+<span class="hljs-addition">+            xhr.responseType = 'json';</span>
+<span class="hljs-addition">+            xhr.onload = function () {</span>
+<span class="hljs-addition">+                console.log(xhr.response);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            xhr.send();</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        function sendAjaxError() {</span>
+<span class="hljs-addition">+            let xhr = new XMLHttpRequest;</span>
+<span class="hljs-addition">+            xhr.open('POST', '/error', true);</span>
+<span class="hljs-addition">+            xhr.responseType = 'json';</span>
+<span class="hljs-addition">+            xhr.onload = function () {</span>
+<span class="hljs-addition">+                console.log(xhr.response);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            xhr.onerror = function (error) {</span>
+<span class="hljs-addition">+                console.log(error);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            xhr.send("name=zhufeng");</span>
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+<h5 id="t332. monitor\index.js">2. monitor\index.js <a href="#t332. monitor\index.js"> # </a></h5>
+<p>src\monitor\index.js</p>
+<pre><code class="lang-diff">import { injectJsError } from './lib/jsError';
+<span class="hljs-addition">+import { injectXHR } from './lib/xhr';</span>
+injectJsError();
+<span class="hljs-addition">+injectXHR();</span>
+</code></pre>
+<h5 id="t343. webpack.config.js">3. webpack.config.js <a href="#t343. webpack.config.js"> # </a></h5>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+module.exports = {
+    mode: 'development',
+    context: process.cwd(),
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'monitor.js'
+    },
+    devServer: {
+        contentBase: path.resolve(__dirname, 'dist'),
+<span class="hljs-addition">+        before(router) {</span>
+<span class="hljs-addition">+            router.get('/success', function (req, res) {</span>
+<span class="hljs-addition">+                res.json({ id: 1 });</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+            router.post('/error', function (req, res) {</span>
+<span class="hljs-addition">+                res.sendStatus(500);</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+        }</span>
+    },
+    module: {},
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './src/index.html',
+            inject: 'head'
+        })
+    ],
+
+}
+</code></pre>
+<h5 id="t354. xhr.js">4. xhr.js <a href="#t354. xhr.js"> # </a></h5>
+<p>src\monitor\lib\xhr.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">import</span> tracker <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/tracker'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">injectXHR</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> XMLHttpRequest = <span class="hljs-built_in">window</span>.XMLHttpRequest;
+    <span class="hljs-keyword">let</span> oldOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">method, url, async, username, password</span>) </span>{
+        <span class="hljs-keyword">if</span> (!url.match(<span class="hljs-regexp">/logstores/</span>) &amp;&amp; !url.match(<span class="hljs-regexp">/sockjs/</span>)) {
+            <span class="hljs-keyword">this</span>.logData = {
+                method, url, <span class="hljs-keyword">async</span>, username, password
+            }
+        }
+        <span class="hljs-keyword">return</span> oldOpen.apply(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">arguments</span>);
+    }
+    <span class="hljs-keyword">let</span> oldSend = XMLHttpRequest.prototype.send;
+    <span class="hljs-keyword">let</span> start;
+    XMLHttpRequest.prototype.send = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">body</span>) </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.logData) {
+            start = <span class="hljs-built_in">Date</span>.now();
+            <span class="hljs-keyword">let</span> handler = <span class="hljs-function">(<span class="hljs-params">type</span>) =&gt;</span> <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+                <span class="hljs-keyword">let</span> duration = <span class="hljs-built_in">Date</span>.now() - start;
+                <span class="hljs-keyword">let</span> status = <span class="hljs-keyword">this</span>.status;
+                <span class="hljs-keyword">let</span> statusText = <span class="hljs-keyword">this</span>.statusText;
+                tracker.send({<span class="hljs-comment">//未捕获的promise错误</span>
+                    <span class="hljs-attr">kind</span>: <span class="hljs-string">'stability'</span>,<span class="hljs-comment">//稳定性指标</span>
+                    <span class="hljs-attr">type</span>: <span class="hljs-string">'xhr'</span>,<span class="hljs-comment">//xhr</span>
+                    <span class="hljs-attr">eventType</span>: type,<span class="hljs-comment">//load error abort</span>
+                    <span class="hljs-attr">pathname</span>: <span class="hljs-keyword">this</span>.logData.url,<span class="hljs-comment">//接口的url地址</span>
+                    <span class="hljs-attr">status</span>: status + <span class="hljs-string">"-"</span> + statusText,
+                    <span class="hljs-attr">duration</span>: <span class="hljs-string">""</span> + duration,<span class="hljs-comment">//接口耗时</span>
+                    <span class="hljs-attr">response</span>: <span class="hljs-keyword">this</span>.response ? <span class="hljs-built_in">JSON</span>.stringify(<span class="hljs-keyword">this</span>.response) : <span class="hljs-string">""</span>,
+                    <span class="hljs-attr">params</span>: body || <span class="hljs-string">''</span>
+                })
+            }
+            <span class="hljs-keyword">this</span>.addEventListener(<span class="hljs-string">'load'</span>, handler(<span class="hljs-string">'load'</span>), <span class="hljs-literal">false</span>);
+            <span class="hljs-keyword">this</span>.addEventListener(<span class="hljs-string">'error'</span>, handler(<span class="hljs-string">'error'</span>), <span class="hljs-literal">false</span>);
+            <span class="hljs-keyword">this</span>.addEventListener(<span class="hljs-string">'abort'</span>, handler(<span class="hljs-string">'abort'</span>), <span class="hljs-literal">false</span>);
+        }
+        oldSend.apply(<span class="hljs-keyword">this</span>, <span class="hljs-built_in">arguments</span>);
+    };
+}
+</code></pre>
+<h3 id="t364.4 白屏">4.4 白屏 <a href="#t364.4 白屏"> # </a></h3>
+<ul>
+<li>白屏就是页面上什么都没有</li>
+</ul>
+<h4 id="t374.4.1 数据设计">4.4.1 数据设计 <a href="#t374.4.1 数据设计"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590822618759"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"stability"</span>,      <span class="hljs-comment">//大类</span>
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"blank"</span>,          <span class="hljs-comment">//小类</span>
+  <span class="hljs-attr">"emptyPoints"</span>: <span class="hljs-string">"0"</span>,       <span class="hljs-comment">//空白点</span>
+  <span class="hljs-attr">"screen"</span>: <span class="hljs-string">"2049x1152"</span>,    <span class="hljs-comment">//分辨率</span>
+  <span class="hljs-attr">"viewPoint"</span>: <span class="hljs-string">"2048x994"</span>,  <span class="hljs-comment">//视口</span>
+  <span class="hljs-attr">"selector"</span>: <span class="hljs-string">"HTML BODY #container"</span> <span class="hljs-comment">//选择器</span>
+}
+</code></pre>
+<h4 id="t384.4.2 实现">4.4.2 实现 <a href="#t384.4.2 实现"> # </a></h4>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/screen">screen</a> 返回当前window的screen对象,返回当前渲染窗口中和屏幕有关的属性</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/innerWidth">innerWidth</a> 只读的 Window 属性 innerWidth 返回以像素为单位的窗口的内部宽度</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/innerHeight">innerHeight</a> 窗口的内部高度(布局视口)的高度</li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Glossary/layout_viewport">layout_viewport</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Document/elementsFromPoint">elementsFromPoint</a>方法可以获取到当前视口内指定坐标处，由里到外排列的所有元素</li>
+</ul>
+<h5 id="t391. src\index.html">1. src\index.html <a href="#t391. src\index.html"> # </a></h5>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;monitor&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="container"&gt;
+        &lt;div class="content" style="width:600px;word-wrap:break-word;"&gt;
+
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+<span class="hljs-addition">+        let content = document.getElementsByClassName('content')[0];</span>
+<span class="hljs-addition">+        content.innerHTML = '@'.repeat(10000);</span>
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h5 id="t402. monitor\index.js">2. monitor\index.js <a href="#t402. monitor\index.js"> # </a></h5>
+<p>src\monitor\index.js</p>
+<pre><code class="lang-diff">import { injectJsError } from './lib/jsError';
+import { injectXHR } from './lib/xhr';
+<span class="hljs-addition">+import { blankScreen } from './lib/blankScreen';</span>
+injectJsError();
+injectXHR();
+<span class="hljs-addition">+blankScreen();</span>
+</code></pre>
+<h5 id="t413. onload.js">3. onload.js <a href="#t413. onload.js"> # </a></h5>
+<p>src\monitor\util\onload.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">callback</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">document</span>.readyState === <span class="hljs-string">'complete'</span>) {
+        callback();
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'load'</span>, callback);
+    }
+};
+</code></pre>
+<h5 id="t424. blankScreen.js">4. blankScreen.js <a href="#t424. blankScreen.js"> # </a></h5>
+<p>src\monitor\lib\blankScreen.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">import</span> tracker <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/tracker'</span>;
+<span class="hljs-keyword">import</span> onload <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/onload'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSelector</span>(<span class="hljs-params">element</span>) </span>{
+    <span class="hljs-keyword">var</span> selector;
+    <span class="hljs-keyword">if</span> (element.id) {
+        selector = <span class="hljs-string">`#<span class="hljs-subst">${element.id}</span>`</span>;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (element.className &amp;&amp; <span class="hljs-keyword">typeof</span> element.className === <span class="hljs-string">'string'</span>) {
+        selector = <span class="hljs-string">'.'</span> + element.className.split(<span class="hljs-string">' '</span>).filter(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{ <span class="hljs-keyword">return</span> !!item }).join(<span class="hljs-string">'.'</span>);
+    } <span class="hljs-keyword">else</span> {
+        selector = element.nodeName.toLowerCase();
+    }
+    <span class="hljs-keyword">return</span> selector;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">blankScreen</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> wrapperSelectors = [<span class="hljs-string">'body'</span>, <span class="hljs-string">'html'</span>, <span class="hljs-string">'#container'</span>, <span class="hljs-string">'.content'</span>];
+    <span class="hljs-keyword">let</span> emptyPoints = <span class="hljs-number">0</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isWrapper</span>(<span class="hljs-params">element</span>) </span>{
+        <span class="hljs-keyword">let</span> selector = getSelector(element);
+        <span class="hljs-keyword">if</span> (wrapperSelectors.indexOf(selector) &gt;= <span class="hljs-number">0</span>) {
+            emptyPoints++;
+        }
+    }
+    onload(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">let</span> xElements, yElements;
+        <span class="hljs-keyword">debugger</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">1</span>; i &lt;= <span class="hljs-number">9</span>; i++) {
+            xElements = <span class="hljs-built_in">document</span>.elementsFromPoint(<span class="hljs-built_in">window</span>.innerWidth * i / <span class="hljs-number">10</span>, <span class="hljs-built_in">window</span>.innerHeight / <span class="hljs-number">2</span>)
+            yElements = <span class="hljs-built_in">document</span>.elementsFromPoint(<span class="hljs-built_in">window</span>.innerWidth / <span class="hljs-number">2</span>, <span class="hljs-built_in">window</span>.innerHeight * i / <span class="hljs-number">10</span>)
+            isWrapper(xElements[<span class="hljs-number">0</span>]);
+            isWrapper(yElements[<span class="hljs-number">0</span>]);
+        }
+        <span class="hljs-keyword">if</span> (emptyPoints &gt;= <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">let</span> centerElements = <span class="hljs-built_in">document</span>.elementsFromPoint(<span class="hljs-built_in">window</span>.innerWidth / <span class="hljs-number">2</span>, <span class="hljs-built_in">window</span>.innerHeight / <span class="hljs-number">2</span>)
+            tracker.send({
+                <span class="hljs-attr">kind</span>: <span class="hljs-string">'stability'</span>,
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'blank'</span>,
+                <span class="hljs-attr">emptyPoints</span>: <span class="hljs-string">""</span> + emptyPoints,
+                <span class="hljs-attr">screen</span>: <span class="hljs-built_in">window</span>.screen.width + <span class="hljs-string">"x"</span> + <span class="hljs-built_in">window</span>.screen.height,
+                <span class="hljs-attr">viewPoint</span>: <span class="hljs-built_in">window</span>.innerWidth + <span class="hljs-string">'x'</span> + <span class="hljs-built_in">window</span>.innerHeight,
+                <span class="hljs-attr">selector</span>: getSelector(centerElements[<span class="hljs-number">0</span>]),
+            })
+        }
+    });
+}
+<span class="hljs-comment">//screen.width  屏幕的宽度   screen.height 屏幕的高度</span>
+<span class="hljs-comment">//window.innerWidth 去除工具条与滚动条的窗口宽度 window.innerHeight 去除工具条与滚动条的窗口高度</span>
+</code></pre>
+<h3 id="t434.5 加载时间">4.5 加载时间 <a href="#t434.5 加载时间"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/PerformanceTiming">PerformanceTiming</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/Events/DOMContentLoaded">DOMContentLoaded</a></li>
+<li><a href="https://docs.google.com/document/d/1BR94tJdZLsin5poeet0XoTW60M0SjvOJQttKT-JK8HI/view#">FMP</a></li>
+</ul>
+<h4 id="t444.5.1 阶段含义">4.5.1 阶段含义 <a href="#t444.5.1 阶段含义"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">navigationStart</td>
+<td style="text-align:left">初始化页面，在同一个浏览器上下文中前一个页面unload的时间戳，如果没有前一个页面的unload,则与fetchStart值相等</td>
+</tr>
+<tr>
+<td style="text-align:left">redirectStart</td>
+<td style="text-align:left">第一个HTTP重定向发生的时间,有跳转且是同域的重定向,否则为0</td>
+</tr>
+<tr>
+<td style="text-align:left">redirectEnd</td>
+<td style="text-align:left">最后一个重定向完成时的时间,否则为0</td>
+</tr>
+<tr>
+<td style="text-align:left">fetchStart</td>
+<td style="text-align:left">浏览器准备好使用http请求获取文档的时间,这发生在检查缓存之前</td>
+</tr>
+<tr>
+<td style="text-align:left">domainLookupStart</td>
+<td style="text-align:left">DNS域名开始查询的时间,如果有本地的缓存或keep-alive则时间为0</td>
+</tr>
+<tr>
+<td style="text-align:left">domainLookupEnd</td>
+<td style="text-align:left">DNS域名结束查询的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">connectStart</td>
+<td style="text-align:left">TCP开始建立连接的时间,如果是持久连接,则与<code>fetchStart</code>值相等</td>
+</tr>
+<tr>
+<td style="text-align:left">secureConnectionStart</td>
+<td style="text-align:left">https 连接开始的时间,如果不是安全连接则为0</td>
+</tr>
+<tr>
+<td style="text-align:left">connectEnd</td>
+<td style="text-align:left">TCP完成握手的时间，如果是持久连接则与<code>fetchStart</code>值相等</td>
+</tr>
+<tr>
+<td style="text-align:left">requestStart</td>
+<td style="text-align:left">HTTP请求读取真实文档开始的时间,包括从本地缓存读取</td>
+</tr>
+<tr>
+<td style="text-align:left">requestEnd</td>
+<td style="text-align:left">HTTP请求读取真实文档结束的时间,包括从本地缓存读取</td>
+</tr>
+<tr>
+<td style="text-align:left">responseStart</td>
+<td style="text-align:left">返回浏览器从服务器收到（或从本地缓存读取）第一个字节时的Unix毫秒时间戳</td>
+</tr>
+<tr>
+<td style="text-align:left">responseEnd</td>
+<td style="text-align:left">返回浏览器从服务器收到（或从本地缓存读取，或从本地资源读取）最后一个字节时的Unix毫秒时间戳</td>
+</tr>
+<tr>
+<td style="text-align:left">unloadEventStart</td>
+<td style="text-align:left">前一个页面的unload的时间戳 如果没有则为0</td>
+</tr>
+<tr>
+<td style="text-align:left">unloadEventEnd</td>
+<td style="text-align:left">与<code>unloadEventStart</code>相对应，返回的是<code>unload</code>函数执行完成的时间戳</td>
+</tr>
+<tr>
+<td style="text-align:left">domLoading</td>
+<td style="text-align:left">返回当前网页DOM结构开始解析时的时间戳,此时<code>document.readyState</code>变成loading,并将抛出<code>readyStateChange</code>事件</td>
+</tr>
+<tr>
+<td style="text-align:left">domInteractive</td>
+<td style="text-align:left">返回当前网页DOM结构结束解析、开始加载内嵌资源时时间戳,<code>document.readyState</code> 变成<code>interactive</code>，并将抛出<code>readyStateChange</code>事件(注意只是DOM树解析完成,这时候并没有开始加载网页内的资源)</td>
+</tr>
+<tr>
+<td style="text-align:left">domContentLoadedEventStart</td>
+<td style="text-align:left">网页domContentLoaded事件发生的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">domContentLoadedEventEnd</td>
+<td style="text-align:left">网页domContentLoaded事件脚本执行完毕的时间,domReady的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">domComplete</td>
+<td style="text-align:left">DOM树解析完成,且资源也准备就绪的时间,<code>document.readyState</code>变成<code>complete</code>.并将抛出<code>readystatechange</code>事件</td>
+</tr>
+<tr>
+<td style="text-align:left">loadEventStart</td>
+<td style="text-align:left">load 事件发送给文档，也即load回调函数开始执行的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">loadEventEnd</td>
+<td style="text-align:left">load回调函数执行完成的时间</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t454.5.2 阶段计算">4.5.2 阶段计算 <a href="#t454.5.2 阶段计算"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">计算方式</th>
+<th style="text-align:left">意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">unload</td>
+<td style="text-align:left">前一个页面卸载耗时</td>
+<td style="text-align:left">unloadEventEnd – unloadEventStart</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:left">redirect</td>
+<td style="text-align:left">重定向耗时</td>
+<td style="text-align:left">redirectEnd – redirectStart</td>
+<td style="text-align:left">重定向的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">appCache</td>
+<td style="text-align:left">缓存耗时</td>
+<td style="text-align:left">domainLookupStart – fetchStart</td>
+<td style="text-align:left">读取缓存的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">dns</td>
+<td style="text-align:left">DNS 解析耗时</td>
+<td style="text-align:left">domainLookupEnd – domainLookupStart</td>
+<td style="text-align:left">可观察域名解析服务是否正常</td>
+</tr>
+<tr>
+<td style="text-align:left">tcp</td>
+<td style="text-align:left">TCP 连接耗时</td>
+<td style="text-align:left">connectEnd – connectStart</td>
+<td style="text-align:left">建立连接的耗时</td>
+</tr>
+<tr>
+<td style="text-align:left">ssl</td>
+<td style="text-align:left">SSL 安全连接耗时</td>
+<td style="text-align:left">connectEnd – secureConnectionStart</td>
+<td style="text-align:left">反映数据安全连接建立耗时</td>
+</tr>
+<tr>
+<td style="text-align:left">ttfb</td>
+<td style="text-align:left">Time to First Byte(TTFB)网络请求耗时</td>
+<td style="text-align:left">responseStart – requestStart</td>
+<td style="text-align:left">TTFB是发出页面请求到接收到应答数据第一个字节所花费的毫秒数</td>
+</tr>
+<tr>
+<td style="text-align:left">response</td>
+<td style="text-align:left">响应数据传输耗时</td>
+<td style="text-align:left">responseEnd – responseStart</td>
+<td style="text-align:left">观察网络是否正常</td>
+</tr>
+<tr>
+<td style="text-align:left">dom</td>
+<td style="text-align:left">DOM解析耗时</td>
+<td style="text-align:left">domInteractive – responseEnd</td>
+<td style="text-align:left">观察DOM结构是否合理，是否有JS阻塞页面解析</td>
+</tr>
+<tr>
+<td style="text-align:left">dcl</td>
+<td style="text-align:left">DOMContentLoaded 事件耗时</td>
+<td style="text-align:left">domContentLoadedEventEnd – domContentLoadedEventStart</td>
+<td style="text-align:left">当 HTML 文档被完全加载和解析完成之后，DOMContentLoaded 事件被触发，无需等待样式表、图像和子框架的完成加载</td>
+</tr>
+<tr>
+<td style="text-align:left">resources</td>
+<td style="text-align:left">资源加载耗时</td>
+<td style="text-align:left">domComplete – domContentLoadedEventEnd</td>
+<td style="text-align:left">可观察文档流是否过大</td>
+</tr>
+<tr>
+<td style="text-align:left">domReady</td>
+<td style="text-align:left">DOM阶段渲染耗时</td>
+<td style="text-align:left">domContentLoadedEventEnd – fetchStart</td>
+<td style="text-align:left">DOM树和页面资源加载完成时间，会触发<code>domContentLoaded</code>事件</td>
+</tr>
+<tr>
+<td style="text-align:left">首次渲染耗时</td>
+<td style="text-align:left">首次渲染耗时</td>
+<td style="text-align:left">responseEnd-fetchStart</td>
+<td style="text-align:left">加载文档到看到第一帧非空图像的时间，也叫白屏时间</td>
+</tr>
+<tr>
+<td style="text-align:left">首次可交互时间</td>
+<td style="text-align:left">首次可交互时间</td>
+<td style="text-align:left">domInteractive-fetchStart</td>
+<td style="text-align:left">DOM树解析完成时间，此时document.readyState为interactive</td>
+</tr>
+<tr>
+<td style="text-align:left">首包时间耗时</td>
+<td style="text-align:left">首包时间</td>
+<td style="text-align:left">responseStart-domainLookupStart</td>
+<td style="text-align:left">DNS解析到响应返回给浏览器第一个字节的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">页面完全加载时间</td>
+<td style="text-align:left">页面完全加载时间</td>
+<td style="text-align:left">loadEventStart - fetchStart</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:left">onLoad</td>
+<td style="text-align:left">onLoad事件耗时</td>
+<td style="text-align:left">loadEventEnd – loadEventStart</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.zhufengpeixun.cn/renderscope3.jpg" alt="renderscope3"></p>
+<p><img src="http://img.zhufengpeixun.cn/browerrender.jpg" alt="browerrender"></p>
+<h4 id="t464.5.3 数据结构">4.5.3 数据结构 <a href="#t464.5.3 数据结构"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590828364183"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"experience"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"timing"</span>,
+  <span class="hljs-attr">"connectTime"</span>: <span class="hljs-string">"0"</span>,
+  <span class="hljs-attr">"ttfbTime"</span>: <span class="hljs-string">"1"</span>,
+  <span class="hljs-attr">"responseTime"</span>: <span class="hljs-string">"1"</span>,
+  <span class="hljs-attr">"parseDOMTime"</span>: <span class="hljs-string">"80"</span>,
+  <span class="hljs-attr">"domContentLoadedTime"</span>: <span class="hljs-string">"0"</span>,
+  <span class="hljs-attr">"timeToInteractive"</span>: <span class="hljs-string">"88"</span>,
+  <span class="hljs-attr">"loadTime"</span>: <span class="hljs-string">"89"</span>
+}
+</code></pre>
+<h4 id="t474.5.4 实现">4.5.4 实现 <a href="#t474.5.4 实现"> # </a></h4>
+<h5 id="t481. src\index.html">1. src\index.html <a href="#t481. src\index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;monitor&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div id="container"&gt;
+        &lt;div class="content" style="width:600px;word-wrap:break-word;"&gt;
+
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        let content = document.getElementsByClassName('content')[0];
+        //content.innerHTML = '@'.repeat(10000);
+        document.addEventListener('DOMContentLoaded', function () {
+<span class="hljs-addition">+            let start = Date.now();</span>
+<span class="hljs-addition">+            while ((Date.now() - start) &lt; 1000) {}</span>
+<span class="hljs-addition">+        });</span>
+    &lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+<h5 id="t492. monitor\index.js">2. monitor\index.js <a href="#t492. monitor\index.js"> # </a></h5>
+<p>src\monitor\index.js</p>
+<pre><code class="lang-diff">import { injectJsError } from './lib/jsError';
+import { injectXHR } from './lib/xhr';
+import { blankScreen } from './lib/blankScreen';
+<span class="hljs-addition">+import { timing } from './lib/timing';</span>
+injectJsError();
+injectXHR();
+blankScreen();
+<span class="hljs-addition">+timing();</span>
+</code></pre>
+<h5 id="t503. timing.js">3. timing.js <a href="#t503. timing.js"> # </a></h5>
+<p>src\monitor\lib\timing.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> onload <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/onload'</span>;
+<span class="hljs-keyword">import</span> tracker <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/tracker'</span>;
+<span class="hljs-keyword">import</span> formatTime <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/formatTime'</span>;
+<span class="hljs-keyword">import</span> getLastEvent <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/getLastEvent'</span>;
+<span class="hljs-keyword">import</span> getSelector <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/getSelector'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">timing</span>(<span class="hljs-params"></span>) </span>{
+    onload(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-keyword">const</span> {
+                fetchStart,
+                connectStart,
+                connectEnd,
+                requestStart,
+                responseStart,
+                responseEnd,
+                domLoading,
+                domInteractive,
+                domContentLoadedEventStart,
+                domContentLoadedEventEnd,
+                loadEventStart } = performance.timing;
+            tracker.send({
+                <span class="hljs-attr">kind</span>: <span class="hljs-string">'experience'</span>,
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'timing'</span>,
+                <span class="hljs-attr">connectTime</span>: connectEnd - connectStart,<span class="hljs-comment">//TCP连接耗时</span>
+                <span class="hljs-attr">ttfbTime</span>: responseStart - requestStart,<span class="hljs-comment">//ttfb</span>
+                <span class="hljs-attr">responseTime</span>: responseEnd - responseStart,<span class="hljs-comment">//Response响应耗时</span>
+                <span class="hljs-attr">parseDOMTime</span>: loadEventStart - domLoading,<span class="hljs-comment">//DOM解析渲染耗时</span>
+                <span class="hljs-attr">domContentLoadedTime</span>: domContentLoadedEventEnd - domContentLoadedEventStart,<span class="hljs-comment">//DOMContentLoaded事件回调耗时</span>
+                <span class="hljs-attr">timeToInteractive</span>: domInteractive - fetchStart,<span class="hljs-comment">//首次可交互时间</span>
+                <span class="hljs-attr">loadTime</span>: loadEventStart - fetchStart<span class="hljs-comment">//完整的加载时间</span>
+            });
+
+        }, <span class="hljs-number">3000</span>);
+    });
+}
+</code></pre>
+<h3 id="t514.6 性能指标">4.6 性能指标 <a href="#t514.6 性能指标"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/PerformanceObserver/observe">PerformanceObserver.observe</a>方法用于观察传入的参数中指定的性能条目类型的集合。当记录一个指定类型的性能条目时，性能监测对象的回调函数将会被调用</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/PerformanceEntry/entryType">entryType</a></li>
+<li><a href="https://w3c.github.io/paint-timing/">paint-timing</a></li>
+<li><a href="https://wicg.github.io/event-timing/">event-timing</a></li>
+<li><a href="https://wicg.github.io/largest-contentful-paint/">LCP</a></li>
+<li><a href="https://docs.google.com/document/d/1BR94tJdZLsin5poeet0XoTW60M0SjvOJQttKT-JK8HI/view">FMP</a></li>
+<li><a href="https://github.com/WICG/time-to-interactive">time-to-interactive</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">备注</th>
+<th style="text-align:left">计算方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">FP</td>
+<td style="text-align:left">First Paint(首次绘制)</td>
+<td style="text-align:left">包括了任何用户自定义的背景绘制，它是首先将像素绘制到屏幕的时刻</td>
+</tr>
+<tr>
+<td style="text-align:left">FCP</td>
+<td style="text-align:left">First Content Paint(首次内容绘制)</td>
+<td style="text-align:left">是浏览器将第一个 DOM 渲染到屏幕的时间,可能是文本、图像、SVG等,这其实就是白屏时间</td>
+</tr>
+<tr>
+<td style="text-align:left">FMP</td>
+<td style="text-align:left">First Meaningful  Paint(首次有意义绘制)</td>
+<td style="text-align:left">页面有意义的内容渲染的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">LCP</td>
+<td style="text-align:left">(Largest Contentful Paint)(最大内容渲染)</td>
+<td style="text-align:left">代表在viewport中最大的页面元素加载的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">DCL</td>
+<td style="text-align:left">(DomContentLoaded)(DOM加载完成)</td>
+<td style="text-align:left">当 HTML 文档被完全加载和解析完成之后,<code>DOMContentLoaded</code> 事件被触发，无需等待样式表、图像和子框架的完成加载</td>
+</tr>
+<tr>
+<td style="text-align:left">L</td>
+<td style="text-align:left">(onLoad)</td>
+<td style="text-align:left">当依赖的资源全部加载完毕之后才会触发</td>
+</tr>
+<tr>
+<td style="text-align:left">TTI</td>
+<td style="text-align:left">(Time to Interactive) 可交互时间</td>
+<td style="text-align:left">用于标记应用已进行视觉渲染并能可靠响应用户输入的时间点</td>
+</tr>
+<tr>
+<td style="text-align:left">FID</td>
+<td style="text-align:left">First Input Delay(首次输入延迟)</td>
+<td style="text-align:left">用户首次和页面交互(单击链接，点击按钮等)到页面响应交互的时间</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.zhufengpeixun.cn/baidurender.png" alt="baidurender"></p>
+<p><img src="http://img.zhufengpeixun.cn/lcp.jpg" alt="lcp"></p>
+<h4 id="t524.6.1 数据结构设计">4.6.1 数据结构设计 <a href="#t524.6.1 数据结构设计"> # </a></h4>
+<h5 id="t531. paint">1. paint <a href="#t531. paint"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590828364186"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"experience"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"paint"</span>,
+  <span class="hljs-attr">"firstPaint"</span>: <span class="hljs-string">"102"</span>,
+  <span class="hljs-attr">"firstContentPaint"</span>: <span class="hljs-string">"2130"</span>,
+  <span class="hljs-attr">"firstMeaningfulPaint"</span>: <span class="hljs-string">"2130"</span>,
+  <span class="hljs-attr">"largestContentfulPaint"</span>: <span class="hljs-string">"2130"</span>
+}
+</code></pre>
+<h5 id="t542. firstInputDelay">2. firstInputDelay <a href="#t542. firstInputDelay"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590828477284"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"experience"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"firstInputDelay"</span>,
+  <span class="hljs-attr">"inputDelay"</span>: <span class="hljs-string">"3"</span>,
+  <span class="hljs-attr">"duration"</span>: <span class="hljs-string">"8"</span>,
+  <span class="hljs-attr">"startTime"</span>: <span class="hljs-string">"4812.344999983907"</span>,
+  <span class="hljs-attr">"selector"</span>: <span class="hljs-string">"HTML BODY #container .content H1"</span>
+}
+</code></pre>
+<h4 id="t554.6.2  实现">4.6.2  实现 <a href="#t554.6.2  实现"> # </a></h4>
+<h5 id="t561. src\index.html">1. src\index.html <a href="#t561. src\index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;monitor&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body style="background-color: green;"&gt;
+    &lt;div id="container"&gt;
+        &lt;div class="content" style="width:600px;height:600px;word-wrap:break-word;"&gt;
+            &lt;input /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        let content = document.getElementsByClassName('content')[0];
+        //content.innerHTML = '@'.repeat(10000);
+<span class="hljs-addition">+        setTimeout(() =&gt; {</span>
+<span class="hljs-addition">+            let h1 = document.createElement('h1');</span>
+<span class="hljs-addition">+            h1.innerHTML = '我是最有重要的内容';</span>
+<span class="hljs-addition">+            h1.setAttribute('elementtiming', 'meaningful');</span>
+<span class="hljs-addition">+            content.appendChild(h1);</span>
+<span class="hljs-addition">+        }, 2000);</span>
+    &lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+<h5 id="t572. timing.js">2. timing.js <a href="#t572. timing.js"> # </a></h5>
+<p>src\monitor\lib\timing.js</p>
+<pre><code class="lang-diff">import onload from '../util/onload';
+import tracker from '../util/tracker';
+import formatTime from '../util/formatTime';
+import getLastEvent from '../util/getLastEvent';
+import getSelector from '../util/getSelector';
+export function timing() {
+<span class="hljs-addition">+    let FMP, LCP;</span>
+<span class="hljs-addition">+    new PerformanceObserver((entryList, observer) =&gt; {</span>
+<span class="hljs-addition">+        let perfEntries = entryList.getEntries();</span>
+<span class="hljs-addition">+        FMP = perfEntries[0];</span>
+<span class="hljs-addition">+        observer.disconnect();</span>
+<span class="hljs-addition">+    }).observe({ entryTypes: ['element'] });</span>
+
+<span class="hljs-addition">+    new PerformanceObserver((entryList, observer) =&gt; {</span>
+<span class="hljs-addition">+        const perfEntries = entryList.getEntries();</span>
+<span class="hljs-addition">+        const lastEntry = perfEntries[perfEntries.length - 1];</span>
+<span class="hljs-addition">+        LCP = lastEntry;</span>
+<span class="hljs-addition">+        observer.disconnect();</span>
+<span class="hljs-addition">+    }).observe({ entryTypes: ['largest-contentful-paint'] });</span>
+
+<span class="hljs-addition">+    new PerformanceObserver(function (entryList, observer) {</span>
+<span class="hljs-addition">+        let lastEvent = getLastEvent();</span>
+<span class="hljs-addition">+        const firstInput = entryList.getEntries()[0];</span>
+<span class="hljs-addition">+        if (firstInput) {</span>
+<span class="hljs-addition">+            let inputDelay = firstInput.processingStart - firstInput.startTime;//处理延迟</span>
+<span class="hljs-addition">+            let duration = firstInput.duration;//处理耗时</span>
+<span class="hljs-addition">+            if (firstInput &gt; 0 || duration &gt; 0) {</span>
+<span class="hljs-addition">+                tracker.send({</span>
+<span class="hljs-addition">+                    kind: 'experience',</span>
+<span class="hljs-addition">+                    type: 'firstInputDelay',</span>
+<span class="hljs-addition">+                    inputDelay: inputDelay ? formatTime(inputDelay) : 0,</span>
+<span class="hljs-addition">+                    duration: duration ? formatTime(duration) : 0,</span>
+<span class="hljs-addition">+                    startTime: firstInput.startTime,</span>
+<span class="hljs-addition">+                    selector: lastEvent ? getSelector(lastEvent.path || lastEvent.target) : ''</span>
+<span class="hljs-addition">+                });</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        observer.disconnect();</span>
+<span class="hljs-addition">+    }).observe({ type: 'first-input', buffered: true });</span>
+
+
+    onload(function () {
+        setTimeout(() =&gt; {
+            const {
+                fetchStart,
+                connectStart,
+                connectEnd,
+                requestStart,
+                responseStart,
+                responseEnd,
+                domLoading,
+                domInteractive,
+                domContentLoadedEventStart,
+                domContentLoadedEventEnd,
+                loadEventStart } = performance.timing;
+            tracker.send({
+                kind: 'experience',
+                type: 'timing',
+                connectTime: connectEnd - connectStart,//TCP连接耗时
+                ttfbTime: responseStart - requestStart,//ttfb
+                responseTime: responseEnd - responseStart,//Response响应耗时
+                parseDOMTime: loadEventStart - domLoading,//DOM解析渲染耗时
+                domContentLoadedTime: domContentLoadedEventEnd - domContentLoadedEventStart,//DOMContentLoaded事件回调耗时
+                timeToInteractive: domInteractive - fetchStart,//首次可交互时间
+                loadTime: loadEventStart - fetchStart//完整的加载时间
+            });
+<span class="hljs-addition">+            const FP = performance.getEntriesByName('first-paint')[0];</span>
+<span class="hljs-addition">+            const FCP = performance.getEntriesByName('first-contentful-paint')[0];</span>
+<span class="hljs-addition">+            console.log('FP', FP);</span>
+<span class="hljs-addition">+            console.log('FCP', FCP);</span>
+<span class="hljs-addition">+            console.log('FMP', FMP);</span>
+<span class="hljs-addition">+            console.log('LCP', LCP);</span>
+<span class="hljs-addition">+            tracker.send({</span>
+<span class="hljs-addition">+                kind: 'experience',</span>
+<span class="hljs-addition">+                type: 'paint',</span>
+<span class="hljs-addition">+                firstPaint: FP ? formatTime(FP.startTime) : 0,</span>
+<span class="hljs-addition">+                firstContentPaint: FCP ? formatTime(FCP.startTime) : 0,</span>
+<span class="hljs-addition">+                firstMeaningfulPaint: FMP ? formatTime(FMP.startTime) : 0,</span>
+<span class="hljs-addition">+                largestContentfulPaint: LCP ? formatTime(LCP.renderTime || LCP.loadTime) : 0</span>
+<span class="hljs-addition">+            });</span>
+        }, 3000);
+    });
+}
+</code></pre>
+<h3 id="t584.7 卡顿">4.7 卡顿 <a href="#t584.7 卡顿"> # </a></h3>
+<ul>
+<li>响应用户交互的响应时间如果大于100ms,用户就会感觉卡顿</li>
+</ul>
+<h4 id="t594.7.1 数据设计">4.7.1 数据设计 <a href="#t594.7.1 数据设计"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590828656781"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"experience"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"longTask"</span>,
+  <span class="hljs-attr">"eventType"</span>: <span class="hljs-string">"mouseover"</span>,
+  <span class="hljs-attr">"startTime"</span>: <span class="hljs-string">"9331"</span>,
+  <span class="hljs-attr">"duration"</span>: <span class="hljs-string">"200"</span>,
+  <span class="hljs-attr">"selector"</span>: <span class="hljs-string">"HTML BODY #container .content"</span>
+}
+</code></pre>
+<h4 id="t604.7.2 实现">4.7.2 实现 <a href="#t604.7.2 实现"> # </a></h4>
+<h5 id="t611.  src\index.html">1.  src\index.html <a href="#t611.  src\index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;monitor&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body style="background-color: green;"&gt;
+    &lt;div id="container"&gt;
+        &lt;div class="content" style="width:600px;height:600px;word-wrap:break-word;"&gt;
+<span class="hljs-addition">+            &lt;button id="longTaskBtn"&gt;执行longTask&lt;/button&gt;</span>
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        let content = document.getElementsByClassName('content')[0];
+<span class="hljs-addition">+        let longTaskBtn = document.getElementById('longTaskBtn');</span>
+<span class="hljs-addition">+        longTaskBtn.addEventListener('click', longTask);</span>
+<span class="hljs-addition">+        function longTask() {</span>
+<span class="hljs-addition">+            let start = Date.now();</span>
+<span class="hljs-addition">+            console.log('longTask开始 start', start);</span>
+<span class="hljs-addition">+            while (Date.now() &lt; (200 + start)) { }</span>
+<span class="hljs-addition">+            console.log('longTask结束 end', (Date.now() - start));</span>
+<span class="hljs-addition">+        }</span>
+    &lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+</code></pre>
+<h5 id="t622. monitor\index.js">2. monitor\index.js <a href="#t622. monitor\index.js"> # </a></h5>
+<p>src\monitor\index.js</p>
+<pre><code class="lang-diff">import { injectJsError } from './lib/jsError';
+import { injectXHR } from './lib/xhr';
+import { blankScreen } from './lib/blankScreen';
+import { timing } from './lib/timing';
+<span class="hljs-addition">+import { longTask } from './lib/longTask';</span>
+injectJsError();
+injectXHR();
+blankScreen();
+timing();
+<span class="hljs-addition">+longTask();</span>
+</code></pre>
+<h5 id="t633. longTask.js">3. longTask.js <a href="#t633. longTask.js"> # </a></h5>
+<p>src\monitor\lib\longTask.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> tracker <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/tracker'</span>;
+<span class="hljs-keyword">import</span> formatTime <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/formatTime'</span>;
+<span class="hljs-keyword">import</span> getLastEvent <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/getLastEvent'</span>;
+<span class="hljs-keyword">import</span> getSelector <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/getSelector'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">longTask</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">new</span> PerformanceObserver(<span class="hljs-function">(<span class="hljs-params">list</span>) =&gt;</span> {
+        list.getEntries().forEach(<span class="hljs-function"><span class="hljs-params">entry</span> =&gt;</span> {
+            <span class="hljs-keyword">if</span> (entry.duration &gt; <span class="hljs-number">100</span>) {
+                <span class="hljs-keyword">let</span> lastEvent = getLastEvent();
+                requestIdleCallback(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                    tracker.send({
+                        <span class="hljs-attr">kind</span>: <span class="hljs-string">'experience'</span>,
+                        <span class="hljs-attr">type</span>: <span class="hljs-string">'longTask'</span>,
+                        <span class="hljs-attr">eventType</span>: lastEvent.type,
+                        <span class="hljs-attr">startTime</span>: formatTime(entry.startTime),<span class="hljs-comment">// 开始时间</span>
+                        <span class="hljs-attr">duration</span>: formatTime(entry.duration),<span class="hljs-comment">// 持续时间</span>
+                        <span class="hljs-attr">selector</span>: lastEvent ? getSelector(lastEvent.path || lastEvent.target) : <span class="hljs-string">''</span>
+                    });
+                });
+            }
+        });
+    }).observe({ <span class="hljs-attr">entryTypes</span>: [<span class="hljs-string">"longtask"</span>] });
+}
+</code></pre>
+<h3 id="t644.8 pv">4.8 pv <a href="#t644.8 pv"> # </a></h3>
+<ul>
+<li><a href="http://wicg.github.io/netinfo">netinfo</a></li>
+<li>RTT(Round Trip Time)一个连接的往返时间，即数据发送时刻到接收到确认的时刻的差值</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Navigator/sendBeacon">navigator.sendBeacon()</a> 方法可用于通过HTTP将少量数据异步传输到Web服务器。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/rtttime2.jpg" alt="rtttime2"></p>
+<h4 id="t654.8.1 数据结构">4.8.1 数据结构 <a href="#t654.8.1 数据结构"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"前端监控系统"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"http://localhost:8080/"</span>,
+  <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"1590829304423"</span>,
+  <span class="hljs-attr">"userAgent"</span>: <span class="hljs-string">"chrome"</span>,
+  <span class="hljs-attr">"kind"</span>: <span class="hljs-string">"business"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"pv"</span>,
+  <span class="hljs-attr">"effectiveType"</span>: <span class="hljs-string">"4g"</span>,
+  <span class="hljs-attr">"rtt"</span>: <span class="hljs-string">"50"</span>,
+  <span class="hljs-attr">"screen"</span>: <span class="hljs-string">"2049x1152"</span>
+}
+</code></pre>
+<h4 id="t664.8.2 实现">4.8.2 实现 <a href="#t664.8.2 实现"> # </a></h4>
+<h5 id="t671. src\index.html">1. src\index.html <a href="#t671. src\index.html"> # </a></h5>
+<p>src\index.html</p>
+<pre><code class="lang-diff">&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;前端监控SDK&lt;/title&gt;
+&lt;/head&gt;
+</code></pre>
+<h5 id="t682. src\monitor\index.js">2. src\monitor\index.js <a href="#t682. src\monitor\index.js"> # </a></h5>
+<p>src\monitor\index.js</p>
+<pre><code class="lang-diff">import { injectJsError } from './lib/jsError';
+import { injectXHR } from './lib/xhr';
+import { blankScreen } from './lib/blankScreen';
+import { timing } from './lib/timing';
+import { longTask } from './lib/longTask';
+<span class="hljs-addition">+import { pv } from './lib/pv';</span>
+injectJsError();
+injectXHR();
+blankScreen();
+timing();
+longTask();
+<span class="hljs-addition">+pv();</span>
+</code></pre>
+<h5 id="t693. pv.js">3. pv.js <a href="#t693. pv.js"> # </a></h5>
+<p>src\monitor\lib\pv.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> tracker <span class="hljs-keyword">from</span> <span class="hljs-string">'../util/tracker'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pv</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> connection = navigator.connection;
+    tracker.send({
+        <span class="hljs-attr">kind</span>: <span class="hljs-string">'business'</span>,
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'pv'</span>,
+        <span class="hljs-attr">effectiveType</span>: connection.effectiveType, <span class="hljs-comment">//网络环境</span>
+        <span class="hljs-attr">rtt</span>: connection.rtt,<span class="hljs-comment">//往返时间</span>
+        <span class="hljs-attr">screen</span>: <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-built_in">window</span>.screen.width}</span>x<span class="hljs-subst">${<span class="hljs-built_in">window</span>.screen.height}</span>`</span><span class="hljs-comment">//设备分辨率</span>
+    });
+    <span class="hljs-keyword">let</span> startTime = <span class="hljs-built_in">Date</span>.now();
+    <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'unload'</span>, () =&gt; {
+        <span class="hljs-keyword">let</span> stayTime = <span class="hljs-built_in">Date</span>.now() - startTime;
+        tracker.send({
+            <span class="hljs-attr">kind</span>: <span class="hljs-string">'business'</span>,
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'stayTime'</span>,
+            stayTime
+        });
+    }, <span class="hljs-literal">false</span>);
+
+}
+</code></pre>
+<h2 id="t705.查询报表">5.查询报表 <a href="#t705.查询报表"> # </a></h2>
+<ul>
+<li><a href="https://help.aliyun.com/document_detail/69313.html">图表说明</a></li>
+<li>查询日志数据</li>
+<li>聚类分析</li>
+<li>数据可视化<ul>
+<li>趋势 柱状图、拆线图、曲线图</li>
+<li>比例 饼图、环状图、面积图</li>
+</ul>
+</li>
+<li>仪表盘</li>
+</ul>
+<h3 id="t715.1 监控项分布">5.1 监控项分布 <a href="#t715.1 监控项分布"> # </a></h3>
+<pre><code class="lang-js">* | SELECT type, COUNT(*) <span class="hljs-keyword">as</span> number GROUP BY type LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<h3 id="t725.2 浏览器分布">5.2 浏览器分布 <a href="#t725.2 浏览器分布"> # </a></h3>
+<pre><code class="lang-js">* | SELECT userAgent, COUNT(*) <span class="hljs-keyword">as</span> number GROUP BY userAgent LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<h3 id="t735.3 页面分辨率分布">5.3 页面分辨率分布 <a href="#t735.3 页面分辨率分布"> # </a></h3>
+<pre><code class="lang-js">* | SELECT screen, COUNT(*) <span class="hljs-keyword">as</span> number GROUP BY screen LIMIT <span class="hljs-number">10</span>
+</code></pre>
+<h2 id="t746.参考">6.参考 <a href="#t746.参考"> # </a></h2>
+<h3 id="t756.1 第三方">6.1 第三方 <a href="#t756.1 第三方"> # </a></h3>
+<h4 id="t766.1.1 商业产品">6.1.1 商业产品 <a href="#t766.1.1 商业产品"> # </a></h4>
+<ul>
+<li><a href="https://www.sensorsdata.cn/">神策数据</a></li>
+<li><a href="https://www.growingio.com/">GrowingIO</a></li>
+</ul>
+<h4 id="t776.1.2 开源产品">6.1.2 开源产品 <a href="#t776.1.2 开源产品"> # </a></h4>
+<ul>
+<li><a href="https://www.fundebug.com/">fundebug</a></li>
+<li><a href="https://github.com/BetterJS/doc">BetterJS</a></li>
+<li><a href="https://sentry.io">Sentry</a></li>
+<li><a href="https://sentry.io/onboarding/zhufeng/get-started/">@sentry/browser</a></li>
+</ul>
+<h3 id="t786.2 defer 和 async">6.2 defer 和 async <a href="#t786.2 defer 和 async"> # </a></h3>
+<ul>
+<li>defer异步下载JavaScript文件,会在HTML解析完成之后<code>DOMContentLoaded</code>事件调用前执行,不会阻塞页面渲染<ul>
+<li>如果script标签设置了该属性，则浏览器会异步的下载该文件并且不会影响到后续DOM的渲染</li>
+<li>如果有多个设置了defer的script标签存在，则会按照顺序执行所有的script</li>
+<li>defer脚本会在文档渲染完毕后，<code>DOMContentLoaded</code>事件调用前执行</li>
+</ul>
+</li>
+<li>async异步下载JavaScript文件，下载完成之后会立即执行，有可能会阻塞页面渲染<ul>
+<li>async的设置,会使得script脚本异步的加载并在允许的情况下执行</li>
+<li>async的执行,并不会按着script在页面中的顺序来执行，而是谁先加载完谁执行</li>
+</ul>
+</li>
+</ul>
+
+    

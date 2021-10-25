@@ -1,0 +1,556 @@
+
+        <h2 id="t01.Context(上下文)">1.Context(上下文) <a href="#t01.Context(上下文)"> # </a></h2>
+<ul>
+<li>在某些场景下，你想在整个组件树中传递数据，但却不想手动地在每一层传递属性。你可以直接在 React 中使用强大的<code>context</code>API解决上述问题</li>
+<li>在一个典型的 React 应用中，数据是通过 props 属性自上而下（由父及子）进行传递的，但这种做法对于某些类型的属性而言是极其繁琐的（例如：地区偏好，UI 主题），这些属性是应用程序中许多组件都需要的。Context 提供了一种在组件之间共享此类值的方式，而不必显式地通过组件树的逐层传递 props</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/contextapi.gif" alt="contextapi"></p>
+<h3 id="t11.1 类组件使用">1.1 类组件使用 <a href="#t11.1 类组件使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">let</span> ThemeContext = React.createContext();
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Title</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.context.color</span>}` }}&gt;</span>
+                Title
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Header</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.context.color</span>}` }}&gt;</span>
+                Header
+                <span class="hljs-tag">&lt;<span class="hljs-name">Title</span> /&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Content</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.context.color</span>}` }}&gt;</span>
+                Content
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> this.context.changeColor('red')}&gt;变红<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> this.context.changeColor('green')}&gt;变绿<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.context.color</span>}` }}&gt;</span>
+                Main
+                <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> /&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Panel</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    state = { <span class="hljs-attr">color</span>: <span class="hljs-string">'green'</span> }
+    changeColor = <span class="hljs-function">(<span class="hljs-params">color</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({ color });
+    }
+    render() {
+        <span class="hljs-keyword">let</span> value = { <span class="hljs-attr">color</span>: <span class="hljs-keyword">this</span>.state.color, <span class="hljs-attr">changeColor</span>: <span class="hljs-keyword">this</span>.changeColor };
+        <span class="hljs-comment">//Provider提供者，它负责向下层所有的组件提供数据value</span>
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{value}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.state.color</span>}`, <span class="hljs-attr">width:</span> <span class="hljs-attr">300</span> }}&gt;</span>
+                    Panel
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Header</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Main</span> /&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Provider</span>&gt;</span></span>
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Panel</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+
+</code></pre>
+<h3 id="t21.2 函数组件使用">1.2 函数组件使用 <a href="#t21.2 函数组件使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">let</span> ThemeContext = React.createContext(<span class="hljs-string">'theme'</span>);
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Header</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+             <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    value =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value.color</span>}`, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span> }}&gt;</span>
+                          header
+                          <span class="hljs-tag">&lt;<span class="hljs-name">Title</span> /&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Title</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext;
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    value =&gt; (
+                       <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value.color</span>}` }}&gt;</span>
+                            title
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext;
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    value =&gt; (
+                      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value.color</span>}`, <span class="hljs-attr">margin:</span> <span class="hljs-attr">5</span>, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span> }}&gt;</span>
+                        main
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> /&gt;</span>
+                      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Content</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = ThemeContext;
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    value =&gt; (
+                     <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value.color</span>}`, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span> }}&gt;</span>
+                        Content
+                            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span>value.changeColor('red')} style={{color:'red'}}&gt;红色<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> value.changeColor('green')} style={{color:'green'}}&gt;绿色<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                     <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Page</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">color</span>: <span class="hljs-string">'red'</span> };
+    }
+    changeColor = <span class="hljs-function">(<span class="hljs-params">color</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({ color })
+    }
+    render() {
+        <span class="hljs-keyword">let</span> contextVal = {<span class="hljs-attr">changeColor</span>: <span class="hljs-keyword">this</span>.changeColor,<span class="hljs-attr">color</span>:<span class="hljs-keyword">this</span>.state.color };
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{contextVal}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{margin:</span>'<span class="hljs-attr">10px</span>', <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.state.color</span>}`, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span>, <span class="hljs-attr">width:</span> <span class="hljs-attr">200</span> }}&gt;</span>
+                    page
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Header</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Main</span> /&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Provider</span>&gt;</span></span>
+
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Page</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+</code></pre>
+<h3 id="t31.3 函数组件实现">1.3 函数组件实现 <a href="#t31.3 函数组件实现"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createContext</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> value;
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Provider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+        <span class="hljs-keyword">constructor</span>(props) {
+            <span class="hljs-keyword">super</span>(props);
+            value = props.value
+            <span class="hljs-keyword">this</span>.state = {};
+        }
+        <span class="hljs-keyword">static</span> getDerivedStateFromProps(nextProps, prevState) {
+            value = nextProps.value;
+            <span class="hljs-keyword">return</span> {};
+        }
+        render() {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.props.children;
+        }
+    }
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Consumer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+        <span class="hljs-keyword">constructor</span>(props) {
+            <span class="hljs-keyword">super</span>(props);
+        }
+        render() {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.props.children(value);
+        }
+    }
+    <span class="hljs-keyword">return</span> {
+        Provider,
+        Consumer
+    }
+}
+<span class="hljs-keyword">let</span> ThemeContext = createContext(<span class="hljs-string">'theme'</span>);
+</code></pre>
+<h2 id="t43. 高阶组件">3. 高阶组件 <a href="#t43. 高阶组件"> # </a></h2>
+<ul>
+<li>高阶组件就是一个函数，传给它一个组件，它返回一个新的组件</li>
+<li>高阶组件的作用其实就是为了组件之间的代码复用</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> NewComponent = higherOrderComponent(OldComponent)
+</code></pre>
+<h3 id="t53.1 日志组件">3.1 日志组件 <a href="#t53.1 日志组件"> # </a></h3>
+<h4 id="t63.1 手工实现">3.1 手工实现 <a href="#t63.1 手工实现"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    componentWillMount() {
+        <span class="hljs-keyword">this</span>.start = <span class="hljs-built_in">Date</span>.now();
+    }
+    componentDidMount() {
+        <span class="hljs-built_in">console</span>.log((<span class="hljs-built_in">Date</span>.now() - <span class="hljs-keyword">this</span>.start) + <span class="hljs-string">'ms'</span>)
+    }
+    render() {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>App<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    }
+}
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h4 id="t73.2 高阶组件">3.2 高阶组件 <a href="#t73.2 高阶组件"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">const</span> logger = <span class="hljs-function">(<span class="hljs-params">WrappedComponent</span>) =&gt;</span> {
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoggerComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+      componentWillMount(){
+          <span class="hljs-keyword">this</span>.start = <span class="hljs-built_in">Date</span>.now();
+      }  
+      componentDidMount(){
+          <span class="hljs-built_in">console</span>.log((<span class="hljs-built_in">Date</span>.now() - <span class="hljs-keyword">this</span>.start)+<span class="hljs-string">'ms'</span>)
+      }
+      render () {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> /&gt;</span></span>
+      }
+    }
+    <span class="hljs-keyword">return</span> LoggerComponent;
+  }
+<span class="hljs-keyword">let</span> Hello = logger(<span class="hljs-function"><span class="hljs-params">props</span>=&gt;</span><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>);
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Hello</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t83.2 多层高阶组件">3.2 多层高阶组件 <a href="#t83.2 多层高阶组件"> # </a></h3>
+<h4 id="t93.2.1 从localStorage中加载">3.2.1 从localStorage中加载 <a href="#t93.2.1 从localStorage中加载"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">const</span> fromLocal = <span class="hljs-function">(<span class="hljs-params">WrappedComponent,name</span>) =&gt;</span>{
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+        <span class="hljs-keyword">constructor</span>(){
+            <span class="hljs-keyword">super</span>();
+            <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">value</span>:<span class="hljs-literal">null</span>};
+        }
+        componentWillMount(){
+            <span class="hljs-keyword">let</span> value = localStorage.getItem(name);
+             <span class="hljs-keyword">this</span>.setState({value});
+        }
+        render(){
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{this.state.value}/</span>&gt;</span></span>
+        }
+    }
+    <span class="hljs-keyword">return</span> NewComponent;
+}
+<span class="hljs-keyword">const</span> UserName = <span class="hljs-function">(<span class="hljs-params">{value}</span>)=&gt;</span>(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">defaultValue</span> = <span class="hljs-string">{value}/</span>&gt;</span></span>
+)
+<span class="hljs-keyword">const</span> UserNameFromLocal = fromLocal(UserName,<span class="hljs-string">'username'</span>);
+
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserNameFromLocal</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+
+</code></pre>
+<h4 id="t103.2.2 从ajax中加载">3.2.2 从ajax中加载 <a href="#t103.2.2 从ajax中加载"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+
+<span class="hljs-keyword">const</span> fromLocal = <span class="hljs-function">(<span class="hljs-params">WrappedComponent,name</span>) =&gt;</span>{
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+        <span class="hljs-keyword">constructor</span>(){
+            <span class="hljs-keyword">super</span>();
+            <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">id</span>:<span class="hljs-literal">null</span>};
+        }
+        componentWillMount(){
+            <span class="hljs-keyword">let</span> id = localStorage.getItem(name);
+            <span class="hljs-keyword">this</span>.setState({id});
+        }
+        render(){
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> <span class="hljs-attr">id</span>=<span class="hljs-string">{this.state.id}/</span>&gt;</span></span>
+        }
+    }
+    <span class="hljs-keyword">return</span> NewComponent;
+}
+<span class="hljs-keyword">const</span> fromAjax = <span class="hljs-function">(<span class="hljs-params">WrappedComponent</span>) =&gt;</span>{
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NewComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+        <span class="hljs-keyword">constructor</span>(){
+            <span class="hljs-keyword">super</span>();
+            <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">value</span>:{}};
+        }
+        componentDidMount(){
+            fetch(<span class="hljs-string">`/<span class="hljs-subst">${<span class="hljs-keyword">this</span>.props.id}</span>.json`</span>).then(<span class="hljs-function"><span class="hljs-params">response</span>=&gt;</span>response.json()).then(<span class="hljs-function"><span class="hljs-params">value</span>=&gt;</span>{
+                <span class="hljs-keyword">this</span>.setState({value});
+            });
+        }
+        render(){
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{this.state.value}/</span>&gt;</span></span>
+        }
+    }
+    <span class="hljs-keyword">return</span> NewComponent;
+}
+<span class="hljs-keyword">const</span> UserName = <span class="hljs-function">(<span class="hljs-params">{value}</span>)=&gt;</span>{
+  <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">defaultValue</span> = <span class="hljs-string">{value.username}/</span>&gt;</span></span>;
+}
+
+<span class="hljs-keyword">const</span> UserNameFromAjax = fromAjax(UserName);
+<span class="hljs-keyword">const</span> UserNameFromLocal = fromLocal(UserNameFromAjax,<span class="hljs-string">'id'</span>);
+
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserNameFromLocal</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<p>translate.json</p>
+<pre><code class="lang-js">{
+    <span class="hljs-string">"zhangsan"</span>: <span class="hljs-string">"张三"</span>
+}
+</code></pre>
+<h2 id="t114. render props">4. render props <a href="#t114. render props"> # </a></h2>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/render-props.html">render-props</a></li>
+<li><code>render prop</code> 是指一种在 React 组件之间使用一个值为函数的 prop 共享代码的简单技术</li>
+<li>具有 render prop 的组件接受一个函数，该函数返回一个 React 元素并调用它而不是实现自己的渲染逻辑</li>
+<li>render prop 是一个用于告知组件需要渲染什么内容的函数 prop</li>
+<li>这也是逻辑复用的一种方式</li>
+</ul>
+<pre><code class="lang-js">&lt;DataProvider render={data =&gt; (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello {data.target}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+)}/&gt;
+</code></pre>
+<h3 id="t124.1 原生实现">4.1 原生实现 <a href="#t124.1 原生实现"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MouseTracker</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">constructor</span>(props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+    }
+
+    handleMouseMove = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">x</span>: event.clientX,
+            <span class="hljs-attr">y</span>: event.clientY
+        });
+    }
+
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onMouseMove</span>=<span class="hljs-string">{this.handleMouseMove}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>移动鼠标!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>当前的鼠标位置是 ({this.state.x}, {this.state.y})<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        );
+    }
+}
+</code></pre>
+<h3 id="t134.2  children">4.2  children <a href="#t134.2  children"> # </a></h3>
+<pre><code class="lang-js">class MouseTracker extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { x: 0, y: 0 };
+    }
+
+    handleMouseMove = (event) =&gt; {
+        this.setState({
+            x: event.clientX,
+            y: event.clientY
+        });
+    }
+
+    render() {
+        return (
+            &lt;div onMouseMove={this.handleMouseMove}&gt;
+               {this.props.children(this.state)}
+            &lt;/div&gt;
+        );
+    }
+}
+ReactDOM.render(&lt; MouseTracker &gt;
+{
+    props=&gt;(
+        &lt;&gt;
+          &lt;h1&gt;移动鼠标!&lt;/h1&gt;
+          &lt;p&gt;当前的鼠标位置是 ({props.x}, {props.y})&lt;/p&gt;
+        &lt;/&gt;
+    )
+}
+&lt;/ MouseTracker&gt;, document.getElementById('root'));
+</code></pre>
+<h3 id="t144.3 render属性">4.3 render属性 <a href="#t144.3 render属性"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MouseTracker</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">constructor</span>(props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+    }
+
+    handleMouseMove = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">x</span>: event.clientX,
+            <span class="hljs-attr">y</span>: event.clientY
+        });
+    }
+
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onMouseMove</span>=<span class="hljs-string">{this.handleMouseMove}</span>&gt;</span>
+               {this.props.render(this.state)}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        );
+    }
+}
+
+ReactDOM.render(&lt; MouseTracker render={params=&gt;(
+    <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>移动鼠标!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>当前的鼠标位置是 ({params.x}, {params.y})<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+)} /&gt;, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t154.4 HOC">4.4 HOC <a href="#t154.4 HOC"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MouseTracker</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">constructor</span>(props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+    }
+
+    handleMouseMove = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">x</span>: event.clientX,
+            <span class="hljs-attr">y</span>: event.clientY
+        });
+    }
+
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onMouseMove</span>=<span class="hljs-string">{this.handleMouseMove}</span>&gt;</span>
+               {this.props.render(this.state)}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        );
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">withMouse</span>(<span class="hljs-params">Component</span>)</span>{
+ <span class="hljs-keyword">return</span> (
+     <span class="hljs-function">(<span class="hljs-params">props</span>)=&gt;</span><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">MouseTracker</span> <span class="hljs-attr">render</span>=<span class="hljs-string">{mouse</span>=&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> {<span class="hljs-attr">...props</span>} {<span class="hljs-attr">...mouse</span>}/&gt;</span>}/&gt;</span>
+ )
+}
+<span class="hljs-keyword">let</span> App = withMouse(<span class="hljs-function"><span class="hljs-params">props</span>=&gt;</span>(
+    <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>移动鼠标!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>当前的鼠标位置是 ({props.x}, {props.y})<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+));
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span>/&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h2 id="t165. 插槽(Portals)">5. 插槽(Portals) <a href="#t165. 插槽(Portals)"> # </a></h2>
+<ul>
+<li>Portals 提供了一种很好的方法，将子节点渲染到父组件 DOM 层次结构之外的 DOM 节点。</li>
+</ul>
+<pre><code class="lang-js">ReactDOM.createPortal(child, container)
+</code></pre>
+<ul>
+<li>第一个参数（child）是任何可渲染的 React 子元素，例如一个元素，字符串或 片段(fragment)</li>
+<li>第二个参数（container）则是一个 DOM 元素</li>
+</ul>
+<p>index.html</p>
+<pre><code class="lang-html"> <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"modal-root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+<p>index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./modal.css'</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Modal</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.modal=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#modal-root'</span>);
+    }
+    render() {
+        <span class="hljs-keyword">return</span> ReactDOM.createPortal(<span class="hljs-keyword">this</span>.props.children,<span class="hljs-keyword">this</span>.modal);
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Page</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.state={<span class="hljs-attr">show</span>:<span class="hljs-literal">false</span>};
+    }
+    handleClick=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">show</span>:!<span class="hljs-keyword">this</span>.state.show});
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.handleClick}</span>&gt;</span>显示模态窗口<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                {
+                    this.state.show&amp;&amp;<span class="hljs-tag">&lt;<span class="hljs-name">Modal</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"modal"</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"modal"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"modal-content"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"modal-content"</span>&gt;</span>
+                                内容
+                                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.handleClick}</span>&gt;</span>关闭<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Modal</span>&gt;</span>
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Page</span>/&gt;</span></span>,<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+</code></pre>
+<p>modal.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-class">.modal</span>{
+    <span class="hljs-attribute">position</span>: fixed;
+    <span class="hljs-attribute">left</span>:<span class="hljs-number">0</span>;
+    <span class="hljs-attribute">top</span>:<span class="hljs-number">0</span>;
+    <span class="hljs-attribute">right</span>:<span class="hljs-number">0</span>;
+    <span class="hljs-attribute">bottom</span>:<span class="hljs-number">0</span>;
+    <span class="hljs-attribute">background</span>: <span class="hljs-built_in">rgba</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,.<span class="hljs-number">5</span>);
+    <span class="hljs-attribute">display</span>: block;
+}
+
+<span class="hljs-keyword">@keyframes</span> zoom{
+    <span class="hljs-selector-tag">from</span>{<span class="hljs-attribute">transform</span>:<span class="hljs-built_in">scale</span>(<span class="hljs-number">0</span>);}
+    <span class="hljs-selector-tag">to</span>{<span class="hljs-attribute">transform</span>:<span class="hljs-built_in">scale</span>(<span class="hljs-number">1</span>);}
+}
+
+<span class="hljs-selector-class">.modal</span> <span class="hljs-selector-class">.modal-content</span>{
+    <span class="hljs-attribute">width</span>:<span class="hljs-number">50%</span>;
+    <span class="hljs-attribute">height</span>:<span class="hljs-number">50%</span>;
+    <span class="hljs-attribute">background</span>: white;
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">10px</span>;
+    <span class="hljs-attribute">margin</span>:<span class="hljs-number">100px</span> auto;
+    <span class="hljs-attribute">display</span>:flex;
+    <span class="hljs-attribute">flex-direction</span>: row;
+    <span class="hljs-attribute">justify-content</span>: center;
+    <span class="hljs-attribute">align-items</span>: center;
+    <span class="hljs-attribute">animation</span>: zoom .<span class="hljs-number">6s</span>;
+}
+</code></pre>
+
+    

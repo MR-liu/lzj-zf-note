@@ -1,0 +1,812 @@
+
+        <h2 id="t01. 进程和线程">1. 进程和线程 <a href="#t01. 进程和线程"> # </a></h2>
+<h3 id="t11.1  进程">1.1  进程 <a href="#t11.1  进程"> # </a></h3>
+<ul>
+<li>CPU承担了所有的计算任务</li>
+<li>进程是CPU资源分配的最小单位</li>
+<li>在同一个时间内，单个CPU只能执行一个任务，只能运行一个进程</li>
+<li>如果有一个进程正在执行，其它进程就得暂停</li>
+<li>CPU使用了时间片轮转的算法实现多进程的调度</li>
+</ul>
+<h3 id="t21.2. 线程">1.2. 线程 <a href="#t21.2. 线程"> # </a></h3>
+<ul>
+<li>线程是 CPU调度的最小单位</li>
+<li>一个进程可以包括多个线程，这些线程共享这个进程的资源</li>
+</ul>
+<h2 id="t32. chrome浏览器进程">2. chrome浏览器进程 <a href="#t32. chrome浏览器进程"> # </a></h2>
+<ul>
+<li>浏览器是多进程的</li>
+<li>每一个TAB页就是一个进程 </li>
+<li>浏览器主进程 <ul>
+<li>控制其它子进程的创建和销毁</li>
+<li>浏览器界面显示，比如用户交互、前进、后退等操作</li>
+<li>将渲染的内容绘制到用户界面上</li>
+</ul>
+</li>
+<li>渲染进程就是我们说的浏览器内核<ul>
+<li>负责页面的渲染、脚本执行、事件处理</li>
+<li>每个TAB页都有一个渲染进程   </li>
+</ul>
+</li>
+<li>网络进程 处理网络请求、文件访问等操作</li>
+<li>GPU进程 用于3D绘制</li>
+<li>第三方插件进程</li>
+</ul>
+<h2 id="t43. 渲染进程">3. 渲染进程 <a href="#t43. 渲染进程"> # </a></h2>
+<ul>
+<li>GUI渲染线程<ul>
+<li>渲染、布局和绘制页面</li>
+<li>当页面需要重绘和回流时，此线程就会执行</li>
+<li>与JS引擎互斥</li>
+</ul>
+</li>
+<li>JS引擎线程<ul>
+<li>负责解析执行JS脚本</li>
+<li>只有一个JS引擎线程(单线程)</li>
+<li>与GUI渲染线程互斥</li>
+</ul>
+</li>
+<li>事件触发线程<ul>
+<li>用来控制事件循环(鼠标点击、setTimeout、Ajax等)</li>
+<li>当事件满足触发条件时，把事件放入到JS引擎所有的执行队列中</li>
+</ul>
+</li>
+<li>定时器触发线程<ul>
+<li>setInterval和setTimeout所在线程   </li>
+<li>定时任务并不是由JS引擎计时，而是由定时触发线程来计时的</li>
+<li>计时完毕后会通知事件触发线程</li>
+</ul>
+</li>
+<li>异步HTTP请求线程<ul>
+<li>浏览器有一个单独的线程处理AJAX请求</li>
+<li>当请求完毕后，如果有回调函数，会通知事件触发线程</li>
+</ul>
+</li>
+</ul>
+<h2 id="t54.eventloop使用">4.eventloop使用 <a href="#t54.eventloop使用"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/eventloop2.png" style="width:50%"></p>
+<h3 id="t64.1 宏任务">4.1 宏任务 <a href="#t64.1 宏任务"> # </a></h3>
+<ul>
+<li>页面的大部分任务是在主任务上执行的，比如下面这些都是宏任务<ul>
+<li>渲染事件(DOM解析、布局、绘制)</li>
+<li>用户交互(鼠标点击、页面缩放)</li>
+<li>JavaScript脚本执行</li>
+<li>网络请求</li>
+<li>文件读写</li>
+</ul>
+</li>
+<li>宏任务会添加到消息到消息队列的尾部，当主线程执行到该消息的时候就会执行  </li>
+<li>每次从事件队列中获取一个事件回调并且放到执行栈中的就是一个宏任务，宏任务执行过程中不会执行其它内容</li>
+<li>每次宏任务执行完毕后会进行GUI渲染线程的渲染，然后再执行下一个宏任务</li>
+<li>宏任务: script（整体代码）, setTimeout, setInterval, setImmediate, I/O, UI rendering</li>
+<li>宏任务颗粒度较大，不适合需要精确控制境的任务</li>
+<li>宏任务是由宿主方控制的</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:red'</span>;
+<span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:yellow'</span>;
+<span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:blue'</span>;
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:red'</span>;
+setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:yellow'</span>
+},<span class="hljs-number">0</span>)
+</code></pre>
+<h3 id="t74.2 微任务">4.2 微任务 <a href="#t74.2 微任务"> # </a></h3>
+<ul>
+<li>宏任务结束后会进行渲染然后执行下一个宏任务</li>
+<li>微任务是当前宏任务执行后立即执行的宏任务</li>
+<li>当宏任务执行完，就到达了检查点,会先将执行期间所产生的所有微任务都执行完再去进行渲染</li>
+<li>微任务是由V8引擎控制的，在创建全局执行上下文的时候，也会在V8引擎内部创建一个微任务队列</li>
+<li>微任务: process.nextTick（Nodejs）, Promises, Object.observe, MutationObserver</li>
+</ul>
+<h4 id="t84.2.1 promise">4.2.1 promise <a href="#t84.2.1 promise"> # </a></h4>
+<ul>
+<li><a href="https://github.com/chromium/chromium/blob/4fbb615854292f1f20ab2170b7682d7274828e4e/third_party/blink/renderer/bindings/core/v8/script_promise.cc">script_promise.cc</a></li>
+<li>微任务队列会一次性清空</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loop</span>(<span class="hljs-params"></span>) </span>{
+     <span class="hljs-built_in">Promise</span>.resolve().then(loop);
+}
+loop();
+</code></pre>
+<ul>
+<li><p>微任务会先于渲染执行</p>
+<pre><code class="lang-js"><span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:red'</span>;
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+<span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+  <span class="hljs-built_in">document</span>.body.style = <span class="hljs-string">'background:yellow'</span>
+});
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+</code></pre>
+</li>
+<li><p>宏任务结束之后会先执行微任务
+<code>`</code>js
+setTimeout(() =&gt; {
+  console.log(1);
+  Promise.resolve(3).then(data =&gt; console.log(data))
+}, 0)</p>
+</li>
+</ul>
+<p>setTimeout(() =&gt; {
+    console.log(2)
+}, 0)</p>
+<pre><code>
+- 比较二者执行栈的区别
+```js
+ button.addEventListener('click', () =&gt; {
+    Promise.resolve().then(() =&gt; console.log('Micro task 1'));
+    console.log('Listener 1');//此时堆栈清空
+});
+button.addEventListener('click', () =&gt; {
+    Promise.resolve().then(() =&gt; console.log('Micro task 2'));
+    console.log('Listener 2');
+});
+// Listener1 Micro task 1 Listener 2 Micro task 2
+//button.click();堆栈在执行完Listener1后没有清空。还在Script中
+</code></pre><pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"link"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"http://www.baidu.com"</span>&gt;</span>link<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">let</span> link = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'link'</span>);
+        <span class="hljs-keyword">const</span> nextTick = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {
+            link.addEventListener(<span class="hljs-string">'click'</span>, resolve, { <span class="hljs-attr">once</span>: <span class="hljs-literal">true</span> });
+        });
+        nextTick.then(<span class="hljs-function"><span class="hljs-params">event</span> =&gt;</span> {
+            event.preventDefault();
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'event.preventDefault()'</span>);
+        });
+        <span class="hljs-comment">//link.click();</span>
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h4 id="t94.2.3 MutationObserver">4.2.3 MutationObserver <a href="#t94.2.3 MutationObserver"> # </a></h4>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver">MutationObserver</a>创建并返回一个新的 MutationObserver 它会在指定的DOM发生变化时被调用</li>
+<li>MutationObserver采用了异步 + 微任务的方案</li>
+<li>异步是为了提升同步操作带来的性能问题</li>
+<li>微任务是为了解决实时响应的问题</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"tree"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"start()"</span>&gt;</span>开始监听<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"changeAttribute()"</span>&gt;</span>修改属性<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"addChild()"</span>&gt;</span>添加子节点，3秒后删除<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">var</span> targetNode = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'tree'</span>);
+        <span class="hljs-keyword">var</span> config = { <span class="hljs-attr">attributes</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">childList</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">subtree</span>: <span class="hljs-literal">true</span> };
+        <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">mutationsList</span>) </span>{
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> mutation <span class="hljs-keyword">of</span> mutationsList) {
+                <span class="hljs-keyword">if</span> (mutation.type == <span class="hljs-string">'childList'</span>) {
+                    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'一个子节点被添加或者删除了'</span>);
+                }
+                <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (mutation.type == <span class="hljs-string">'attributes'</span>) {
+                    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'属性 '</span> + mutation.attributeName + <span class="hljs-string">' 被改变了.'</span>);
+                }
+            }
+        };
+
+        <span class="hljs-keyword">var</span> observer = <span class="hljs-keyword">new</span> MutationObserver(callback);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span>(<span class="hljs-params"></span>) </span>{
+            observer.observe(targetNode, config);
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">changeAttribute</span>(<span class="hljs-params"></span>) </span>{
+            targetNode.setAttribute(<span class="hljs-string">'data-name'</span>, <span class="hljs-string">'树'</span>);
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addChild</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">let</span> child = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+            child.innerHTML = <span class="hljs-string">'子节点'</span>;
+            targetNode.appendChild(child);
+            setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                targetNode.removeChild(child);
+            }, <span class="hljs-number">2000</span>);
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h2 id="t105. EventLoop实现">5. EventLoop实现 <a href="#t105. EventLoop实现"> # </a></h2>
+<ul>
+<li>JS 分为同步任务和异步任务</li>
+<li>同步任务都在JS引擎线程上执行，形成一个执行栈</li>
+<li>事件触发线程管理一个任务队列，异步任务触发条件达成，将回调事件放到任务队列中</li>
+<li>执行栈中所有同步任务执行完毕，此时JS引擎线程空闲，系统会读取任务队列，将可运行的异步任务回调事件添加到执行栈中，开始执行</li>
+<li>setTimeout/setInterval JS引擎线程=&gt;定时触发器线程=&gt;事件触发线程=&gt;事件队列</li>
+<li><p>Ajax  JS引擎线程=&gt;异步http请求线程=&gt;事件触发线程=&gt;事件队列</p>
+</li>
+<li><p><a href="https://html.spec.whatwg.org/#event-loop">event-loop</a></p>
+</li>
+</ul>
+<h3 id="t115.1 单线执行">5.1 单线执行 <a href="#t115.1 单线执行"> # </a></h3>
+<ul>
+<li>无法和外界交互</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> ret1 = <span class="hljs-number">1</span> + <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> ret2 = <span class="hljs-number">2</span> + <span class="hljs-number">2</span>;
+<span class="hljs-keyword">let</span> ret3 = <span class="hljs-number">3</span> + <span class="hljs-number">3</span>;
+<span class="hljs-keyword">let</span> ret4 = <span class="hljs-number">4</span> + <span class="hljs-number">4</span>;
+<span class="hljs-built_in">console</span>.log(ret1, ret2, ret3, ret4);
+</code></pre>
+<h3 id="t125.2 事件循环">5.2 事件循环 <a href="#t125.2 事件循环"> # </a></h3>
+<pre><code class="lang-js">cnpm i readline-sync -S
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> readline = <span class="hljs-built_in">require</span>(<span class="hljs-string">'readline-sync'</span>);
+<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">var</span> num1 = readline.question(<span class="hljs-string">'input num1: '</span>);
+    <span class="hljs-keyword">var</span> num2 = readline.question(<span class="hljs-string">'input num2: '</span>);
+    <span class="hljs-keyword">let</span> ret = <span class="hljs-built_in">eval</span>(num1 + <span class="hljs-string">"+"</span> + num2);
+    <span class="hljs-built_in">console</span>.log(ret);
+}
+</code></pre>
+<h3 id="t135.3 setTimeout">5.3 setTimeout <a href="#t135.3 setTimeout"> # </a></h3>
+<h4 id="t145.3.1 setTimeout第一版">5.3.1 setTimeout第一版 <a href="#t145.3.1 setTimeout第一版"> # </a></h4>
+<ul>
+<li>IPC(Inter-Process Communication)进程间通信，提供了各种进程间通信的方法</li>
+</ul>
+<h5 id="t155.3.1.1 main.js">5.3.1.1 main.js <a href="#t155.3.1.1 main.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { fork } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'child_process'</span>);
+<span class="hljs-keyword">let</span> tasks = [];
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">showName</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"zhufeng"</span>)
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setTimeout</span>(<span class="hljs-params">callback, timeout</span>) </span>{
+    <span class="hljs-keyword">let</span> child = fork(<span class="hljs-string">'./setTimeout.js'</span>);
+    child.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">message</span>) </span>{
+        <span class="hljs-keyword">if</span> (message.ready) {
+            tasks.push(callback);
+        }
+    });
+    child.send({ <span class="hljs-attr">type</span>: <span class="hljs-string">'timer'</span>, timeout });
+}
+setTimeout(showName, <span class="hljs-number">1000</span>);
+setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> task = tasks.shift();
+    task &amp;&amp; task();
+}, <span class="hljs-number">100</span>);
+</code></pre>
+<h5 id="t165.3.1.2 setTimeout.js">5.3.1.2 setTimeout.js <a href="#t165.3.1.2 setTimeout.js"> # </a></h5>
+<pre><code class="lang-js">process.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">message</span>) </span>{
+    <span class="hljs-keyword">let</span> { type, timeout } = message;
+    <span class="hljs-keyword">if</span> (type === <span class="hljs-string">'timer'</span>) {
+        <span class="hljs-keyword">let</span> end = <span class="hljs-built_in">Date</span>.now() + <span class="hljs-built_in">parseFloat</span>(timeout);
+        setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Date</span>.now() &gt;= end) {
+                process.send({ <span class="hljs-attr">ready</span>: <span class="hljs-literal">true</span> });
+                process.exit();
+            }
+        }, <span class="hljs-number">100</span>);
+    }
+});
+
+</code></pre>
+<h4 id="t175.3.2 setTimeout第二版">5.3.2 setTimeout第二版 <a href="#t175.3.2 setTimeout第二版"> # </a></h4>
+<ul>
+<li><a href="https://github.com/chromium/chromium/blob/master/base/task/sequence_manager/task_queue_impl.cc#L212">task_queue_impl</a></li>
+</ul>
+<p>main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> tasks = [];
+
+<span class="hljs-keyword">let</span> delayTasks = [];
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">showName</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"zhufeng"</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setTimeout</span>(<span class="hljs-params">callback, timeout</span>) </span>{
+    delayTasks.push({ callback, <span class="hljs-attr">start</span>: <span class="hljs-built_in">Date</span>.now(), timeout });
+}
+setTimeout(showName, <span class="hljs-number">1000</span>);
+
+setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> task = tasks.shift();
+    task &amp;&amp; task();
+    delayTasks = delayTasks.filter(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (item.start + item.timeout &lt;= <span class="hljs-built_in">Date</span>.now()) {
+            tasks.push(item.callback.bind(item));
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    });
+}, <span class="hljs-number">100</span>);
+</code></pre>
+<h4 id="t185.3.3 注意事项">5.3.3 注意事项 <a href="#t185.3.3 注意事项"> # </a></h4>
+<h5 id="t195.3.3.1  当前任务可能会影响定时器任务的执行">5.3.3.1  当前任务可能会影响定时器任务的执行 <a href="#t195.3.3.1  当前任务可能会影响定时器任务的执行"> # </a></h5>
+<pre><code class="lang-js">&lt;script&gt;
+        function task() {
+            console.log('zhufeng');
+        }
+        function exec() {
+            setTimeout(task, 0);
+            let start = Date.now();
+            let end = start + 500;
+            while (Date.now() &lt; end) {
+                console.log(1);
+            }
+        }
+        exec();
+    &lt;/script&gt;
+</code></pre>
+<h5 id="t205.3.3.2 嵌套的定时器最小间隔为4ms">5.3.3.2 嵌套的定时器最小间隔为4ms <a href="#t205.3.3.2 嵌套的定时器最小间隔为4ms"> # </a></h5>
+<ul>
+<li><a href="https://github.com/chromium/chromium/blob/master/third_party/blink/renderer/core/frame/dom_timer.cc#L39-L46">dom_timer.cc</a></li>
+<li>未激页面最小间隔为1秒</li>
+<li>延时时间最大值是24.8天</li>
+</ul>
+<pre><code class="lang-js">&lt;script&gt;
+        function task() { setTimeout(task, 0); }
+        setTimeout(task, 0);
+&lt;/script&gt;
+</code></pre>
+<h3 id="t215.4 XMLHttpRequest">5.4 XMLHttpRequest <a href="#t215.4 XMLHttpRequest"> # </a></h3>
+<ul>
+<li><a href="https://github.com/chromium/chromium/blob/master/third_party/blink/renderer/core/xmlhttprequest/xml_http_request.cc#L1391">xmlhttprequest</a></li>
+<li>XMLHttpRequest是由浏览器的其他进程或发起请求，然后再将执行结果利用 IPC 的方式通知渲染进程，之后渲染进程再将对应的消息添加到消息队列中</li>
+</ul>
+<h4 id="t225.4.1 main.js">5.4.1 main.js <a href="#t225.4.1 main.js"> # </a></h4>
+<pre><code class="lang-js">
+<span class="hljs-keyword">const</span> { fork } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'child_process'</span>);
+<span class="hljs-keyword">let</span> tasks = [];
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XMLHttpRequest</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>.options = {};
+    }
+    open(method, url) {
+        <span class="hljs-keyword">this</span>.options.method = method;
+        <span class="hljs-keyword">this</span>.options.url = url;
+    }
+    send() {
+        <span class="hljs-keyword">let</span> child = fork(<span class="hljs-string">'./XMLHttpRequest.js'</span>);
+        child.on(<span class="hljs-string">'message'</span>, (message) =&gt; {
+            <span class="hljs-keyword">if</span> (message.type === <span class="hljs-string">'response'</span>) {
+                <span class="hljs-keyword">this</span>.response = message.data;
+                tasks.push(<span class="hljs-keyword">this</span>.onload);
+            }
+        });
+        child.send({ <span class="hljs-attr">type</span>: <span class="hljs-string">'send'</span>, <span class="hljs-attr">options</span>: <span class="hljs-keyword">this</span>.options });
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getData</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+    xhr.open(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'http://localhost:3000/data'</span>);
+    xhr.onload = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(xhr.response);
+    }
+    xhr.send();
+}
+getData();
+
+setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> task = tasks.shift();
+    task &amp;&amp; task();
+}, <span class="hljs-number">100</span>);
+</code></pre>
+<h4 id="t235.4.2 XMLHttpRequest.js">5.4.2 XMLHttpRequest.js <a href="#t235.4.2 XMLHttpRequest.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> url = <span class="hljs-built_in">require</span>(<span class="hljs-string">'url'</span>);
+<span class="hljs-keyword">let</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+process.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">message</span>) </span>{
+    <span class="hljs-keyword">let</span> { type, options } = message;
+    <span class="hljs-keyword">if</span> (type == <span class="hljs-string">'send'</span>) {
+        <span class="hljs-keyword">let</span> urlObj = url.parse(options.url);
+        <span class="hljs-keyword">const</span> config = {
+            <span class="hljs-attr">hostname</span>: urlObj.hostname,
+            <span class="hljs-attr">port</span>: urlObj.port,
+            <span class="hljs-attr">path</span>: urlObj.path,
+            <span class="hljs-attr">method</span>: options.method
+        };
+        <span class="hljs-keyword">var</span> req = http.request(config, (res) =&gt; {
+            <span class="hljs-keyword">let</span> chunks = [];
+            res.on(<span class="hljs-string">'data'</span>, (chunk) =&gt; {
+                chunks.push(chunk);
+            });
+            res.on(<span class="hljs-string">'end'</span>, () =&gt; {
+                process.send({
+                    <span class="hljs-attr">type</span>: <span class="hljs-string">'response'</span>,
+                    <span class="hljs-attr">data</span>: <span class="hljs-built_in">JSON</span>.parse(Buffer.concat(chunks).toString())
+                });
+                process.exit();
+            });
+        });
+        req.on(<span class="hljs-string">'error'</span>, (err) =&gt; {
+            <span class="hljs-built_in">console</span>.error(err);
+        });
+        req.end();
+    }
+});
+</code></pre>
+<h4 id="t245.4.3 server.js">5.4.3 server.js <a href="#t245.4.3 server.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">"http"</span>);
+<span class="hljs-keyword">var</span> server = http.createServer();
+server.on(<span class="hljs-string">"request"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">request, response</span>) </span>{
+    response.end(<span class="hljs-built_in">JSON</span>.stringify({ <span class="hljs-attr">message</span>: <span class="hljs-string">'hello'</span> }));
+})
+server.listen(<span class="hljs-number">3000</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"服务器开启成功"</span>)
+});
+</code></pre>
+<h3 id="t255.5 Promise">5.5 Promise <a href="#t255.5 Promise"> # </a></h3>
+<h4 id="t265.5.1 main.js">5.5.1 main.js <a href="#t265.5.1 main.js"> # </a></h4>
+<pre><code class="lang-js">
+<span class="hljs-keyword">const</span> { fork } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'child_process'</span>);
+<span class="hljs-keyword">let</span> tasks = [];
+<span class="hljs-keyword">let</span> microTasks = []
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XMLHttpRequest</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>.options = {};
+    }
+    open(method, url) {
+        <span class="hljs-keyword">this</span>.options.method = method;
+        <span class="hljs-keyword">this</span>.options.url = url;
+    }
+    send() {
+        <span class="hljs-keyword">let</span> child = fork(<span class="hljs-string">'./XMLHttpRequest.js'</span>);
+        child.on(<span class="hljs-string">'message'</span>, (message) =&gt; {
+            <span class="hljs-keyword">if</span> (message.type === <span class="hljs-string">'response'</span>) {
+                <span class="hljs-keyword">this</span>.response = message.data;
+                tasks.push(<span class="hljs-keyword">this</span>.onload);
+            }
+        });
+        child.send({ <span class="hljs-attr">type</span>: <span class="hljs-string">'send'</span>, <span class="hljs-attr">options</span>: <span class="hljs-keyword">this</span>.options });
+    }
+}
+
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getData</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+    xhr.open(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'http://localhost:3000/data'</span>);
+    xhr.onload = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(xhr.response);
+    }
+    xhr.send();
+}
+getData();
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Promise</span> </span>{
+    <span class="hljs-keyword">constructor</span>(executor) {
+        executor(<span class="hljs-keyword">this</span>.resolve);
+    }
+    then = <span class="hljs-function">(<span class="hljs-params">onResolve</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>._onResolve = onResolve;
+    }
+    resolve = <span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> {
+        microTasks.push(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">this</span>._onResolve(value));
+    }
+}
+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+    resolve(<span class="hljs-string">'promise1'</span>);
+}).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(result));
+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+    resolve(<span class="hljs-string">'promise2'</span>);
+}).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(result));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'同步任务'</span>);
+
+setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> task = tasks.shift();
+    task &amp;&amp; task();
+    microTasks.forEach(<span class="hljs-function"><span class="hljs-params">task</span> =&gt;</span> task());
+    microTasks = [];
+}, <span class="hljs-number">100</span>);
+</code></pre>
+<h2 id="t276.requestAnimationFrame">6.requestAnimationFrame <a href="#t276.requestAnimationFrame"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame">requestAnimationFrame</a></li>
+<li>由浏览器决定何时渲染会更高效</li>
+<li>浏览器仅渲染到显示器能够达到的频率 1000ms/60=16ms</li>
+<li>每个帧的开头包括样式计算、布局和绘制</li>
+<li>如果某个任务执行时间过长，浏览器会推迟渲染</li>
+<li>当在执行用户交互的任务时，将渲染任务的优先级调整到最高</li>
+<li>渲染线程完成后将页面解析、定时器等任务优先级提升</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/requestAnimationFrame.jpg" style="width:50%"></p>
+<h3 id="t286.1 requestAnimationFrame">6.1 requestAnimationFrame <a href="#t286.1 requestAnimationFrame"> # </a></h3>
+<ul>
+<li><code>requestAnimationFrame</code>回调函数运行在处理CSS之前的绘制之前</li>
+<li>执行任务阶段不考虑CSS变化，在真正渲染的时候才会看最后的结果</li>
+<li><code>getComputedStyle</code>可以迫使浏览器更早的执行样式计算</li>
+</ul>
+<pre><code class="lang-js">  button.addEventListener(<span class="hljs-string">'click'</span>, () =&gt; {
+            box.style.display = <span class="hljs-string">'none'</span>;
+            box.style.display = <span class="hljs-string">'block'</span>;
+            box.style.display = <span class="hljs-string">'none'</span>;
+            box.style.display = <span class="hljs-string">'block'</span>;
+            box.style.display = <span class="hljs-string">'none'</span>;
+            <span class="hljs-built_in">window</span>.getComputedStyle(box).marginLeft;
+            box.style.display = <span class="hljs-string">'block'</span>;
+            box.style.display = <span class="hljs-string">'none'</span>;
+            box.style.display = <span class="hljs-string">'block'</span>;
+            box.style.display = <span class="hljs-string">'none'</span>;
+            box.style.display = <span class="hljs-string">'block'</span>;
+        });
+</code></pre>
+<h3 id="t296.2 requestAnimationFrame">6.2 requestAnimationFrame <a href="#t296.2 requestAnimationFrame"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"background: lightblue;width: 0;height: 20px;"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>走你<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-comment">/**
+         * requestAnimationFrame(callback) 由浏览器专门为动画提供的API
+         * cancelAnimationFrame(返回值) 清除动画
+         * &lt;16.7 丢帧
+         * &gt;16.7 跳跃 卡顿
+         */</span>
+        <span class="hljs-keyword">const</span> div = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'div'</span>);
+        <span class="hljs-keyword">const</span> button = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'button'</span>);
+        <span class="hljs-keyword">let</span> start;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">progress</span>(<span class="hljs-params"></span>) </span>{
+            div.style.width = div.offsetWidth + <span class="hljs-number">1</span> + <span class="hljs-string">'px'</span>;
+            div.innerHTML = (div.offsetWidth) + <span class="hljs-string">'%'</span>;
+            <span class="hljs-keyword">if</span> (div.offsetWidth &lt; <span class="hljs-number">100</span>)
+                timer = requestAnimationFrame(progress);
+            <span class="hljs-keyword">else</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Date</span>.now() - start);
+        }
+        button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            div.style.width = <span class="hljs-number">0</span>;
+            start = <span class="hljs-built_in">Date</span>.now();
+            requestAnimationFrame(progress);
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h2 id="t307.requestIdleCallback">7.requestIdleCallback <a href="#t307.requestIdleCallback"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback">requestIdleCallback</a></li>
+<li>window.requestIdleCallback()方法将在浏览器的空闲时段内调用的函数排队</li>
+<li>这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应</li>
+<li>页面是一帧一帧绘制出来的，当每秒绘制的帧数（FPS）达到 60 时，页面是流畅的，小于这个值时，用户会感觉到卡顿</li>
+<li>1s 60帧，所以每一帧分到的时间是 1000/60 ≈ 16 ms。所以我们书写代码时力求不让一帧的工作量超过 16ms</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/farmeimage.png" style="width:50%"></p>
+<h3 id="t317.1 requestIdleCallback">7.1 requestIdleCallback <a href="#t317.1 requestIdleCallback"> # </a></h3>
+<ul>
+<li>上面六个步骤完成后没超过 16 ms，说明时间有富余，此时就会执行 requestIdleCallback 里注册的任务</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/IdleDeadline">IdleDeadline</a></li>
+<li>callback：回调，即空闲时需要执行的任务，该回调函数接收一个IdleDeadline对象作为入参。其中IdleDeadline对象包含：<ul>
+<li>didTimeout，布尔值，表示任务是否超时，结合 timeRemaining 使用</li>
+<li>timeRemaining()，表示当前帧剩余的时间，也可理解为留给任务的时间还有多少</li>
+</ul>
+</li>
+<li>options：目前 options 只有一个参数<ul>
+<li>timeout。表示超过这个时间后，如果任务还没执行，则强制执行，不必等待空闲</li>
+</ul>
+</li>
+<li>requestIdleCallback发生在一帧的最后，此时页面布局已经完成，所以不建议在 requestIdleCallback 里再操作 DOM，这样会导致页面再次重绘,DOM 操作建议在 rAF 中进行</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/idlecallback.png" style="width:50%"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> handle = <span class="hljs-built_in">window</span>.requestIdleCallback(callback[, options])
+</code></pre>
+<pre><code class="lang-js">&lt;body&gt;
+    &lt;script&gt;
+        let task = () =&gt; {
+            console.log('requestAnimationFrame');
+        };
+
+        requestIdleCallback(idleWork, { timeout: 2000 });
+        // 任务队列
+        const tasks = [
+            () =&gt; {
+                console.log("第一个任务");
+                requestAnimationFrame(task);
+            },
+            () =&gt; {
+                console.log("第二个任务");
+                requestAnimationFrame(task);
+            },
+            () =&gt; {
+                console.log("第三个任务");
+                requestAnimationFrame(task);
+            },
+        ];
+
+        function idleWork(deadline) {
+            console.log('deadline.timeRemaining()', deadline.timeRemaining());
+            while ((deadline.timeRemaining() &gt; 0 || deadline.didTimeout) &amp;&amp; tasks.length &gt; 0) {
+                work();
+            }
+
+            if (tasks.length &gt; 0)
+                requestIdleCallback(idleWork);
+        }
+
+        function work() {
+            tasks.shift()();
+            console.log('执行任务');
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="t328. Node中的EventLoop">8. Node中的EventLoop <a href="#t328. Node中的EventLoop"> # </a></h2>
+<ul>
+<li>Node.js采用V8作为js的解析引擎，而I/O处理方面使用了自己设计的libuv</li>
+<li>libuv是一个基于事件驱动的跨平台抽象层，封装了不同操作系统一些底层特性，对外提供统一的API</li>
+<li>事件循环机制也是它里面的实现<ul>
+<li>V8引擎解析JavaScript脚本并调用Node API</li>
+<li>libuv库负责Node API的执行。它将不同的任务分配给不同的线程,形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎</li>
+<li>V8引擎再将结果返回给用户</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/nodelibuv.jpg" style="width:50%"></p>
+<h3 id="t338.1 libuv">8.1 libuv <a href="#t338.1 libuv"> # </a></h3>
+<ul>
+<li>同步执行全局的脚本</li>
+<li>执行所有的微任务，先执行nextTick中的所有的任务，再执行其它微任务</li>
+<li>开始执行宏任务，共有6个阶段，从第1个阶段开始，会执行每一个阶段所有的宏任务</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/nodelibuv2.jpg" style="width:50%"></p>
+<p><img src="http://img.zhufengpeixun.cn/nodeeventloop.jpg" style="width:50%"></p>
+<h3 id="t348.2 setImmediate">8.2 setImmediate <a href="#t348.2 setImmediate"> # </a></h3>
+<ul>
+<li>setTimeout/setInterval取值范围是[1,2的32次方-1],超出范围初始化为1，所以 setTimeout(fn,0) = setTimeout(fn,1)</li>
+</ul>
+<pre><code class="lang-js">setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>  (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'timeout'</span>);
+},<span class="hljs-number">0</span>);
+setImmediate(<span class="hljs-function"><span class="hljs-keyword">function</span>  (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'immediate'</span>);
+});
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
+fs.readFile(__filename, () =&gt; {
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'timeout'</span>);
+    }, <span class="hljs-number">0</span>)
+    setImmediate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'immediate'</span>)
+    })
+})
+</code></pre>
+<h3 id="t358.3 process.nextTick">8.3 process.nextTick <a href="#t358.3 process.nextTick"> # </a></h3>
+<ul>
+<li>nextTick独立于Event Loop,有自己的队列，每个阶段完成后如果存在nextTick队列会全部清空，优先级高于微任务</li>
+</ul>
+<pre><code class="lang-js">setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout1'</span>)
+    <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise1'</span>)
+    })
+}, <span class="hljs-number">0</span>)
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout2'</span>)
+    <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise2'</span>)
+    })
+}, <span class="hljs-number">0</span>)
+setImmediate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setImmediate1'</span>)
+    <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise3'</span>)
+    })
+}, <span class="hljs-number">0</span>)
+
+process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick1'</span>);
+    <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise4'</span>));
+    process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick2'</span>);
+        <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise5'</span>));
+        process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick3'</span>)
+            process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick4'</span>)
+            })
+        })
+    })
+})
+<span class="hljs-comment">// nextTick1 nextTick2 nextTick3 nextTick4</span>
+<span class="hljs-comment">//promise4 promise5 setTimeout1  promise1 setTimeout2 promise2  setImmediate1 promise3 </span>
+</code></pre>
+<h3 id="t368.4 Node.js事件环">8.4 Node.js事件环 <a href="#t368.4 Node.js事件环"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1'</span>);
+    <span class="hljs-keyword">let</span> rs1 = fs.createReadStream(<span class="hljs-string">'./1.txt'</span>);
+    rs1.on(<span class="hljs-string">'close'</span>, (data) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'end_a'</span>));
+    rs1.on(<span class="hljs-string">'data'</span>, () =&gt; {
+        rs1.destroy();
+        setImmediate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setImmediate_a'</span>));
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout_a'</span>)
+        });
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'a'</span>);
+    });
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'2'</span>);
+    setImmediate(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setImmediate1'</span>);
+        process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick1'</span>));
+    });
+    setImmediate(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setImmediate2'</span>);
+        process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick2'</span>));
+    });
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'3'</span>);
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout1'</span>);
+        process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick3'</span>)
+            process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'nextTick4'</span>));
+        });
+    });
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout2'</span>);
+    });
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'4'</span>);
+}, <span class="hljs-number">1000</span>);
+</code></pre>
+<h2 id="t379. 面试题">9. 面试题 <a href="#t379. 面试题"> # </a></h2>
+<h3 id="t389.1. 第1题">9.1. 第1题 <a href="#t389.1. 第1题"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Promise1'</span>)  
+  setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout2'</span>)
+  },<span class="hljs-number">0</span>)
+})
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout1'</span>)
+  <span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Promise2'</span>)    
+  })
+},<span class="hljs-number">0</span>)
+</code></pre>
+<h3 id="t399.2. 第2题">9.2. 第2题 <a href="#t399.2. 第2题"> # </a></h3>
+<ul>
+<li><a href="https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/">microtasks</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">'script start'</span>);
+
+setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout'</span>);
+}, <span class="hljs-number">0</span>);
+
+<span class="hljs-built_in">Promise</span>.resolve().then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise1'</span>);
+}).then(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise2'</span>);
+});
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'script end'</span>);
+</code></pre>
+<h3 id="t409.3. 第3题">9.3. 第3题 <a href="#t409.3. 第3题"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">async1</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'async1 start'</span>)
+    <span class="hljs-keyword">await</span> async2()
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'async1 end'</span>)
+}
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">async2</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'async2'</span>)
+}
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'script start'</span>)
+setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout'</span>)
+})
+async1()
+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise1'</span>)
+    resolve()
+}).then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise2'</span>)
+})
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'script end'</span>)
+</code></pre>
+<pre><code class="lang-js">script start
+async1 start
+async2
+promise1
+script end
+async1 end
+promise2
+setTimeout
+</code></pre>
+<h3 id="t419.4. 第4题">9.4. 第4题 <a href="#t419.4. 第4题"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+}, <span class="hljs-number">10</span>);
+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+    resolve();
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">4</span>);
+}).then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">5</span>);
+});
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">6</span>);
+requestIdleCallback(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-number">7</span>));
+requestAnimationFrame(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-number">8</span>));
+</code></pre>
+
+    

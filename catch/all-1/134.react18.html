@@ -1,0 +1,708 @@
+
+        <h2 id="t01. React18介绍">1. React18介绍 <a href="#t01. React18介绍"> # </a></h2>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/blog/2021/06/08/the-plan-for-react-18.html">React 18发布计划</a></li>
+<li><a href="https://github.com/reactwg/react-18/discussions">React 18 工作组</a></li>
+<li><a href="https://github.com/reactwg/react-18/discussions/41">startTransition</a></li>
+<li><a href="https://github.com/reactwg/react-18/discussions/37">React.lazy的全新SSR 架构</a></li>
+</ul>
+<h2 id="t12. 并发模式(concurrent mode)">2. 并发模式(concurrent mode) <a href="#t12. 并发模式(concurrent mode)"> # </a></h2>
+<ul>
+<li>在React 18中新加入的可选的<a href="https://zh-hans.reactjs.org/docs/concurrent-mode-intro.html">并发渲染(concurrent rendering)</a>机制</li>
+<li>Concurrent 模式是一组 React 的新功能，可帮助应用保持响应，并根据用户的设备性能和网速进行适当的调整</li>
+<li>在 Concurrent 模式中，渲染不是阻塞的。它是可中断的</li>
+</ul>
+<h3 id="t22.1 更新优先级">2.1 更新优先级 <a href="#t22.1 更新优先级"> # </a></h3>
+<ul>
+<li>以前更新没有优先级的概念,优先级高的更新并不能打断之前的更新,需要等前面的更新完成后才能进行</li>
+<li>用户对不同的操作对交互的执行速度有不同的预期,所以我们可以根据用户的预期赋予更新不同的优先级<ul>
+<li>高优先级  用户输入、窗口缩放和拖拽事件等</li>
+<li>低优先级  数据请求和下载文件等</li>
+</ul>
+</li>
+<li>高优先级的更新会中断正在进行的低优先级的更新</li>
+<li>等高优先级更新完成后,低优先级基于高优先级更新的结果重新更新</li>
+<li>对于 <code>CPU-bound</code> 的更新 (例如创建新的 DOM 节点和运行组件中的代码)，并发意味着一个更急迫的更新可以“中断”已经开始的渲染</li>
+</ul>
+<p><img src="https://upload-markdown-images.oss-cn-beijing.aliyuncs.com/jia_sai_1625651545473.jpeg" alt="jia_sai_1625651545473"></p>
+<p><img src="https://upload-markdown-images.oss-cn-beijing.aliyuncs.com/bing_fa_geng_xin_1625649988239.jpg" alt="bing_fa_geng_xin"></p>
+<h3 id="t32.2 双缓冲">2.2 双缓冲 <a href="#t32.2 双缓冲"> # </a></h3>
+<ul>
+<li>当数据量很大时，绘图可能需要几秒钟甚至更长的时间，而且有时还会出现闪烁现象，为了解决这些问题，可采用双缓冲技术来绘图</li>
+<li><a href="https://wiki.osdev.org/Double_Buffering">双缓冲</a>即在内存中创建一个与屏幕绘图区域一致的对象，先将图形绘制到内存中的这个对象上，再一次性将这个对象上的图形拷贝到屏幕上，这样能大大加快绘图的速度</li>
+<li>对于 <code>IO-bound</code>的更新 (例如从网络加载代码或数据)，并发意味着 React 甚至可以在全部数据到达之前就在内存中开始渲染，然后跳过令人不愉快的空白加载状态</li>
+</ul>
+<p><img src="https://upload-markdown-images.oss-cn-beijing.aliyuncs.com/shuang_huan_cun_hui_tu_1625651174010.jpg" alt="shuang_huan_cun_hui_tu"></p>
+<h2 id="t43.搭建开发环境">3.搭建开发环境 <a href="#t43.搭建开发环境"> # </a></h2>
+<h3 id="t53.1 vite">3.1 vite <a href="#t53.1 vite"> # </a></h3>
+<ul>
+<li>Vite是Vue的作者开发的Web开发构建工具</li>
+<li>它是一个基于浏览器原生ES模块导入的开发服务器</li>
+<li>在开发环境下，利用浏览器去解析import，在服务器端按需编译返回，完全跳过了打包这个概念</li>
+<li>服务器随启随用</li>
+<li>同时不仅对Vue文件提供了支持，还支持热更新，而且热更新的速度不会随着模块增多而变慢</li>
+</ul>
+<h3 id="t63.2 安装">3.2 安装 <a href="#t63.2 安装"> # </a></h3>
+<ul>
+<li><a href="plugin-react-refresh">plugin-react-refresh</a>支持react组件的热更新</li>
+</ul>
+<pre><code class="lang-js">npm install react@alpha react-dom@alpha @types/react @types/react-dom -S
+npm install vite typescript @vitejs/plugin-react-refresh -D
+node ./node_modules/esbuild/install.js
+</code></pre>
+<h3 id="t73.3 vite.config.ts">3.3 vite.config.ts <a href="#t73.3 vite.config.ts"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">'vite'</span>
+<span class="hljs-keyword">import</span> reactRefresh <span class="hljs-keyword">from</span> <span class="hljs-string">'@vitejs/plugin-react-refresh'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> defineConfig({
+  <span class="hljs-attr">plugins</span>: [reactRefresh()]
+})
+</code></pre>
+<h3 id="t83.4 tsconfig.json">3.4 tsconfig.json <a href="#t83.4 tsconfig.json"> # </a></h3>
+<p>tsconfig.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"compilerOptions"</span>: {
+    <span class="hljs-attr">"target"</span>: <span class="hljs-string">"ESNext"</span>,
+    <span class="hljs-attr">"lib"</span>: [<span class="hljs-string">"DOM"</span>, <span class="hljs-string">"DOM.Iterable"</span>, <span class="hljs-string">"ESNext"</span>],
+    <span class="hljs-attr">"allowJs"</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">"skipLibCheck"</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">"esModuleInterop"</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">"allowSyntheticDefaultImports"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"strict"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"forceConsistentCasingInFileNames"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"module"</span>: <span class="hljs-string">"ESNext"</span>,
+    <span class="hljs-attr">"moduleResolution"</span>: <span class="hljs-string">"Node"</span>,
+    <span class="hljs-attr">"resolveJsonModule"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"isolatedModules"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"noEmit"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"jsx"</span>: <span class="hljs-string">"react"</span>,
+    <span class="hljs-attr">"types"</span>: [<span class="hljs-string">"react/next"</span>, <span class="hljs-string">"react-dom/next"</span>]
+  },
+  <span class="hljs-attr">"include"</span>: [<span class="hljs-string">"./src"</span>]
+}
+</code></pre>
+<h3 id="t93.5 package.json">3.5 package.json <a href="#t93.5 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"zhufeng-react18"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"main"</span>: <span class="hljs-string">"index.js"</span>,
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"vite"</span>,
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"tsc &amp;&amp; vite build"</span>
+  },
+  <span class="hljs-attr">"keywords"</span>: [],
+  <span class="hljs-attr">"author"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"license"</span>: <span class="hljs-string">"ISC"</span>,
+  <span class="hljs-attr">"dependencies"</span>: {
+    <span class="hljs-attr">"react"</span>: <span class="hljs-string">"^18.0.0-alpha-ed6c091fe-20210701"</span>,
+    <span class="hljs-attr">"react-dom"</span>: <span class="hljs-string">"^18.0.0-alpha-ed6c091fe-20210701"</span>
+  },
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"@types/react"</span>: <span class="hljs-string">"^17.0.13"</span>,
+    <span class="hljs-attr">"@types/react-dom"</span>: <span class="hljs-string">"^17.0.8"</span>,
+    <span class="hljs-attr">"@vitejs/plugin-react-refresh"</span>: <span class="hljs-string">"^1.3.5"</span>,
+    <span class="hljs-attr">"typescript"</span>: <span class="hljs-string">"^4.3.5"</span>,
+    <span class="hljs-attr">"vite"</span>: <span class="hljs-string">"^2.4.1"</span>
+  }
+}
+</code></pre>
+<h3 id="t103.6 index.html">3.6 index.html <a href="#t103.6 index.html"> # </a></h3>
+<ul>
+<li><code>type='module'</code>可以导入<a href="https://www.sitepoint.com/using-es-modules/">ES6模块</a>,可以启用ESM模块机制</li>
+</ul>
+<p>index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"icon"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"image/svg+xml"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/src/favicon.svg"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Vite App<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/src/main.tsx"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t113.7 src\main.tsx">3.7 src\main.tsx <a href="#t113.7 src\main.tsx"> # </a></h3>
+<ul>
+<li><code>legacy</code>模式<code>ReactDOM.renders</code>会同步渲染</li>
+<li><code>createRoot</code>会启用<code>concurrent</code>并发模式</li>
+</ul>
+<p>src\main.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
+ReactDOM.createRoot(
+    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)!
+).render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>);
+</code></pre>
+<h3 id="t123.8 启动">3.8 启动 <a href="#t123.8 启动"> # </a></h3>
+<pre><code class="lang-js">npm run dev
+</code></pre>
+<h2 id="t134.批量更新">4.批量更新 <a href="#t134.批量更新"> # </a></h2>
+<ul>
+<li><a href="https://github.com/reactwg/react-18/discussions/21">automatic batching</a></li>
+<li>在<code>Concurrent</code>模式中更新是以优先级为依据进行合并的</li>
+</ul>
+<h3 id="t144.1 安装路由">4.1 安装路由 <a href="#t144.1 安装路由"> # </a></h3>
+<ul>
+<li>npm强制安装可以使用 <code>-f</code> 或 <code>--force</code> 参数<pre><code class="lang-js">npm install react-router-dom @types/react-router-dom --force -S
+</code></pre>
+</li>
+</ul>
+<h3 id="t154.2 src\main.tsx">4.2 src\main.tsx <a href="#t154.2 src\main.tsx"> # </a></h3>
+<p>src\main.tsx</p>
+<pre><code class="lang-diff">import React from 'react'
+import ReactDOM from 'react-dom'
+<span class="hljs-addition">+import {HashRouter as Router,Route,Link} from 'react-router-dom';</span>
+<span class="hljs-addition">+import BatchState from './routes/BatchState';</span>
+ReactDOM.createRoot(
+    document.getElementById('root')!
+).render(
+<span class="hljs-addition">+   &lt;Router&gt;</span>
+<span class="hljs-addition">+       &lt;ul&gt;</span>
+<span class="hljs-addition">+           &lt;li&gt;&lt;Link to="/BatchState"&gt;BatchState&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+       &lt;/ul&gt;</span>
+<span class="hljs-addition">+       &lt;Route path="/BatchState" component={BatchState}/&gt;</span>
+<span class="hljs-addition">+   &lt;/Router&gt;</span>
+);
+</code></pre>
+<h3 id="t164.3 BatchState.tsx">4.3 BatchState.tsx <a href="#t164.3 BatchState.tsx"> # </a></h3>
+<p>src\routes\BatchState.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+interface Props { }
+interface State {
+    <span class="hljs-attr">count</span>: number
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+    state = { <span class="hljs-attr">count</span>: <span class="hljs-number">0</span> }
+    handleCLick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">count</span>: <span class="hljs-keyword">this</span>.state.count + <span class="hljs-number">1</span> });
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"count"</span>, <span class="hljs-keyword">this</span>.state.count);
+            <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">count</span>: <span class="hljs-keyword">this</span>.state.count + <span class="hljs-number">1</span> });
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"count"</span>, <span class="hljs-keyword">this</span>.state.count);
+        }, <span class="hljs-number">0</span>);
+    };
+
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.state.count}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.handleCLick}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        );
+    }
+}
+</code></pre>
+<h2 id="t175.Suspense">5.Suspense <a href="#t175.Suspense"> # </a></h2>
+<ul>
+<li>Suspense 让你的组件在渲染之前进行<code>等待</code>，并在等待时显示<code>fallback</code>的内容</li>
+<li>Suspense内的组件子树比组件树的其他部分拥有更低的优先级</li>
+<li>执行流程<ul>
+<li>在render函数中我们可以使用异步请求数据</li>
+<li>react会从我们缓存中读取这个缓存</li>
+<li>如果有缓存了，直接进行正常的render</li>
+<li>如果没有缓存，那么会抛出一个promise异常</li>
+<li>当这个promise完成后(比发请求数据完成)，react会继续回到原来的render中，把数据render出来</li>
+<li>完全同步写法，没有任何异步<code>callback</code>之类的东西</li>
+</ul>
+</li>
+<li>React提供了一个内置函数<code>componentDidCatch</code>,如果 <code>render()</code> 函数抛出错误，则会触发该函数</li>
+<li>ErrorBoundary(错误边界)是一个组件，该组件会捕获到渲染期间(render)子组件发生的错误，并有能力阻止错误继续传播</li>
+</ul>
+<h3 id="t185.1 src\main.tsx">5.1 src\main.tsx <a href="#t185.1 src\main.tsx"> # </a></h3>
+<p>src\main.tsx</p>
+<pre><code class="lang-diff">import React from 'react'
+import ReactDOM from 'react-dom'
+import {HashRouter as Router,Route,Link} from 'react-router-dom';
+import BatchState from './routes/BatchState';
+<span class="hljs-addition">+import Suspense from './routes/Suspense';</span>
+ReactDOM.createRoot(
+    document.getElementById('root')!
+).render(
+    &lt;Router&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;Link to="/BatchState"&gt;BatchState&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+           &lt;li&gt;&lt;Link to="/Suspense"&gt;Suspense&lt;/Link&gt;&lt;/li&gt;</span>
+        &lt;/ul&gt;
+        &lt;Route path="/BatchState" component={BatchState}/&gt;
+<span class="hljs-addition">+       &lt;Route path="/Suspense" component={Suspense}/&gt;</span>
+    &lt;/Router&gt;
+);
+</code></pre>
+<h3 id="t195.2 ErrorBoundary.tsx">5.2 ErrorBoundary.tsx <a href="#t195.2 ErrorBoundary.tsx"> # </a></h3>
+<p>src\components\ErrorBoundary.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+interface Props{
+    <span class="hljs-attr">fallback</span>:React.ReactNode
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ErrorBoundary</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+  state = {<span class="hljs-attr">hasError</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span>};
+  <span class="hljs-keyword">static</span> getDerivedStateFromError(error:any) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">hasError</span>: <span class="hljs-literal">true</span>,
+      error,
+    };
+  }
+  render() {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state.hasError) {
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.props.fallback;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.props.children;
+  }
+}
+</code></pre>
+<h3 id="t205.3 Suspense.tsx">5.3 Suspense.tsx <a href="#t205.3 Suspense.tsx"> # </a></h3>
+<p>src\routes\Suspense.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ErrorBoundary <span class="hljs-keyword">from</span> <span class="hljs-string">"../components/ErrorBoundary"</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createResource</span>(<span class="hljs-params">promise: Promise&lt;any&gt;</span>) </span>{
+    <span class="hljs-keyword">let</span> status = <span class="hljs-string">'pending'</span>;
+    <span class="hljs-keyword">let</span> result: any;
+    <span class="hljs-keyword">return</span> {
+        read() {
+            <span class="hljs-keyword">if</span> (status === <span class="hljs-string">'success'</span> || status === <span class="hljs-string">'error'</span>) {
+                <span class="hljs-keyword">return</span> result;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">throw</span> promise.then(<span class="hljs-function">(<span class="hljs-params">data: any</span>) =&gt;</span> {
+                    status = <span class="hljs-string">'success'</span>;
+                    result = data;
+                }, (error: any) =&gt; {
+                    status = <span class="hljs-string">'error'</span>;
+                    result = error;
+                });
+            }
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetchData</span>(<span class="hljs-params">id: number</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            resolve({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: { id, <span class="hljs-attr">name</span>: <span class="hljs-string">'张三'</span> } });
+            <span class="hljs-comment">//reject({success:false,message:'获取数据发生了错误'});</span>
+        }, <span class="hljs-number">1000</span>);
+    });
+}
+<span class="hljs-keyword">const</span> initialResource = createResource(fetchData(<span class="hljs-number">1</span>));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">User</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> result = initialResource.read();
+    <span class="hljs-keyword">if</span> (result.success) {
+        <span class="hljs-keyword">let</span> user = result.data;
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{user.id}:{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{result.message}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorBoundary</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>出错了<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>加载中<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                    <span class="hljs-tag">&lt;<span class="hljs-name">User</span> /&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ErrorBoundary</span>&gt;</span></span>
+        );
+    }
+}
+</code></pre>
+<h3 id="t215.4 Suspense.tsx">5.4 Suspense.tsx <a href="#t215.4 Suspense.tsx"> # </a></h3>
+<p>src\components\Suspense.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+interface SuspenseProps {
+    <span class="hljs-attr">fallback</span>: React.ReactNode
+}
+interface SuspenseState {
+    <span class="hljs-attr">loading</span>: boolean
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suspense</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">SuspenseProps</span>, <span class="hljs-title">SuspenseState</span>&gt; </span>{
+    <span class="hljs-attr">mounted</span>: any = <span class="hljs-literal">null</span>
+    state = { <span class="hljs-attr">loading</span>: <span class="hljs-literal">false</span> };
+    componentDidCatch(error: any) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> error.then === <span class="hljs-string">'function'</span>) {
+            <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">loading</span>: <span class="hljs-literal">true</span> });
+            error.then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">loading</span>: <span class="hljs-literal">false</span> }) });
+        }
+    }
+    render() {
+        <span class="hljs-keyword">const</span> { fallback, children } = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">const</span> { loading } = <span class="hljs-keyword">this</span>.state;
+        <span class="hljs-keyword">return</span> loading ? fallback : children;
+    }
+}
+</code></pre>
+<h2 id="t226.SuspenseList">6.SuspenseList <a href="#t226.SuspenseList"> # </a></h2>
+<ul>
+<li>SuspenseList 通过编排向用户显示这些组件的顺序，来帮助协调许多可以挂起的组件</li>
+<li>revealOrder (forwards, backwards, together) 定义了 SuspenseList 子组件应该显示的顺序<ul>
+<li>together 在所有的子组件都准备好了的时候显示它们，而不是一个接着一个显示</li>
+<li>forwards 从前往后显示</li>
+<li>backwards 从后往前显示</li>
+</ul>
+</li>
+<li>tail (collapsed, hidden) 指定如何显示 SuspenseList 中未加载的项目<ul>
+<li>默认情况下，SuspenseList 将显示列表中的所有 fallback</li>
+<li>collapsed 仅显示列表中下一个 fallback</li>
+<li>hidden 未加载的项目不显示任何信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="t236.1 src\main.tsx">6.1 src\main.tsx <a href="#t236.1 src\main.tsx"> # </a></h3>
+<pre><code class="lang-diff">import React from 'react'
+import ReactDOM from 'react-dom'
+import {HashRouter as Router,Route,Link} from 'react-router-dom';
+import BatchState from './routes/BatchState';
+import Suspense from './routes/Suspense';
+<span class="hljs-addition">+import SuspenseList from './routes/SuspenseList';</span>
+ReactDOM.createRoot(
+    document.getElementById('root')!
+).render(
+    &lt;Router&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;Link to="/BatchState"&gt;BatchState&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/Suspense"&gt;Suspense&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+           &lt;li&gt;&lt;Link to="/SuspenseList"&gt;SuspenseList&lt;/Link&gt;&lt;/li&gt;</span>
+        &lt;/ul&gt;
+        &lt;Route path="/BatchState" component={BatchState}/&gt;
+        &lt;Route path="/Suspense" component={Suspense}/&gt;
+<span class="hljs-addition">+       &lt;Route path="/SuspenseList" component={SuspenseList}/&gt;</span>
+    &lt;/Router&gt;
+);
+</code></pre>
+<h3 id="t246.2 SuspenseList.tsx">6.2 SuspenseList.tsx <a href="#t246.2 SuspenseList.tsx"> # </a></h3>
+<p>src\routes\SuspenseList.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, Suspense, SuspenseList } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ErrorBoundary <span class="hljs-keyword">from</span> <span class="hljs-string">"../components/ErrorBoundary"</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createResource</span>(<span class="hljs-params">promise: Promise&lt;any&gt;</span>) </span>{
+    <span class="hljs-keyword">let</span> status = <span class="hljs-string">'pending'</span>;
+    <span class="hljs-keyword">let</span> result: any;
+    <span class="hljs-keyword">return</span> {
+        read() {
+            <span class="hljs-keyword">if</span> (status === <span class="hljs-string">'success'</span> || status === <span class="hljs-string">'error'</span>) {
+                <span class="hljs-keyword">return</span> result;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">throw</span> promise.then(<span class="hljs-function">(<span class="hljs-params">data: any</span>) =&gt;</span> {
+                    status = <span class="hljs-string">'success'</span>;
+                    result = data;
+                }, (error: any) =&gt; {
+                    status = <span class="hljs-string">'error'</span>;
+                    result = error;
+                });
+            }
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetchData</span>(<span class="hljs-params">id: number</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            resolve({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: { id, <span class="hljs-attr">name</span>: <span class="hljs-string">'姓名'</span> + id } });
+            <span class="hljs-comment">//reject({success:false,message:'获取数据发生了错误'});</span>
+        }, <span class="hljs-number">1000</span> * id);
+    });
+}
+
+<span class="hljs-keyword">let</span> userResourceMap: any = {
+    <span class="hljs-number">1</span>: createResource(fetchData(<span class="hljs-number">1</span>)),
+    <span class="hljs-number">2</span>: createResource(fetchData(<span class="hljs-number">2</span>)),
+    <span class="hljs-number">3</span>: createResource(fetchData(<span class="hljs-number">3</span>))
+}
+interface UserProps {
+    <span class="hljs-attr">id</span>: number
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">User</span>(<span class="hljs-params">props: UserProps</span>) </span>{
+    <span class="hljs-keyword">const</span> result = userResourceMap[props.id].read();
+    <span class="hljs-keyword">if</span> (result.success) {
+        <span class="hljs-keyword">let</span> user = result.data;
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{user.id}:{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{result.message}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorBoundary</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>出错了<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                <span class="hljs-tag">&lt;<span class="hljs-name">SuspenseList</span> <span class="hljs-attr">revealOrder</span>=<span class="hljs-string">"backwards"</span> <span class="hljs-attr">tail</span>=<span class="hljs-string">"collapsed"</span> &gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>加载用户3......<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                        <span class="hljs-tag">&lt;<span class="hljs-name">User</span> <span class="hljs-attr">id</span>=<span class="hljs-string">{3}</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>加载用户2......<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                        <span class="hljs-tag">&lt;<span class="hljs-name">User</span> <span class="hljs-attr">id</span>=<span class="hljs-string">{2}</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>加载用户1......<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                        <span class="hljs-tag">&lt;<span class="hljs-name">User</span> <span class="hljs-attr">id</span>=<span class="hljs-string">{1}</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">SuspenseList</span>&gt;</span>
+
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ErrorBoundary</span>&gt;</span></span>
+        );
+    }
+}
+</code></pre>
+<h2 id="t257.startTransition">7.startTransition <a href="#t257.startTransition"> # </a></h2>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/concurrent-mode-reference.html">startTransition</a></li>
+<li>startTransition 是一个接受回调的函数。我们用它来告诉 React 需要推迟的 state</li>
+<li>允许组件将速度较慢的数据获取更新推迟到随后渲染，以便能够立即渲染更重要的更新</li>
+</ul>
+<h3 id="t267.1 src\main.tsx">7.1 src\main.tsx <a href="#t267.1 src\main.tsx"> # </a></h3>
+<pre><code class="lang-diff">import React from 'react'
+import ReactDOM from 'react-dom'
+import {HashRouter as Router,Route,Link} from 'react-router-dom';
+import BatchState from './routes/BatchState';
+import Suspense from './routes/Suspense';
+import SuspenseList from './routes/SuspenseList';
+<span class="hljs-addition">+import StartTransition from './routes/StartTransition';</span>
+ReactDOM.createRoot(
+    document.getElementById('root')!
+).render(
+    &lt;Router&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;Link to="/BatchState"&gt;BatchState&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/Suspense"&gt;Suspense&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/SuspenseList"&gt;SuspenseList&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+           &lt;li&gt;&lt;Link to="/StartTransition"&gt;StartTransition&lt;/Link&gt;&lt;/li&gt;</span>
+        &lt;/ul&gt;
+        &lt;Route path="/BatchState" component={BatchState}/&gt;
+        &lt;Route path="/Suspense" component={Suspense}/&gt;
+        &lt;Route path="/SuspenseList" component={SuspenseList}/&gt;
+<span class="hljs-addition">+       &lt;Route path="/StartTransition" component={StartTransition}/&gt;</span>
+    &lt;/Router&gt;
+);
+</code></pre>
+<h3 id="t277.2 StartTransition.tsx">7.2 StartTransition.tsx <a href="#t277.2 StartTransition.tsx"> # </a></h3>
+<p>src\routes\StartTransition.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { startTransition, useEffect, useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSuggestions</span>(<span class="hljs-params">keyword: string</span>):<span class="hljs-title">Promise</span>&lt;<span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;&gt; </span>{
+  <span class="hljs-keyword">let</span> items =  <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(<span class="hljs-number">10000</span>).fill(<span class="hljs-number">0</span>).map(<span class="hljs-function">(<span class="hljs-params">item: number, index: number</span>) =&gt;</span> keyword + index);
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(items);
+}
+interface SuggestionProps {
+  <span class="hljs-attr">keyword</span>: string;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Suggestion</span>(<span class="hljs-params">props: SuggestionProps</span>) </span>{
+  <span class="hljs-keyword">const</span> [suggestions, setSuggestions] = useState&lt;<span class="hljs-built_in">Array</span>&lt;string&gt;&gt;([]);
+  useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    getSuggestions(props.keyword).then(<span class="hljs-function"><span class="hljs-params">suggestions</span> =&gt;</span> {
+      startTransition(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        setSuggestions(suggestions);
+      }) 
+    })
+  }, [props.keyword]);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+      {
+        suggestions.map((item: string) =&gt; (<span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>))
+      }
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+  )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> [keyword, setKeyword] = useState&lt;string&gt;(<span class="hljs-string">""</span>);
+  <span class="hljs-keyword">const</span> handleChange = <span class="hljs-function">(<span class="hljs-params">event: React.ChangeEvent&lt;HTMLInputElement&gt;</span>) =&gt;</span> {
+    setKeyword(event.target.value);
+  };
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      请输入商品关键字<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{keyword}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleChange}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Suggestion</span> <span class="hljs-attr">keyword</span>=<span class="hljs-string">{keyword}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</code></pre>
+<h2 id="t288.useDeferredValue">8.useDeferredValue <a href="#t288.useDeferredValue"> # </a></h2>
+<ul>
+<li>返回一个延迟响应的值</li>
+<li>在<code>useDeferredValue</code>内部会调用useState并触发一次更新,但此更新的优先级很低</li>
+</ul>
+<h3 id="t298.1 src\main.tsx">8.1 src\main.tsx <a href="#t298.1 src\main.tsx"> # </a></h3>
+<p>src\main.tsx</p>
+<pre><code class="lang-diff">import React from 'react'
+import ReactDOM from 'react-dom'
+import {HashRouter as Router,Route,Link} from 'react-router-dom';
+import BatchState from './routes/BatchState';
+import Suspense from './routes/Suspense';
+import SuspenseList from './routes/SuspenseList';
+import StartTransition from './routes/StartTransition';
+<span class="hljs-addition">+import UseDeferredValue from './routes/UseDeferredValue';</span>
+ReactDOM.createRoot(
+    document.getElementById('root')!
+).render(
+    &lt;Router&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;Link to="/BatchState"&gt;BatchState&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/Suspense"&gt;Suspense&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/SuspenseList"&gt;SuspenseList&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/StartTransition"&gt;StartTransition&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+           &lt;li&gt;&lt;Link to="/UseDeferredValue"&gt;UseDeferredValue&lt;/Link&gt;&lt;/li&gt;</span>
+        &lt;/ul&gt;
+        &lt;Route path="/BatchState" component={BatchState}/&gt;
+        &lt;Route path="/Suspense" component={Suspense}/&gt;
+        &lt;Route path="/SuspenseList" component={SuspenseList}/&gt;
+        &lt;Route path="/StartTransition" component={StartTransition}/&gt;
+<span class="hljs-addition">+       &lt;Route path="/UseDeferredValue" component={UseDeferredValue}/&gt;</span>
+    &lt;/Router&gt;
+);
+</code></pre>
+<h3 id="t308.2 UseDeferredValue.tsx">8.2 UseDeferredValue.tsx <a href="#t308.2 UseDeferredValue.tsx"> # </a></h3>
+<p>src\routes\UseDeferredValue.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { startTransition, useEffect, useState,useDeferredValue } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSuggestions</span>(<span class="hljs-params">keyword: string</span>):<span class="hljs-title">Promise</span>&lt;<span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;&gt; </span>{
+  <span class="hljs-keyword">let</span> items =  <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(<span class="hljs-number">10000</span>).fill(<span class="hljs-number">0</span>).map(<span class="hljs-function">(<span class="hljs-params">item: number, index: number</span>) =&gt;</span> keyword + index);
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(items);
+}
+interface SuggestionProps {
+  <span class="hljs-attr">keyword</span>: string;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Suggestion</span>(<span class="hljs-params">props: SuggestionProps</span>) </span>{
+  <span class="hljs-keyword">const</span> [suggestions, setSuggestions] = useState&lt;<span class="hljs-built_in">Array</span>&lt;string&gt;&gt;([]);
+  useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    getSuggestions(props.keyword).then(<span class="hljs-function"><span class="hljs-params">suggestions</span> =&gt;</span> {
+       setSuggestions(suggestions);
+    })
+  }, [props.keyword]);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+      {
+        suggestions.map((item: string) =&gt; (<span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>))
+      }
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+  )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> [keyword, setKeyword] = useState(<span class="hljs-string">""</span>);
+  <span class="hljs-keyword">const</span> deferredText = useDeferredValue(keyword); 
+  <span class="hljs-keyword">const</span> handleChange = <span class="hljs-function">(<span class="hljs-params">event: React.ChangeEvent&lt;HTMLInputElement&gt;</span>) =&gt;</span> {
+    setKeyword(event.target.value);
+  };
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      请输入商品关键字<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{keyword}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleChange}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Suggestion</span> <span class="hljs-attr">keyword</span>=<span class="hljs-string">{deferredText}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</code></pre>
+<h2 id="t319.useTransition">9.useTransition <a href="#t319.useTransition"> # </a></h2>
+<ul>
+<li><code>useTransition</code>允许组件在切换到下一个界面之前等待内容加载，从而避免不必要的加载状态</li>
+<li>它还允许组件将速度较慢的数据获取更新推迟到随后渲染，以便能够立即渲染更重要的更新</li>
+<li>useTransition hook 返回两个值的数组<ul>
+<li>startTransition 是一个接受回调的函数。我们用它来告诉 React 需要推迟的 state</li>
+<li>isPending 是一个布尔值。这是 React 通知我们是否正在等待过渡的完成的方式</li>
+</ul>
+</li>
+<li>如果某个 state 更新导致组件挂起，则该 state 更新应包装在 transition 中</li>
+</ul>
+<h3 id="t329.1 src\main.tsx">9.1 src\main.tsx <a href="#t329.1 src\main.tsx"> # </a></h3>
+<pre><code class="lang-diff">import React from 'react'
+import ReactDOM from 'react-dom'
+import {HashRouter as Router,Route,Link} from 'react-router-dom';
+import BatchState from './routes/BatchState';
+import Suspense from './routes/Suspense';
+import SuspenseList from './routes/SuspenseList';
+import StartTransition from './routes/StartTransition';
+import UseDeferredValue from './routes/UseDeferredValue';
+<span class="hljs-addition">+import UseTransition from './routes/UseTransition';</span>
+ReactDOM.createRoot(
+    document.getElementById('root')!
+).render(
+    &lt;Router&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;Link to="/BatchState"&gt;BatchState&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/Suspense"&gt;Suspense&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/SuspenseList"&gt;SuspenseList&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/StartTransition"&gt;StartTransition&lt;/Link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;Link to="/UseDeferredValue"&gt;UseDeferredValue&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+           &lt;li&gt;&lt;Link to="/UseTransition"&gt;UseTransition&lt;/Link&gt;&lt;/li&gt;</span>
+        &lt;/ul&gt;
+        &lt;Route path="/BatchState" component={BatchState}/&gt;
+        &lt;Route path="/Suspense" component={Suspense}/&gt;
+        &lt;Route path="/SuspenseList" component={SuspenseList}/&gt;
+        &lt;Route path="/StartTransition" component={StartTransition}/&gt;
+        &lt;Route path="/UseDeferredValue" component={UseDeferredValue}/&gt;
+<span class="hljs-addition">+       &lt;Route path="/UseTransition" component={UseTransition}/&gt;</span>
+    &lt;/Router&gt;
+);
+</code></pre>
+<h3 id="t339.2 UseTransition.tsx">9.2 UseTransition.tsx <a href="#t339.2 UseTransition.tsx"> # </a></h3>
+<p>src\routes\UseTransition.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, Suspense, useTransition, useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ErrorBoundary <span class="hljs-keyword">from</span> <span class="hljs-string">"../components/ErrorBoundary"</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetchData</span>(<span class="hljs-params">id: number</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            resolve({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: { id, <span class="hljs-attr">name</span>: <span class="hljs-string">'张三'</span> + id } });
+            <span class="hljs-comment">//reject({success:false,message:'获取数据发生了错误'});</span>
+        }, <span class="hljs-number">3000</span>);
+    });
+}
+
+interface UserProps {
+    <span class="hljs-attr">resource</span>: any
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">User</span>(<span class="hljs-params">props: UserProps</span>) </span>{
+    <span class="hljs-keyword">const</span> result = props.resource.read();
+    <span class="hljs-keyword">if</span> (result.success) {
+        <span class="hljs-keyword">let</span> user = result.data;
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{user.id}:{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{result.message}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createResource</span>(<span class="hljs-params">promise: Promise&lt;string&gt;</span>) </span>{
+    <span class="hljs-keyword">let</span> status = <span class="hljs-string">'pending'</span>;
+    <span class="hljs-keyword">let</span> result: any;
+    <span class="hljs-keyword">return</span> {
+        read() {
+            <span class="hljs-keyword">if</span> (status === <span class="hljs-string">'success'</span> || status === <span class="hljs-string">'error'</span>) {
+                <span class="hljs-keyword">return</span> result;
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">throw</span> promise.then(<span class="hljs-function">(<span class="hljs-params">data: any</span>) =&gt;</span> {
+                    status = <span class="hljs-string">'success'</span>;
+                    result = data;
+                }, (error: any) =&gt; {
+                    status = <span class="hljs-string">'error'</span>;
+                    result = error;
+                });
+            }
+        }
+    }
+}
+<span class="hljs-keyword">const</span> initialResource = createResource(fetchData(<span class="hljs-number">1</span>));
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> [resource, setResource] = useState(initialResource);
+    <span class="hljs-keyword">const</span> [isPending, startTransition] = useTransition();
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">ErrorBoundary</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>出错了<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">h1</span>&gt;</span>加载中...<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>}&gt;
+                    <span class="hljs-tag">&lt;<span class="hljs-name">User</span> <span class="hljs-attr">resource</span>=<span class="hljs-string">{resource}</span> /&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ErrorBoundary</span>&gt;</span>
+            {isPending ? " 加载中..." : null}
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+                <span class="hljs-attr">disabled</span>=<span class="hljs-string">{isPending}</span>
+                <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> {
+                    //startTransition(() =&gt; {
+                        setResource(createResource(fetchData(2)));
+                    //});
+                }}
+            &gt;下一个用户<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/&gt;</span></span>
+    )
+}
+</code></pre>
+
+    

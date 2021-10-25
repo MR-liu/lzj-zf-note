@@ -1,0 +1,116 @@
+
+        <h2 id="t01. 爬取内容">1. 爬取内容 <a href="#t01. 爬取内容"> # </a></h2>
+<h3 id="t11. http/axios 等爬取API接口">1. http/axios 等爬取API接口 <a href="#t11. http/axios 等爬取API接口"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> axios = <span class="hljs-built_in">require</span>(<span class="hljs-string">'axios'</span>);
+axios.get(<span class="hljs-string">'https://follow-api-ms.juejin.im/v1/getUserFollowInfo?uid=551d6923e4b0cd5b623f54da&amp;src=web'</span>)
+    .then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(res.data))
+</code></pre>
+<h3 id="t22. superagent/request/crawl爬取HTML页面">2. superagent/request/crawl爬取HTML页面 <a href="#t22. superagent/request/crawl爬取HTML页面"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>);
+request(<span class="hljs-string">'https://juejin.im/tag/%E5%89%8D%E7%AB%AF'</span>, (err, response, body) =&gt; {
+    <span class="hljs-keyword">let</span> regexp = <span class="hljs-regexp">/class="title" data-v-\w+&gt;(.+?)&lt;\/a&gt;/g</span>;
+    <span class="hljs-keyword">let</span> titles = [];
+    body.replace(regexp, (matched, title) =&gt; {
+        titles.push(title);
+    });
+    <span class="hljs-built_in">console</span>.log(titles);
+});
+</code></pre>
+<h3 id="t33. 使用puppeteer控制chromium">3. 使用puppeteer控制chromium <a href="#t33. 使用puppeteer控制chromium"> # </a></h3>
+<ul>
+<li>puppeteer是Chrome团队开发的一个node库</li>
+<li>可以通过api来控制浏览器的行为，比如点击，跳转，刷新，在控制台执行js脚本等等</li>
+<li>通过这个工具可以用来写爬虫，自动签到，网页截图，生成pdf，自动化测试等</li>
+</ul>
+<pre><code class="lang-js">(<span class="hljs-keyword">async</span> () =&gt; {
+     <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> puppeteer.launch();<span class="hljs-comment">//打开浏览器</span>
+     <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> browser.newPage();<span class="hljs-comment">//打开一个空白页</span>
+     <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://www.baidu.com'</span>);<span class="hljs-comment">//在地址栏输入网址并等待加载</span>
+     <span class="hljs-keyword">await</span> page.screenshot({ <span class="hljs-attr">path</span>: <span class="hljs-string">'baidu.png'</span> });<span class="hljs-comment">//截个图</span>
+     <span class="hljs-keyword">await</span> browser.close();<span class="hljs-comment">//关掉浏览器</span>
+})();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> puppeteer=<span class="hljs-built_in">require</span>(<span class="hljs-string">'puppeteer'</span>);
+<span class="hljs-keyword">const</span> fs=<span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">const</span> browser=<span class="hljs-keyword">await</span> puppeteer.launch({<span class="hljs-attr">headless</span>:<span class="hljs-literal">false</span>});
+        <span class="hljs-keyword">const</span> page=<span class="hljs-keyword">await</span> browser.newPage();
+        <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://juejin.im/tag/%E5%89%8D%E7%AB%AF'</span>, {
+<span class="hljs-attr">waitUntil</span>: <span class="hljs-string">'networkidle2'</span>
+        });
+        <span class="hljs-keyword">await</span> page.waitFor(<span class="hljs-number">500</span>);
+        <span class="hljs-keyword">let</span> comments = <span class="hljs-keyword">await</span> page.$$<span class="hljs-built_in">eval</span>(<span class="hljs-string">'a.title'</span>, els =&gt; {
+<span class="hljs-keyword">return</span> els.map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.innerText);
+        });
+        fs.writeFileSync(<span class="hljs-string">'comments.txt'</span>,comments.join(<span class="hljs-string">'\r\n'</span>),<span class="hljs-string">'utf8'</span>);
+        <span class="hljs-keyword">await</span> browser.close();
+})();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> puppeteer=<span class="hljs-built_in">require</span>(<span class="hljs-string">'puppeteer'</span>);
+(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> browser=<span class="hljs-keyword">await</span> puppeteer.launch({<span class="hljs-attr">headless</span>:<span class="hljs-literal">false</span>});<span class="hljs-comment">//启动浏览器</span>
+    <span class="hljs-keyword">let</span> page = <span class="hljs-keyword">await</span> browser.newPage();<span class="hljs-comment">//创建一个 Page 实例</span>
+    <span class="hljs-keyword">await</span> page.setJavaScriptEnabled(<span class="hljs-literal">true</span>);<span class="hljs-comment">//启用javascript</span>
+    <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">"https://www.jd.com/"</span>);
+    <span class="hljs-keyword">const</span> searchInput = <span class="hljs-keyword">await</span> page.$(<span class="hljs-string">"#key"</span>);<span class="hljs-comment">//获取元素</span>
+    <span class="hljs-keyword">await</span> searchInput.focus(); <span class="hljs-comment">//定位到搜索框</span>
+    <span class="hljs-keyword">await</span> page.keyboard.type(<span class="hljs-string">"手机"</span>);<span class="hljs-comment">//输入手机</span>
+    <span class="hljs-keyword">const</span> searchBtn = <span class="hljs-keyword">await</span> page.$(<span class="hljs-string">".button"</span>);
+    <span class="hljs-keyword">await</span> searchBtn.click();
+    <span class="hljs-keyword">await</span> page.waitForSelector(<span class="hljs-string">'.gl-item'</span>); <span class="hljs-comment">//等待元素加载之后，否则获取不了异步加载的元素</span>
+    <span class="hljs-keyword">const</span> links = <span class="hljs-keyword">await</span> page.$$<span class="hljs-built_in">eval</span>(<span class="hljs-string">'.gl-item &gt; .gl-i-wrap &gt; .p-img &gt; a'</span>, links =&gt; {
+        <span class="hljs-keyword">return</span> links.map(<span class="hljs-function"><span class="hljs-params">a</span> =&gt;</span> {
+            <span class="hljs-keyword">return</span> {
+                <span class="hljs-attr">href</span>: a.href.trim(),
+                <span class="hljs-attr">title</span>: a.title
+            }
+        });
+    });
+    page.close();
+    <span class="hljs-keyword">const</span> aTags = links.splice(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; aTags.length; i++) {
+        page=<span class="hljs-keyword">await</span> browser.newPage();
+        page.setJavaScriptEnabled(<span class="hljs-literal">true</span>);
+        <span class="hljs-keyword">await</span> page.setViewport({<span class="hljs-comment">//修改浏览器视窗大小</span>
+            <span class="hljs-attr">width</span>: <span class="hljs-number">1920</span>,
+            <span class="hljs-attr">height</span>: <span class="hljs-number">1080</span>
+        });
+        <span class="hljs-keyword">var</span> a = aTags[i];
+        <span class="hljs-keyword">await</span> page.goto(a.href, {<span class="hljs-attr">timeout</span>: <span class="hljs-number">0</span>});
+        <span class="hljs-keyword">let</span> filename = <span class="hljs-string">"items-"</span> + i + <span class="hljs-string">".png"</span>;
+        <span class="hljs-keyword">await</span> page.screenshot({
+            <span class="hljs-attr">path</span>: filename,
+            <span class="hljs-attr">fullPage</span>: <span class="hljs-literal">true</span>
+        });
+        page.close();
+    }
+    browser.close();
+})();
+</code></pre>
+<h2 id="t42.数据持久化">2.数据持久化 <a href="#t42.数据持久化"> # </a></h2>
+<ul>
+<li>根据爬取的规则和策略，把爬取到的数据储到数据库中</li>
+<li>如果要兼容不同的来源，需要对数据需要格式化</li>
+<li>为不同的数据建立索引方便检索</li>
+</ul>
+<h2 id="t53. 数据订阅">3. 数据订阅 <a href="#t53. 数据订阅"> # </a></h2>
+<ul>
+<li>用户可以按照自己的兴趣和需要进行订制内容</li>
+</ul>
+<h2 id="t64. 分发">4. 分发 <a href="#t64. 分发"> # </a></h2>
+<p>有新的数据的时候</p>
+<ul>
+<li>可以使用邮件推送到订阅者</li>
+<li>可以使用极光推送等推送服务</li>
+<li>可以使用及时通信服务向客户端推送</li>
+</ul>
+<h2 id="t7参考">参考 <a href="#t7参考"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/axios">axios</a></li>
+<li><a href="https://www.npmjs.com/package/request">request</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a></li>
+<li><a href="https://github.com/GoogleChrome/puppeteer/blob/v1.7.0/docs/api.md">puppeteer api</a></li>
+<li><a href="https://www.showapi.com/api/view/184/4">showapi</a> </li>
+</ul>
+
+    

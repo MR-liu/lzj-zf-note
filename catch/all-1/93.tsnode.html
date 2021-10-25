@@ -1,0 +1,487 @@
+
+        <h2 id="t01.搭建开发环境">1.搭建开发环境 <a href="#t01.搭建开发环境"> # </a></h2>
+<pre><code class="lang-js">mkdir zhufengexpress
+cd zhufengexpress
+cnpm init -y
+npx tsconfig.json
+</code></pre>
+<h3 id="t11.1 安装依赖">1.1 安装依赖 <a href="#t11.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cnpm i express sequelize mysql2 morgan http-errors http-status-codes  -S
+cnpm i cross-env typescript @types/express @types/morgan @types/http-errors ts-node-dev nodemon ts-node nyc mocha @types/mocha chai @types/chai chai-http  -D
+</code></pre>
+<h3 id="t21.2 package.json">1.2 package.json <a href="#t21.2 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">  "scripts": {
+    "start": "cross-env PORT=8000 ts-node-dev --respawn ./src/bin/www.ts",
+    "dev": "cross-env PORT=8000  nodemon --exec ts-node --files ./src/bin/www.ts",
+  },
+</code></pre>
+<h3 id="t31.3 bin\www.ts">1.3 bin\www.ts <a href="#t31.3 bin\www.ts"> # </a></h3>
+<p>src\bin\<a href="http://www.ts">www.ts</a></p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> app <span class="hljs-keyword">from</span> <span class="hljs-string">'../app'</span>;
+<span class="hljs-keyword">import</span> http <span class="hljs-keyword">from</span> <span class="hljs-string">'http'</span>;
+
+<span class="hljs-keyword">const</span> port = process.env.PORT || <span class="hljs-number">8000</span>;
+
+<span class="hljs-keyword">const</span> server = http.createServer(app);
+
+server.listen(port);
+server.on(<span class="hljs-string">'error'</span>, onError);
+server.on(<span class="hljs-string">'listening'</span>, onListening);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onError</span>(<span class="hljs-params">error: any</span>) </span>{
+  <span class="hljs-built_in">console</span>.error(error);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onListening</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Listening on '</span> + port);
+}
+</code></pre>
+<h3 id="t41.4 app.ts">1.4 app.ts <a href="#t41.4 app.ts"> # </a></h3>
+<p>src\app.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> createError <span class="hljs-keyword">from</span> <span class="hljs-string">'http-errors'</span>;
+<span class="hljs-keyword">import</span> express, { Request, Response } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> logger <span class="hljs-keyword">from</span> <span class="hljs-string">'morgan'</span>;
+<span class="hljs-keyword">var</span> indexRouter = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./routes/index'</span>);
+<span class="hljs-keyword">var</span> usersRouter = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./routes/users'</span>);
+<span class="hljs-keyword">var</span> app = express();
+app.use(logger(<span class="hljs-string">'dev'</span>));
+app.use(express.json());
+app.use(express.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+
+app.use(<span class="hljs-string">'/'</span>, indexRouter);
+app.use(<span class="hljs-string">'/users'</span>, usersRouter);
+
+app.use(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_req, _res, next</span>) </span>{
+    next(createError(<span class="hljs-number">404</span>));
+});
+
+app.use(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error: any, _req: Request, res: Response, _next: NextFunction</span>) </span>{
+    res.status(error.status || INTERNAL_SERVER_ERROR);
+    res.json({
+        <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>,
+        error
+    });
+});
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> app;
+</code></pre>
+<h3 id="t51.5 routes\index.ts">1.5 routes\index.ts <a href="#t51.5 routes\index.ts"> # </a></h3>
+<p>src\routes\index.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> express, { Request, Response } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">var</span> router = express.Router();
+
+router.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_req: Request, res: Response</span>) </span>{
+    res.json({
+        <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">data</span>: <span class="hljs-string">'home'</span>
+    })
+});
+
+<span class="hljs-built_in">module</span>.exports = router;
+</code></pre>
+<h3 id="t61.6 routes\users.ts">1.6 routes\users.ts <a href="#t61.6 routes\users.ts"> # </a></h3>
+<p>src\routes\users.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> express, { Request, Response } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">var</span> router = express.Router();
+
+router.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_req: Request, res: Response</span>) </span>{
+    res.json({
+        <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">data</span>: <span class="hljs-string">'users'</span>
+    })
+});
+
+<span class="hljs-built_in">module</span>.exports = router;
+</code></pre>
+<h2 id="t72. 使用sequelize">2. 使用sequelize <a href="#t72. 使用sequelize"> # </a></h2>
+<ul>
+<li>Sequelize 是一个基于 promise 的 Node.js ORM, 目前支持 Postgresql, MySQL, SQLite 和 Microsoft SQL Server. 它具有强大的事务支持, 关联关系, 预读和延迟加载,读取复制等功能.</li>
+</ul>
+<h3 id="t82.1 安装">2.1 安装 <a href="#t82.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm i sequelize -S
+</code></pre>
+<h3 id="t92.2 model\sequelize.ts">2.2 model\sequelize.ts <a href="#t92.2 model\sequelize.ts"> # </a></h3>
+<p>src\model\sequelize.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Sequelize } <span class="hljs-keyword">from</span> <span class="hljs-string">'sequelize'</span>;
+<span class="hljs-keyword">const</span> sequelize = <span class="hljs-keyword">new</span> Sequelize(<span class="hljs-string">'restful'</span>, <span class="hljs-string">'root'</span>, <span class="hljs-string">'root'</span>, {
+    <span class="hljs-attr">host</span>: <span class="hljs-string">'localhost'</span>,
+    <span class="hljs-attr">dialect</span>: <span class="hljs-string">'mysql'</span>,
+    <span class="hljs-attr">logging</span>: <span class="hljs-literal">false</span>
+})
+<span class="hljs-keyword">export</span> {
+    sequelize
+};
+</code></pre>
+<h3 id="t102.3 src\model\user.ts">2.3 src\model\user.ts <a href="#t102.3 src\model\user.ts"> # </a></h3>
+<p>src\model\user.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Model, DataTypes } <span class="hljs-keyword">from</span> <span class="hljs-string">'sequelize'</span>;
+<span class="hljs-keyword">import</span> { sequelize } <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span> </span>{ }
+
+User.init({
+    <span class="hljs-attr">username</span>: DataTypes.STRING,
+    <span class="hljs-attr">password</span>: DataTypes.STRING,
+    <span class="hljs-attr">email</span>: DataTypes.STRING
+}, { sequelize, <span class="hljs-attr">modelName</span>: <span class="hljs-string">'user'</span> });
+
+<span class="hljs-comment">//如果你希望 Sequelize 根据你的模型定义自动创建表(或根据需要进行修改),你可以使用sync方法,</span>
+<span class="hljs-comment">// 注意:如果表已经存在,使用`force:true`将删除该表</span>
+<span class="hljs-comment">/* sequelize.sync({ force: true })
+    .then(() =&gt; User.create({
+        username: 'zhangsan',
+        password: '123456',
+        email: 'zhangsan@qq.com'
+    }))
+    .then((result: User) =&gt; {
+        console.log(result.toJSON());
+    });
+ */</span>
+<span class="hljs-keyword">export</span> {
+    User
+};
+</code></pre>
+<h3 id="t112.4 model\index.ts">2.4 model\index.ts <a href="#t112.4 model\index.ts"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'./sequelize'</span>;
+<span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'./user'</span>;
+</code></pre>
+<h2 id="t123. restful">3. restful <a href="#t123. restful"> # </a></h2>
+<ul>
+<li>REST就是用<code>URI</code>表示资源，用HTTP方法(GET, POST, PUT, DELETE)表示对这些资源做什么操作</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">方法</th>
+<th style="text-align:left">路径</th>
+<th style="text-align:left">名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">/users</td>
+<td style="text-align:left">查看用户列表</td>
+</tr>
+<tr>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">/users/:id</td>
+<td style="text-align:left">查看单个用户</td>
+</tr>
+<tr>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">/users</td>
+<td style="text-align:left">添加用户</td>
+</tr>
+<tr>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">/users/:id</td>
+<td style="text-align:left">修改单个用户</td>
+</tr>
+<tr>
+<td style="text-align:left">DELETE</td>
+<td style="text-align:left">/users/:id</td>
+<td style="text-align:left">删除单个用户</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t133.1 routes\users.ts">3.1 routes\users.ts <a href="#t133.1 routes\users.ts"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> express, { Request, Response, NextFunction } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> createError <span class="hljs-keyword">from</span> <span class="hljs-string">'http-errors'</span>;
+<span class="hljs-keyword">import</span> { User } <span class="hljs-keyword">from</span> <span class="hljs-string">'../model'</span>;
+<span class="hljs-keyword">import</span> { INTERNAL_SERVER_ERROR } <span class="hljs-keyword">from</span> <span class="hljs-string">'http-status-codes'</span>;
+<span class="hljs-keyword">var</span> router = express.Router();
+
+router.get(<span class="hljs-string">'/'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_req: Request, res: Response, next: NextFunction</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> users = <span class="hljs-keyword">await</span> User.findAll();
+        res.json({
+            <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">data</span>: users
+        })
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(createError(INTERNAL_SERVER_ERROR));
+    }
+});
+router.get(<span class="hljs-string">'/:id'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req: Request, res: Response, next: NextFunction</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> User.findByPk(req.params.id);
+        <span class="hljs-keyword">if</span> (!user) {
+            <span class="hljs-keyword">return</span> next(createError(INTERNAL_SERVER_ERROR));
+        }
+        res.json({
+            <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">data</span>: user
+        })
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(createError(INTERNAL_SERVER_ERROR));
+    }
+
+});
+router.post(<span class="hljs-string">'/'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req: Request, res: Response, next: NextFunction</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> user = req.body;
+        user = <span class="hljs-keyword">await</span> User.create(user);
+        res.json({
+            <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">data</span>: user
+        })
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(createError(INTERNAL_SERVER_ERROR));
+    }
+
+});
+router.put(<span class="hljs-string">'/:id'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req: Request, res: Response, next: NextFunction</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> id = req.params.id;
+        <span class="hljs-keyword">let</span> update = req.body;
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> User.findByPk(id);
+        <span class="hljs-keyword">if</span> (!user) {
+            <span class="hljs-keyword">return</span> next(createError(INTERNAL_SERVER_ERROR));
+        }
+        user = <span class="hljs-keyword">await</span> user.update(update);
+        res.json({
+            <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">data</span>: user
+        })
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(createError(INTERNAL_SERVER_ERROR));
+    }
+
+});
+router.delete(<span class="hljs-string">'/:id'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req: Request, res: Response, next: NextFunction</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> id = req.params.id;
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> User.findByPk(id);
+        <span class="hljs-keyword">if</span> (!user) {
+            <span class="hljs-keyword">return</span> next(createError(INTERNAL_SERVER_ERROR));
+        }
+        user = <span class="hljs-keyword">await</span> user.destroy();
+        res.json({
+            <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">data</span>: user
+        })
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(createError(INTERNAL_SERVER_ERROR));
+    }
+});
+
+<span class="hljs-built_in">module</span>.exports = router;
+</code></pre>
+<h2 id="t144. 单元测试">4. 单元测试 <a href="#t144. 单元测试"> # </a></h2>
+<h3 id="t154.1 安装">4.1 安装 <a href="#t154.1 安装"> # </a></h3>
+<ul>
+<li><a href="https://mochajs.org/">mochajs</a></li>
+<li><a href="https://www.chaijs.com/">chaijs</a></li>
+<li><a href="https://www.chaijs.com/plugins/chai-http/">chai-http</a></li>
+<li><a href="https://www.npmjs.com/package/growl">growl</a></li>
+</ul>
+<pre><code class="lang-js">cnpm i mocha @types/mocha chai @types/chai chai-http -D
+</code></pre>
+<h3 id="t164.2 src\tests\helper.spec.ts">4.2 src\tests\helper.spec.ts <a href="#t164.2 src\tests\helper.spec.ts"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> chai <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+<span class="hljs-keyword">import</span> chaiHttp <span class="hljs-keyword">from</span> <span class="hljs-string">'chai-http'</span>;
+<span class="hljs-keyword">import</span> { sequelize, User } <span class="hljs-keyword">from</span> <span class="hljs-string">'../model'</span>;
+chai.use(chaiHttp);
+<span class="hljs-comment">//BDD测试提供了describe()，context()，it()，specify()，before()，after()，beforeEach()和afterEach()这几种函数</span>
+before(<span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> sequelize.sync();
+});
+
+beforeEach(<span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> User.truncate();
+});
+afterEach(<span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> User.truncate();
+});
+</code></pre>
+<h3 id="t174.3 tests\index.spec.ts">4.3 tests\index.spec.ts <a href="#t174.3 tests\index.spec.ts"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> app <span class="hljs-keyword">from</span> <span class="hljs-string">'../app'</span>;
+<span class="hljs-keyword">import</span> chai, { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+describe(<span class="hljs-string">'index'</span>, () =&gt; {
+    it(<span class="hljs-string">'GET / 访问首页'</span>, (done) =&gt; {
+        chai
+            .request(app)
+            .get(<span class="hljs-string">'/'</span>)
+            .end(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, res</span>) </span>{
+                expect(err).to.be.null;
+                expect(res).to.have.status(<span class="hljs-number">200</span>);
+                expect(res.body.success).to.equal(<span class="hljs-literal">true</span>);
+                expect(res.body).to.have.property(<span class="hljs-string">'data'</span>);
+                done();
+            });
+    });
+});
+</code></pre>
+<h3 id="t184.4 src\tests\user.spec.ts">4.4 src\tests\user.spec.ts <a href="#t184.4 src\tests\user.spec.ts"> # </a></h3>
+<p>src\tests\user.spec.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> app <span class="hljs-keyword">from</span> <span class="hljs-string">'../app'</span>;
+<span class="hljs-keyword">import</span> chai, { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+describe(<span class="hljs-string">'users'</span>, () =&gt; {
+    it(<span class="hljs-string">'POST /users 添加用户'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+        <span class="hljs-keyword">let</span> result = <span class="hljs-keyword">await</span> chai
+            .request(app)
+            .post(<span class="hljs-string">'/users'</span>)
+            .set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'application/json'</span>)
+            .send({ <span class="hljs-attr">username</span>: <span class="hljs-string">'zhangsan'</span>, <span class="hljs-attr">password</span>: <span class="hljs-string">'123456'</span> })
+        expect(result).to.have.status(<span class="hljs-number">200</span>);
+        expect(result.body.success).to.equal(<span class="hljs-literal">true</span>);
+        expect(result.body).to.have.property(<span class="hljs-string">'data'</span>);
+    });
+
+    it(<span class="hljs-string">'GET /users 查看用户列表'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+        <span class="hljs-keyword">await</span> chai
+            .request(app)
+            .post(<span class="hljs-string">'/users'</span>)
+            .set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'application/json'</span>)
+            .send({ <span class="hljs-attr">username</span>: <span class="hljs-string">'zhangsan'</span>, <span class="hljs-attr">password</span>: <span class="hljs-string">'123456'</span> })
+
+        <span class="hljs-keyword">let</span> result = <span class="hljs-keyword">await</span> chai.request(app).get(<span class="hljs-string">'/users'</span>);
+        expect(result.body.data).to.have.lengthOf(<span class="hljs-number">1</span>);
+    });
+
+    it(<span class="hljs-string">'PUT /users/1 更新'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+        <span class="hljs-keyword">let</span> result: any = <span class="hljs-keyword">await</span> chai
+            .request(app)
+            .post(<span class="hljs-string">'/users'</span>)
+            .set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'application/json'</span>)
+            .send({ <span class="hljs-attr">username</span>: <span class="hljs-string">'zhangsan'</span>, <span class="hljs-attr">password</span>: <span class="hljs-string">'123456'</span> })
+
+        <span class="hljs-keyword">let</span> update = <span class="hljs-keyword">await</span> chai
+            .request(app)
+            .put(<span class="hljs-string">`/users/<span class="hljs-subst">${result.body.data.id}</span>`</span>)
+            .set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'application/json'</span>)
+            .send({ <span class="hljs-attr">password</span>: <span class="hljs-string">'111111'</span> })
+        expect(update.body.data.password).to.equal(<span class="hljs-string">'111111'</span>);
+    });
+    it(<span class="hljs-string">'PUT /users/1 删除用户'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+        <span class="hljs-keyword">let</span> addResult: any = <span class="hljs-keyword">await</span> chai
+            .request(app)
+            .post(<span class="hljs-string">'/users'</span>)
+            .set(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'application/json'</span>)
+            .send({ <span class="hljs-attr">username</span>: <span class="hljs-string">'zhangsan'</span>, <span class="hljs-attr">password</span>: <span class="hljs-string">'123456'</span> });
+        <span class="hljs-keyword">let</span> findRequest = <span class="hljs-keyword">await</span> chai.request(app).get(<span class="hljs-string">'/users'</span>);
+        expect(findRequest.body.data).to.have.lengthOf(<span class="hljs-number">1</span>);
+        <span class="hljs-keyword">await</span> chai
+            .request(app)
+            .delete(<span class="hljs-string">`/users/<span class="hljs-subst">${addResult.body.data.id}</span>`</span>);
+        <span class="hljs-keyword">let</span> findRequest2 = <span class="hljs-keyword">await</span> chai.request(app).get(<span class="hljs-string">'/users'</span>);
+        expect(findRequest2.body.data).to.have.lengthOf(<span class="hljs-number">0</span>);
+    });
+});
+</code></pre>
+<h2 id="t195. docker布署">5. docker布署 <a href="#t195. docker布署"> # </a></h2>
+<h3 id="t205.1. 准备工作">5.1. 准备工作 <a href="#t205.1. 准备工作"> # </a></h3>
+<ul>
+<li>建议从<a href="https://dc.console.aliyun.com/next/index">阿里云</a>购买域名</li>
+<li>建议从<a href="https://ecs.console.aliyun.com">阿里云</a>购买ECS服务器</li>
+<li>建议从<a href="https://bsn.console.aliyun.com">阿里云</a>进行备案</li>
+</ul>
+<h3 id="t215.2. 安装系统">5.2. 安装系统 <a href="#t215.2. 安装系统"> # </a></h3>
+<ul>
+<li>选择最新的 CentOS 7.6</li>
+</ul>
+<h3 id="t225.3. 安装docker">5.3. 安装docker <a href="#t225.3. 安装docker"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/dockercontainer.png" alt="docker"></p>
+<pre><code class="lang-js">yum install -y yum-utils   device-mapper-persistent-data   lvm2
+yum-config-manager \
+    --add-repo \
+    <span class="hljs-attr">https</span>:<span class="hljs-comment">//mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span>
+yum install -y docker-ce docker-ce-cli containerd.io
+</code></pre>
+<h3 id="t235.4 阿里云加速">5.4 阿里云加速 <a href="#t235.4 阿里云加速"> # </a></h3>
+<pre><code class="lang-js">mkdir -p /etc/docker
+tee /etc/docker/daemon.json &lt;&lt;-'EOF'
+{
+  "registry-mirrors": ["https://fwvjnv59.mirror.aliyuncs.com"]
+}
+EOF
+# 重载所有修改过的配置文件
+systemctl daemon-reload
+systemctl restart docker
+</code></pre>
+<h3 id="t245.5 安装git">5.5 安装git <a href="#t245.5 安装git"> # </a></h3>
+<pre><code class="lang-js">yum install git -y
+</code></pre>
+<h3 id="t255.6 安装node">5.6 安装node <a href="#t255.6 安装node"> # </a></h3>
+<ul>
+<li><a href="https://nodejs.org/en/download/">nodejs</a></li>
+</ul>
+<h4 id="t265.6.1 nvm">5.6.1 nvm <a href="#t265.6.1 nvm"> # </a></h4>
+<ul>
+<li><a href="https://github.com/nvm-sh/nvm">nvm</a></li>
+</ul>
+<pre><code class="lang-js">wget -qO- https:<span class="hljs-comment">//raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash</span>
+source /root/.bashrc
+nvm ls-remote
+nvm install v12<span class="hljs-number">.16</span><span class="hljs-number">.0</span>
+</code></pre>
+<h4 id="t275.6.2 源码安装">5.6.2 源码安装 <a href="#t275.6.2 源码安装"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-comment">//wget https://npm.taobao.org/mirrors/node/v11.0.0/node-v11.0.0.tar.gz</span>
+wget http:<span class="hljs-comment">//img.zhufengpeixun.cn/node-v11.0.0.tar.gz</span>
+tar -xvf node-v11<span class="hljs-number">.0</span><span class="hljs-number">.0</span>.tar.gz
+cd node-v11<span class="hljs-number">.0</span><span class="hljs-number">.0</span>
+yum install gcc gcc-c++ -y
+./configure
+make
+make install
+node -v
+</code></pre>
+<h4 id="t285.6.3  xz">5.6.3  xz <a href="#t285.6.3  xz"> # </a></h4>
+<pre><code>wget http://img.zhufengpeixun.cn/node-v12.16.0-linux-x64.tar.xz
+xz -d node-v12.16.0-linux-x64.tar.xz
+tar -xf node-v12.16.0-linux-x64.tar 
+ln -s ~/node-v12.16.0-linux-x64/bin/node /usr/bin/node
+ln -s ~/node-v12.16.0-linux-x64/bin/npm /usr/bin/npm
+ln -s ~/node-v12.16.0-linux-x64/bin/npm /usr/bin/npx
+</code></pre><h3 id="t295.7 Dockerfile">5.7 Dockerfile <a href="#t295.7 Dockerfile"> # </a></h3>
+<pre><code class="lang-js">FROM node
+COPY . /api
+WORKDIR /api
+RUN npm install
+EXPOSE <span class="hljs-number">8000</span>
+CMD npm start
+</code></pre>
+<h3 id="t305.8 .dockerignore">5.8 .dockerignore <a href="#t305.8 .dockerignore"> # </a></h3>
+<pre><code class="lang-js">.git
+node_modules
+package-lock.json
+Dockerfile
+.dockerignore
+</code></pre>
+<h3 id="t315.8 启动">5.8 启动 <a href="#t315.8 启动"> # </a></h3>
+<pre><code class="lang-js">docker build -t rest .
+docker container run -p <span class="hljs-number">8000</span>:<span class="hljs-number">8000</span> -d  rest
+</code></pre>
+<h2 id="t326. docker-compose">6. docker-compose <a href="#t326. docker-compose"> # </a></h2>
+<h3 id="t336.1 安装docker-compose">6.1 安装docker-compose <a href="#t336.1 安装docker-compose"> # </a></h3>
+<pre><code class="lang-js">curl -L https:<span class="hljs-comment">//github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose</span>
+chmod +x /usr/local/bin/docker-compose
+</code></pre>
+<h3 id="t346.2 docker-compose.yml">6.2 docker-compose.yml <a href="#t346.2 docker-compose.yml"> # </a></h3>
+<pre><code class="lang-yml"><span class="hljs-attr">version:</span> <span class="hljs-string">'2'</span>
+<span class="hljs-attr">services:</span>
+ <span class="hljs-attr">node:</span>
+  <span class="hljs-attr">build:</span>
+    <span class="hljs-attr">context:</span> <span class="hljs-string">./ts_express</span>
+    <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">Dockerfile</span>
+  <span class="hljs-attr">ports:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">"8000:8000"</span>  
+  <span class="hljs-attr">depends_on:</span>
+   <span class="hljs-bullet">-</span> <span class="hljs-string">db</span>
+ <span class="hljs-attr">db:</span>
+  <span class="hljs-attr">image:</span> <span class="hljs-string">mariadb</span>
+  <span class="hljs-attr">environment:</span>
+   <span class="hljs-attr">MYSQL_ROOT_PASSWORD:</span> <span class="hljs-string">"root"</span>
+   <span class="hljs-attr">MYSQL_DATABASE:</span> <span class="hljs-string">"restful"</span>
+  <span class="hljs-attr">volumes:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">db:/var/lib/mysql</span>
+<span class="hljs-attr">volumes:</span>
+ <span class="hljs-attr">db:</span>
+  <span class="hljs-attr">driver:</span> <span class="hljs-string">local</span>
+</code></pre>
+<h3 id="t356.2 启动docker-compose">6.2 启动docker-compose <a href="#t356.2 启动docker-compose"> # </a></h3>
+<pre><code class="lang-js">docker-compose build
+docker-compose up
+docker-compose up -d
+</code></pre>
+
+    

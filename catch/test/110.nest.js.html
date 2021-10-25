@@ -1,0 +1,928 @@
+
+        <h2 id="t01. Reflect">1. Reflect <a href="#t01. Reflect"> # </a></h2>
+<h3 id="t11.1 Reflect">1.1 Reflect <a href="#t11.1 Reflect"> # </a></h3>
+<ul>
+<li>Reflect对象与Proxy对象一样，也是 ES6 为了操作对象而提供的新 API</li>
+<li>JS 的装饰器更多的是存在于对函数或者属性进行一些操作，比如修改他们的值，代理变量，自动绑定 this 等等功能</li>
+<li>但是却无法实现通过反射来获取究竟有哪些装饰器添加到这个类/方法上,于是 Reflect Metadata 应运而生</li>
+</ul>
+<h3 id="t21.2 Reflect Metadata">1.2 Reflect Metadata <a href="#t21.2 Reflect Metadata"> # </a></h3>
+<ul>
+<li><code>Reflect Metadata</code>简单来说，你可以通过装饰器来给类添加一些自定义的信息</li>
+<li>然后通过反射将这些信息提取出来</li>
+</ul>
+<h4 id="t31.2.1 defineMetadata">1.2.1 defineMetadata <a href="#t31.2.1 defineMetadata"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-comment">// define metadata on an object or property</span>
+<span class="hljs-built_in">Reflect</span>.defineMetadata(metadataKey, metadataValue, target);
+<span class="hljs-built_in">Reflect</span>.defineMetadata(metadataKey, metadataValue, target, propertyKey);
+
+<span class="hljs-comment">// get metadata value of a metadata key on the prototype chain of an object or property</span>
+<span class="hljs-keyword">let</span> result = <span class="hljs-built_in">Reflect</span>.getMetadata(metadataKey, target);
+<span class="hljs-keyword">let</span> result = <span class="hljs-built_in">Reflect</span>.getMetadata(metadataKey, target, propertyKey);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> target = {};
+<span class="hljs-built_in">Reflect</span>.defineMetadata(<span class="hljs-string">"name"</span>, <span class="hljs-string">"zhufeng"</span>, target);
+<span class="hljs-built_in">Reflect</span>.defineMetadata(<span class="hljs-string">"name"</span>, <span class="hljs-string">"world"</span>, target, <span class="hljs-string">'hello'</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getOwnMetadata(<span class="hljs-string">"name"</span>, target));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getOwnMetadata(<span class="hljs-string">"name"</span>, target, <span class="hljs-string">"hello"</span>));
+</code></pre>
+<h4 id="t41.2.2 decorator">1.2.2 decorator <a href="#t41.2.2 decorator"> # </a></h4>
+<ul>
+<li>所有的对类的修饰，都是定义在类这个对象上面的</li>
+<li>而所有的对类的属性或者方法的修饰，都是定义在类的原型上面的，并且以属性或者方法的 key 作为 property</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// apply metadata via a decorator to a constructor</span>
+@<span class="hljs-built_in">Reflect</span>.metadata(metadataKey, metadataValue)
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C</span> </span>{
+  <span class="hljs-comment">// apply metadata via a decorator to a method (property)</span>
+  @<span class="hljs-built_in">Reflect</span>.metadata(metadataKey, metadataValue)
+  method() {}
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'reflect-metadata'</span>;
+<span class="hljs-keyword">let</span> target = {};
+<span class="hljs-built_in">Reflect</span>.defineMetadata(<span class="hljs-string">'name'</span>,<span class="hljs-string">'zhufeng'</span>,target);
+<span class="hljs-built_in">Reflect</span>.defineMetadata(<span class="hljs-string">'name'</span>, <span class="hljs-string">'world'</span>, target,<span class="hljs-string">'hello'</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getOwnMetadata(<span class="hljs-string">'name'</span>,target));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getOwnMetadata(<span class="hljs-string">'name'</span>, target, <span class="hljs-string">'hello'</span>));
+<span class="hljs-built_in">console</span>.dir(target);
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">classMetadata</span>(<span class="hljs-params">key,value</span>)</span>{
+     <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">target</span>)</span>{
+         <span class="hljs-built_in">Reflect</span>.defineMetadata(key, value, target);
+     }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">methodMetadata</span>(<span class="hljs-params">key, value</span>) </span>{
+    <span class="hljs-comment">//target类的原型</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target,propertyName</span>) </span>{
+        <span class="hljs-comment">//Person.prototype.hello.name=world</span>
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(key, value, target, propertyName);
+    }
+}
+<span class="hljs-comment">//decorator</span>
+<span class="hljs-comment">//给类本身增加元数据</span>
+<span class="hljs-comment">//@Reflect.metadata('name','Person')</span>
+@classMetadata(<span class="hljs-string">'name'</span>, <span class="hljs-string">'Person'</span>)
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>{
+    <span class="hljs-comment">//给类的原型增加元数据</span>
+  <span class="hljs-comment">//@Reflect.metadata('name', 'world')</span>
+   @methodMetadata(<span class="hljs-string">'name'</span>, <span class="hljs-string">'world'</span>)
+   hello():string{ <span class="hljs-keyword">return</span> <span class="hljs-string">'world'</span>}
+}
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getMetadata(<span class="hljs-string">'name'</span>, Person));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getMetadata(<span class="hljs-string">'name'</span>, <span class="hljs-keyword">new</span> Person(),<span class="hljs-string">'hello'</span>));
+
+</code></pre>
+<h3 id="t51.2  tsconfig.json">1.2  tsconfig.json <a href="#t51.2  tsconfig.json"> # </a></h3>
+<h4 id="t61.2.1 tsconfig.json">1.2.1 tsconfig.json <a href="#t61.2.1 tsconfig.json"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"compilerOptions"</span>: {
+    <span class="hljs-attr">"module"</span>: <span class="hljs-string">"commonjs"</span>,
+    <span class="hljs-attr">"declaration"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"removeComments"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"emitDecoratorMetadata"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"experimentalDecorators"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"target"</span>: <span class="hljs-string">"es2017"</span>,
+    <span class="hljs-attr">"sourceMap"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"outDir"</span>: <span class="hljs-string">"./dist"</span>,
+    <span class="hljs-attr">"baseUrl"</span>: <span class="hljs-string">"./"</span>,
+    <span class="hljs-attr">"incremental"</span>: <span class="hljs-literal">true</span>
+  },
+  <span class="hljs-attr">"exclude"</span>: [
+    <span class="hljs-string">"node_modules"</span>,
+    <span class="hljs-string">"dist"</span>
+  ]
+}
+</code></pre>
+<h4 id="t71.2.2 tsconfig.build.json">1.2.2 tsconfig.build.json <a href="#t71.2.2 tsconfig.build.json"> # </a></h4>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"extends"</span>: <span class="hljs-string">"./tsconfig.json"</span>,
+    <span class="hljs-attr">"exclude"</span>: [
+        <span class="hljs-string">"node_modules"</span>,
+        <span class="hljs-string">"test"</span>,
+        <span class="hljs-string">"dist"</span>,
+        <span class="hljs-string">"**/*spec.ts"</span>
+    ]
+}
+</code></pre>
+<h2 id="t82. IOC和DI">2. IOC和DI <a href="#t82. IOC和DI"> # </a></h2>
+<h3 id="t92.1 创建电脑">2.1 创建电脑 <a href="#t92.1 创建电脑"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> interface Monitor{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Monitor27inch</span> <span class="hljs-title">implements</span> <span class="hljs-title">Monitor</span></span>{}
+interface Host{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LegendHost</span> <span class="hljs-title">implements</span> <span class="hljs-title">Host</span> </span>{ }
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Computer</span></span>{
+    <span class="hljs-attr">monitor</span>:Monitor;
+    host:Host;
+    <span class="hljs-keyword">constructor</span>(){
+        <span class="hljs-keyword">this</span>.monitor = <span class="hljs-keyword">new</span> Monitor27inch();
+        <span class="hljs-keyword">this</span>.host = <span class="hljs-keyword">new</span> LegendHost();
+    }
+    startup(){
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'组装好了,可以开机了'</span>);
+    }
+}
+<span class="hljs-keyword">let</span> computer = <span class="hljs-keyword">new</span> Computer();
+computer.startup();
+</code></pre>
+<ul>
+<li>问题<ul>
+<li>无法传递不同的零件实例</li>
+<li>需要自己手工创建零件实例</li>
+</ul>
+</li>
+</ul>
+<h3 id="t102.2  可以传递零件">2.2  可以传递零件 <a href="#t102.2  可以传递零件"> # </a></h3>
+<pre><code class="lang-diff">interface Monitor{}
+class Monitor27inch implements Monitor{}
+interface Host{}
+class LegendHost implements Host { }
+export class Computer{
+    monitor:Monitor;
+    host:Host;
+    constructor(monitor, host){
+        this.monitor = monitor;
+        this.host = host;
+    }
+    startup(){
+        console.log('组装好了,可以开机了');
+    }
+}
+<span class="hljs-addition">+let monitor = new Monitor27inch();</span>
+<span class="hljs-addition">+let host = new LegendHost();</span>
+<span class="hljs-addition">+let computer = new Computer(monitor, host);</span>
+computer.startup();
+</code></pre>
+<h3 id="t112.3 Ioc和DI">2.3 Ioc和DI <a href="#t112.3 Ioc和DI"> # </a></h3>
+<h4 id="t122.3.1 IoC(Inversion of Control)">2.3.1 IoC(Inversion of Control) <a href="#t122.3.1 IoC(Inversion of Control)"> # </a></h4>
+<ul>
+<li>IoC(Inversion of Control)即<code>控制反转</code>。在开发中， IoC 意味着你设计好的对象交给容器控制，而不是使用传统的方式，在对象内部直接控制</li>
+<li>谁控制谁，控制什么，为何是反转，哪些方面反转了<ul>
+<li>谁控制谁，控制什么：在传统的程序设计中，我们直接在对象内部通过 new 的方式创建对象，是程序主动创建依赖对象； 而 IoC 是有专门一个容器来创建这些对象，即由 IoC 容器控制对象的创建,谁控制谁？当然是 IoC 容器控制了对象；控制什么？主要是控制外部资源(依赖对象)获取</li>
+<li>为何是反转了，哪些方面反转了：有反转就有正转，传统应用程序是由我们自己在程序中主动控制去获取依赖对象，也就是正转； 而反转则是由容器来帮忙创建及注入依赖对象,为何是反转？因为由容器帮我们查找及注入依赖对象，对象只是被动的接受依赖对象，所以是反转了；哪些方面反转了？依赖对象的获取被反转了</li>
+</ul>
+</li>
+<li>IoC是一种思想，是面向对象编程中的一种设计原则，可以用来减低计算机代码之间的耦合度</li>
+<li>传统应用程序都是由我们在类内部主动创建依赖对象，从而导致类与类之间高耦合，难于测试； 有了 IoC 容器后，把创建和查找依赖对象的控制权交给了容器，由容器注入组合对象，所以对象之间是松散耦合。 这样也便于测试，利于功能复用，更重要的是使得程序的整个体系结构变得非常灵活</li>
+<li>其实 IoC 对编程带来的最大改变不是从代码上，而是思想上，发生了主从换位的变化。应用程序本来是老大，要获取什么资源都是主动出击，但在 IoC 思想中，应用程序就变成被动了，被动的等待 IoC 容器来创建并注入它所需的资源了</li>
+</ul>
+<h4 id="t132.3.2 DI(Dependency Injection)">2.3.2 DI(Dependency Injection) <a href="#t132.3.2 DI(Dependency Injection)"> # </a></h4>
+<ul>
+<li>对于控制反转来说，其中最常见的方式叫做 依赖注入，简称为 DI（Dependency Injection）</li>
+<li>组件之间的依赖关系由容器在运行期决定，形象的说，即由容器动态的将某个依赖关系注入到组件之中</li>
+<li>通过依赖注入机制，我们只需要通过简单的配置，而无需任何代码就可指定目标需要的资源，完成自身的业务逻辑，而不需要关心具体的资源来自何处，由谁实现</li>
+<li>理解 DI 的关键是 <code>谁依赖了谁，为什么需要依赖，谁注入了谁，注入了什么</code>　<ul>
+<li>谁依赖了谁：当然是应用程序依赖 IoC 容器</li>
+<li>为什么需要依赖：应用程序需要 IoC 容器来提供对象需要的外部资源（包括对象、资源、常量数据）</li>
+<li>谁注入谁：很明显是 IoC 容器注入应用程序依赖的对象；</li>
+<li>注入了什么：注入某个对象所需的外部资源（包括对象、资源、常量数据）</li>
+</ul>
+</li>
+<li>IoC 和 DI 是同一个概念的不同角度描述,依赖注入明确描述了被注入对象依赖 IoC 容器配置依赖对象</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ioctdi.jpg" alt="ioctdi"></p>
+<h2 id="t143. Nest.js">3. Nest.js <a href="#t143. Nest.js"> # </a></h2>
+<ul>
+<li>NestJS 是构建高效，可扩展的 Node.js Web 应用程序的框架</li>
+<li>它使用现代的 JavaScript 或 TypeScript（保留与纯 JavaScript 的兼容性），并结合 OOP（面向对象编程），FP（函数式编程）和FRP（函数响应式编程）的元素</li>
+<li>NestJS 旨在提供一个开箱即用的应用程序体系结构，允许轻松创建高度可测试，可扩展，松散耦合且易于维护的应用程序</li>
+</ul>
+<h3 id="t153.1 安装依赖">3.1 安装依赖 <a href="#t153.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cnpm i @nestjs/core @nestjs/common @nestjs/platform-express rxjs reflect-metadata -D
+</code></pre>
+<h3 id="t163.2 实现应用">3.2 实现应用 <a href="#t163.2 实现应用"> # </a></h3>
+<h4 id="t173.2.1 main.ts">3.2.1 main.ts <a href="#t173.2.1 main.ts"> # </a></h4>
+<p>src\main.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { NestFactory } <span class="hljs-keyword">from</span> <span class="hljs-string">'@nestjs/core'</span>;
+<span class="hljs-keyword">import</span> { AppModule } <span class="hljs-keyword">from</span> <span class="hljs-string">'./app.module'</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bootstrap</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> app = <span class="hljs-keyword">await</span> NestFactory.create(AppModule);
+  <span class="hljs-keyword">await</span> app.listen(<span class="hljs-number">3000</span>);
+}
+bootstrap();
+</code></pre>
+<h4 id="t183.2.2 app.module.ts">3.2.2 app.module.ts <a href="#t183.2.2 app.module.ts"> # </a></h4>
+<p>src\app.module.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Module } <span class="hljs-keyword">from</span> <span class="hljs-string">'@nestjs/common'</span>;
+<span class="hljs-keyword">import</span> { AppController } <span class="hljs-keyword">from</span> <span class="hljs-string">"./app.controller"</span>;
+@Module({
+  <span class="hljs-attr">controllers</span>: [AppController]
+})
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppModule</span> </span>{}
+</code></pre>
+<h4 id="t193.2.3 app.controller.ts">3.2.3 app.controller.ts <a href="#t193.2.3 app.controller.ts"> # </a></h4>
+<p>src\app.controller.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Get, Controller } <span class="hljs-keyword">from</span> <span class="hljs-string">"@nestjs/common"</span>;
+
+@Controller(<span class="hljs-string">'/'</span>)
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppController</span> </span>{
+  @Get(<span class="hljs-string">'/hello'</span>)
+  hello() {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'hello'</span>;
+  }
+}
+</code></pre>
+<h4 id="t203.2.4 package.json">3.2.4 package.json <a href="#t203.2.4 package.json"> # </a></h4>
+<pre><code class="lang-json">  "scripts": {
+    "start:dev": "nest start --watch"
+  },
+</code></pre>
+<h3 id="t213.3 依赖注入">3.3 依赖注入 <a href="#t213.3 依赖注入"> # </a></h3>
+<h4 id="t223.3.1 src\main.ts">3.3.1 src\main.ts <a href="#t223.3.1 src\main.ts"> # </a></h4>
+<pre><code class="lang-diff">import { Module } from '@nestjs/common';
+import { AppController } from "./app.controller";
+<span class="hljs-addition">+import { AppService } from "./app.service";</span>
+<span class="hljs-addition">+import { UseClassLoggerService, UseValueLoggerService, UseValueLoggerServiceStringToken, UseFactoryLoggerService } from "./logger.service";</span>
+
+@Module({
+  controllers: [AppController],
+<span class="hljs-addition">+  providers: [</span>
+    AppService,
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      provide: UseClassLoggerService,</span>
+<span class="hljs-addition">+      useClass: UseClassLoggerService</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      provide: UseValueLoggerService,</span>
+<span class="hljs-addition">+      useValue: new UseValueLoggerService()</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      provide: 'StringToken',</span>
+<span class="hljs-addition">+      useValue: new UseValueLoggerServiceStringToken()</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      provide: 'FactoryToken',</span>
+<span class="hljs-addition">+      useFactory: () =&gt; new UseFactoryLoggerService()</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+  ]</span>
+<span class="hljs-addition">+})</span>
+export class AppModule {}
+</code></pre>
+<h4 id="t233.3.2 app.controller.ts">3.3.2 app.controller.ts <a href="#t233.3.2 app.controller.ts"> # </a></h4>
+<p>src\app.controller.ts</p>
+<pre><code class="lang-diff">import { Get, Controller,Inject } from "@nestjs/common";
+import { AppService } from "./app.service";
+<span class="hljs-addition">+import { UseClassLoggerService, UseValueLoggerService, UseFactoryLoggerService, UseValueLoggerServiceStringToken } from "./logger.service";</span>
+@Controller('/')
+export class AppController {
+  constructor(
+<span class="hljs-addition">+    private readonly appService: AppService,</span>
+<span class="hljs-addition">+    private readonly useClassLoggerService: UseClassLoggerService,</span>
+<span class="hljs-addition">+    private readonly useValueLoggerService: UseValueLoggerService,</span>
+<span class="hljs-addition">+    @Inject("StringToken") private readonly useValueLoggerServiceStringToken: UseValueLoggerServiceStringToken,</span>
+<span class="hljs-addition">+    @Inject("FactoryToken")  private readonly useFactoryLoggerService: UseFactoryLoggerService</span>
+<span class="hljs-addition">+    ) { }</span>
+  @Get('/hello')
+  hello() {
+<span class="hljs-addition">+    this.useClassLoggerService.log('useClassLoggerService');</span>
+<span class="hljs-addition">+    this.useValueLoggerService.log('useValueLoggerService');</span>
+<span class="hljs-addition">+    this.useValueLoggerServiceStringToken.log('StringToken');</span>
+<span class="hljs-addition">+    this.useFactoryLoggerService.log('FactoryToken');</span>
+    return this.appService.getHello();
+  }
+}
+</code></pre>
+<h4 id="t243.3.3 src\app.service.ts">3.3.3 src\app.service.ts <a href="#t243.3.3 src\app.service.ts"> # </a></h4>
+<p>src\app.service.ts</p>
+<pre><code class="lang-diff">import { Injectable } from "@nestjs/common";
+<span class="hljs-addition">+import { UseClassLoggerService } from "./logger.service";</span>
+@Injectable()
+export class AppService {
+<span class="hljs-addition">+  constructor(private readonly useClassLoggerService: UseClassLoggerService,){}</span>
+  getHello(): string {
+<span class="hljs-addition">+    this.useClassLoggerService.log('getHello');</span>
+    return "Hello";
+  }
+}
+</code></pre>
+<h4 id="t253.3.4 logger.service.ts">3.3.4 logger.service.ts <a href="#t253.3.4 logger.service.ts"> # </a></h4>
+<p>src\app.logger.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Injectable } <span class="hljs-keyword">from</span> <span class="hljs-string">"@nestjs/common"</span>;
+
+@Injectable()
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UseClassLoggerService</span> </span>{
+  <span class="hljs-keyword">constructor</span>(){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'创建 UseClassLoggerService'</span>);
+  }
+  log(message:string) {
+   <span class="hljs-built_in">console</span>.log(message);
+  }
+}
+
+
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UseValueLoggerService</span> </span>{
+  log(message: string) {
+    <span class="hljs-built_in">console</span>.log(message);
+  } 
+}
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UseValueLoggerServiceStringToken</span> </span>{
+  log(message: string) {
+    <span class="hljs-built_in">console</span>.log(message);
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UseFactoryLoggerService</span> </span>{
+  log(message: string) {
+    <span class="hljs-built_in">console</span>.log(message);
+  }
+}
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/inversejs.jpg" alt="inversejs"></p>
+<h2 id="t264. IOC">4. IOC <a href="#t264. IOC"> # </a></h2>
+<h3 id="t274.1 注册Provider">4.1 注册Provider <a href="#t274.1 注册Provider"> # </a></h3>
+<h4 id="t284.1 type.ts">4.1 type.ts <a href="#t284.1 type.ts"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> interface Type&lt;T&gt;{
+    <span class="hljs-keyword">new</span>(...args: any[]): T;
+}
+<span class="hljs-comment">//class Person{}</span>
+<span class="hljs-comment">//let t:Type&lt;Person&gt; = Person;s</span>
+</code></pre>
+<h4 id="t294.2 Container.ts">4.2 Container.ts <a href="#t294.2 Container.ts"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Provider,Token} <span class="hljs-keyword">from</span> <span class="hljs-string">"./provider"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Container</span> </span>{
+    public providers = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>&lt;Token&lt;any&gt;, Provider&lt;any&gt;&gt;();
+    addProvider&lt;T&gt;(provider: Provider&lt;T&gt;) {
+        <span class="hljs-keyword">this</span>.providers.set(provider.provide, provider);
+    }
+}
+</code></pre>
+<h4 id="t304.3 provider.ts">4.3 provider.ts <a href="#t304.3 provider.ts"> # </a></h4>
+<p>provider.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Type } <span class="hljs-keyword">from</span> <span class="hljs-string">"./type"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InjectionToken</span> </span>{
+    <span class="hljs-keyword">constructor</span>(public injectionIdentifier: string) { }
+}
+<span class="hljs-comment">//Token 类型是一个联合类型，既可以是一个函数类型也可以是 InjectionToken 类型</span>
+<span class="hljs-keyword">export</span> type Token&lt;T&gt; = Type&lt;T&gt; | InjectionToken;
+
+<span class="hljs-keyword">export</span> interface BaseProvider&lt;T&gt; {
+    <span class="hljs-attr">provide</span>: Token&lt;T&gt;;
+}
+
+<span class="hljs-keyword">export</span> interface ClassProvider&lt;T&gt; extends BaseProvider&lt;T&gt; {
+    <span class="hljs-attr">provide</span>: Token&lt;T&gt;;
+    useClass: Type&lt;T&gt;;
+}
+
+<span class="hljs-keyword">export</span> interface ValueProvider&lt;T&gt; extends BaseProvider&lt;T&gt; {
+    <span class="hljs-attr">provide</span>: Token&lt;T&gt;;
+    useValue: T;
+}
+
+<span class="hljs-keyword">export</span> interface FactoryProvider&lt;T&gt; extends BaseProvider&lt;T&gt; {
+    <span class="hljs-attr">provide</span>: Token&lt;T&gt;;
+    useFactory: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> T;
+}
+
+<span class="hljs-keyword">export</span> type Provider&lt;T&gt; =
+    | ClassProvider&lt;T&gt;
+    | ValueProvider&lt;T&gt;
+    | FactoryProvider&lt;T&gt;;    
+</code></pre>
+<h4 id="t314.4 index.ts">4.4 index.ts <a href="#t314.4 index.ts"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">"./container"</span>;
+</code></pre>
+<h4 id="t324.5 ioc\index.spec.ts">4.5 ioc\index.spec.ts <a href="#t324.5 ioc\index.spec.ts"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Container} <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-keyword">let</span> container = <span class="hljs-keyword">new</span> Container();
+<span class="hljs-keyword">const</span> point = { <span class="hljs-attr">x</span>: <span class="hljs-number">100</span>,<span class="hljs-attr">y</span>:<span class="hljs-number">100</span> };
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BasicClass</span> </span>{ }
+<span class="hljs-comment">// 注册ClassProvider</span>
+container.addProvider({ <span class="hljs-attr">provide</span>: BasicClass, <span class="hljs-attr">useClass</span>: BasicClass });
+<span class="hljs-comment">// 注册ValueProvider</span>
+container.addProvider({ <span class="hljs-attr">provide</span>: BasicClass, <span class="hljs-attr">useValue</span>: point });
+<span class="hljs-comment">// 注册FactoryProvider</span>
+container.addProvider({ <span class="hljs-attr">provide</span>: BasicClass, <span class="hljs-attr">useFactory</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> point });
+<span class="hljs-built_in">console</span>.log(container.providers);
+</code></pre>
+<h3 id="t334.2  装饰器">4.2  装饰器 <a href="#t334.2  装饰器"> # </a></h3>
+<h4 id="t344.2.1 Injectable">4.2.1 Injectable <a href="#t344.2.1 Injectable"> # </a></h4>
+<ul>
+<li>Injectable 装饰器用于表示此类可以自动注入其依赖项，该装饰器属于类装饰器</li>
+<li>类装饰器顾名思义，就是用来装饰类的。它接收一个参数：target: TFunction，表示被装饰的类</li>
+</ul>
+<pre><code class="lang-js">declare type ClassDecorator = <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">TFunction</span> <span class="hljs-attr">extends</span> <span class="hljs-attr">Function</span>&gt;</span>(target: TFunction) =&gt; TFunction;
+</span></code></pre>
+<h4 id="t354.2.2 Inject">4.2.2 Inject <a href="#t354.2.2 Inject"> # </a></h4>
+<ul>
+<li><code>Inject</code>装饰器属于参数装饰器</li>
+<li>参数装饰器顾名思义，是用来装饰函数参数，它接收三个参数<ul>
+<li>target: Object —— 被装饰的类</li>
+<li>propertyKey: string | symbol —— 方法名</li>
+<li>parameterIndex: number —— 方法中参数的索引值</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">declare type ParameterDecorator = (target: <span class="hljs-built_in">Object</span>, 
+  <span class="hljs-attr">propertyKey</span>: string | symbol, <span class="hljs-attr">parameterIndex</span>: number ) =&gt; <span class="hljs-keyword">void</span>
+</code></pre>
+<h4 id="t364.2.3 实现">4.2.3 实现 <a href="#t364.2.3 实现"> # </a></h4>
+<h5 id="t374.2.3.1 Injectable.ts">4.2.3.1 Injectable.ts <a href="#t374.2.3.1 Injectable.ts"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">"reflect-metadata"</span>;
+<span class="hljs-keyword">const</span> INJECTABLE_METADATA_KEY = <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">"INJECTABLE_KEY"</span>);
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Injectable</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target: any</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECTABLE_METADATA_KEY, <span class="hljs-literal">true</span>, target);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+</code></pre>
+<h5 id="t384.2.3.2 Inject.ts">4.2.3.2 Inject.ts <a href="#t384.2.3.2 Inject.ts"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'reflect-metadata'</span>;
+<span class="hljs-keyword">import</span> { Token } <span class="hljs-keyword">from</span> <span class="hljs-string">'./provider'</span>;
+
+<span class="hljs-keyword">const</span> INJECT_METADATA_KEY = <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">'INJECT_KEY'</span>);
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Inject</span>(<span class="hljs-params">token: Token&lt;any&gt;</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target: any, _: string | symbol, index: number</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECT_METADATA_KEY, token, target, <span class="hljs-string">`index-<span class="hljs-subst">${index}</span>`</span>);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+</code></pre>
+<h3 id="t394.3 实现 inject">4.3 实现 inject <a href="#t394.3 实现 inject"> # </a></h3>
+<ul>
+<li>inject 方法所实现的功能就是根据 Token 获取与之对应的对象</li>
+</ul>
+<h4 id="t404.3.1 Container.ts">4.3.1 Container.ts <a href="#t404.3.1 Container.ts"> # </a></h4>
+<pre><code class="lang-diff">import {
+    Provider, Token, InjectionToken,
+    ClassProvider, ValueProvider,FactoryProvider,
+    isClassProvider, isValueProvider,isFactoryProvider} from "./provider";
+import { Type } from "./type";    
+export class Container {
+    public providers = new Map&lt;Token&lt;any&gt;, Provider&lt;any&gt;&gt;();
+    addProvider&lt;T&gt;(provider: Provider&lt;T&gt;) {
+        this.providers.set(provider.provide, provider);
+    }
+    inject&lt;T&gt;(type: Token&lt;T&gt;): T {
+        let provider = this.providers.get(type);
+        return this.injectWithProvider(type, provider);
+    }
+    private injectWithProvider&lt;T&gt;(type: Token&lt;T&gt;, provider?: Provider&lt;T&gt;): T {
+        if (isClassProvider(provider)) {
+            //TODO
+        } else if (isValueProvider(provider)) {
+            return this.injectValue(provider as ValueProvider&lt;T&gt;);
+        } else if (isFactoryProvider(provider)){
+            return this.injectFactory(provider as FactoryProvider&lt;T&gt;);
+        }
+    }
+    private injectValue&lt;T&gt;(valueProvider: ValueProvider&lt;T&gt;): T {
+        return valueProvider.useValue;
+    }
+    private injectFactory&lt;T&gt;(valueProvider: FactoryProvider&lt;T&gt;): T {
+        return valueProvider.useFactory();
+    }
+}
+</code></pre>
+<h3 id="t414.4 __metadata">4.4 __metadata <a href="#t414.4 __metadata"> # </a></h3>
+<ul>
+<li>__decorate:执行装饰器的函数，被执行的装饰器分为四类，类装饰器、参数装饰器、方法装饰器，还有一类特殊的装饰器是ts编译选项<code>emitDecoratorMetadata</code>生成的装饰器，用来定义一些特殊元数据design:paramtypes等，这些特殊元数据可以获取编译之前的类型信息<ul>
+<li>参数类型元数据使用元数据键"design:type"</li>
+<li>参数类型元数据使用元数据键"design:paramtypes"</li>
+<li>返回值类型元数据使用元数据键"design:returntype"</li>
+</ul>
+</li>
+<li>__metadata: 类装饰器工厂，获取的装饰器会将指定键值对与类关联起来</li>
+<li>__param: 参数装饰器工厂，根据参数下标、参数装饰器、获取最终的装饰器，并且将参数下标传递给装饰器</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/decoratorflow.png" alt="decoratorflow"></p>
+<pre><code class="lang-js">tsc params/index.ts --experimentalDecorators --emitDecoratorMetadata --target es5
+</code></pre>
+<h4 id="t424.4.1  装饰器">4.4.1  装饰器 <a href="#t424.4.1  装饰器"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ * 类装饰器
+ * <span class="hljs-doctag">@param </span>constructor 类的构造函数
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">classDecorator</span>(<span class="hljs-params">constructor: Function</span>) </span>{}
+<span class="hljs-comment">/**
+ * 属性装饰器
+ * <span class="hljs-doctag">@param </span>target 静态成员来说是类的构造函数，对于实例成员是类的原型对象
+ * <span class="hljs-doctag">@param </span>property  属性的名称
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">propertyDecorator</span>(<span class="hljs-params">target: any, property: string</span>) </span>{}
+<span class="hljs-comment">/**
+ * 方法装饰器
+ * <span class="hljs-doctag">@param </span>target 静态成员来说是类的构造函数，对于实例成员是类的原型对象
+ * <span class="hljs-doctag">@param </span>property 方法的名称
+ * <span class="hljs-doctag">@param </span>descriptor 方法描述符
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">methodDecorator</span>(<span class="hljs-params">target: any, property: string, descriptor: PropertyDescriptor</span>) </span>{ }
+<span class="hljs-comment">/**
+ * 参数装饰器
+ * <span class="hljs-doctag">@param </span>target 静态成员是类的构造函数,实例成员是类的原型对象
+ * <span class="hljs-doctag">@param </span>methodName 方法名
+ * <span class="hljs-doctag">@param </span>paramsIndex 参数在函数列表中的索引
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">paramDecorator</span>(<span class="hljs-params">target: any, methodName: string, paramsIndex: number</span>) </span>{ }
+</code></pre>
+<h4 id="t434.4.2  params\index.ts">4.4.2  params\index.ts <a href="#t434.4.2  params\index.ts"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'reflect-metadata'</span>;
+interface Type&lt;T&gt; {
+    <span class="hljs-keyword">new</span>(...args: any[]): T;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InjectionToken</span> </span>{
+    <span class="hljs-keyword">constructor</span>(public injectionIdentifier: string) { }
+}
+type Token&lt;T&gt; = Type&lt;T&gt; | InjectionToken;
+
+<span class="hljs-keyword">const</span> INJECT_METADATA_KEY = <span class="hljs-string">'INJECT_KEY'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Inject</span>(<span class="hljs-params">token: Token&lt;any&gt;</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target: any, _propertyName: string | symbol, index: number</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECT_METADATA_KEY, token, target, <span class="hljs-string">`index-<span class="hljs-subst">${index}</span>`</span>);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Car</span> </span>{ }
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoggerService</span> </span>{ }
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Wife</span> </span>{
+    <span class="hljs-keyword">constructor</span>(
+        private car: Car,
+        @Inject(new InjectionToken('Logger')) private loggerService:LoggerService
+    ) { }
+}
+<span class="hljs-built_in">console</span>.log(Wife);
+</code></pre>
+<h4 id="t444.4.2  params\index.js">4.4.2  params\index.js <a href="#t444.4.2  params\index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-meta">"use strict"</span>;
+<span class="hljs-keyword">var</span> __decorate = (<span class="hljs-keyword">this</span> &amp;&amp; <span class="hljs-keyword">this</span>.__decorate) || <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">decorators, target, key, desc</span>) </span>{
+    <span class="hljs-keyword">var</span> c = <span class="hljs-built_in">arguments</span>.length, r = c &lt; <span class="hljs-number">3</span> ? target : desc === <span class="hljs-literal">null</span> ? desc = <span class="hljs-built_in">Object</span>.getOwnPropertyDescriptor(target, key) : desc, d;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Reflect</span> === <span class="hljs-string">"object"</span> &amp;&amp; <span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Reflect</span>.decorate === <span class="hljs-string">"function"</span>) r = <span class="hljs-built_in">Reflect</span>.decorate(decorators, target, key, desc);
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = decorators.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) <span class="hljs-keyword">if</span> (d = decorators[i]) r = (c &lt; <span class="hljs-number">3</span> ? d(r) : c &gt; <span class="hljs-number">3</span> ? d(target, key, r) : d(target, key)) || r;
+    <span class="hljs-keyword">return</span> c &gt; <span class="hljs-number">3</span> &amp;&amp; r &amp;&amp; <span class="hljs-built_in">Object</span>.defineProperty(target, key, r), r;
+};
+<span class="hljs-keyword">var</span> __metadata = (<span class="hljs-keyword">this</span> &amp;&amp; <span class="hljs-keyword">this</span>.__metadata) || <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">k, v</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Reflect</span> === <span class="hljs-string">"object"</span> &amp;&amp; <span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Reflect</span>.metadata === <span class="hljs-string">"function"</span>) <span class="hljs-keyword">return</span> <span class="hljs-built_in">Reflect</span>.metadata(k, v);
+};
+<span class="hljs-keyword">var</span> __param = (<span class="hljs-keyword">this</span> &amp;&amp; <span class="hljs-keyword">this</span>.__param) || <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">paramIndex, decorator</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, key</span>) </span>{ decorator(target, key, paramIndex); }
+};
+<span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">"__esModule"</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+<span class="hljs-built_in">require</span>(<span class="hljs-string">"reflect-metadata"</span>);
+<span class="hljs-keyword">var</span> InjectionToken = <span class="hljs-comment">/** @class */</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">InjectionToken</span>(<span class="hljs-params">injectionIdentifier</span>) </span>{
+        <span class="hljs-keyword">this</span>.injectionIdentifier = injectionIdentifier;
+    }
+    <span class="hljs-keyword">return</span> InjectionToken;
+}());
+<span class="hljs-keyword">var</span> INJECT_METADATA_KEY = <span class="hljs-string">'INJECT_KEY'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Inject</span>(<span class="hljs-params">token</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, _propertyName, index</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECT_METADATA_KEY, token, target, <span class="hljs-string">"index-"</span> + index);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+<span class="hljs-keyword">var</span> Car = <span class="hljs-comment">/** @class */</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Car</span>(<span class="hljs-params"></span>) </span>{
+    }
+    <span class="hljs-keyword">return</span> Car;
+}());
+<span class="hljs-keyword">var</span> LoggerService = <span class="hljs-comment">/** @class */</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">LoggerService</span>(<span class="hljs-params"></span>) </span>{
+    }
+    <span class="hljs-keyword">return</span> LoggerService;
+}());
+<span class="hljs-keyword">var</span> Wife = <span class="hljs-comment">/** @class */</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Wife</span>(<span class="hljs-params">car, loggerService</span>) </span>{
+        <span class="hljs-keyword">this</span>.car = car;
+        <span class="hljs-keyword">this</span>.loggerService = loggerService;
+    }
+    Wife = __decorate([
+        __param(<span class="hljs-number">1</span>, Inject(<span class="hljs-keyword">new</span> InjectionToken(<span class="hljs-string">'Logger'</span>))),
+        __metadata(<span class="hljs-string">"design:paramtypes"</span>, [Car,
+            LoggerService])
+    ], Wife);
+    <span class="hljs-keyword">return</span> Wife;
+}());
+<span class="hljs-built_in">console</span>.log(Wife);
+</code></pre>
+<h4 id="t454.4.3  params\imp.js">4.4.3  params\imp.js <a href="#t454.4.3  params\imp.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-meta">"use strict"</span>;
+<span class="hljs-built_in">require</span>(<span class="hljs-string">"reflect-metadata"</span>);
+<span class="hljs-comment">/**
+ * 装饰器执行器
+ * @param {*} decorators 装饰器数组
+ * @param {*} target 装饰器目标
+ * @param {*} key 元数据键
+ * @param {*} desc 方法的描述符
+ */</span>
+<span class="hljs-keyword">var</span> __decorate = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">decorators, target, key, desc</span>) </span>{
+    <span class="hljs-comment">/*获取参数长度，当参数长度小于3,说明目标就是target，否则目标为方法描述符
+        描述符不存在时，通过key从target获取，即认为key是方法名 */</span>
+    <span class="hljs-keyword">var</span> argsLength = <span class="hljs-built_in">arguments</span>.length,
+        decoratorTarget =
+            argsLength &lt; <span class="hljs-number">3</span>
+                ? target
+                : desc === <span class="hljs-literal">null</span>
+                    ? (desc = <span class="hljs-built_in">Object</span>.getOwnPropertyDescriptor(target, key))
+                    : desc;
+    <span class="hljs-comment">/* 如果Reflect的decorate方法存在，则调用这个方法为目标调用装饰器方法数组，这个方法在reflect-metadata包中实现 */</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Reflect</span> === <span class="hljs-string">"object"</span> &amp;&amp; <span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Reflect</span>.decorate === <span class="hljs-string">"function"</span>)
+      decoratorTarget = <span class="hljs-built_in">Reflect</span>.decorate(decorators, target, key, desc);
+    <span class="hljs-comment">/*
+    如果Reflect.decorate方法不存在，则手动调用装饰方法，注意是倒序调用
+    如果参数长度小于3说明是类装饰器，直接将类传递给装饰器方法
+    如果参数长度等于3说明是类装饰器，但是key参数存在，与类一同传递给装饰器方法
+    如果参数长度大于3说明是方法装饰器，将类、key、方法描述符传递给装饰器方法
+    同时获取装饰器方法执行完毕的target给decoratorTarget，如果装饰器方法执行完毕没有返回值，则使用之前的decoratorTarget */</span> 
+    <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = decorators.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {
+        <span class="hljs-keyword">let</span> decorator = decorators[i];
+        <span class="hljs-keyword">if</span> (decorator) {
+          decoratorTarget =
+            (argsLength &lt; <span class="hljs-number">3</span>
+              ? decorator(decoratorTarget)
+              : argsLength &gt; <span class="hljs-number">3</span>
+              ? decorator(target, key, decoratorTarget)
+              : decorator(target, key)) || decoratorTarget;
+        }
+      }
+    }
+    <span class="hljs-comment">/* 返回decoratorTarget，参数小于3时为类对象，参数大于3时为方法描述符,当为描述符时需要重新将其定义到target上 */</span>
+    <span class="hljs-keyword">return</span> (
+      argsLength &gt; <span class="hljs-number">3</span> &amp;&amp;
+        decoratorTarget &amp;&amp;
+        <span class="hljs-built_in">Object</span>.defineProperty(target, key, decoratorTarget),
+      decoratorTarget
+    );
+}
+
+<span class="hljs-comment">/**
+ *  装饰器工厂，可以获取在类上定义指定键值对的装饰器，一般用来定义emitDecoratorMetadata
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>k 属性名
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>v 属性值
+ */</span>
+<span class="hljs-keyword">var</span> __metadata = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">k, v</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Reflect</span>.metadata(k, v);
+};
+
+<span class="hljs-comment">/**
+ * 参数装饰器工厂，用来获取参数装饰器
+ * @param {*} paramIndex  参数下标
+ * @param {*} decorator 装饰器
+ * @param {*} target 装饰的目标为类
+ * @param {*} key 属性名
+*/</span>
+<span class="hljs-keyword">var</span> __param = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">paramIndex, decorator</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, key</span>) </span>{
+        decorator(target, key, paramIndex);
+    };
+};
+
+<span class="hljs-keyword">var</span> InjectionToken = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">InjectionToken</span>(<span class="hljs-params">injectionIdentifier</span>) </span>{
+        <span class="hljs-keyword">this</span>.injectionIdentifier = injectionIdentifier;
+    }
+    <span class="hljs-keyword">return</span> InjectionToken;
+})();
+<span class="hljs-keyword">var</span> INJECT_METADATA_KEY = <span class="hljs-string">"INJECT_KEY"</span>;
+<span class="hljs-comment">/**
+ * 返回 token装饰器
+ * @param {*} token 标识符 
+ * @param {*} target 装饰的目标
+ * @param {*} _propertyName 属性名
+ * @param {*} index 索引
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Inject</span>(<span class="hljs-params">token</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, _propertyName, index</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECT_METADATA_KEY,token,target,<span class="hljs-string">"index-"</span> + index);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+<span class="hljs-keyword">var</span> Car = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Car</span>(<span class="hljs-params"></span>) </span>{ }
+    <span class="hljs-keyword">return</span> Car;
+})();
+<span class="hljs-keyword">var</span> LoggerService = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">LoggerService</span>(<span class="hljs-params"></span>) </span>{ }
+    <span class="hljs-keyword">return</span> LoggerService;
+})();
+<span class="hljs-keyword">var</span> Wife = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Wife</span>(<span class="hljs-params">car, loggerService</span>) </span>{
+        <span class="hljs-keyword">this</span>.car = car;
+        <span class="hljs-keyword">this</span>.loggerService = loggerService;
+    }
+    Wife = __decorate(
+        [
+            __param(<span class="hljs-number">1</span>, Inject(<span class="hljs-keyword">new</span> InjectionToken(<span class="hljs-string">"Logger"</span>))),
+            __metadata(<span class="hljs-string">"design:paramtypes"</span>, [Car, LoggerService]),
+        ],
+        Wife
+    );
+    <span class="hljs-keyword">return</span> Wife;
+})();
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.getMetadata(INJECT_METADATA_KEY, Wife, <span class="hljs-string">"index-1"</span>));
+<span class="hljs-built_in">console</span>.log(Wife);
+
+</code></pre>
+<h3 id="t464.5 实现注入">4.5 实现注入 <a href="#t464.5 实现注入"> # </a></h3>
+<h4 id="t474.5.1 Container.ts">4.5.1 Container.ts <a href="#t474.5.1 Container.ts"> # </a></h4>
+<pre><code class="lang-diff">import {
+    Provider, Token, InjectionToken,
+    ClassProvider, ValueProvider,FactoryProvider,
+<span class="hljs-addition">+    isClassProvider, isValueProvider,isFactoryProvider} from "./provider";</span>
+<span class="hljs-addition">+import { getInjectionToken, } from "./inject";    </span>
+<span class="hljs-addition">+import { Type } from "./type";    </span>
+<span class="hljs-addition">+type InjectableParam = Type&lt;any&gt;;</span>
+<span class="hljs-addition">+const REFLECT_PARAMS = "design:paramtypes";    </span>
+export class Container {
+    public providers = new Map&lt;Token&lt;any&gt;, Provider&lt;any&gt;&gt;();
+    addProvider&lt;T&gt;(provider: Provider&lt;T&gt;) {
+        this.providers.set(provider.provide, provider);
+    }
+<span class="hljs-addition">+    inject&lt;T&gt;(type: Token&lt;T&gt;): T {</span>
+<span class="hljs-addition">+        let provider = this.providers.get(type);</span>
+<span class="hljs-addition">+        return this.injectWithProvider(type, provider);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    private injectWithProvider&lt;T&gt;(type: Token&lt;T&gt;, provider?: Provider&lt;T&gt;): T {</span>
+<span class="hljs-addition">+        if (provider === undefined) {</span>
+<span class="hljs-addition">+            throw new Error(`No provider for type ${this.getTokenName(type)}`);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        if (isClassProvider(provider)) {</span>
+<span class="hljs-addition">+            return this.injectClass(provider as ClassProvider&lt;T&gt;);</span>
+<span class="hljs-addition">+        } else if (isValueProvider(provider)) {</span>
+<span class="hljs-addition">+            return this.injectValue(provider as ValueProvider&lt;T&gt;);</span>
+<span class="hljs-addition">+        } else if (isFactoryProvider(provider)){</span>
+<span class="hljs-addition">+            return this.injectFactory(provider as FactoryProvider&lt;T&gt;);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    private injectValue&lt;T&gt;(valueProvider: ValueProvider&lt;T&gt;): T {</span>
+<span class="hljs-addition">+        return valueProvider.useValue;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    private injectFactory&lt;T&gt;(valueProvider: FactoryProvider&lt;T&gt;): T {</span>
+<span class="hljs-addition">+        return valueProvider.useFactory();</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    private injectClass&lt;T&gt;(classProvider: ClassProvider&lt;T&gt;): T {</span>
+<span class="hljs-addition">+        const target = classProvider.useClass;</span>
+<span class="hljs-addition">+        const params = this.getInjectedParams(target);</span>
+<span class="hljs-addition">+        return Reflect.construct(target, params);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    private getInjectedParams&lt;T&gt;(target: Type&lt;T&gt;) {</span>
+<span class="hljs-addition">+        const argTypes = Reflect.getMetadata(REFLECT_PARAMS, target) as (</span>
+<span class="hljs-addition">+            | InjectableParam</span>
+<span class="hljs-addition">+            | undefined)[];</span>
+<span class="hljs-addition">+        if (argTypes === undefined) {</span>
+<span class="hljs-addition">+            return [];</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        return argTypes.map((argType, index) =&gt; {</span>
+<span class="hljs-addition">+            const overrideToken = getInjectionToken(target, index);</span>
+<span class="hljs-addition">+            const actualToken = overrideToken === undefined ? argType : overrideToken;</span>
+<span class="hljs-addition">+            let provider = this.providers.get(actualToken);</span>
+<span class="hljs-addition">+            return this.injectWithProvider(actualToken, provider);</span>
+<span class="hljs-addition">+        });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    private getTokenName&lt;T&gt;(token: Token&lt;T&gt;) {</span>
+<span class="hljs-addition">+        return token instanceof InjectionToken</span>
+<span class="hljs-addition">+            ? token.injectionIdentifier</span>
+<span class="hljs-addition">+            : token.name;</span>
+<span class="hljs-addition">+    }</span>
+}
+</code></pre>
+<h4 id="t484.5.2 ioc\provider.ts">4.5.2 ioc\provider.ts <a href="#t484.5.2 ioc\provider.ts"> # </a></h4>
+<pre><code class="lang-diff">import { Type } from "./type";
+export class InjectionToken {
+    constructor(public injectionIdentifier: string) { }
+}
+//Token 类型是一个联合类型，既可以是一个函数类型也可以是 InjectionToken 类型
+export type Token&lt;T&gt; = Type&lt;T&gt; | InjectionToken;
+
+export interface BaseProvider&lt;T&gt; {
+    provide: Token&lt;T&gt;;
+}
+
+export interface ClassProvider&lt;T&gt; extends BaseProvider&lt;T&gt; {
+    provide: Token&lt;T&gt;;
+    useClass: Type&lt;T&gt;;
+}
+
+export interface ValueProvider&lt;T&gt; extends BaseProvider&lt;T&gt; {
+    provide: Token&lt;T&gt;;
+    useValue: T;
+}
+
+export interface FactoryProvider&lt;T&gt; extends BaseProvider&lt;T&gt; {
+    provide: Token&lt;T&gt;;
+    useFactory: () =&gt; T;
+}
+
+export type Provider&lt;T&gt; =
+    | ClassProvider&lt;T&gt;
+    | ValueProvider&lt;T&gt;
+    | FactoryProvider&lt;T&gt;;
+
+<span class="hljs-addition">+export function isClassProvider&lt;T&gt;(</span>
+<span class="hljs-addition">+    provider: BaseProvider&lt;T&gt;</span>
+<span class="hljs-addition">+): provider is ClassProvider&lt;T&gt; {</span>
+<span class="hljs-addition">+    return (provider as any).useClass !== undefined;</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export function isValueProvider&lt;T&gt;(</span>
+<span class="hljs-addition">+    provider: BaseProvider&lt;T&gt;</span>
+<span class="hljs-addition">+): provider is ValueProvider&lt;T&gt; {</span>
+<span class="hljs-addition">+    return (provider as any).useValue !== undefined;</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export function isFactoryProvider&lt;T&gt;(</span>
+<span class="hljs-addition">+    provider: BaseProvider&lt;T&gt;</span>
+<span class="hljs-addition">+): provider is FactoryProvider&lt;T&gt; {</span>
+<span class="hljs-addition">+    return (provider as any).useFactory !== undefined;</span>
+<span class="hljs-addition">+}    </span>
+</code></pre>
+<h4 id="t494.5.3 Inject.ts">4.5.3 Inject.ts <a href="#t494.5.3 Inject.ts"> # </a></h4>
+<p>ioc\Inject.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'reflect-metadata'</span>;
+<span class="hljs-keyword">import</span> { Token } <span class="hljs-keyword">from</span> <span class="hljs-string">'./provider'</span>;
+
+<span class="hljs-keyword">const</span> INJECT_METADATA_KEY = <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">'INJECT_KEY'</span>);
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Inject</span>(<span class="hljs-params">token: Token&lt;any&gt;</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target: any, _: string | symbol, index: number</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECT_METADATA_KEY, token, target, <span class="hljs-string">`index-<span class="hljs-subst">${index}</span>`</span>);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getInjectionToken</span>(<span class="hljs-params">target: any, index: number</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Reflect</span>.getMetadata(INJECT_METADATA_KEY, target, <span class="hljs-string">`index-<span class="hljs-subst">${index}</span>`</span>) <span class="hljs-keyword">as</span>
+        | Token&lt;any&gt;
+        | <span class="hljs-literal">undefined</span>;
+}
+</code></pre>
+<h4 id="t504.5.4 Injectable.ts">4.5.4 Injectable.ts <a href="#t504.5.4 Injectable.ts"> # </a></h4>
+<p>ioc\Injectable.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">"reflect-metadata"</span>;
+<span class="hljs-keyword">const</span> INJECTABLE_METADATA_KEY = <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">"INJECTABLE_KEY"</span>);
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Injectable</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target: any</span>) </span>{
+        <span class="hljs-built_in">Reflect</span>.defineMetadata(INJECTABLE_METADATA_KEY, <span class="hljs-literal">true</span>, target);
+        <span class="hljs-keyword">return</span> target;
+    };
+}
+</code></pre>
+<h3 id="t514.6 index.spec.ts">4.6 index.spec.ts <a href="#t514.6 index.spec.ts"> # </a></h3>
+<ul>
+<li>测试一下注释是否正确</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Container } <span class="hljs-keyword">from</span> <span class="hljs-string">"./container"</span>;
+<span class="hljs-keyword">import</span> { Injectable } <span class="hljs-keyword">from</span> <span class="hljs-string">"./injectable"</span>;
+<span class="hljs-keyword">import</span> { Inject } <span class="hljs-keyword">from</span> <span class="hljs-string">"./inject"</span>;
+<span class="hljs-keyword">import</span> { InjectionToken } <span class="hljs-keyword">from</span> <span class="hljs-string">"./provider"</span>;
+
+<span class="hljs-keyword">const</span> HouseStringToken = <span class="hljs-keyword">new</span> InjectionToken(<span class="hljs-string">"House"</span>);
+
+@Injectable()
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Car</span> </span>{ }
+
+@Injectable()
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">House</span> </span>{ }
+
+@Injectable()
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Wife</span> </span>{
+    <span class="hljs-keyword">constructor</span>(
+        private car: Car,
+        @Inject(HouseStringToken) private house: House
+    ) { }
+}
+
+<span class="hljs-keyword">const</span> container = <span class="hljs-keyword">new</span> Container();
+
+container.addProvider({
+    <span class="hljs-attr">provide</span>: HouseStringToken,
+    <span class="hljs-attr">useValue</span>: <span class="hljs-keyword">new</span> House(),
+});
+
+container.addProvider({ <span class="hljs-attr">provide</span>: Car, <span class="hljs-attr">useClass</span>: Car });
+container.addProvider({ <span class="hljs-attr">provide</span>: Wife, <span class="hljs-attr">useClass</span>: Wife });
+<span class="hljs-keyword">const</span> wife = container.inject(Wife);
+<span class="hljs-built_in">console</span>.dir(wife);
+</code></pre>
+<h2 id="t525. debugger">5. debugger <a href="#t525. debugger"> # </a></h2>
+<pre><code class="lang-js">cnpm i ts-node typescript reflect-metadata -D
+</code></pre>
+<p>.vscode\launch.json</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.2.0"</span>,
+    <span class="hljs-attr">"configurations"</span>: [
+        {
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Debug ts"</span>,
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"node"</span>,
+            <span class="hljs-attr">"request"</span>: <span class="hljs-string">"launch"</span>,
+            <span class="hljs-attr">"runtimeArgs"</span>: [
+                <span class="hljs-string">"-r"</span>,
+                <span class="hljs-string">"ts-node/register"</span>
+            ], <span class="hljs-comment">//核心</span>
+            <span class="hljs-attr">"args"</span>: [
+                <span class="hljs-string">"${relativeFile}"</span>
+            ]
+        }
+    ]
+}
+</code></pre>
+
+    

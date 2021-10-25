@@ -1,0 +1,1738 @@
+
+        <h2 id="t01. React路由原理">1. React路由原理 <a href="#t01. React路由原理"> # </a></h2>
+<ul>
+<li>不同的路径渲染不同的组件</li>
+<li>有两种实现方式<ul>
+<li>HashRouter:利用hash实现路由切换</li>
+<li>BrowserRouter:实现h5 Api实现路由的切换</li>
+</ul>
+</li>
+</ul>
+<h3 id="t11.1 HashRouter">1.1 HashRouter <a href="#t11.1 HashRouter"> # </a></h3>
+<ul>
+<li>利用hash实现路由切换</li>
+</ul>
+<p>public\index.html</p>
+<pre><code class="lang-js">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+    &lt;style&gt;
+        #root{
+            border:1px solid red;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="root"&gt;&lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href="#/a"&gt;/a&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#/b"&gt;/b&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;script&gt;
+        window.addEventListener('hashchange',()=&gt;{
+            console.log(window.location.hash);
+            let pathname = window.location.hash.slice(1);//把最前面的那个#删除 
+            root.innerHTML = pathname;
+        });
+
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="t21.2 BrowserRouter">1.2 BrowserRouter <a href="#t21.2 BrowserRouter"> # </a></h3>
+<ul>
+<li>利用h5 Api实现路由的切换</li>
+</ul>
+<h4 id="t31.2.1 history">1.2.1 history <a href="#t31.2.1 history"> # </a></h4>
+<ul>
+<li>HTML5规范给我们提供了一个<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/history">history</a>接口</li>
+<li>HTML5 History API包括2个方法：<code>history.pushState()</code>和<code>history.replaceState()</code>，和1个事件<code>window.onpopstate</code></li>
+</ul>
+<h5 id="t41.2.1.1 pushState">1.2.1.1 pushState <a href="#t41.2.1.1 pushState"> # </a></h5>
+<ul>
+<li>history.pushState(stateObject, title, url)，包括三个参数<ul>
+<li>第一个参数用于存储该url对应的状态对象，该对象可在onpopstate事件中获取，也可在history对象中获取</li>
+<li>第二个参数是标题，目前浏览器并未实现</li>
+<li>第三个参数则是设定的url</li>
+</ul>
+</li>
+<li>pushState函数向浏览器的历史堆栈压入一个url为设定值的记录，并改变历史堆栈的当前指针至栈顶  </li>
+</ul>
+<h5 id="t51.2.1.2 replaceState">1.2.1.2 replaceState <a href="#t51.2.1.2 replaceState"> # </a></h5>
+<ul>
+<li>该接口与pushState参数相同，含义也相同</li>
+<li>唯一的区别在于<code>replaceState</code>是替换浏览器历史堆栈的当前历史记录为设定的url</li>
+<li>需要注意的是<code>replaceState</code>不会改动浏览器历史堆栈的当前指针</li>
+</ul>
+<h5 id="t61.2.1.3 onpopstate">1.2.1.3 onpopstate <a href="#t61.2.1.3 onpopstate"> # </a></h5>
+<ul>
+<li>该事件是window的属性</li>
+<li>该事件会在调用浏览器的前进、后退以及执行<code>history.forward</code>、<code>history.back</code>、和<code>history.go</code>触发，因为这些操作有一个共性，即修改了历史堆栈的当前指针</li>
+<li>在不改变document的前提下，一旦当前指针改变则会触发<code>onpopstate</code>事件</li>
+</ul>
+<h5 id="t71.2.1.4 案例">1.2.1.4 案例 <a href="#t71.2.1.4 案例"> # </a></h5>
+<ul>
+<li>浏览器针对每个页面维护一个<code>History</code>栈,执行<code>pushState</code>函数可压入设定的<code>url</code>至栈顶,同时修改当前指针</li>
+<li>当执行<code>back</code>和<code>forward</code>操作时，history栈大小并不会改变（history.length不变），仅仅移动当前指针的位置</li>
+<li>若当前指针在history栈的中间位置(非栈顶)，此时执行pushState会在指针当前的位置添加此条目,并成为新的栈顶</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Document<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+        <span class="hljs-selector-id">#root</span>{
+            <span class="hljs-attribute">border</span>:<span class="hljs-number">1px</span> solid red;
+            <span class="hljs-attribute">height</span>:<span class="hljs-number">20px</span>;
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">var</span> historyObj = <span class="hljs-built_in">window</span>.history;
+        <span class="hljs-comment">//监听路径改变事件 表示将当前的状态变更了，弹出了</span>
+        <span class="hljs-built_in">window</span>.onpushstate = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(event.type,event.detail.state);
+            root.innerHTML = <span class="hljs-built_in">window</span>.location.pathname;
+        }
+        <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'popstate'</span>, (event) =&gt; {
+            <span class="hljs-built_in">console</span>.log(event.type,event.state);
+            root.innerHTML = <span class="hljs-built_in">window</span>.location.pathname;
+        });
+
+        (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">historyObj</span>) </span>{
+            <span class="hljs-keyword">let</span> oldPushState = history.pushState;<span class="hljs-comment">//缓存原生的pushState</span>
+            historyObj.pushState = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state, title, pathname</span>) </span>{
+                <span class="hljs-keyword">let</span> result = oldPushState.apply(history, <span class="hljs-built_in">arguments</span>);
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">window</span>.onpushstate === <span class="hljs-string">'function'</span>) {
+                    <span class="hljs-built_in">window</span>.onpushstate(<span class="hljs-keyword">new</span> CustomEvent(<span class="hljs-string">'pushstate'</span>,{<span class="hljs-attr">detail</span>:{pathname,state}}));
+                }
+                <span class="hljs-keyword">return</span> result;
+            }
+        })(historyObj);
+        <span class="hljs-keyword">let</span> oldHistoryLength = historyObj.length;
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            historyObj.pushState({ <span class="hljs-attr">page</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">title</span>: <span class="hljs-string">'page1'</span> }, <span class="hljs-string">'/page1'</span>);<span class="hljs-comment">//page1</span>
+            <span class="hljs-built_in">console</span>.log(historyObj.length-oldHistoryLength);
+        }, <span class="hljs-number">1000</span>);
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            historyObj.pushState({ <span class="hljs-attr">page</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">title</span>: <span class="hljs-string">'page2'</span> }, <span class="hljs-string">'/page2'</span>);<span class="hljs-comment">//page2</span>
+            <span class="hljs-built_in">console</span>.log(historyObj.length-oldHistoryLength);
+        }, <span class="hljs-number">2000</span>);
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            historyObj.pushState({ <span class="hljs-attr">page</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">title</span>: <span class="hljs-string">'page3'</span> }, <span class="hljs-string">'/page3'</span>);<span class="hljs-comment">//page3</span>
+            <span class="hljs-built_in">console</span>.log(historyObj.length-oldHistoryLength);
+        }, <span class="hljs-number">3000</span>);
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            historyObj.back();<span class="hljs-comment">//historyObj.go(-1);//page2</span>
+            setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-built_in">console</span>.log(historyObj.length-oldHistoryLength),<span class="hljs-number">100</span>);
+
+        }, <span class="hljs-number">4000</span>);
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            historyObj.pushState({ <span class="hljs-attr">page</span>:<span class="hljs-number">4</span> }, { <span class="hljs-attr">title</span>: <span class="hljs-string">'page4'</span> }, <span class="hljs-string">'/page4'</span>);<span class="hljs-comment">//page4</span>
+            <span class="hljs-built_in">console</span>.log(historyObj.length-oldHistoryLength);
+        }, <span class="hljs-number">5000</span>);
+        setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            historyObj.go(<span class="hljs-number">1</span>);
+            <span class="hljs-built_in">console</span>.log(historyObj.length-oldHistoryLength);<span class="hljs-comment">//page4</span>
+        }, <span class="hljs-number">6000</span>);
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h2 id="t82.基本路由">2.基本路由 <a href="#t82.基本路由"> # </a></h2>
+<h3 id="t92.1 安装">2.1 安装 <a href="#t92.1 安装"> # </a></h3>
+<pre><code class="lang-js">npm i react-router-dom --save
+</code></pre>
+<h3 id="t102.2 src\index.js">2.2 src\index.js <a href="#t102.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {HashRouter <span class="hljs-keyword">as</span> Router,Route} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router-dom'</span>;
+<span class="hljs-keyword">import</span> Home <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Home'</span>;
+<span class="hljs-keyword">import</span> User <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/User'</span>;
+<span class="hljs-keyword">import</span> Profile <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Profile'</span>;
+ReactDOM.render(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Home}</span> <span class="hljs-attr">exact</span>/&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/user"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{User}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/profile"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Profile}/</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t112.3 Home.js">2.3 Home.js <a href="#t112.3 Home.js"> # </a></h3>
+<p>src\components\Home.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Home</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    render(){
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.props);
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span> 
+             <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+             <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>this.props.history.push({pathname:'/user',state:{id:1}})}&gt;跳转到/user<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t122.4 Home.js">2.4 Home.js <a href="#t122.4 Home.js"> # </a></h3>
+<p>src\components\User.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    render(){
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.props.location.state);
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>User<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>this.props.history.goBack()}&gt;返回<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-comment">/**
+{
+    "history": {
+        "length": 3,
+        "action": "POP",
+        "location": {
+            "pathname": "/user",
+            "search": "",
+            "hash": ""
+        }
+    },
+    "location": {
+        "pathname": "/user",
+        "search": "",
+        "hash": ""
+    },
+    "match": {
+        "path": "/user",
+        "url": "/user",
+        "isExact": true,
+        "params": {}
+    }
+}
+ */</span>
+</code></pre>
+<h3 id="t132.4 Profile.js">2.4 Profile.js <a href="#t132.4 Profile.js"> # </a></h3>
+<p>src\components\Profile.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Profile</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Profile<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h2 id="t143.实现基本路由">3.实现基本路由 <a href="#t143.实现基本路由"> # </a></h2>
+<h3 id="t153.1 src\index.js">3.1 src\index.js <a href="#t153.1 src\index.js"> # </a></h3>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/react-router/blob/master/packages/react-router-dom/modules/index.js">react-router-dom/modules/index.js</a></li>
+</ul>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {HashRouter as Router,Route} from './react-router-dom';</span>
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+ReactDOM.render(
+    &lt;Router&gt;
+        &lt;div&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Route path="/profile" component={Profile}/&gt;
+        &lt;/div&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h3 id="t163.2 RouterContext.js">3.2 RouterContext.js <a href="#t163.2 RouterContext.js"> # </a></h3>
+<p>src\react-router\RouterContext.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createContext({});
+</code></pre>
+<h3 id="t173.3 Router.js">3.3 Router.js <a href="#t173.3 Router.js"> # </a></h3>
+<p>src\react-router\Router.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Router</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">constructor</span>(props){
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = {
+            <span class="hljs-attr">location</span>:props.history.location
+        }
+        <span class="hljs-comment">//当路径发生的变化的时候执行回调</span>
+        <span class="hljs-keyword">this</span>.unlisten = props.history.listen(<span class="hljs-function">(<span class="hljs-params">location</span>)=&gt;</span>{
+            <span class="hljs-keyword">this</span>.setState({location});
+        });
+    }
+    componentWillUnmount(){
+        <span class="hljs-keyword">this</span>.unlisten&amp;&amp;<span class="hljs-keyword">this</span>.unlisten();
+    }
+    render(){
+        <span class="hljs-keyword">let</span> value = {<span class="hljs-comment">//通过value向下层传递数据</span>
+            <span class="hljs-attr">location</span>:<span class="hljs-keyword">this</span>.state.location,
+            <span class="hljs-attr">history</span>:<span class="hljs-keyword">this</span>.props.history
+        }
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouterContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{value}</span>&gt;</span>
+                {this.props.children}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">RouterContext.Provider</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Router;
+</code></pre>
+<h3 id="t183.4 Route.js">3.4 Route.js <a href="#t183.4 Route.js"> # </a></h3>
+<p>src\react-router\Route.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Route</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">static</span> contextType = RouterContext
+    render(){
+        <span class="hljs-keyword">const</span> {history,location} = <span class="hljs-keyword">this</span>.context;
+        <span class="hljs-keyword">const</span> {path,<span class="hljs-attr">component</span>:RouteComponent} = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">const</span> match = location.pathname === path;
+        <span class="hljs-keyword">let</span> routeProps = {history,location};
+        <span class="hljs-keyword">let</span> element=<span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">if</span>(match){
+            element= <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouteComponent</span> {<span class="hljs-attr">...routeProps</span>}/&gt;</span></span>
+        }
+        <span class="hljs-keyword">return</span> element;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Route;
+</code></pre>
+<h3 id="t193.5 react-router\index.js">3.5 react-router\index.js <a href="#t193.5 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> Route} <span class="hljs-keyword">from</span> <span class="hljs-string">'./Route'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> Router} <span class="hljs-keyword">from</span> <span class="hljs-string">'./Router'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> __RouterContext} <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+</code></pre>
+<h3 id="t203.6 BrowserRouter.js">3.6 BrowserRouter.js <a href="#t203.6 BrowserRouter.js"> # </a></h3>
+<p>src\react-router-dom\BrowserRouter.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> {Router} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router'</span>;
+<span class="hljs-keyword">import</span> {createBrowserHistory} <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-comment">//创建相应的历史对象，并且传入Router组件，原样渲染子组件</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BrowserRouter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    <span class="hljs-comment">//不管是哪种创建历史对象的方法，得到的history 长的都一样，都像window.history</span>
+    history = createBrowserHistory(<span class="hljs-keyword">this</span>.props)<span class="hljs-comment">//window.history</span>
+    render(){
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span> <span class="hljs-attr">history</span>=<span class="hljs-string">{this.history}</span>&gt;</span>
+                {this.props.children}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> BrowserRouter;
+</code></pre>
+<h3 id="t213.7 HashRouter.js">3.7 HashRouter.js <a href="#t213.7 HashRouter.js"> # </a></h3>
+<p>src\react-router-dom\HashRouter.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> {Router} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router'</span>;
+<span class="hljs-keyword">import</span> {createHashHistory} <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HashRouter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    history = createHashHistory()<span class="hljs-comment">//hash实现</span>
+    render(){
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span> <span class="hljs-attr">history</span>=<span class="hljs-string">{this.history}</span>&gt;</span>
+                {this.props.children}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> HashRouter;
+</code></pre>
+<h3 id="t223.8 react-router-dom\index.js">3.8 react-router-dom\index.js <a href="#t223.8 react-router-dom\index.js"> # </a></h3>
+<p>src\react-router-dom\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> HashRouter} <span class="hljs-keyword">from</span> <span class="hljs-string">'./HashRouter'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> BrowserRouter} <span class="hljs-keyword">from</span> <span class="hljs-string">'./BrowserRouter'</span>;
+</code></pre>
+<h2 id="t233.实现history">3.实现history <a href="#t233.实现history"> # </a></h2>
+<h3 id="t243.1 createBrowserHistory.js">3.1 createBrowserHistory.js <a href="#t243.1 createBrowserHistory.js"> # </a></h3>
+<p>src\history\createBrowserHistory.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createBrowserHistory</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">const</span> globalHistory = <span class="hljs-built_in">window</span>.history;
+    <span class="hljs-keyword">let</span> listeners = [];<span class="hljs-comment">//存放所有的监听函数</span>
+    <span class="hljs-keyword">let</span> state;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listen</span>(<span class="hljs-params">listener</span>)</span>{
+        listeners.push(listener);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            listeners = listeners.filter(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item!=listener);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">go</span>(<span class="hljs-params">n</span>)</span>{
+        globalHistory.go(n);
+    }
+    <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'popstate'</span>,()=&gt;{<span class="hljs-comment">//TODO</span>
+        <span class="hljs-keyword">let</span> location = {<span class="hljs-attr">state</span>:globalHistory.state,<span class="hljs-attr">pathname</span>:<span class="hljs-built_in">window</span>.location.pathname};
+        <span class="hljs-comment">//当路径改变之后应该让history的监听函数执行，重新刷新组件</span>
+        notify({<span class="hljs-attr">action</span>:<span class="hljs-string">"POP"</span>,location});
+    });
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">goBack</span>(<span class="hljs-params"></span>)</span>{
+        go(<span class="hljs-number">-1</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">goForward</span>(<span class="hljs-params"></span>)</span>{
+        go(<span class="hljs-number">1</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">notify</span>(<span class="hljs-params">newState</span>)</span>{
+        <span class="hljs-comment">//把newState上的属性赋值到history对象上</span>
+        <span class="hljs-built_in">Object</span>.assign(history,newState);
+        history.length = globalHistory.length;<span class="hljs-comment">//路由历史栈中历史条目的长度</span>
+        listeners.forEach(<span class="hljs-function"><span class="hljs-params">listener</span>=&gt;</span>listener(history.location));<span class="hljs-comment">//通知监听函数执行,参数是新的location</span>
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">push</span>(<span class="hljs-params">pathname,nextState</span>)</span>{<span class="hljs-comment">//TODO</span>
+        <span class="hljs-keyword">const</span> action = <span class="hljs-string">'PUSH'</span>;<span class="hljs-comment">//action表示是由于什么样的动作引起了路径的变更</span>
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">typeof</span> pathname === <span class="hljs-string">'object'</span>){
+            state = pathname.state;
+            pathname = pathname.pathname;
+        }<span class="hljs-keyword">else</span>{
+            state=nextState;<span class="hljs-comment">//TODO </span>
+        }
+        globalHistory.pushState(state,<span class="hljs-literal">null</span>,pathname);<span class="hljs-comment">//我们已经 跳转路径</span>
+        <span class="hljs-keyword">let</span> location = {state,pathname};
+        notify({action,location});
+    }
+    <span class="hljs-keyword">const</span> history = {
+        <span class="hljs-attr">action</span>:<span class="hljs-string">'POP'</span>,
+        go,
+        goBack,
+        goForward,
+        push,
+        listen,
+        <span class="hljs-attr">location</span>:{<span class="hljs-attr">pathname</span>:<span class="hljs-built_in">window</span>.location.pathname,<span class="hljs-attr">state</span>:<span class="hljs-built_in">window</span>.location.state}
+    }
+    <span class="hljs-keyword">return</span> history;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createBrowserHistory;
+</code></pre>
+<h3 id="t253.2 createHashHistory.js">3.2 createHashHistory.js <a href="#t253.2 createHashHistory.js"> # </a></h3>
+<p>src\history\createHashHistory.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ * hash不能使用 浏览器的history对象了
+ * <span class="hljs-doctag">@returns </span>
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createHashHistory</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">let</span> stack = [];<span class="hljs-comment">//类似于历史栈 里面存放都是路径</span>
+    <span class="hljs-keyword">let</span> index = <span class="hljs-number">-1</span>;<span class="hljs-comment">//栈的指针，默认是-1</span>
+    <span class="hljs-keyword">let</span> action = <span class="hljs-string">'POP'</span>;<span class="hljs-comment">//动作</span>
+    <span class="hljs-keyword">let</span> state ;<span class="hljs-comment">//最新的状态 </span>
+    <span class="hljs-keyword">let</span> listeners = [];<span class="hljs-comment">//监听函数的数组</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listen</span>(<span class="hljs-params">listener</span>)</span>{
+        listeners.push(listener);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            listeners = listeners.filter(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item!=listener);
+        }
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">go</span>(<span class="hljs-params">n</span>)</span>{
+        action = <span class="hljs-string">'POP'</span>;
+        index+=n;<span class="hljs-comment">//更改栈顶的指针</span>
+        <span class="hljs-keyword">let</span> nextLocation = stack[index];<span class="hljs-comment">//取出指定索引对应的路径对象</span>
+        state= nextLocation.state;<span class="hljs-comment">//取出此location对应的状态 </span>
+        <span class="hljs-built_in">window</span>.location.hash = nextLocation.pathname;<span class="hljs-comment">//修改hash值 ，从而修改当前的路径</span>
+    }
+    <span class="hljs-keyword">let</span> hashChangeHandler = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        <span class="hljs-keyword">let</span> pathname = <span class="hljs-built_in">window</span>.location.hash.slice(<span class="hljs-number">1</span>);<span class="hljs-comment">//取出最新的hash值对应的路径  #/user</span>
+        <span class="hljs-built_in">Object</span>.assign(history,{action,<span class="hljs-attr">location</span>:{pathname,state}});
+        <span class="hljs-keyword">if</span>(action === <span class="hljs-string">'PUSH'</span>){<span class="hljs-comment">//说明是调用push方法，需要往历史栈中添加新的条目 </span>
+            stack[++index]=history.location;
+        }
+        listeners.forEach(<span class="hljs-function"><span class="hljs-params">listener</span>=&gt;</span>listener(history.location));
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">push</span>(<span class="hljs-params">pathname,nextState</span>)</span>{
+        action = <span class="hljs-string">'PUSH'</span>;
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">typeof</span> pathname ===<span class="hljs-string">'object'</span>){
+            state = pathname.state;
+            pathname = pathname.pathname
+        }<span class="hljs-keyword">else</span>{
+            state = nextState;
+        }
+        <span class="hljs-built_in">window</span>.location.hash = pathname;
+    }
+    <span class="hljs-comment">//当hash发生变化的话，会执行回调</span>
+    <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'hashchange'</span>,hashChangeHandler);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">goBack</span>(<span class="hljs-params"></span>)</span>{
+        go(<span class="hljs-number">-1</span>);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">goForward</span>(<span class="hljs-params"></span>)</span>{
+        go(<span class="hljs-number">1</span>);
+    }
+    <span class="hljs-keyword">const</span> history = {
+        <span class="hljs-attr">action</span>:<span class="hljs-string">'POP'</span>,
+        go,
+        goBack,
+        goForward,
+        push,
+        listen,
+        <span class="hljs-attr">location</span>:{},
+        <span class="hljs-attr">location</span>:{<span class="hljs-attr">pathname</span>:<span class="hljs-string">'/'</span>,<span class="hljs-attr">state</span>:<span class="hljs-literal">undefined</span>}
+    }
+    <span class="hljs-keyword">if</span>(<span class="hljs-built_in">window</span>.location.hash){<span class="hljs-comment">//如果初始的情况下，如果hash是有值的</span>
+        action = <span class="hljs-string">'PUSH'</span>;
+        hashChangeHandler();
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-built_in">window</span>.location.hash = <span class="hljs-string">'/'</span>;
+    }
+    <span class="hljs-keyword">return</span> history;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createHashHistory;
+</code></pre>
+<h3 id="t263.3 history\index.js">3.3 history\index.js <a href="#t263.3 history\index.js"> # </a></h3>
+<p>src\history\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> createBrowserHistory} <span class="hljs-keyword">from</span> <span class="hljs-string">'./createBrowserHistory'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> createHashHistory} <span class="hljs-keyword">from</span> <span class="hljs-string">'./createHashHistory'</span>;
+</code></pre>
+<h3 id="t273.4 BrowserRouter.js">3.4 BrowserRouter.js <a href="#t273.4 BrowserRouter.js"> # </a></h3>
+<p>src\react-router-dom\BrowserRouter.js</p>
+<pre><code class="lang-diff">import React from 'react'
+import {Router} from '../react-router';
+<span class="hljs-addition">+import {createBrowserHistory} from '../history';</span>
+//创建相应的历史对象，并且传入Router组件，原样渲染子组件
+class BrowserRouter extends React.Component{
+    //不管是哪种创建历史对象的方法，得到的history 长的都一样，都像window.history
+    history = createBrowserHistory(this.props)//window.history
+    render(){
+        return (
+            &lt;Router history={this.history}&gt;
+                {this.props.children}
+            &lt;/Router&gt;
+        )
+    }
+}
+export default BrowserRouter;
+</code></pre>
+<h3 id="t283.5 HashRouter.js">3.5 HashRouter.js <a href="#t283.5 HashRouter.js"> # </a></h3>
+<p>src\react-router-dom\HashRouter.js</p>
+<pre><code class="lang-diff">import React from 'react'
+import {Router} from '../react-router';
+import {createHashHistory} from '../history';
+class HashRouter extends React.Component{
+    history = createHashHistory()//hash实现
+    render(){
+        return (
+            &lt;Router history={this.history}&gt;
+                {this.props.children}
+            &lt;/Router&gt;
+        )
+    }
+}
+export default HashRouter;
+</code></pre>
+<h2 id="t294. path-to-regexp">4. path-to-regexp <a href="#t294. path-to-regexp"> # </a></h2>
+<ul>
+<li><a href="https://jex.im/regulex">regulex</a></li>
+<li><a href="https://www.npmjs.com/package/path-to-regexp">path-to-regexp</a><ul>
+<li>sensitive 是否大小写敏感 (默认值: false)</li>
+<li>strict 是否允许结尾有一个可选的/  (默认值: false)</li>
+<li>end 是否匹配整个字符串 (默认值: true)</li>
+</ul>
+</li>
+</ul>
+<h3 id="t304.1 /home结束">4.1 /home结束 <a href="#t304.1 /home结束"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> pathToRegExp = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path-to-regexp'</span>);
+<span class="hljs-keyword">let</span> regxp = pathToRegExp(<span class="hljs-string">'/home'</span>,[],{<span class="hljs-attr">end</span>:<span class="hljs-literal">true</span>});
+<span class="hljs-built_in">console</span>.log(regxp);<span class="hljs-comment">//   /^\/home\/?$/i</span>
+<span class="hljs-built_in">console</span>.log(regxp.test(<span class="hljs-string">'/home'</span>));
+<span class="hljs-built_in">console</span>.log(regxp.test(<span class="hljs-string">'/home/2'</span>));
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/homereg.png" alt="homereg"></p>
+<h3 id="t314.2 /home非结束">4.2 /home非结束 <a href="#t314.2 /home非结束"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> pathToRegExp = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path-to-regexp'</span>);
+<span class="hljs-keyword">let</span> regExp = pathToRegExp(<span class="hljs-string">'/home'</span>,[],{<span class="hljs-attr">end</span>:<span class="hljs-literal">false</span>});
+<span class="hljs-built_in">console</span>.log(regExp);<span class="hljs-comment">//   /^\/home\/?(?=\/|$)/i</span>
+<span class="hljs-built_in">console</span>.log(regExp.test(<span class="hljs-string">'/home'</span>));
+<span class="hljs-built_in">console</span>.log(regExp.test(<span class="hljs-string">'/home/'</span>));
+<span class="hljs-built_in">console</span>.log(regExp.test(<span class="hljs-string">'/home//'</span>));
+<span class="hljs-built_in">console</span>.log(regExp.test(<span class="hljs-string">'/home/2'</span>));
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/homereg2.png" alt="homereg2"></p>
+<h3 id="t324.3 路径参数">4.3 路径参数 <a href="#t324.3 路径参数"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> params = [];
+<span class="hljs-keyword">let</span> regExp = pathToRegExp(<span class="hljs-string">'/user/:id'</span>,params,{<span class="hljs-attr">end</span>:<span class="hljs-literal">true</span>});
+<span class="hljs-built_in">console</span>.log(regExp,params);
+<span class="hljs-comment">/**
+/^\/user\/(?:([^\/]+?))\/?$/i
+[ { name: 'id', optional: false, offset: 7 } ]
+**/</span>
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/uerreg.png" alt="uerreg"></p>
+<h3 id="t334.4 正则匹配">4.4 正则匹配 <a href="#t334.4 正则匹配"> # </a></h3>
+<ul>
+<li>是否捕获</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">表达式</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">()</td>
+<td style="text-align:left">表示捕获分组，()会把每个分组里的匹配的值保存起来，使用$n(n是一个数字，表示第n个捕获组的内容)</td>
+</tr>
+<tr>
+<td style="text-align:left">(?:)</td>
+<td style="text-align:left">表示非捕获分组，和捕获分组唯一的区别在于，非捕获分组匹配的值不会保存起来</td>
+</tr>
+<tr>
+<td style="text-align:left">(?<name>...)</name></td>
+<td style="text-align:left">表示命名捕获分组,反向引用一个命名分组的语法是 \k<name>,在 replace() 方法的替换字符串中反向引用是用 $<name></name></name></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js"><span class="hljs-comment">//分组获取</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1ab'</span>.match(<span class="hljs-regexp">/1[a-z]([b-c])/</span>));
+<span class="hljs-comment">//分组不捕获</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1ab'</span>.match(<span class="hljs-regexp">/1[a-z](?:[a-z])/</span>));
+<span class="hljs-comment">//?&lt;x&gt; 表示命名捕获分组</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-regexp">/(?&lt;x&gt;\d{2})-(?&lt;y&gt;\d{2})/</span>.exec(<span class="hljs-string">'11-22'</span>));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'11-22'</span>.replace(<span class="hljs-regexp">/(?&lt;x&gt;\d{2})-(?&lt;y&gt;\d{2})/</span>,<span class="hljs-string">"$&lt;y&gt;-$&lt;x&gt;"</span>));
+</code></pre>
+<ul>
+<li>前瞻和后顾</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">表达式</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">(?=pattern)</td>
+<td style="text-align:left">正向肯定查找(前瞻),后面必须跟着什么</td>
+</tr>
+<tr>
+<td style="text-align:left">(?!pattern)</td>
+<td style="text-align:left">正向否定查找(前瞻)，后面不能跟着什么</td>
+</tr>
+<tr>
+<td style="text-align:left">(?&lt;=pattern)</td>
+<td style="text-align:left">反向肯定条件查找(后顾),不捕获</td>
+</tr>
+<tr>
+<td style="text-align:left">(?&lt;!pattern)</td>
+<td style="text-align:left">反向否定条件查找（后顾）</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js"><span class="hljs-comment">//会消耗掉字符的</span>
+<span class="hljs-comment">//console.log('1a'.match(/\d[a-z][a-z]/));</span>
+<span class="hljs-comment">//?= 正向肯定查找 不消费字符 正向前瞻</span>
+<span class="hljs-comment">//console.log('1a'.match(/\d(?=[a-z])[a-z]/));</span>
+
+<span class="hljs-comment">//正向肯定前瞻</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1a'</span>.match(<span class="hljs-regexp">/\d(?=[a-z])[a-z]/</span>));
+<span class="hljs-comment">//正向否定前瞻</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1a'</span>.match(<span class="hljs-regexp">/\d(?![A-Z])[a-z]/</span>));
+<span class="hljs-comment">//反向肯定前瞻</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1a'</span>.match(<span class="hljs-regexp">/(?&lt;=[a-z])\d[a-z]/</span>));
+<span class="hljs-comment">//反向否定前瞻</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'1a'</span>.match(<span class="hljs-regexp">/(?&lt;![A-Z])\d[a-z]/</span>));
+
+<span class="hljs-keyword">let</span> array = [<span class="hljs-string">'1ab'</span>];
+array.index = <span class="hljs-number">0</span>;
+array.input = <span class="hljs-string">'1ab'</span>;
+array.groups = <span class="hljs-literal">undefined</span>;
+<span class="hljs-built_in">console</span>.log(array);
+</code></pre>
+<h2 id="t345. 正则匹配">5. 正则匹配 <a href="#t345. 正则匹配"> # </a></h2>
+<h3 id="t355.1 matchPath.js">5.1 matchPath.js <a href="#t355.1 matchPath.js"> # </a></h3>
+<p>src\react-router\matchPath.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> pathToRegexp <span class="hljs-keyword">from</span> <span class="hljs-string">'path-to-regexp'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">compilePath</span>(<span class="hljs-params">path,options</span>)</span>{
+    <span class="hljs-keyword">const</span> keys = [];
+    <span class="hljs-keyword">const</span> regexp = pathToRegexp(path,keys,options);
+    <span class="hljs-keyword">return</span> {keys,regexp};
+}
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>pathname 浏览器栏中的真实路径
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>options 匹配的参数 path exact strict sensitive
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">matchPath</span>(<span class="hljs-params">pathname,options = {}</span>)</span>{
+    <span class="hljs-keyword">let</span> {path=<span class="hljs-string">'/'</span>,exact=<span class="hljs-literal">false</span>,strict=<span class="hljs-literal">false</span>,sensitive=<span class="hljs-literal">false</span>}=options;
+    <span class="hljs-keyword">let</span> {keys,regexp} = compilePath(path,{
+        <span class="hljs-attr">end</span>:exact,
+        strict,
+        sensitive
+    }); <span class="hljs-comment">// /post/:id  keys=["id"] regexp= /\/post\/([^\/]+?)/</span>
+    <span class="hljs-keyword">const</span> match = regexp.exec(pathname);
+    <span class="hljs-keyword">if</span>(!match) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">const</span> [url,...values] = match;<span class="hljs-comment">//['/post/1','1'] url=/post/1 values=['1']</span>
+    <span class="hljs-comment">// pathname /post/1/name !== /post/1</span>
+    <span class="hljs-keyword">const</span> isExact = pathname === url;
+    <span class="hljs-comment">//需要精确匹配，但是匹配的不精确，没有完全相等，也相当于没匹配上</span>
+    <span class="hljs-keyword">if</span>(exact &amp;&amp; !isExact) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">return</span> { <span class="hljs-comment">//路由组件中props.match</span>
+        path,<span class="hljs-comment">//Route原始path</span>
+        url,<span class="hljs-comment">//正则匹配到的浏览器的pathname的部分</span>
+        isExact,
+        <span class="hljs-attr">params</span>:keys.reduce(<span class="hljs-function">(<span class="hljs-params">memo,key,index</span>)=&gt;</span>{
+            memo[key.name] = values[index];
+            <span class="hljs-keyword">return</span> memo;
+        },{})
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> matchPath;
+</code></pre>
+<h3 id="t365.2 Router.js">5.2 Router.js <a href="#t365.2 Router.js"> # </a></h3>
+<p>src\react-router\Router.js</p>
+<pre><code class="lang-diff">import React from 'react'
+import RouterContext from './RouterContext';
+class Router extends React.Component{
+<span class="hljs-addition">+    static computeRootMatch(pathname) {</span>
+<span class="hljs-addition">+        return { path: "/", url: "/", params: {}, isExact: pathname === "/" };</span>
+<span class="hljs-addition">+    }</span>
+    constructor(props){
+        super(props);
+        this.state = {
+            location:props.history.location
+        }
+        //当路径发生的变化的时候执行回调
+        this.unlisten = props.history.listen((location)=&gt;{
+            this.setState({location});
+        });
+    }
+    componentWillUnmount(){
+        this.unlisten&amp;&amp;this.unlisten();
+    }
+    render(){
+        let value = {//通过value向下层传递数据
+            location:this.state.location,
+            history:this.props.history,
+<span class="hljs-addition">+            match: Router.computeRootMatch(this.state.location.pathname)</span>
+        }
+        return (
+            &lt;RouterContext.Provider value={value}&gt;
+                {this.props.children}
+            &lt;/RouterContext.Provider&gt;
+        )
+    }
+}
+
+export default Router;
+</code></pre>
+<h3 id="t375.3 Route.js">5.3 Route.js <a href="#t375.3 Route.js"> # </a></h3>
+<p>src\react-router\Route.js</p>
+<pre><code class="lang-diff">import React from 'react'
+import RouterContext from './RouterContext';
+<span class="hljs-addition">+import matchPath from './matchPath';</span>
+class Route extends React.Component{
+    static contextType = RouterContext
+    render(){
+        const {history,location} = this.context;
+        const {component:RouteComponent} = this.props;
+<span class="hljs-addition">+        const match = matchPath(location.pathname, this.props);</span>
+        let routeProps = {history,location};
+        let element=null;
+        if (match) {
+<span class="hljs-addition">+           routeProps.match = match;</span>
+            element = &lt;RouteComponent {...routeProps} /&gt;
+        }
+        return (
+            &lt;RouterContext.Provider value={routeProps}&gt;
+                {element}
+            &lt;/RouterContext.Provider&gt;
+        )
+    }
+}
+export default Route;
+</code></pre>
+<h3 id="t385.4 react-router\index.js">5.4 react-router\index.js <a href="#t385.4 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-diff">export {default as Route} from './Route';
+export {default as Router} from './Router';
+export {default as __RouterContext} from './RouterContext';
+<span class="hljs-addition">+export {default as matchPath} from './matchPath';</span>
+</code></pre>
+<h2 id="t396. 实现Switch">6. 实现Switch <a href="#t396. 实现Switch"> # </a></h2>
+<h3 id="t406.1 Switch.js">6.1 Switch.js <a href="#t406.1 Switch.js"> # </a></h3>
+<p>src\react-router\Switch.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-keyword">import</span> matchPath <span class="hljs-keyword">from</span> <span class="hljs-string">'./matchPath'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Switch</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">static</span> contextType = RouterContext
+    render() {
+        <span class="hljs-keyword">const</span> { location } = <span class="hljs-keyword">this</span>.context;
+        <span class="hljs-keyword">let</span> element, match;
+        React.Children.forEach(<span class="hljs-keyword">this</span>.props.children, child =&gt; {
+            <span class="hljs-keyword">if</span> (!match &amp;&amp; React.isValidElement(child)) {
+                element = child;
+                match = matchPath(location.pathname, child.props);
+            }
+        });
+        <span class="hljs-keyword">return</span> match ? React.cloneElement(element, {<span class="hljs-attr">computedMatch</span>: match }) : <span class="hljs-literal">null</span>
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Switch;
+</code></pre>
+<h3 id="t416.2 Route.js">6.2 Route.js <a href="#t416.2 Route.js"> # </a></h3>
+<p>src\react-router\Route.js</p>
+<pre><code class="lang-diff">import React from 'react'
+import RouterContext from './RouterContext';
+import matchPath from './matchPath';
+class Route extends React.Component{
+    static contextType = RouterContext
+    render(){
+        const {history,location} = this.context;
+<span class="hljs-addition">+        const {component:RouteComponent,computedMatch} = this.props;</span>
+<span class="hljs-addition">+        const match = computedMatch ? computedMatch : matchPath(location.pathname, this.props);</span>
+        let routeProps = {history,location};
+        let element=null;
+        if (match) {
+            routeProps.match = match;
+            element = &lt;RouteComponent {...routeProps} /&gt;
+        }
+        return (
+            &lt;RouterContext.Provider value={routeProps}&gt;
+                {element}
+            &lt;/RouterContext.Provider&gt;
+        )
+    }
+}
+export default Route;
+</code></pre>
+<h3 id="t426.3 react-router\index.js">6.3 react-router\index.js <a href="#t426.3 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-diff">export {default as Route} from './Route';
+export {default as Router} from './Router';
+export {default as __RouterContext} from './RouterContext';
+export {default as matchPath} from './matchPath';
+<span class="hljs-addition">+export {default as Switch} from './Switch';</span>
+</code></pre>
+<h3 id="t436.4 src\index.js">6.4 src\index.js <a href="#t436.4 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import {HashRouter as Router,Route,Switch} from './react-router-dom';
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+ReactDOM.render(
+    &lt;Router&gt;
+<span class="hljs-addition">+        &lt;Switch&gt;</span>
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Route path="/profile" component={Profile}/&gt;
+<span class="hljs-addition">+        &lt;/Switch&gt;</span>
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h2 id="t447. Redirect">7. Redirect <a href="#t447. Redirect"> # </a></h2>
+<h3 id="t457.1 Redirect.js">7.1 Redirect.js <a href="#t457.1 Redirect.js"> # </a></h3>
+<p>src\react-router\Redirect.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-keyword">import</span> Lifecycle <span class="hljs-keyword">from</span> <span class="hljs-string">'./Lifecycle'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Redirect</span>(<span class="hljs-params">{to}</span>)</span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouterContext.Consumer</span>&gt;</span>
+            {
+                contextValue=&gt;{
+                    const {history}= contextValue;
+                    return (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Lifecycle</span>
+                           <span class="hljs-attr">onMount</span>=<span class="hljs-string">{()</span>=&gt;</span>history.push(to)}
+                        /&gt;
+                    );
+                }
+            }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">RouterContext.Consumer</span>&gt;</span></span>
+    );
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Redirect;
+</code></pre>
+<h3 id="t467.2 Lifecycle.js">7.2 Lifecycle.js <a href="#t467.2 Lifecycle.js"> # </a></h3>
+<p>src\react-router\Lifecycle.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Lifecycle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    componentDidMount(){
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.props.onMount)
+            <span class="hljs-keyword">this</span>.props.onMount(<span class="hljs-keyword">this</span>);
+    }
+    componentWillUnmount(){
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.props.onUnmount)
+            <span class="hljs-keyword">this</span>.props.onUnmount(<span class="hljs-keyword">this</span>);
+    }
+    render(){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Lifecycle;
+</code></pre>
+<h3 id="t477.3 react-router\index.js">7.3 react-router\index.js <a href="#t477.3 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-diff">export {default as Route} from './Route';
+export {default as Router} from './Router';
+export {default as __RouterContext} from './RouterContext';
+export {default as matchPath} from './matchPath';
+export {default as Switch} from './Switch';
+<span class="hljs-addition">+export {default as Redirect} from './Redirect';</span>
+</code></pre>
+<h3 id="t487.4 src\index.js">7.4 src\index.js <a href="#t487.4 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {HashRouter as Router,Route,Switch,Redirect} from './react-router-dom';</span>
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+ReactDOM.render(
+    &lt;Router&gt;
+        &lt;Switch&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Route path="/profile" component={Profile}/&gt;
+<span class="hljs-addition">+         &lt;Redirect to="/"/&gt;</span>
+        &lt;/Switch&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h2 id="t498.Link">8.Link <a href="#t498.Link"> # </a></h2>
+<h3 id="t508.1 Link.js">8.1 Link.js <a href="#t508.1 Link.js"> # </a></h3>
+<p>src\react-router-dom\Link.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {__RouterContext <span class="hljs-keyword">as</span> RouterContext} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Link</span>(<span class="hljs-params">props</span>)</span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouterContext.Consumer</span>&gt;</span>
+            {
+                contextValue=&gt;{
+                    return (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">a</span>
+                           {<span class="hljs-attr">...props</span>}
+                           <span class="hljs-attr">onClick</span>=<span class="hljs-string">{(event)</span>=&gt;</span>{
+                              event.preventDefault();
+                              contextValue.history.push(props.to);
+                           }}
+                        &gt;{props.children}<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+                    )
+                }
+            }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">RouterContext.Consumer</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h3 id="t518.2 react-router-dom\index.js">8.2 react-router-dom\index.js <a href="#t518.2 react-router-dom\index.js"> # </a></h3>
+<p>src\react-router-dom\index.js</p>
+<pre><code class="lang-diff">export * from '../react-router';
+export {default as HashRouter} from './HashRouter';
+export {default as BrowserRouter} from './BrowserRouter';
+<span class="hljs-addition">+export {default as Link} from './Link';</span>
+</code></pre>
+<h3 id="t528.3 src\index.js">8.3 src\index.js <a href="#t528.3 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {HashRouter as Router,Route,Switch,Redirect,Link} from './react-router-dom';</span>
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+ReactDOM.render(
+    &lt;Router&gt;
+<span class="hljs-addition">+      &lt;ul&gt;</span>
+<span class="hljs-addition">+          &lt;li&gt;&lt;Link to="/"&gt;首页&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+          &lt;li&gt;&lt;Link to="/user" &gt;用户管理&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+          &lt;li&gt;&lt;Link to="/profile" &gt;个人中心&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+      &lt;/ul&gt;</span>
+        &lt;Switch&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Route path="/profile" component={Profile}/&gt;
+          &lt;Redirect to="/"/&gt;
+        &lt;/Switch&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h2 id="t539.嵌套路由">9.嵌套路由 <a href="#t539.嵌套路由"> # </a></h2>
+<h3 id="t549.1 utils.js">9.1 utils.js <a href="#t549.1 utils.js"> # </a></h3>
+<p>src\utils.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> UserAPI = {
+    list(){
+        <span class="hljs-keyword">let</span> usersStr = localStorage.getItem(<span class="hljs-string">'users'</span>);
+        <span class="hljs-keyword">let</span> users= usersStr ? <span class="hljs-built_in">JSON</span>.parse(usersStr) : [];
+        <span class="hljs-keyword">return</span> users;
+    },
+    add(user){
+        <span class="hljs-keyword">let</span> users = UserAPI.list();
+        users.push(user);
+        localStorage.setItem(<span class="hljs-string">'users'</span>, <span class="hljs-built_in">JSON</span>.stringify(users));
+    },
+    find(id){
+        <span class="hljs-keyword">let</span> users = UserAPI.list();
+        <span class="hljs-keyword">return</span> users.find(<span class="hljs-function">(<span class="hljs-params">user</span>) =&gt;</span> user.id === id);
+    }
+}
+</code></pre>
+<h3 id="t559.2 User.js">9.2 User.js <a href="#t559.2 User.js"> # </a></h3>
+<p>src\components\User.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import { Link, Route } from '../react-router-dom';
+<span class="hljs-addition">+import UserAdd from './UserAdd';</span>
+<span class="hljs-addition">+import UserDetail from './UserDetail';</span>
+<span class="hljs-addition">+import UserList from './UserList';</span>
+export default function User() {
+    return (
+<span class="hljs-addition">+        &lt;div&gt;</span>
+<span class="hljs-addition">+             &lt;ul&gt;</span>
+<span class="hljs-addition">+                    &lt;li&gt;&lt;Link to="/user/list"&gt;用户列表&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+                    &lt;li&gt;&lt;Link to="/user/add"&gt;添加用户&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+                &lt;/ul&gt;</span>
+<span class="hljs-addition">+            &lt;div&gt;</span>
+<span class="hljs-addition">+                &lt;Route path="/user/add" component={UserAdd} /&gt;</span>
+<span class="hljs-addition">+                &lt;Route path="/user/list" component={UserList} /&gt;</span>
+<span class="hljs-addition">+                &lt;Route path="/user/detail/:id" component={UserDetail} /&gt;</span>
+<span class="hljs-addition">+            &lt;/div&gt;</span>
+<span class="hljs-addition">+        &lt;/div&gt;</span>
+    )
+}
+</code></pre>
+<h3 id="t569.3 UserAdd.js">9.3 UserAdd.js <a href="#t569.3 UserAdd.js"> # </a></h3>
+<p>src\components\UserAdd.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {UserAPI} <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserAdd</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    usernameRef
+    <span class="hljs-keyword">constructor</span>(props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.usernameRef = React.createRef();
+    }
+    handleSubmit = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+        event.preventDefault();
+        <span class="hljs-keyword">let</span> username = <span class="hljs-keyword">this</span>.usernameRef.current.value;
+        UserAPI.add({ <span class="hljs-attr">id</span>: <span class="hljs-built_in">Date</span>.now() + <span class="hljs-string">''</span>, username });
+        <span class="hljs-keyword">this</span>.props.history.push(<span class="hljs-string">'/user/list'</span>);
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{this.handleSubmit}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.usernameRef}</span> /&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span> &gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t579.4 UserList.js">9.4 UserList.js <a href="#t579.4 UserList.js"> # </a></h3>
+<p>src\components\UserList.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { Link } <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router-dom'</span>;
+<span class="hljs-keyword">import</span> {UserAPI} <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserList</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    state = { <span class="hljs-attr">users</span>: [] }
+    componentDidMount() {
+        <span class="hljs-keyword">let</span> users = UserAPI.list();
+        <span class="hljs-keyword">this</span>.setState({ users });
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> &gt;</span>
+                {
+                    this.state.users.map((user, index) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>  <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">pathname:</span> `/<span class="hljs-attr">user</span>/<span class="hljs-attr">detail</span>/${<span class="hljs-attr">user.id</span>}`, <span class="hljs-attr">state:</span> <span class="hljs-attr">user</span> }}&gt;</span>{user.username}<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                    ))
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t589.5 UserDetail.js">9.5 UserDetail.js <a href="#t589.5 UserDetail.js"> # </a></h3>
+<p>src\components\UserDetail.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {UserAPI} <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserDetail</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    state = {
+        <span class="hljs-attr">user</span>: {}
+    }
+    componentDidMount() {
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">this</span>.props.location.state;
+        <span class="hljs-keyword">if</span> (!user) {
+            <span class="hljs-keyword">let</span> id = <span class="hljs-keyword">this</span>.props.match.params.id;
+            user = UserAPI.find(id);
+        }
+        <span class="hljs-keyword">if</span> (user) <span class="hljs-keyword">this</span>.setState({ user });
+    }
+    render() {
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">this</span>.state.user;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                {user.id}:{user.username}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h2 id="t5910.受保护路由">10.受保护路由 <a href="#t5910.受保护路由"> # </a></h2>
+<h3 id="t6010.1 src\index.js">10.1 src\index.js <a href="#t6010.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {HashRouter as Router,Route,Switch,Redirect,Link} from './react-router-dom';</span>
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+<span class="hljs-addition">+import Protected from './components/Protected';</span>
+<span class="hljs-addition">+import Login from './components/Login';</span>
+ReactDOM.render(
+    &lt;Router&gt;
+      &lt;ul&gt;
+          &lt;li&gt;&lt;Link to="/"&gt;首页&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to="/user" &gt;用户管理&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to="/profile" &gt;个人中心&lt;/Link&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+        &lt;Switch&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+<span class="hljs-addition">+         &lt;Protected path="/profile" component={Profile}/&gt;</span>
+<span class="hljs-addition">+         &lt;Route path="/login" component={Login}/&gt;</span>
+          &lt;Redirect to="/"/&gt;
+        &lt;/Switch&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h3 id="t6110.2 Route.js">10.2 Route.js <a href="#t6110.2 Route.js"> # </a></h3>
+<p>src\react-router\Route.js</p>
+<pre><code class="lang-diff">import React from 'react'
+import RouterContext from './RouterContext';
+import matchPath from './matchPath';
+class Route extends React.Component{
+    static contextType = RouterContext
+    render(){
+        const {history,location} = this.context;
+<span class="hljs-addition">+       const {component:RouteComponent,computedMatch,render} = this.props;</span>
+        const match = computedMatch ? computedMatch : matchPath(location.pathname, this.props);
+        let routeProps = {history,location};
+        let element=null;
+<span class="hljs-addition">+       if (match) {</span>
+<span class="hljs-addition">+           routeProps.match = match;</span>
+<span class="hljs-addition">+           if (RouteComponent) {</span>
+<span class="hljs-addition">+               element = &lt;RouteComponent {...routeProps} /&gt;</span>
+<span class="hljs-addition">+           } else if (render) {</span>
+<span class="hljs-addition">+               element=  render(routeProps);</span>
+<span class="hljs-addition">+           } else {</span>
+<span class="hljs-addition">+               element=  null;</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       }else {</span>
+<span class="hljs-addition">+            element=  null;</span>
+<span class="hljs-addition">+       }</span>
+        return (
+            &lt;RouterContext.Provider value={routeProps}&gt;
+                {element}
+            &lt;/RouterContext.Provider&gt;
+        )
+    }
+}
+export default Route;
+</code></pre>
+<h3 id="t6210.3 Login.js">10.3 Login.js <a href="#t6210.3 Login.js"> # </a></h3>
+<p>src\components\Login.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Login</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    login = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        localStorage.setItem(<span class="hljs-string">'login'</span>,<span class="hljs-string">'true'</span>);
+        <span class="hljs-keyword">let</span> to=<span class="hljs-string">'/'</span>;
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.props.location.state){
+            to=<span class="hljs-keyword">this</span>.props.location.state.from||<span class="hljs-string">'/'</span>;
+        }
+        <span class="hljs-keyword">this</span>.props.history.push(to);
+    }
+    render(){
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.login}</span>&gt;</span>登录<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Login;
+</code></pre>
+<h3 id="t6310.4 Protected.js">10.4 Protected.js <a href="#t6310.4 Protected.js"> # </a></h3>
+<p>src\components\Protected.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Route,Redirect} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router-dom'</span>;
+<span class="hljs-keyword">const</span> Protected =  <span class="hljs-function">(<span class="hljs-params">props</span>)=&gt;</span>{
+    <span class="hljs-keyword">let</span> {<span class="hljs-attr">component</span>:RouteComponent,path} = props;
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">{path}</span> <span class="hljs-attr">render</span>=<span class="hljs-string">{</span>
+            (<span class="hljs-attr">routeProps</span>)=&gt;</span>(
+                localStorage.getItem('login')?<span class="hljs-tag">&lt;<span class="hljs-name">RouteComponent</span> {<span class="hljs-attr">...routeProps</span>}/&gt;</span>:
+                <span class="hljs-tag">&lt;<span class="hljs-name">Redirect</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{{pathname:</span>'/<span class="hljs-attr">login</span>',<span class="hljs-attr">state:</span>{<span class="hljs-attr">from:path</span>}}}/&gt;</span>
+            )
+        }/&gt;</span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Protected;
+</code></pre>
+<h2 id="t6411.NavLink">11.NavLink <a href="#t6411.NavLink"> # </a></h2>
+<h3 id="t6511.1 public\index.html">11.1 public\index.html <a href="#t6511.1 public\index.html"> # </a></h3>
+<p>public\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+    &lt;meta name="theme-color" content="#000000" /&gt;
+    &lt;meta
+      name="description"
+      content="Web site created using create-react-app"
+    /&gt;
+    &lt;title&gt;React App&lt;/title&gt;
+    &lt;style&gt;
+<span class="hljs-addition">+      .strong{</span>
+<span class="hljs-addition">+        font-size: 20px;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+      .active{</span>
+<span class="hljs-addition">+        background-color: green;</span>
+<span class="hljs-addition">+      }</span>
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="root"&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="t6611.2 src\index.js">11.2 src\index.js <a href="#t6611.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {HashRouter as Router,Route,Switch,Redirect,NavLink} from './react-router-dom';</span>
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+import Protected from './components/Protected';
+import Login from './components/Login';
+ReactDOM.render(
+    &lt;Router&gt;
+      &lt;ul&gt;
+<span class="hljs-addition">+        &lt;li&gt;&lt;NavLink className="strong" style={{textDecoration: 'line-through'}} activeStyle={{color:'red'}} to="/" exact&gt;Home&lt;/NavLink&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+        &lt;li&gt;&lt;NavLink activeStyle={{color:'red'}}  to="/user"&gt;User&lt;/NavLink&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+        &lt;li&gt;&lt;NavLink activeStyle={{color:'red'}}  to="/profile"&gt;Profile&lt;/NavLink&gt;&lt;/li&gt;</span>
+      &lt;/ul&gt;
+        &lt;Switch&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Protected path="/profile" component={Profile}/&gt;
+          &lt;Route path="/login" component={Login}/&gt;
+          &lt;Redirect to="/"/&gt;
+        &lt;/Switch&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h3 id="t6711.3 NavLink.js">11.3 NavLink.js <a href="#t6711.3 NavLink.js"> # </a></h3>
+<p>src\react-router-dom\NavLink.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Route} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router'</span>;
+<span class="hljs-keyword">import</span> matchPath <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router/matchPath'</span>;
+<span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'./Link'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">NavLink</span>(<span class="hljs-params">props</span>)</span>{
+    <span class="hljs-keyword">const</span> {
+        <span class="hljs-attr">to</span>:path,<span class="hljs-comment">//Link指向的路径</span>
+        <span class="hljs-attr">className</span>:classNameProp=<span class="hljs-string">''</span>,<span class="hljs-comment">//基本的类名</span>
+        <span class="hljs-attr">style</span>:styleProp={},<span class="hljs-comment">//基本的行内样式</span>
+        activeClassName=<span class="hljs-string">'active'</span>,<span class="hljs-comment">//激活的类名</span>
+        activeStyle={},<span class="hljs-comment">//激活的行内样式</span>
+        children,<span class="hljs-comment">//儿子</span>
+        exact<span class="hljs-comment">//是否要精确匹配</span>
+    }= props;
+     <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">{path}</span> <span class="hljs-attr">exact</span>=<span class="hljs-string">{exact}</span>&gt;</span>
+            {
+                ({match})=&gt;{
+                    let className = match?joinClassNames(classNameProp,activeClassName):classNameProp;
+                    let style =match?{...styleProp,...activeStyle}:styleProp;
+                    let linkProps = {
+                        className,
+                        style,
+                        to:path,
+                        children
+                    }
+                    return <span class="hljs-tag">&lt;<span class="hljs-name">Link</span> {<span class="hljs-attr">...linkProps</span>}/&gt;</span>
+                }
+            }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">Route</span>&gt;</span></span>
+     )   
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">NavLink</span>(<span class="hljs-params">props</span>)</span>{
+    <span class="hljs-keyword">let</span> context = React.useContext(RouterContext);
+    <span class="hljs-keyword">let</span> {<span class="hljs-attr">location</span>:{pathname}}= context;
+    <span class="hljs-keyword">const</span> {
+        <span class="hljs-attr">to</span>:path,<span class="hljs-comment">//Link指向的路径</span>
+        <span class="hljs-attr">className</span>:classNameProp=<span class="hljs-string">''</span>,<span class="hljs-comment">//基本的类名</span>
+        <span class="hljs-attr">style</span>:styleProp={},<span class="hljs-comment">//基本的行内样式</span>
+        activeClassName=<span class="hljs-string">'active'</span>,<span class="hljs-comment">//激活的类名</span>
+        activeStyle={},<span class="hljs-comment">//激活的行内样式</span>
+        children,<span class="hljs-comment">//儿子</span>
+        exact<span class="hljs-comment">//是否要精确匹配</span>
+    }= props;
+    <span class="hljs-comment">//pathname浏览器的路径 path来自于NavLink的配置</span>
+    <span class="hljs-keyword">let</span> isActive = matchPath(pathname,{path,exact});
+    <span class="hljs-keyword">let</span> className = isActive?joinClassNames(classNameProp,activeClassName):classNameProp;
+    <span class="hljs-keyword">let</span> style = isActive?{...styleProp,...activeStyle}:styleProp;
+    <span class="hljs-keyword">let</span> linkProps = {
+        className,
+        style,
+        <span class="hljs-attr">to</span>:path,
+        children
+    }
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> {<span class="hljs-attr">...linkProps</span>}/&gt;</span></span>;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">joinClassNames</span>(<span class="hljs-params">...classnames</span>)</span>{
+  <span class="hljs-keyword">return</span> classnames.filter(<span class="hljs-function"><span class="hljs-params">c</span>=&gt;</span>c).join(<span class="hljs-string">' '</span>);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> NavLink;
+</code></pre>
+<h3 id="t6811.4 react-router-dom\index.js">11.4 react-router-dom\index.js <a href="#t6811.4 react-router-dom\index.js"> # </a></h3>
+<p>src\react-router-dom\index.js</p>
+<pre><code class="lang-diff">export * from '../react-router';
+export {default as HashRouter} from './HashRouter';
+export {default as BrowserRouter} from './BrowserRouter';
+export {default as Link} from './Link';
+<span class="hljs-addition">+export { default as NavLink } from "./NavLink";</span>
+</code></pre>
+<h2 id="t6912.withRouter">12.withRouter <a href="#t6912.withRouter"> # </a></h2>
+<h3 id="t7012.1 src\index.js">12.1 src\index.js <a href="#t7012.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import {HashRouter as Router,Route,Switch,Redirect,NavLink} from './react-router-dom';
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+import Protected from './components/Protected';
+import Login from './components/Login';
+<span class="hljs-addition">+import NavHeader from './components/NavHeader';</span>
+ReactDOM.render(
+    &lt;Router&gt;
+      &lt;&gt;
+<span class="hljs-addition">+      &lt;NavHeader title="欢迎光临"/&gt;</span>
+      &lt;ul&gt;
+        &lt;li&gt;&lt;NavLink className="strong" style={{textDecoration: 'line-through'}} activeStyle={{color:'red'}} to="/" exact&gt;Home&lt;/NavLink&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;NavLink activeStyle={{color:'red'}}  to="/user"&gt;User&lt;/NavLink&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;NavLink activeStyle={{color:'red'}}  to="/profile"&gt;Profile&lt;/NavLink&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;Switch&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Protected path="/profile" component={Profile}/&gt;
+          &lt;Route path="/login" component={Login}/&gt;
+          &lt;Redirect to="/"/&gt;
+      &lt;/Switch&gt;
+      &lt;/&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h3 id="t7112.2 NavHeader.js">12.2 NavHeader.js <a href="#t7112.2 NavHeader.js"> # </a></h3>
+<p>src\components\NavHeader.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {withRouter} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-router-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NavHeader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    render(){
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>this.props.history.push('/')} &gt;{this.props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> withRouter(NavHeader);
+</code></pre>
+<h3 id="t7212.3 withRouter.js">12.3 withRouter.js <a href="#t7212.3 withRouter.js"> # </a></h3>
+<p>src\react-router\withRouter.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">withRouter</span>(<span class="hljs-params">OldComponent</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">props</span> =&gt;</span> {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouterContext.Consumer</span>&gt;</span>
+                {
+                    contextValue =&gt;{
+                        return <span class="hljs-tag">&lt;<span class="hljs-name">OldComponent</span> {<span class="hljs-attr">...props</span>} {<span class="hljs-attr">...contextValue</span>}/&gt;</span>
+                    }
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">RouterContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> withRouter;
+</code></pre>
+<h3 id="t7312.4 react-router\index.js">12.4 react-router\index.js <a href="#t7312.4 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-diff">export {default as Route} from './Route';
+export {default as Router} from './Router';
+export {default as __RouterContext} from './RouterContext';
+export {default as matchPath} from './matchPath';
+export {default as Switch} from './Switch';
+export {default as Redirect} from './Redirect';
+<span class="hljs-addition">+export {default as withRouter} from './withRouter';</span>
+</code></pre>
+<h2 id="t7413.Prompt">13.Prompt <a href="#t7413.Prompt"> # </a></h2>
+<h3 id="t7513.1 src\index.js">13.1 src\index.js <a href="#t7513.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {BrowserRouter as Router,Route,Switch,Redirect,NavLink} from './react-router-dom';</span>
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+import Protected from './components/Protected';
+import Login from './components/Login';
+import NavHeader from './components/NavHeader';
+ReactDOM.render(
+<span class="hljs-addition">+    &lt;Router getUserConfirmation={()=&gt;window.confirm}&gt;</span>
+      &lt;&gt;
+      &lt;NavHeader title="欢迎光临"/&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;NavLink className="strong" style={{textDecoration: 'line-through'}} activeStyle={{color:'red'}} to="/" exact&gt;Home&lt;/NavLink&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;NavLink activeStyle={{color:'red'}}  to="/user"&gt;User&lt;/NavLink&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;NavLink activeStyle={{color:'red'}}  to="/profile"&gt;Profile&lt;/NavLink&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;Switch&gt;
+          &lt;Route path="/" component={Home} exact/&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Protected path="/profile" component={Profile}/&gt;
+          &lt;Route path="/login" component={Login}/&gt;
+          &lt;Redirect to="/"/&gt;
+      &lt;/Switch&gt;
+      &lt;/&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h3 id="t7613.2 UserAdd.js">13.2 UserAdd.js <a href="#t7613.2 UserAdd.js"> # </a></h3>
+<p>src\components\UserAdd.js</p>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+import {UserAPI} from '../utils';
+import {Prompt} from '../react-router-dom';
+export default class UserAdd extends Component {
+    usernameRef
+<span class="hljs-addition">+    state = {isBlocking:false}</span>
+    constructor(props) {
+        super(props);
+        this.usernameRef = React.createRef();
+    }
+    handleSubmit = (event) =&gt; {
+        event.preventDefault();
+<span class="hljs-addition">+        this.setState({</span>
+<span class="hljs-addition">+            isBlocking:false</span>
+<span class="hljs-addition">+        },()=&gt;{</span>
+            let username = this.usernameRef.current.value;
+            UserAPI.add({ id: Date.now() + '', username });
+            this.props.history.push('/user/list');
+<span class="hljs-addition">+        });</span>
+    }
+    render() {
+        return (
+            &lt;form onSubmit={this.handleSubmit}&gt;
+<span class="hljs-addition">+                 &lt;Prompt</span>
+<span class="hljs-addition">+                   when={this.state.isBlocking}</span>
+<span class="hljs-addition">+                   message = {</span>
+<span class="hljs-addition">+                       (location)=&gt;`请问你确定要跳转到${location.pathname}吗?`</span>
+<span class="hljs-addition">+                   }</span>
+<span class="hljs-addition">+                /&gt;</span>
+<span class="hljs-addition">+               &lt;input  type="text" ref={this.usernameRef}  onChange={(event) =&gt; {</span>
+<span class="hljs-addition">+                   this.setState({ isBlocking: event.target.value.length &gt; 0 });</span>
+<span class="hljs-addition">+               }} /&gt;</span>
+                &lt;button type="submit" &gt;提交&lt;/button&gt;
+            &lt;/form&gt;
+        )
+    }
+}
+</code></pre>
+<h3 id="t7713.3 Prompt.js">13.3 Prompt.js <a href="#t7713.3 Prompt.js"> # </a></h3>
+<p>src\react-router\Prompt.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-keyword">import</span> LifeCycle <span class="hljs-keyword">from</span> <span class="hljs-string">'./LifeCycle'</span>;
+<span class="hljs-comment">//函数组件</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Prompt</span>(<span class="hljs-params">props</span>)</span>{
+    <span class="hljs-keyword">let</span> value = React.useContext(RouterContext);
+    React.useEffect(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        <span class="hljs-keyword">return</span>  value.history.block(props.message)
+    });
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+}
+<span class="hljs-comment">//类组件</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Prompt</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">static</span> contextType = RouterContext;
+    componentDidMount(){
+        <span class="hljs-keyword">const</span> block = <span class="hljs-keyword">this</span>.context.history.block;
+        <span class="hljs-keyword">this</span>.release = block(<span class="hljs-keyword">this</span>.props.message)
+    }
+    componentWillUnmount(){
+        <span class="hljs-keyword">this</span>.release()
+    }
+    render(){
+        <span class="hljs-keyword">return</span>  <span class="hljs-literal">null</span>;
+    }
+}
+<span class="hljs-comment">//源码</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Prompt</span>(<span class="hljs-params">{when,message}</span>)</span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouterContext.Consumer</span>&gt;</span>
+            {
+                (value)=&gt;{
+                    //如果不需要阻止跳转，则可以直接返回null,什么都不做
+                    if(!when)return null;
+                    //需要给history对象上添加一个block方法
+                    const block = value.history.block;
+                    return (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">LifeCycle</span>
+                           <span class="hljs-attr">onMount</span>=<span class="hljs-string">{lifeCycleInstance</span>=&gt;</span>lifeCycleInstance.release = block(message)}
+                           onUnMount={lifeCycleInstance=&gt;lifeCycleInstance.release()}
+                        /&gt;
+                    )
+
+                }
+            }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">RouterContext.Consumer</span>&gt;</span></span>
+    )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Prompt;
+</code></pre>
+<h3 id="t7813.4 react-router\index.js">13.4 react-router\index.js <a href="#t7813.4 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-diff">export {default as Route} from './Route';
+export {default as Router} from './Router';
+export {default as __RouterContext} from './RouterContext';
+export {default as matchPath} from './matchPath';
+export {default as Switch} from './Switch';
+export {default as Redirect} from './Redirect';
+export {default as withRouter} from './withRouter';
+<span class="hljs-addition">+export {default as Prompt} from './Prompt';</span>
+</code></pre>
+<h3 id="t7913.5 createBrowserHistory.js">13.5 createBrowserHistory.js <a href="#t7913.5 createBrowserHistory.js"> # </a></h3>
+<p>src\history\createBrowserHistory.js</p>
+<pre><code class="lang-diff">
+function createBrowserHistory(props){
+<span class="hljs-addition">+   let confirm =props.getUserConfirmation?props.getUserConfirmation():window.confirm;</span>
+    let globalHistory = window.history;
+    let listeners = [];
+<span class="hljs-addition">+   let message;</span>
+    function go(n){
+        globalHistory.go(n);
+    }
+    function goBack(){
+        go(-1)
+    }
+    function goForward(){
+        go(1)
+    }
+    function listen(listener){
+        listeners.push(listener);
+        return function(){//unlisten
+            listeners = listeners.filter(l=&gt;l!==listener);
+        }
+    }
+    function setState(newState){
+        Object.assign(history,newState);
+        history.length = globalHistory.length;
+        listeners.forEach(listener=&gt;listener(history.location));
+    }
+    /**
+     * @param {*} pathname 可能是对象，也可能是字符串
+     * @param {*} state 这个路径的状态对象是什么,只是一个路径的描述信息，可以放任何
+     */
+    function push(pathname, state){
+        const action = 'PUSH';//表示发了什么动作引起了路径变化 POP PUSH
+        if(typeof pathname <span class="hljs-comment">=== 'object'){</span>
+            state=pathname.state;
+            pathname= pathname.pathname;
+        }
+<span class="hljs-addition">+        if(message){</span>
+<span class="hljs-addition">+            let showMessage = message({pathname});</span>
+<span class="hljs-addition">+            let allow = confirm(showMessage);</span>
+<span class="hljs-addition">+            if(!allow){</span>
+<span class="hljs-addition">+                return;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+        globalHistory.pushState(state,null,pathname);
+        let location = {state,pathname};
+        setState({action,location});
+    }
+<span class="hljs-addition">+    function block(newMessage){</span>
+<span class="hljs-addition">+        message=newMessage;</span>
+<span class="hljs-addition">+        return ()=&gt; message=null;</span>
+<span class="hljs-addition">+    }</span>
+    const history = {
+        action: "POP",
+        go,
+        goBack,
+        goForward,
+        listen,
+        location:{pathname:window.location.pathname,state:globalHistory.state},
+        push,
+<span class="hljs-addition">+        block</span>
+    }
+    return history;
+}
+
+export default createBrowserHistory;
+</code></pre>
+<h2 id="t8015.hooks">15.hooks <a href="#t8015.hooks"> # </a></h2>
+<h3 id="t8115.1 src\index.js">15.1 src\index.js <a href="#t8115.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {BrowserRouter <span class="hljs-keyword">as</span> Router,Route,Link,
+useParams,
+useLocation,
+useHistory,
+useRouteMatch
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-router-dom'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Home</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>首页<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserDetail</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">let</span> params = useParams();
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'params'</span>,params);
+  <span class="hljs-keyword">let</span> location = useLocation();
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'location'</span>,location);
+  <span class="hljs-keyword">let</span> history = useHistory();
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'history'</span>,history);
+<span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>User id:{params.id} <span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>name:{location.state.name}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Post</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">let</span> match = useRouteMatch({
+    <span class="hljs-attr">path</span>:<span class="hljs-string">'/post/:id'</span>,
+    <span class="hljs-attr">strict</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">sensitive</span>:<span class="hljs-literal">true</span>
+  });
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'match'</span>,match);
+  <span class="hljs-keyword">return</span> match?<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>id:{match.params.id}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>:<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Not Found<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+}
+ ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/"</span>&gt;</span>首页<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span>  <span class="hljs-attr">to</span>=<span class="hljs-string">{{pathname:</span>"/<span class="hljs-attr">user</span>/<span class="hljs-attr">detail</span>/<span class="hljs-attr">1</span>",<span class="hljs-attr">state:</span>{<span class="hljs-attr">id:1</span>,<span class="hljs-attr">name:</span>'珠峰架构'}}}&gt;</span>用户1详情<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/post/1"</span>&gt;</span>贴子<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Home}/</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/user/detail/:id"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{UserDetail}/</span>&gt;</span>   
+    <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/post/:id"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Post}/</span>&gt;</span>   
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+
+</code></pre>
+<h3 id="t8215.2 hooks.js">15.2 hooks.js <a href="#t8215.2 hooks.js"> # </a></h3>
+<p>src\react-router\hooks.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> RouterContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./RouterContext'</span>;
+<span class="hljs-keyword">import</span> matchPath <span class="hljs-keyword">from</span> <span class="hljs-string">'./matchPath'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useParams</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">let</span> match = React.useContext(RouterContext).match;
+    <span class="hljs-keyword">return</span> match?match.params:{};
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useLocation</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">return</span> React.useContext(RouterContext).location;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useHistory</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">return</span> React.useContext(RouterContext).history;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useRouteMatch</span>(<span class="hljs-params">path</span>)</span>{
+   <span class="hljs-keyword">const</span> location = useLocation();<span class="hljs-comment">//获取当前的路径pathname代表当前的路径名</span>
+   <span class="hljs-keyword">let</span> match = React.useContext(RouterContext).match;<span class="hljs-comment">//获得匹配结果</span>
+   <span class="hljs-keyword">return</span> path?matchPath(location.pathname,path):match;
+}
+</code></pre>
+<h3 id="t8315.3 react-router\index.js">15.3 react-router\index.js <a href="#t8315.3 react-router\index.js"> # </a></h3>
+<p>src\react-router\index.js</p>
+<pre><code class="lang-diff">export {default as Route} from './Route';
+export {default as Router} from './Router';
+export {default as __RouterContext} from './RouterContext';
+export {default as matchPath} from './matchPath';
+export {default as Switch} from './Switch';
+export {default as Redirect} from './Redirect';
+export {default as withRouter} from './withRouter';
+export {default as Prompt} from './Prompt';
+<span class="hljs-addition">+export {useHistory,useLocation,useParams,useRouteMatch} from './hooks';</span>
+</code></pre>
+<h2 id="t8416.路由懒加载">16.路由懒加载 <a href="#t8416.路由懒加载"> # </a></h2>
+<h3 id="t8516.1 src\index.js">16.1 src\index.js <a href="#t8516.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {
+  BrowserRouter <span class="hljs-keyword">as</span> Router, Route,Link
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router-dom'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">lazy</span>(<span class="hljs-params">load</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+    state = { <span class="hljs-attr">InnerComponent</span>: <span class="hljs-literal">null</span> }
+    componentDidMount() {
+      load().then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">InnerComponent</span>: result.default || result });
+      });
+    }
+    render() {
+      <span class="hljs-keyword">let</span> { InnerComponent } = <span class="hljs-keyword">this</span>.state;
+      <span class="hljs-keyword">return</span> InnerComponent ? <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">InnerComponent</span> /&gt;</span></span> : <span class="hljs-literal">null</span>;
+    }
+  }
+}
+<span class="hljs-keyword">const</span> LazyHome = React.lazy(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-comment">/* webpackChunkName: "Home" */</span><span class="hljs-string">'./components/Home'</span>));
+<span class="hljs-keyword">const</span> LazyLogin = React.lazy(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-comment">/* webpackChunkName: "Login" */</span><span class="hljs-string">'./components/Login'</span>));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Loading</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>加载中......<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">SuspenseHome</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Loading</span> /&gt;</span>}&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">LazyHome</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span></span>
+  )
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">SuspenseLogin</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Loading</span> /&gt;</span>}&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">LazyLogin</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span></span>
+  )
+}
+<span class="hljs-comment">//webpack chunkFilename</span>
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+       <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/"</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/login"</span>&gt;</span>User<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">exact</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{SuspenseHome}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/login"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{SuspenseLogin}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+
+</code></pre>
+<h2 id="t86链接">链接 <a href="#t86链接"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/zhufeng_react_router_20201106_prepare">zhufeng_react_router</a></li>
+</ul>
+
+    

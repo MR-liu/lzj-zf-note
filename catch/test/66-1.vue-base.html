@@ -1,0 +1,553 @@
+
+        <h2 id="t0什么是vue?">什么是vue? <a href="#t0什么是vue?"> # </a></h2>
+<p>Vue (读音 /vjuː/，类似于 view) 是一套用于构建用户界面的渐进式框架。<br>特点: 易用，灵活，高效
+渐进式框架   </p>
+<p><img src="https://www.fullstackjavascript.cn/vue.png" alt="">  </p>
+<p>逐一递增 vue + components + vue-router + vuex + vue-cli </p>
+<h2 id="t1什么是库，什么是框架?">什么是库，什么是框架? <a href="#t1什么是库，什么是框架?"> # </a></h2>
+<ul>
+<li>库是将代码集合成一个产品,库是我们调用库中的方法实现自己的功能。</li>
+<li>框架则是为解决一类问题而开发的产品,框架是我们在指定的位置编写好代码，框架帮我们调用。</li>
+</ul>
+<p>框架是库的升级版</p>
+<h2 id="t2初始使用">初始使用 <a href="#t2初始使用"> # </a></h2>
+<pre><code>new Vue({
+    el:'#app',
+    template:'&lt;div&gt;我是姜文～～&lt;/div&gt;', // 优先使用template
+    data:{}
+});
+</code></pre><h2 id="t3mvc &amp;&amp; mvvm">mvc &amp;&amp; mvvm <a href="#t3mvc &amp;&amp; mvvm"> # </a></h2>
+<p><img src="https://www.fullstackjavascript.cn/mvc.png" alt="">
+<img src="https://www.fullstackjavascript.cn/mvvm.png" alt=""></p>
+<p>在传统的mvc中除了model和view以外的逻辑都放在了controller中，导致controller逻辑复杂难以维护,在mvvm中view和model没有直接的关系，全部通过viewModel进行交互</p>
+<h2 id="t4声明式和命令式">声明式和命令式 <a href="#t4声明式和命令式"> # </a></h2>
+<ul>
+<li>自己写for循环就是命令式  (命令其按照自己的方式得到结果)</li>
+<li>声明式就是利用数组的方法forEach (我们想要的是循环，内部帮我们去做)</li>
+</ul>
+<h2 id="t5模板语法 mustache">模板语法 mustache <a href="#t5模板语法 mustache"> # </a></h2>
+<p>允许开发者声明式地将 DOM 绑定至底层 Vue 实例的数据。在使用数据前需要先声明</p>
+<ul>
+<li>编写三元表达式 </li>
+<li>获取返回值 </li>
+<li>JavaScript 表达式 <pre><code>&lt;div id="app"&gt;
+  {{ 1+1 }}
+  {{ msg == 'hello'?'yes':'no' }}
+  {{ {name:1} }}
+&lt;/div&gt;
+&lt;script src="./node_modules/vue/dist/vue.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  let vm = new Vue({
+      el:'#app',
+      data:{
+          msg:'hello'
+      }
+  })
+&lt;/script&gt;
+</code></pre></li>
+</ul>
+<h2 id="t6观察数据变化">观察数据变化 <a href="#t6观察数据变化"> # </a></h2>
+<pre><code>function notify(){
+    console.log('视图更新')
+}
+let data = {
+    name:'jw',
+    age:18,
+    arr:[]
+}
+// 重写数组的方法
+let oldProtoMehtods = Array.prototype;
+let proto = Object.create(oldProtoMehtods);
+['push','pop','shift','unshift'].forEach(method=&gt;{
+    proto[method] = function(){
+        notify();
+        oldProtoMehtods[method].call(this,...arguments)
+    }
+})
+function observer(obj){
+    if(Array.isArray(obj)){
+        obj.__proto__ = proto
+        return;
+    }
+    if(typeof obj === 'object'){
+        for(let key in obj){
+            defineReactive(obj,key,obj[key]);
+        }
+    }
+}
+function defineReactive(obj,key,value){
+    observer(value); // 再一次循环value
+    Object.defineProperty(obj,key,{ // 不支持数组
+        get(){
+            return value;
+        },
+        set(val){
+            notify();
+            observer(val);
+            value = val;
+        }
+    });
+}
+observer(data);
+data.arr.push(1);
+</code></pre><h2 id="t7使用proxy实现响应式变化">使用proxy实现响应式变化 <a href="#t7使用proxy实现响应式变化"> # </a></h2>
+<pre><code>let obj = {
+    name:{name:'jw'},
+    arr:['吃','喝','玩']
+}
+let handler = {
+    get(target,key,receiver){
+        if(typeof target[key] === 'object' &amp;&amp;  target[key] !== null){
+            return new Proxy(target[key],handler);
+        }
+        return Reflect.get(target,key,receiver);
+    },
+    set(target,key,value,receiver){
+        if(key === 'length') return true;
+        console.log('update')
+        return Reflect.set(target,key,value,receiver);
+    }
+}
+let proxy = new Proxy(obj,handler);
+proxy.name.name = 'zf';
+</code></pre><h2 id="t8响应式变化">响应式变化 <a href="#t8响应式变化"> # </a></h2>
+<ul>
+<li><p>数组的变异方法(不能通过通过长度，索引改变数组)</p>
+<pre><code>  &lt;div id="app"&gt;
+      {{hobbies}}
+  &lt;/div&gt;
+  &lt;script src="node_modules/vue/dist/vue.js"&gt;&lt;/script&gt;
+  &lt;script&gt;
+      let vm = new Vue({
+          el:'#app',
+          data:{
+              hobbies:['洗澡','吃饭','睡觉']
+          }
+      });
+      vm.hobbies[0] = '喝水';// 数据变化视图不刷新
+      vm.hobbies.length--;// 数据变化视图不会刷新
+  &lt;/script&gt;
+</code></pre><pre><code>  vm.hobbies = ['喝水']; // 替换的方式
+  vm.hobbies.push('吃饭'); // push slice pop ...变异方法
+</code></pre></li>
+<li><p>不能给对象新增属性 </p>
+<pre><code>  &lt;div id="app"&gt;
+  {{state.a}}
+  &lt;/div&gt;
+  &lt;script src="node_modules/vue/dist/vue.js"&gt;&lt;/script&gt;
+  &lt;script&gt;
+      let vm = new Vue({
+          el:'#app',
+          data:{
+              state:{count:0}
+          }
+      });
+      //vm.state.a = 100; // 新增熟悉不会响应到视图上
+  &lt;/script&gt;
+</code></pre></li>
+<li><p>使用vm.$set方法强制添加响应式数据   </p>
+<pre><code>  function $set(data,key,val){
+  if(Array.isArray(data)){
+      return data.splice(key,1,val);
+  }
+  defineReactive(data,key,val);
+  }
+  $set(data.arr,0,1);
+
+  vm.$set(vm.state,'a','100');
+</code></pre></li>
+</ul>
+<h2 id="t9vue实例上常见属性和方法">vue实例上常见属性和方法 <a href="#t9vue实例上常见属性和方法"> # </a></h2>
+<ul>
+<li><p>vm.$set();  </p>
+<pre><code>  vm.$set(vm.state,'a','100');
+</code></pre></li>
+<li><p>vm.$watch();</p>
+<pre><code>  vm.$watch('state.count',function(newValue,oldValue){
+      console.log(newValue,oldValue);
+  });
+</code></pre></li>
+<li><p>vm.$mount();</p>
+<pre><code>  let vm = new Vue({
+      data:{state:{count:0}}
+  });
+  vm.$mount('#app');
+</code></pre></li>
+<li><p>vm.$nextTick();</p>
+<pre><code>  vm.state.count = 100; // 更高数据后会将更改的内容缓存起来
+  // 在下一个事件循环tick中 刷新队列
+  vm.$nextTick(function(){
+      console.log(vm.$el.innerHTML);
+  });
+</code></pre></li>
+<li><p>vm.$data  </p>
+</li>
+<li><p>vm.$el</p>
+</li>
+</ul>
+<h2 id="t10vue中的指令">vue中的指令 <a href="#t10vue中的指令"> # </a></h2>
+<p>在vue中 指令 (Directives) 是带有 v- 前缀的特殊特性,主要的功能就是操作DOM  </p>
+<ul>
+<li><p>v-once   </p>
+<pre><code>  &lt;div v-once&gt;{{state.count}} &lt;/div&gt;
+</code></pre></li>
+<li><p>v-html （不要对用户输入使用v-html显示）</p>
+<pre><code>  &lt;div v-html="text"&gt;&lt;/div&gt;
+</code></pre><p>  <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Element/innerHTML#%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98">https://developer.mozilla.org/zh-CN/docs/Web/API/Element/innerHTML#%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98</a>  </p>
+</li>
+<li>v-text</li>
+<li>v-if/v-else使用</li>
+</ul>
+<h2 id="t11v-for使用">v-for使用 <a href="#t11v-for使用"> # </a></h2>
+<ul>
+<li><p>v-for遍历数组</p>
+<pre><code>  fruits:['香蕉','苹果','桃子']
+  &lt;div v-for="(fruit,index) in fruits" :key="index"&gt;
+      {{fruit}}
+  &lt;/div&gt;
+</code></pre></li>
+<li><p>v-for遍历对象</p>
+<pre><code>  info:{name:'jiang',location:'回龙观',phone:18310349227}
+  &lt;div v-for="(item,key) in info" :key="key"&gt;
+      {{item}} {{key}}
+  &lt;/div&gt;
+</code></pre></li>
+<li><p>template的使用</p>
+<pre><code>  &lt;template v-for="(item,key) in fruits"&gt;
+      &lt;p v-if="key%2"&gt;hello&lt;/p&gt;
+      &lt;span v-else&gt;world&lt;/span&gt;
+  &lt;/template&gt;
+</code></pre></li>
+<li><p>key属性的应用  </p>
+<pre><code>  &lt;div v-if="flag"&gt;
+      &lt;span&gt;珠峰&lt;/span&gt;
+      &lt;input key="2"/&gt;   
+  &lt;/div&gt;
+  &lt;div v-else&gt;
+      &lt;span&gt;架构&lt;/span&gt;
+      &lt;input key="1"/&gt;  
+  &lt;/div&gt;
+</code></pre></li>
+<li><p>key尽量不要使用索引  </p>
+<pre><code>   &lt;ul&gt;
+      &lt;li key="0"&gt;🍌&lt;/li&gt;
+      &lt;li key="1"&gt;🍎&lt;/li&gt;
+      &lt;li key="2"&gt;🍊&lt;/l&gt;
+  &lt;/ul&gt;
+  &lt;ul&gt;
+      &lt;li key="0"&gt;🍊&lt;/li&gt;
+      &lt;li key="1"&gt;🍎&lt;/li&gt;
+      &lt;li key="2"&gt;🍌&lt;/li&gt;
+  &lt;/ul&gt;
+</code></pre></li>
+</ul>
+<h2 id="t12属性绑定 :（v-bind）">属性绑定 :（v-bind） <a href="#t12属性绑定 :（v-bind）"> # </a></h2>
+<p>Class 与 Style 绑定  </p>
+<ul>
+<li><p>数组的绑定  </p>
+<pre><code>      &lt;div :class="['apple','banana']" &gt;&lt;/div&gt;
+      &lt;div :class="{banana:true}"&gt;&lt;/div&gt;
+</code></pre></li>
+<li><p>对象类型的绑定  </p>
+<pre><code>      &lt;div :class="['apple','banana']" &gt;&lt;/div&gt;
+      &lt;div :class="{banana:true}"&gt;&lt;/div&gt;
+      &lt;div :style="[{background:'red'},{color:'red'}]"&gt;&lt;/div&gt;
+      &lt;div :style="{color:'red'}"&gt;&lt;/div&gt;
+</code></pre></li>
+</ul>
+<h2 id="t13绑定事件 @ （v-on）">绑定事件 @ （v-on） <a href="#t13绑定事件 @ （v-on）"> # </a></h2>
+<ul>
+<li>事件的绑定 v-on绑定事件</li>
+<li>事件修饰符 (.stop .prevent) .capture .self .once .passive</li>
+</ul>
+<h2 id="t14vue的双向绑定 (v-model)">vue的双向绑定 (v-model) <a href="#t14vue的双向绑定 (v-model)"> # </a></h2>
+<pre><code>    &lt;input type="text" :value="value" @input="input"&gt;
+    &lt;input type="text" v-model="value"&gt;
+</code></pre><ul>
+<li>input,textarea</li>
+<li><p>select</p>
+<pre><code>  &lt;select v-model="select"&gt;
+      &lt;option 
+          v-for="fruit in fruits"
+          :value="fruit"&gt;
+              {{fruit}}
+      &lt;/option&gt;
+  &lt;/select&gt;
+</code></pre></li>
+<li><p>radio </p>
+<pre><code>  &lt;input type="radio" v-model="value"  value="男"&gt;
+  &lt;input type="radio" v-model="value"  value="女"&gt;
+</code></pre></li>
+<li><p>checkbox</p>
+<pre><code>  &lt;input type="checkbox" v-model="checks" value="游泳" &gt;
+  &lt;input type="checkbox" v-model="checks" value="健身"&gt;
+</code></pre></li>
+<li><p>修饰符应用 .number .lazy .trim</p>
+<pre><code>  &lt;input type="text" v-model.number="value"&gt;
+  &lt;input type="text" v-model.trim="value"&gt;
+</code></pre></li>
+</ul>
+<h2 id="t15鼠标 键盘事件">鼠标 键盘事件 <a href="#t15鼠标 键盘事件"> # </a></h2>
+<ul>
+<li>按键、鼠标修饰符  Vue.config.keyCodes<pre><code>Vue.config.keyCodes = {
+  'f1':112
+}
+</code></pre></li>
+</ul>
+<h2 id="t16watch &amp; computed">watch &amp; computed <a href="#t16watch &amp; computed"> # </a></h2>
+<ul>
+<li><p>计算属性和watch的区别  （异步）</p>
+<pre><code>  let vm = new Vue({
+      el:'#app',
+      data:{
+          firstName:'姜',
+          lastName:'文',
+          fullName:''
+      },
+      mounted(){
+          this.getFullName();
+      },
+      methods:{
+          getFullName(){
+              this.fullName = this.firstName + this.lastName
+          }
+      },
+      watch:{
+          firstName(){
+              setTimeout(()=&gt;{
+                  this.getFullName();
+              },1000)
+          },
+          lastName(){
+                  this.getFullName();
+          }
+      }
+      // 计算属性不支持异步
+      // computed:{
+      //    fullName(){
+      //        return this.firstName + this.lastName;
+      //    }
+      // }
+  });
+</code></pre></li>
+<li><p>计算属性和 method的区别 （缓存）</p>
+</li>
+</ul>
+<h2 id="t17条件渲染">条件渲染 <a href="#t17条件渲染"> # </a></h2>
+<ul>
+<li>v-if和v-show区别</li>
+<li>v-if/v-else-if/v-else</li>
+<li>v-show</li>
+</ul>
+<h2 id="t18过滤器的应用 (过滤器中的this都是window)">过滤器的应用 (过滤器中的this都是window) <a href="#t18过滤器的应用 (过滤器中的this都是window)"> # </a></h2>
+<ul>
+<li>全局过滤器 和 局部过滤器 </li>
+<li>编写一个过滤器<pre><code>&lt;div&gt;{{'hello' | capitalize(3)}}&lt;/div&gt;
+Vue.filter('capitalize',(value,count=1)=&gt;{
+  return value.slice(0,count).toUpperCase() + value.slice(count);
+});
+</code></pre></li>
+</ul>
+<h2 id="t19指令的编写">指令的编写 <a href="#t19指令的编写"> # </a></h2>
+<ul>
+<li>全局指令和 局部指令 </li>
+<li><p>编写一个自定义指令 </p>
+<ul>
+<li><p>钩子函数bind，inserted，update  </p>
+<pre><code>      &lt;input type="text" v-focus.color="'red'"&gt;
+      Vue.directive('focus',{
+          inserted:(el,bindings)=&gt;{
+              let color = bindings.modifiers.color;
+              if(color){
+                  console.log('color')
+                  el.style.boxShadow = `1px 1px 2px ${bindings.value}`
+              }   
+              el.focus();
+          }
+      });
+</code></pre></li>
+</ul>
+</li>
+<li><p>clickoutside指令</p>
+<pre><code>&lt;div v-click-outside="change"&gt;
+  &lt;input type="text"  @focus="flag=true" &gt;
+  &lt;div v-show="flag"&gt;
+      contenter
+  &lt;/div&gt;
+&lt;/div&gt;
+let vm = new Vue({
+  el:'#app',
+  data:{
+      flag:false
+  },
+  methods:{
+      change(){
+          this.flag = false
+      }
+  },
+  directives:{
+      'click-outside'(el,bindings,vnode){
+          document.addEventListener('click',(e)=&gt;{
+              if(!el.contains(e.target,vnode)){
+                  let eventName = bindings.expression;
+                  vnode.context[eventName]()
+              }
+          })
+      }
+  }
+})
+</code></pre><h2 id="t20vue中的生命周期">vue中的生命周期 <a href="#t20vue中的生命周期"> # </a></h2>
+</li>
+<li>beforeCreate
+在实例初始化之后，数据观测(data observer) 和 event/watcher 事件配置之前被调用。</li>
+<li>created
+实例已经创建完成之后被调用。在这一步，实例已完成以下的配置：数据观测(data observer)，属性和方法的运算， watch/event 事件回调。这里没有$el</li>
+<li>beforeMount
+在挂载开始之前被调用：相关的 render 函数首次被调用。</li>
+<li>mounted
+el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子。</li>
+<li>beforeUpdate
+数据更新时调用，发生在虚拟 DOM 重新渲染和打补丁之前。</li>
+<li>updated
+由于数据更改导致的虚拟 DOM 重新渲染和打补丁，在这之后会调用该钩子。</li>
+<li>beforeDestroy
+实例销毁之前调用。在这一步，实例仍然完全可用。</li>
+<li>destroyed
+Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。 该钩子在服务器端渲染期间不被调用。</li>
+</ul>
+<h2 id="t21钩子函数中该做的事情">钩子函数中该做的事情 <a href="#t21钩子函数中该做的事情"> # </a></h2>
+<ul>
+<li>created
+实例已经创建完成，因为它是最早触发的原因可以进行一些数据，资源的请求。</li>
+<li>mounted
+实例已经挂载完成，可以进行一些DOM操作</li>
+<li>beforeUpdate
+可以在这个钩子中进一步地更改状态，这不会触发附加的重渲染过程。</li>
+<li>updated
+可以执行依赖于 DOM 的操作。然而在大多数情况下，你应该避免在此期间更改状态，因为这可能会导致更新无限循环。
+该钩子在服务器端渲染期间不被调用。</li>
+<li>destroyed
+可以执行一些优化操作,清空定时器，解除绑定事件</li>
+</ul>
+<p><img src="https://www.fullstackjavascript.cn/lifecycle.png" alt="">  </p>
+<h2 id="t22vue中的动画">vue中的动画 <a href="#t22vue中的动画"> # </a></h2>
+<p>vue中的动画就是从无到有或者从有到无产生的。有以下几个状态
+transition组件的应用</p>
+<pre><code>.v-enter-active,.v-leave-active {
+    transition: opacity 0.25s ease-out;
+}
+.v-enter, .v-leave-to {
+    opacity: 0;
+}
+</code></pre><p>切换isShow的显示或者隐藏就显示出效果啦~</p>
+<pre><code>&lt;button @click="toggle"&gt;toggle&lt;/button&gt;
+&lt;transition&gt;
+    &lt;span v-show="isShow"&gt;珠峰架构&lt;/span&gt;
+&lt;/transition&gt;
+</code></pre><blockquote>
+<p>默认的name是以v-开头，当然你可以自己指定name属性来修改前缀</p>
+</blockquote>
+<h2 id="t23使用animate.css设置动画">使用animate.css设置动画 <a href="#t23使用animate.css设置动画"> # </a></h2>
+<pre><code>.v-enter-active {
+    animation:zoomIn  2s linear
+}
+.v-leave-avitve{
+    animation:zoomOut 2s linear
+}
+</code></pre><p>直接修改激活时的样式</p>
+<pre><code>&lt;transition 
+    enter-active-class="zoomIn"
+    leave-active-class="zoomOut"
+&gt;
+    &lt;span class="animated" v-show="isShow"&gt;珠峰架构&lt;/span&gt;
+&lt;/transition&gt;
+</code></pre><h2 id="t24vue中js动画">vue中js动画 <a href="#t24vue中js动画"> # </a></h2>
+<pre><code>&lt;transition 
+    @before-enter="beforeEnter"
+    @enter="enter"
+    @after-enter="afterEnter"
+&gt;   
+    &lt;span class="animated" v-show="isShow"&gt;珠峰架构&lt;/span&gt;
+&lt;/transition&gt;
+</code></pre><p>对应的钩子有before-leave,leave,after-leave钩子函数,函数的参数为当前元素</p>
+<pre><code>beforeEnter(el){
+    el.style.color="red"
+},
+enter(el,done){
+    setTimeout(()=&gt;{
+        el.style.color = 'green'
+    },1000);
+    setTimeout(() =&gt; {
+        done();
+    }, 2000);
+},
+afterEnter(el){
+    el.style.color = 'blue';
+}
+</code></pre><h2 id="t25使用js动画库">使用js动画库 <a href="#t25使用js动画库"> # </a></h2>
+<blockquote>
+<p><a href="https://github.com/julianshapiro/velocity">https://github.com/julianshapiro/velocity</a></p>
+</blockquote>
+<pre><code>&lt;script src="node_modules/velocity-animate/velocity.js"&gt;&lt;/script&gt;
+beforeEnter(el){
+    el.style.opacity = 0;
+},
+enter(el,done){
+    Velocity(el, {opacity: 1}, {duration: 2000, complete: done})
+},
+afterEnter(el){
+    el.style.color = 'blue';
+},
+leave(el,done){
+    Velocity(el, {opacity: 0}, {duration: 2000, complete: done})
+}
+</code></pre><h2 id="t26筛选动画">筛选动画 <a href="#t26筛选动画"> # </a></h2>
+<pre><code>&lt;div id="app"&gt;
+    &lt;input type="text" v-model="filterData"&gt;
+    &lt;transition-group  
+        enter-active-class="zoomInLeft" 
+        leave-active-class="zoomOutRight"
+    &gt;
+        &lt;div v-for="(l,index) in computedData" :key="l.title" class="animated"&gt;
+            {{l.title}}
+        &lt;/div&gt;
+    &lt;/transition-group&gt;  
+&lt;/div&gt;
+&lt;script src="./node_modules/vue/dist/vue.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    let vm = new Vue({
+        el:'#app',
+        data:{
+            filterData:'',
+            dataList:[
+                {title:'标题1'},
+                {title:'标题2'},
+                {title:'标题4'},
+                {title:'标题3'}
+            ]
+        },
+        computed:{
+            computedData(){
+                return this.dataList.filter((item)=&gt;{
+                    return item.title.includes(this.filterData);
+                })
+            }
+        },
+    })
+&lt;/script&gt;
+</code></pre><list>
+    <li>{{</li>
+</list>
+
+
+
+<div>
+    <slot v-for="i in 5">
+
+    </slot>
+</div>
+
+
+<p>slot v-for i in 5</p>
+
+    

@@ -1,0 +1,317 @@
+
+        <h2 id="t01.什么是 Kubernetes">1.什么是 Kubernetes <a href="#t01.什么是 Kubernetes"> # </a></h2>
+<ul>
+<li>Kubernetes 看作是用来是一个部署镜像的平台</li>
+<li>可以用来操作多台机器调度部署镜像</li>
+<li>在 Kubernetes 中，可以使用集群来组织服务器的。集群中会存在一个 <code>Master</code> 节点，该节点是 Kubernetes 集群的控制节点，负责调度集群中其他服务器的资源。其他节点被称为 Node</li>
+</ul>
+<h2 id="t12. 基础安装">2. 基础安装 <a href="#t12. 基础安装"> # </a></h2>
+<ul>
+<li>Master &amp; Node 节点都需要安装</li>
+</ul>
+<h3 id="t22.1 安装些必备组件">2.1 安装些必备组件 <a href="#t22.1 安装些必备组件"> # </a></h3>
+<ul>
+<li>vim 是 Linux 下的一个文件编辑器</li>
+<li>wget 可以用作文件下载使用</li>
+<li>ntpdate 则是可以用来同步时区</li>
+</ul>
+<pre><code class="lang-js">yum install vim wget ntpdate -y
+
+</code></pre>
+<h3 id="t32.2 关闭防火墙">2.2 关闭防火墙 <a href="#t32.2 关闭防火墙"> # </a></h3>
+<ul>
+<li>kubernetes 会创建防火墙规则,先关闭<code>firewalld</code></li>
+</ul>
+<pre><code class="lang-js">systemctl stop firewalld &amp; systemctl disable firewalld
+</code></pre>
+<h3 id="t42.3 关闭 Swap 分区">2.3 关闭 Swap 分区 <a href="#t42.3 关闭 Swap 分区"> # </a></h3>
+<ul>
+<li>Swap 是 Linux 的交换分区，在系统资源不足时，Swap 分区会启用,这个我们不需要</li>
+<li>应该让新创建的服务自动调度到集群的其他 Node 节点中去，而不是使用 Swap 分区</li>
+</ul>
+<pre><code class="lang-js">#临时关闭
+swapoff -a
+</code></pre>
+<h3 id="t52.4 关闭 Selinux">2.4 关闭 Selinux <a href="#t52.4 关闭 Selinux"> # </a></h3>
+<ul>
+<li>关闭Selinux是为了支持容器可以访问宿主机文件系统</li>
+</ul>
+<pre><code class="lang-js"># 暂时关闭 selinux
+setenforce 0
+
+# 永久关闭
+vi /etc/sysconfig/selinux
+# 修改以下参数，设置为disable
+SELINUX=disabled
+</code></pre>
+<h3 id="t62.5 统一我们的系统时间和时区">2.5 统一我们的系统时间和时区 <a href="#t62.5 统一我们的系统时间和时区"> # </a></h3>
+<ul>
+<li>使用 <code>ntpdate</code> 来统一我们的系统时间和时区,服务器时间与阿里云服务器对齐</li>
+</ul>
+<pre><code class="lang-js"># 统一时区，为上海时区
+ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+bash -c "echo 'Asia/Shanghai' &gt; /etc/timezone"
+
+# 统一使用阿里服务器进行时间更新
+ntpdate ntp1.aliyun.com
+</code></pre>
+<h3 id="t72.6 安装 Docker">2.6 安装 Docker <a href="#t72.6 安装 Docker"> # </a></h3>
+<ul>
+<li>在 kubernetes 中的组件，服务都可以 Docker 镜像方式部署的,所以需要安装Docker</li>
+<li>device-mapper-persistent-data: 存储驱动，Linux上的许多高级卷管理技术</li>
+<li>lvm: 逻辑卷管理器，用于创建逻辑磁盘分区使用</li>
+</ul>
+<pre><code class="lang-js">yum install -y yum-utils device-mapper-persistent-data lvm2
+
+
+sudo yum-config-manager --add-repo http:<span class="hljs-comment">//mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span>
+yum install docker-ce -y
+systemctl start docker
+systemctl enable docker
+
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json &lt;&lt;-<span class="hljs-string">'EOF'</span>
+{
+  <span class="hljs-string">"registry-mirrors"</span>: [<span class="hljs-string">"https://fwvjnv59.mirror.aliyuncs.com"</span>]
+}
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker.service
+</code></pre>
+<h3 id="t82.7 安装 Kubernetes 组件">2.7 安装 Kubernetes 组件 <a href="#t82.7 安装 Kubernetes 组件"> # </a></h3>
+<h4 id="t92.7.1 切换阿里云源">2.7.1 切换阿里云源 <a href="#t92.7.1 切换阿里云源"> # </a></h4>
+<pre><code class="lang-js">cat &lt;&lt;EOF &gt; <span class="hljs-regexp">/etc/yum</span>.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=http:<span class="hljs-comment">//mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64</span>
+enabled=<span class="hljs-number">1</span>
+gpgcheck=<span class="hljs-number">0</span>
+repo_gpgcheck=<span class="hljs-number">0</span>
+gpgkey=http:<span class="hljs-comment">//mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg</span>
+        http:<span class="hljs-comment">//mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span>
+EOF
+</code></pre>
+<h4 id="t102.7.2 安装 Kubernetes 组件">2.7.2 安装 Kubernetes 组件 <a href="#t102.7.2 安装 Kubernetes 组件"> # </a></h4>
+<ul>
+<li>kubelet 是 Kubernetes 中的核心组件。它会运行在集群的所有节点上，并负责创建启动服务容器</li>
+<li>kubectl 则是Kubernetes的命令行工具。可以用来管理，删除，创建资源</li>
+<li>kubeadm  则是用来初始化集群，子节点加入的工具</li>
+</ul>
+<pre><code class="lang-js">yum install -y kubelet kubeadm kubectl
+# 启动kubelet
+systemctl enable kubelet &amp;&amp; systemctl start kubelet
+</code></pre>
+<h3 id="t112.8 设置bridge-nf-call-iptables">2.8 设置bridge-nf-call-iptables <a href="#t112.8 设置bridge-nf-call-iptables"> # </a></h3>
+<ul>
+<li>配置内核参数，将桥接的IPV4浏览传递到iptables链</li>
+<li>开启了bridge-nf-call-iptables</li>
+</ul>
+<pre><code class="lang-js">echo <span class="hljs-number">1</span> &gt; <span class="hljs-regexp">/proc/</span>sys/net/bridge/bridge-nf-call-iptables
+</code></pre>
+<h2 id="t123. Master">3. Master <a href="#t123. Master"> # </a></h2>
+<ul>
+<li>Master 节点是集群内的调度和主要节点</li>
+</ul>
+<h3 id="t133.1 修改主机名称为 master">3.1 修改主机名称为 master <a href="#t133.1 修改主机名称为 master"> # </a></h3>
+<pre><code class="lang-js">hostnamectl <span class="hljs-keyword">set</span>-hostname  master
+</code></pre>
+<h3 id="t143.2 配置hosts">3.2 配置hosts <a href="#t143.2 配置hosts"> # </a></h3>
+<pre><code class="lang-js">ip addr
+vim /etc/hosts
+
+<span class="hljs-number">172.31</span><span class="hljs-number">.178</span><span class="hljs-number">.169</span>  master  master
+</code></pre>
+<h3 id="t153.3 配置 Kubernetes 初始化文件">3.3 配置 Kubernetes 初始化文件 <a href="#t153.3 配置 Kubernetes 初始化文件"> # </a></h3>
+<ul>
+<li><code>init-defaults</code> 输出一份默认初始化配置文件</li>
+</ul>
+<pre><code class="lang-js">kubeadm config print init-defaults &gt; init-kubeadm.conf
+vim init-kubeadm.conf
+</code></pre>
+<ul>
+<li>更换 Kubernetes 镜像仓库为阿里云镜像仓库，加速组件拉取</li>
+<li>替换 ip 为自己主机 ip </li>
+<li>配置 pod 网络为 <code>flannel</code> 网段</li>
+<li>为了让集群之间可以互相通信，需要配置子网络,这些在后面的flannel网络中需要用到<ul>
+<li>10.96.0.0/12   是Kubernetes内部的网络pods需要的网络</li>
+<li>10.244.0.0/16  是Kubernetes内部services需要的网络</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-diff"><span class="hljs-deletion">- imageRepository: k8s.gcr.io 更换k8s镜像仓库</span>
+<span class="hljs-addition">+ imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers</span>
+<span class="hljs-deletion">- localAPIEndpointc，advertiseAddress为master ip ,port默认不修改</span>
+localAPIEndpoint:
+<span class="hljs-addition">+ advertiseAddress: 172.31.178.169  # 此处为master的IP</span>
+  bindPort: 6443
+# 配置子网络
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+<span class="hljs-addition">+ podSubnet: 10.244.0.0/16    # 添加这个</span>
+</code></pre>
+<h3 id="t163.3 拉取其它组件">3.3 拉取其它组件 <a href="#t163.3 拉取其它组件"> # </a></h3>
+<ul>
+<li>kubeadm 可以用来拉取我们的默认组件镜像</li>
+<li>kube-apiserver  提供接口服务，可以让外网访问集群</li>
+<li>kube-controller-manager  内部的控制指令工具</li>
+<li>kube-scheduler 内部的任务调度器</li>
+<li>kube-proxy 反向代理和负载均衡，流量转发</li>
+<li>pause  进程管理工具</li>
+<li>etcd 保持 集群内部的数据一致性</li>
+<li>coredns 集群内网通信</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/c844dfc8104d55a90f18d4dc0a57d5c4" alt="c844dfc8104d55a90f18d4dc0a57d5c4"></p>
+<pre><code class="lang-js"><span class="hljs-comment">// 查看缺少的组件</span>
+kubeadm config images list --config init-kubeadm.conf
+<span class="hljs-comment">// 拉取缺少的组件</span>
+kubeadm config images pull --config init-kubeadm.conf
+</code></pre>
+<h3 id="t173.4 初始化 Kubernetes">3.4 初始化 Kubernetes <a href="#t173.4 初始化 Kubernetes"> # </a></h3>
+<pre><code class="lang-js">kubeadm init --config init-kubeadm.conf
+</code></pre>
+<ul>
+<li><code>kubeadm join</code> 可以快速将 Node 节点加入到 Master 集群内</li>
+</ul>
+<ul>
+<li>Master 节点需要执行的初始化命令</li>
+<li>将默认的 Kubernetes 认证文件拷贝进 .kube 文件夹内，才能默认使用该配置文件</li>
+</ul>
+<pre><code class="lang-js">Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following <span class="hljs-keyword">as</span> a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, <span class="hljs-keyword">if</span> you are the root user, you can run:
+
+  <span class="hljs-keyword">export</span> KUBECONFIG=<span class="hljs-regexp">/etc/</span>kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run <span class="hljs-string">"kubectl apply -f [podnetwork].yaml"</span> <span class="hljs-keyword">with</span> one <span class="hljs-keyword">of</span> the options listed at:
+  https:<span class="hljs-comment">//kubernetes.io/docs/concepts/cluster-administration/addons/</span>
+
+Then you can join any number <span class="hljs-keyword">of</span> worker nodes by running the following on each <span class="hljs-keyword">as</span> root:
+
+kubeadm join <span class="hljs-number">172.31</span><span class="hljs-number">.178</span><span class="hljs-number">.169</span>:<span class="hljs-number">6443</span> --token abcdef<span class="hljs-number">.0123456789</span>abcdef \
+    --discovery-token-ca-cert-hash sha256:<span class="hljs-number">8</span>aac19f4dbe68f1e15ba3d80e141acdc912e353f9757ad69187e8fb9780bc975 
+</code></pre>
+<h3 id="t183.5 安装 Flannel">3.5 安装 Flannel <a href="#t183.5 安装 Flannel"> # </a></h3>
+<ul>
+<li><code>flannel</code> 主要的作用是通过创建一个虚拟网络，让不同节点下的服务有着全局唯一的IP地址，且服务之前可以互相访问和连接。</li>
+<li>集群内网网络通信协议通信模式采用了Flannel协议</li>
+</ul>
+<pre><code class="lang-js">#wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+wget https://img.zhufengpeixun.com/kube-flannel.yml
+docker pull quay.io/coreos/flannel:v0.13.0-rc2
+kubectl apply -f kube-flannel.yml
+</code></pre>
+<pre><code class="lang-yaml"><span class="hljs-attr">net-conf.json:</span> <span class="hljs-string">|
+    {
+      "Network": "10.244.0.0/16",
+      "Backend": {
+        "Type": "vxlan"
+      }
+    }
+</span></code></pre>
+<h3 id="t193.6 查看启动情况">3.6 查看启动情况 <a href="#t193.6 查看启动情况"> # </a></h3>
+<pre><code class="lang-js">kubectl <span class="hljs-keyword">get</span> nodes
+
+NAME     STATUS   ROLES                  AGE     VERSION
+master   Ready    control-plane,master   9m34s   v1.20.4
+</code></pre>
+<h3 id="t203.7 Node节点配置">3.7 Node节点配置 <a href="#t203.7 Node节点配置"> # </a></h3>
+<ul>
+<li>Node 节点的地位则是负责运行服务容器，负责接收调度的。</li>
+<li>先执行基础安装</li>
+</ul>
+<pre><code class="lang-js">hostnamectl <span class="hljs-keyword">set</span>-hostname node1
+</code></pre>
+<h3 id="t213.8 拷贝 Master 节点配置文件">3.8 拷贝 Master 节点配置文件 <a href="#t213.8 拷贝 Master 节点配置文件"> # </a></h3>
+<ul>
+<li>将 master 节点的配置文件拷贝 k8s 到 node1 节点</li>
+</ul>
+<pre><code class="lang-js">scp $HOME/.kube/config root@172.31.178.170:~/
+</code></pre>
+<ul>
+<li>在node1节点归档配置文件</li>
+</ul>
+<pre><code class="lang-js">mkdir -p $HOME/.kube
+sudo mv $HOME/config $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+</code></pre>
+<h3 id="t223.9 加入 Master 节点">3.9 加入 Master 节点 <a href="#t223.9 加入 Master 节点"> # </a></h3>
+<ul>
+<li>让 Node 节点加入到 master 集群内</li>
+</ul>
+<pre><code class="lang-js">kubeadm join <span class="hljs-number">172.16</span><span class="hljs-number">.81</span><span class="hljs-number">.164</span>:<span class="hljs-number">6443</span> --token abcdef<span class="hljs-number">.0123456789</span>abcdef \
+    --discovery-token-ca-cert-hash sha256:b4a059eeffa2e52f2eea7a5d592be10c994c7715c17bda57bbc3757d4f13903d
+</code></pre>
+<ul>
+<li>如果刚才的命令丢了，可以在 master 机器上使用 kubeadm token create 重新生成一条命令<pre><code class="lang-js">kubeadm token create --print-join-command
+</code></pre>
+</li>
+</ul>
+<h3 id="t233.10. 安装 Flannel">3.10. 安装 Flannel <a href="#t233.10. 安装 Flannel"> # </a></h3>
+<pre><code class="lang-js">scp ~<span class="hljs-regexp">/kube-flannel.yml root@172.31.178.170:~/</span>
+kubectl apply -f kube-flannel.yml
+</code></pre>
+<h3 id="t244. 查看状态">4. 查看状态 <a href="#t244. 查看状态"> # </a></h3>
+<pre><code class="lang-js">kubectl <span class="hljs-keyword">get</span> nodes
+NAME     STATUS   ROLES                  AGE    VERSION
+master   Ready    control-plane,master   24m    v1.20.4
+node1    Ready    &lt;none&gt;                 101s   v1.20.4
+</code></pre>
+<h2 id="t255.直接布署nginx">5.直接布署nginx <a href="#t255.直接布署nginx"> # </a></h2>
+<pre><code class="lang-js">kubectl create deployment nginx --image=nginx
+[root@master ~]# kubectl expose deployment nginx --port=80 --type=NodePort
+service/nginx exposed
+kubectl get pod,svc
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/nginx-6799fc88d8-bt5n6      1/1     Running   0          5m32s
+
+curl 127.0.0.1:32636
+//快速扩容为3个副本
+[root@master ~]# kubectl scale deployment nginx --replicas=3
+deployment.apps/nginx scaled
+</code></pre>
+<h2 id="t266.通过yaml布署mysql">6.通过yaml布署mysql <a href="#t266.通过yaml布署mysql"> # </a></h2>
+<h3 id="t276.1 配置文件">6.1 配置文件 <a href="#t276.1 配置文件"> # </a></h3>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">ReplicationController</span>                           
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">mysql</span>                                          
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span>           <span class="hljs-comment">#Pod副本的期待数量</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">mysql</span>          <span class="hljs-comment">#符合目标的Pod拥有此标签</span>
+  <span class="hljs-attr">template:</span>             <span class="hljs-comment">#根据此模板创建Pod的副本（实例）</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">mysql</span>     <span class="hljs-comment">#Pod副本拥有的标签，对应RC的Selector</span>
+    <span class="hljs-attr">spec:</span>
+      <span class="hljs-attr">containers:</span>      <span class="hljs-comment">#Pod内容器的定义部分</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">mysql</span>            <span class="hljs-comment">#容器的名称</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">mysql</span>    <span class="hljs-comment">#容器对应的Docker image</span>
+        <span class="hljs-attr">ports:</span> 
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">3306</span>       <span class="hljs-comment">#容器应用监听的端口号</span>
+        <span class="hljs-attr">env:</span>                        <span class="hljs-comment">#注入容器内的环境变量</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">MYSQL_ROOT_PASSWORD</span> 
+          <span class="hljs-attr">value:</span> <span class="hljs-string">"123456"</span>
+</code></pre>
+<h3 id="t286.2 创建POD">6.2 创建POD <a href="#t286.2 创建POD"> # </a></h3>
+<pre><code class="lang-js">kubectl create -f mysql-rc.yaml
+replicationcontroller/mysql created
+
+kubectl <span class="hljs-keyword">get</span> pods
+NAME          READY   STATUS    RESTARTS   AGE
+mysql         1/1     Running      0      5m56s
+</code></pre>
+<h3 id="t296.3 查看状态">6.3 查看状态 <a href="#t296.3 查看状态"> # </a></h3>
+<pre><code class="lang-js">kubectl describe pod mysql
+</code></pre>
+
+    

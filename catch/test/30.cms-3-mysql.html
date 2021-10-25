@@ -1,0 +1,850 @@
+
+        <h2 id="t01. 为什么需要设计数据库">1. 为什么需要设计数据库 <a href="#t01. 为什么需要设计数据库"> # </a></h2>
+<h3 id="t11.1 良好的数据库设计">1.1 良好的数据库设计 <a href="#t11.1 良好的数据库设计"> # </a></h3>
+<ul>
+<li>节省数据的存储空间</li>
+<li>能够保证数据的完整性</li>
+<li>方便进行数据库系统的开发</li>
+</ul>
+<h3 id="t21.2 糟糕的数据库设计">1.2 糟糕的数据库设计 <a href="#t21.2 糟糕的数据库设计"> # </a></h3>
+<ul>
+<li>数据冗余，存储空间浪费</li>
+<li>内存空间浪费</li>
+<li>数据和更新插入异常</li>
+</ul>
+<h2 id="t32. 软件项目开发周期中的数据库设计">2. 软件项目开发周期中的数据库设计 <a href="#t32. 软件项目开发周期中的数据库设计"> # </a></h2>
+<ul>
+<li>需求分析阶段: 分析客户的业务和数据处理需求</li>
+<li>概要设计阶段： 设计数据库的E-R模型图，确认需求的正确和完整性</li>
+<li>详细设计阶段： 应用三大范式审核数据库</li>
+<li>代码编写阶段： 物理实现数据库，编码实现应用</li>
+<li>软件测试阶段</li>
+<li>安装部署</li>
+</ul>
+<blockquote>
+<p>现实世界-&gt;信息世界-&gt;数据库模型图-&gt;数据库</p>
+</blockquote>
+<h2 id="t43.设计数据库的步骤">3.设计数据库的步骤 <a href="#t43.设计数据库的步骤"> # </a></h2>
+<h3 id="t53.1 收集信息">3.1 收集信息 <a href="#t53.1 收集信息"> # </a></h3>
+<p>与相关人员进行交流、访谈充分了解用户需求，理解数据库需要完成的任务</p>
+<h3 id="t63.2 标示实体(Entity)">3.2 标示实体(Entity) <a href="#t63.2 标示实体(Entity)"> # </a></h3>
+<p>标识数据库要管理的关键对象或者实体，实体一般是名词</p>
+<h3 id="t73.3 标示实体的属性(Attribute)">3.3 标示实体的属性(Attribute) <a href="#t73.3 标示实体的属性(Attribute)"> # </a></h3>
+<h3 id="t83.4 标示实体之间的关系(RelationShip)">3.4 标示实体之间的关系(RelationShip) <a href="#t83.4 标示实体之间的关系(RelationShip)"> # </a></h3>
+<h2 id="t94. 数据库ER图">4. 数据库ER图 <a href="#t94. 数据库ER图"> # </a></h2>
+<p>ER图：实体关系图，简记E-R图，是指以实体、关系、属性三个基本概念概括数据的基本结构，从而描述静态数据结构的概念模式</p>
+<p><img src="http://img.zhufengpeixun.cn/er.png" alt="er"></p>
+<h3 id="t104.1 ER图的实体（entity）">4.1 ER图的实体（entity） <a href="#t104.1 ER图的实体（entity）"> # </a></h3>
+<ul>
+<li>ER图的实体（entity）即数据模型中的数据对象，例如人、学生、音乐都可以作为一个数据对象，用长方体来表示</li>
+</ul>
+<h3 id="t114.2 ER图的属性（attribute）">4.2 ER图的属性（attribute） <a href="#t114.2 ER图的属性（attribute）"> # </a></h3>
+<ul>
+<li>ER图的属性（attribute）即数据对象所具有的属性，例如学生具有姓名、学号、年级等属性，用椭圆形表示</li>
+<li>属性分为唯一属性（ unique attribute）和非唯一属性</li>
+<li>唯一属性指的是唯一可用来标识该实体实例或者成员的属性，用下划线表示，一般来讲实体都至少有一个唯一属性。</li>
+</ul>
+<h3 id="t124.3 ER图的关系（relationship）">4.3 ER图的关系（relationship） <a href="#t124.3 ER图的关系（relationship）"> # </a></h3>
+<ul>
+<li>ER图的关系（relationship）用来表现数据对象与数据对象之间的联系</li>
+<li>例如学生的实体和成绩表的实体之间有一定的联系，每个学生都有自己的成绩表，这就是一种关系，关系用菱形来表示。</li>
+</ul>
+<h3 id="t134.4 ER图中关联关系">4.4 ER图中关联关系 <a href="#t134.4 ER图中关联关系"> # </a></h3>
+<h4 id="t144.4.1 1对1 (1:1)">4.4.1 1对1 (1:1) <a href="#t144.4.1 1对1 (1:1)"> # </a></h4>
+<p>1对1关系是指对于实体集A与实体集B，A中的每一个实体至多与B中一个实体有关系；反之，在实体集B中的每个实体至多与实体集A中一个实体有关系。</p>
+<p><img src="http://img.zhufengpeixun.cn/onetoone.png" alt="er"></p>
+<h4 id="t154.4.2 1对多（1:N）">4.4.2 1对多（1:N） <a href="#t154.4.2 1对多（1:N）"> # </a></h4>
+<p>1对多关系是指实体集A与实体集B中至少有N(N&gt;0)个实体有关系；并且实体集B中每一个实体至多与实体集A中一个实体有关系。</p>
+<p><img src="http://img.zhufengpeixun.cn/onetomany.png" alt="er"></p>
+<h4 id="t164.4.3 多对多（M:N）">4.4.3 多对多（M:N） <a href="#t164.4.3 多对多（M:N）"> # </a></h4>
+<p>多对多关系是指实体集A中的每一个实体与实体集B中至少有M(M&gt;0)个实体有关系，并且实体集B中的每一个实体与实体集A中的至少N（N&gt;0）个实体有关系。</p>
+<p><img src="http://img.zhufengpeixun.cn/manytomany.png" alt="er"></p>
+<h2 id="t175. 数据库设计三大范式">5. 数据库设计三大范式 <a href="#t175. 数据库设计三大范式"> # </a></h2>
+<h3 id="t185.1 不合理的表设计">5.1 不合理的表设计 <a href="#t185.1 不合理的表设计"> # </a></h3>
+<ul>
+<li>信息重复</li>
+<li>更新异常</li>
+<li>插入异常</li>
+<li>删除异常</li>
+</ul>
+<h3 id="t195.2 三大范式">5.2 三大范式 <a href="#t195.2 三大范式"> # </a></h3>
+<h4 id="t205.2.1  第一范式（1NF）">5.2.1  第一范式（1NF） <a href="#t205.2.1  第一范式（1NF）"> # </a></h4>
+<ul>
+<li>数据表中的每一列（每个字段）必须是不可拆分的最小单元，也就是确保每一列的原子性；</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/firstpattern.png" alt="firstpattern"></p>
+<h4 id="t215.2.2 第二范式（2NF）">5.2.2 第二范式（2NF） <a href="#t215.2.2 第二范式（2NF）"> # </a></h4>
+<ul>
+<li>满足1NF后，要求表中的所有列，都必须依赖于主键，而不能有任何一列与主键没有关系，也就是说一个表只描述一件事情</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/2th1.jpg" alt="2th1"></p>
+<p><img src="http://img.zhufengpeixun.cn/2th2.jpg" alt="2th2"></p>
+<p><img src="http://img.zhufengpeixun.cn/2th3.jpg" alt="2th3"></p>
+<blockquote>
+<p>一个人同时订几个房间，就会出来一个订单号多条数据，这样子联系人都是重复的，就会造成数据冗余</p>
+</blockquote>
+<h4 id="t225.2.3 第三范式（3NF）">5.2.3 第三范式（3NF） <a href="#t225.2.3 第三范式（3NF）"> # </a></h4>
+<ul>
+<li>必须先满足第二范式（2NF），要求：表中的每一列只与主键直接相关而不是间接相关，(表中的每一列只能依赖于主键)</li>
+<li>数据不能存在传递关系,即每个属性都跟主键有直接关系而不是间接关系</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/thirdpattern.png" alt="thirdpattern"></p>
+<h4 id="t235.2.4 如何更好的区分三大范式">5.2.4 如何更好的区分三大范式 <a href="#t235.2.4 如何更好的区分三大范式"> # </a></h4>
+<ul>
+<li>第一范式和第二范式的区别在于有没有分出两张表,第二范式是说一张表中包含了所种不同的实体属性，那么要必须分成多张表</li>
+<li>第三范式是要求已经分成了多张表，那么一张表中只能有另一张表中的id（主键），而不能有其他的任何信息（其他的信息一律用外键在另一表的主键看查询）。</li>
+</ul>
+<h2 id="t245.RBAC">5.RBAC <a href="#t245.RBAC"> # </a></h2>
+<ul>
+<li>基于角色的权限访问控制（Role-Based Access Control） </li>
+<li>RBAC（Role-Based Access Control，基于角色的访问控制），就是用户通过角色与权限进行关联</li>
+<li>简单地说，一个用户拥有若干角色，每一个角色拥有若干权限。这样，就构造成“用户-角色-权限-资源”的授权模型</li>
+<li>在这种模型中，用户与角色之间，角色与权限之间，权限与资源之间一般是多对多的关系。</li>
+<li>在RBAC中最重要的概念包括：用户(User)，角色(Role)，权限(Permission)，资源(Resource) <h3 id="t255.1 安全原则">5.1 安全原则 <a href="#t255.1 安全原则"> # </a></h3>
+</li>
+<li>最小权限原则之所以被RBAC所支持，是因为RBAC可以将其角色配置成其完成任务所需要的最小的权限集</li>
+<li>责任分离原则可以通过调用相互独立互斥的角色来共同完成敏感的任务而体现，比如要求一个计帐员和财务管理员共参与同一过帐。</li>
+<li>数据抽象可以通过权限的抽象来体现，如财务操作用借款、存款等抽象权限，而不用操作系统提供的典型的读、写、执行权限</li>
+</ul>
+<h3 id="t265.2 ER图">5.2 ER图 <a href="#t265.2 ER图"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/cms-er.png" alt="er"></p>
+<h3 id="t275.2.1 用户表">5.2.1 用户表 <a href="#t275.2.1 用户表"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">username</td>
+<td style="text-align:left">用户名</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">password</td>
+<td style="text-align:left">密码</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">email</td>
+<td style="text-align:left">邮箱</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">phone</td>
+<td style="text-align:left">手机号</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">gender</td>
+<td style="text-align:left">性别</td>
+<td style="text-align:left">tinyint</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">birthday</td>
+<td style="text-align:left">生日</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">addresss</td>
+<td style="text-align:left">地址</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">create_time</td>
+<td style="text-align:left">创建时间</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left">CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td style="text-align:left">last_login</td>
+<td style="text-align:left">上次登录时间</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">status</td>
+<td style="text-align:left">状态</td>
+<td style="text-align:left">tinyint</td>
+<td style="text-align:left">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t285.2.2 角色表">5.2.2 角色表 <a href="#t285.2.2 角色表"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">名称</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">create_time</td>
+<td style="text-align:left">创建时间</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left">CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td style="text-align:left">status</td>
+<td style="text-align:left">状态</td>
+<td style="text-align:left">tinyint</td>
+<td style="text-align:left">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t295.2.3 资源表">5.2.3 资源表 <a href="#t295.2.3 资源表"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">名称</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">key</td>
+<td style="text-align:left">路径</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">create_time</td>
+<td style="text-align:left">创建时间</td>
+<td style="text-align:left">datetime</td>
+<td style="text-align:left">CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td style="text-align:left">status</td>
+<td style="text-align:left">状态</td>
+<td style="text-align:left">tinyint</td>
+<td style="text-align:left">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t305.2.4 用户角色表">5.2.4 用户角色表 <a href="#t305.2.4 用户角色表"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">user_id</td>
+<td style="text-align:left">用户ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+<tr>
+<td style="text-align:left">role_id</td>
+<td style="text-align:left">角色ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t315.2.5 角色资源">5.2.5 角色资源 <a href="#t315.2.5 角色资源"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">role_id</td>
+<td style="text-align:left">角色ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+<tr>
+<td style="text-align:left">resource_id</td>
+<td style="text-align:left">资源ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t325.3 数据库脚本">5.3 数据库脚本 <a href="#t325.3 数据库脚本"> # </a></h3>
+<pre><code class="lang-sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`categories`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_category_parent_id`</span>;
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`articles`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_article_category_id`</span>;
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`user_role`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_user_role_user_id`</span>;
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`user_role`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_user_role_role_id`</span>;
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`role_resource`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_role_resource_role_id`</span>;
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`role_resource`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_role_resource_resource_id`</span>;
+
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`users`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`carousels`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`categories`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`articles`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`navigations`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`links`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`config`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`roles`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`user_role`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`resources`</span>;
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`role_resource`</span>;
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`users`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`username`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`password`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`last_login`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+<span class="hljs-string">`email`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`phone`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`gender`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`birthday`</span> datetime <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`address`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`carousels`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`title`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`url`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`categories`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`title`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`description`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`keywords`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+<span class="hljs-string">`parent_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-literal">NULL</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`articles`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`category_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`title`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`content`</span> <span class="hljs-built_in">text</span> <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`user_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`keywords`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+<span class="hljs-string">`pv`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`navigations`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`title`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`url`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`links`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`title`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`logo`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`url`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`config`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`name`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`logo`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`url`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+<span class="hljs-string">`keywords`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`description`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`icp`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`about`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`roles`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`name`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`user_role`</span> (
+<span class="hljs-string">`user_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`role_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`user_id`</span>, <span class="hljs-string">`role_id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`resources`</span> (
+<span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`name`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`key`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span>,
+<span class="hljs-string">`create_time`</span> datetime <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CURRENT_TIMESTAMP</span>,
+<span class="hljs-string">`status`</span> <span class="hljs-built_in">tinyint</span>(<span class="hljs-number">255</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">1</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>) 
+);
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`role_resource`</span> (
+<span class="hljs-string">`role_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+<span class="hljs-string">`resource_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`role_id`</span>, <span class="hljs-string">`resource_id`</span>) 
+);
+
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`categories`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_category_parent_id`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`parent_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`categories`</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`articles`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_article_category_id`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`category_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`categories`</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`user_role`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_user_role_user_id`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`user_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`users`</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`user_role`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_user_role_role_id`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`role_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`roles`</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`role_resource`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_role_resource_role_id`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`role_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`roles`</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`role_resource`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_role_resource_resource_id`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`resource_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`resources`</span> (<span class="hljs-string">`id`</span>);
+</code></pre>
+<h2 id="t336.事务">6.事务 <a href="#t336.事务"> # </a></h2>
+<h3 id="t346.1 为什么需要事务">6.1 为什么需要事务 <a href="#t346.1 为什么需要事务"> # </a></h3>
+<ul>
+<li>银行转账问题</li>
+<li>A账户资金减少</li>
+<li>B账户资金增加</li>
+</ul>
+<pre><code class="lang-sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">database</span> bank;
+<span class="hljs-keyword">use</span> bank;
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">account</span>
+(
+    <span class="hljs-keyword">name</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">64</span>),
+    balance <span class="hljs-built_in">decimal</span>(<span class="hljs-number">10</span>,<span class="hljs-number">2</span>)
+) <span class="hljs-keyword">ENGINE</span>=<span class="hljs-keyword">InnoDB</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CHARSET</span>=utf8;
+<span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">account</span>(<span class="hljs-keyword">name</span>,balance) <span class="hljs-keyword">values</span>(<span class="hljs-string">'张三'</span>,<span class="hljs-number">100</span>);
+<span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">account</span>(<span class="hljs-keyword">name</span>,balance) <span class="hljs-keyword">values</span>(<span class="hljs-string">'李四'</span>,<span class="hljs-number">100</span>);
+
+<span class="hljs-keyword">update</span> <span class="hljs-keyword">account</span> <span class="hljs-keyword">set</span> balance = balance - <span class="hljs-number">10</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">name</span> = <span class="hljs-string">'张三'</span>;
+<span class="hljs-keyword">update</span> <span class="hljs-keyword">account</span> <span class="hljs-keyword">set</span> balance = balance + <span class="hljs-number">10</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">name</span> = <span class="hljs-string">'李四'</span>;
+</code></pre>
+<h3 id="t356.2 什么是事务">6.2 什么是事务 <a href="#t356.2 什么是事务"> # </a></h3>
+<ul>
+<li>事务是作为单个逻辑工作单元执行的一系列操作</li>
+<li>多个操作作为一个整体向系统提交，要么都执行，要么都不执行</li>
+<li>事务是一个不可分割的工作逻辑单元</li>
+</ul>
+<blockquote>
+<p>转账过程就是一个整体，它需要两条UPDATE语句，如果任何一个出错，则整个转账业务取消，两个账户的余额都恢复到原来的数据，确保总余额不变</p>
+</blockquote>
+<h3 id="t366.3 事务的特性">6.3 事务的特性 <a href="#t366.3 事务的特性"> # </a></h3>
+<ul>
+<li>原子性(Atomicity)  事务是一个完整的操作，事务各个部分是不可分的，要么都执行，要么都不执行</li>
+<li>一致性(Consistency)  当事务完成后，数据必须处理完整的状态</li>
+<li>隔离性(Isolation) 并发事务彼此隔离、独立，它不应该以任何方式依赖于其它事务</li>
+<li>持久性(Durability) 事务完成后，它对数据库的修改被永久保持</li>
+</ul>
+<h3 id="t376.4 如何创建事务">6.4 如何创建事务 <a href="#t376.4 如何创建事务"> # </a></h3>
+<ul>
+<li>开始事务 <code>START TRANSACTION</code> 或者 <code>BEGIN</code></li>
+<li>提交事务 <code>COMMIT</code></li>
+<li>回滚或者说撤销事务 <code>ROLLBACK</code></li>
+</ul>
+<pre><code class="lang-sql"><span class="hljs-keyword">BEGIN</span>;
+<span class="hljs-keyword">update</span> <span class="hljs-keyword">account</span> <span class="hljs-keyword">set</span> balance = balance - <span class="hljs-number">10</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">name</span> = <span class="hljs-string">'张三'</span>;
+<span class="hljs-keyword">ROLLBACK</span>;
+</code></pre>
+<ul>
+<li>默认情况下，每条单独的SQL语句视为一个事务</li>
+<li>关闭默认提交状态后，可手动开启、关闭事务</li>
+<li>关闭/开启自动提交状态 <code>SET autocommit=0|1</code> 0关闭 1开启</li>
+</ul>
+<blockquote>
+<p>关闭自动提交后，从下一条SQL语句开始开启新的事务，需要使用COMMIT或ROLLBACK结束该事务</p>
+</blockquote>
+<h2 id="t387.在node中使用mysql">7.在node中使用mysql <a href="#t387.在node中使用mysql"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/mysql">mysql</a></li>
+</ul>
+<pre><code class="lang-js">npm install mysql
+</code></pre>
+<h3 id="t397.1 使用mysql">7.1 使用mysql <a href="#t397.1 使用mysql"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> mysql      = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mysql'</span>);
+<span class="hljs-keyword">var</span> connection = mysql.createConnection({
+  <span class="hljs-attr">host</span>     : <span class="hljs-string">'localhost'</span>,
+  <span class="hljs-attr">user</span>     : <span class="hljs-string">'me'</span>,
+  <span class="hljs-attr">password</span> : <span class="hljs-string">'secret'</span>,
+  <span class="hljs-attr">database</span> : <span class="hljs-string">'my_db'</span>
+});
+
+connection.connect();
+
+connection.query(<span class="hljs-string">'SELECT 1 + 1 AS solution'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, results, fields</span>) </span>{
+  <span class="hljs-keyword">if</span> (error) <span class="hljs-keyword">throw</span> error;
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'The solution is: '</span>, results[<span class="hljs-number">0</span>].solution);
+});
+
+connection.end();
+</code></pre>
+<h3 id="t407.2 使用mysql连接池">7.2 使用mysql连接池 <a href="#t407.2 使用mysql连接池"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> mysql = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mysql'</span>);
+<span class="hljs-keyword">var</span> pool  = mysql.createPool({
+  <span class="hljs-attr">connectionLimit</span> : <span class="hljs-number">10</span>,
+  <span class="hljs-attr">host</span>            : <span class="hljs-string">'example.org'</span>,
+  <span class="hljs-attr">user</span>            : <span class="hljs-string">'bob'</span>,
+  <span class="hljs-attr">password</span>        : <span class="hljs-string">'secret'</span>,
+  <span class="hljs-attr">database</span>        : <span class="hljs-string">'my_db'</span>
+});
+
+pool.query(<span class="hljs-string">'SELECT 1 + 1 AS solution'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, results, fields</span>) </span>{
+  <span class="hljs-keyword">if</span> (error) <span class="hljs-keyword">throw</span> error;
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'The solution is: '</span>, results[<span class="hljs-number">0</span>].solution);
+});
+</code></pre>
+<h3 id="t417.3 使用mysql事务">7.3 使用mysql事务 <a href="#t417.3 使用mysql事务"> # </a></h3>
+<pre><code class="lang-js">connection.beginTransaction(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>) </span>{
+  <span class="hljs-keyword">if</span> (err) { <span class="hljs-keyword">throw</span> err; }
+  connection.query(<span class="hljs-string">'INSERT INTO posts SET title=?'</span>, title, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, results, fields</span>) </span>{
+    <span class="hljs-keyword">if</span> (error) {
+      <span class="hljs-keyword">return</span> connection.rollback(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">throw</span> error;
+      });
+    }
+
+    <span class="hljs-keyword">var</span> log = <span class="hljs-string">'Post '</span> + results.insertId + <span class="hljs-string">' added'</span>;
+
+    connection.query(<span class="hljs-string">'INSERT INTO log SET data=?'</span>, log, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, results, fields</span>) </span>{
+      <span class="hljs-keyword">if</span> (error) {
+        <span class="hljs-keyword">return</span> connection.rollback(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+          <span class="hljs-keyword">throw</span> error;
+        });
+      }
+      connection.commit(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>) </span>{
+        <span class="hljs-keyword">if</span> (err) {
+          <span class="hljs-keyword">return</span> connection.rollback(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">throw</span> err;
+          });
+        }
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'success!'</span>);
+      });
+    });
+  });
+});
+</code></pre>
+<h2 id="t428.锁">8.锁 <a href="#t428.锁"> # </a></h2>
+<ul>
+<li>锁时计算机协调多个进程或线程并发访问某一资源的机制</li>
+</ul>
+<h3 id="t438.1 锁的分类">8.1 锁的分类 <a href="#t438.1 锁的分类"> # </a></h3>
+<ul>
+<li>从对数据库操作的类型分，分为读锁和写锁 <ul>
+<li>读锁（共享锁）：针对同一份数据，多个读操作可以同时进行而不会互相影响 </li>
+<li>写锁（排它锁）：当前写操作没有完成前，它会阻断其他写锁和读锁</li>
+</ul>
+</li>
+<li>从对数据操作的粒度分，分为<ul>
+<li>表锁</li>
+<li>行锁</li>
+</ul>
+</li>
+</ul>
+<h3 id="t448.2 表锁">8.2 表锁 <a href="#t448.2 表锁"> # </a></h3>
+<ul>
+<li>表锁偏向<code>MyISAM</code>存储引擎，开销小，加锁快，锁定粒度大，发生锁冲突的概率最高，并发度最低</li>
+</ul>
+<h4 id="t458.2.1 准备数据">8.2.1 准备数据 <a href="#t458.2.1 准备数据"> # </a></h4>
+<pre><code class="lang-js">CREATE TABLE <span class="hljs-string">`users`</span> (
+  <span class="hljs-string">`id`</span> int(<span class="hljs-number">11</span>) NOT NULL AUTO_INCREMENT,
+  <span class="hljs-string">`NAME`</span> varchar(<span class="hljs-number">20</span>) DEFAULT NULL,
+  PRIMARY KEY (<span class="hljs-string">`id`</span>)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+INSERT INTO <span class="hljs-string">`users`</span> (<span class="hljs-string">`id`</span>, <span class="hljs-string">`NAME`</span>) VALUES (<span class="hljs-string">'1'</span>, <span class="hljs-string">'a'</span>);
+INSERT INTO <span class="hljs-string">`users`</span> (<span class="hljs-string">`id`</span>, <span class="hljs-string">`NAME`</span>) VALUES (<span class="hljs-string">'2'</span>, <span class="hljs-string">'b'</span>);
+INSERT INTO <span class="hljs-string">`users`</span> (<span class="hljs-string">`id`</span>, <span class="hljs-string">`NAME`</span>) VALUES (<span class="hljs-string">'3'</span>, <span class="hljs-string">'c'</span>);
+INSERT INTO <span class="hljs-string">`users`</span> (<span class="hljs-string">`id`</span>, <span class="hljs-string">`NAME`</span>) VALUES (<span class="hljs-string">'4'</span>, <span class="hljs-string">'d'</span>);
+
+
+lock table 表名称 read(write),表名称<span class="hljs-number">2</span> read(write);
+unlock tables;
+</code></pre>
+<h4 id="t468.2.2 加读锁">8.2.2 加读锁 <a href="#t468.2.2 加读锁"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">会话1</th>
+<th style="text-align:left">会话2</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">lock table users read;</td>
+<td style="text-align:left">连接数据库</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">select * from users;</td>
+<td style="text-align:left">select * from users;</td>
+<td style="text-align:left">都可以查询</td>
+</tr>
+<tr>
+<td style="text-align:left">select * from role;</td>
+<td style="text-align:left">select * from role;</td>
+<td style="text-align:left">会话1不能查询没有锁定的表，会话2可以查询没有锁定的表或更新未锁定的表</td>
+</tr>
+<tr>
+<td style="text-align:left">INSERT INTO <code>users</code> (<code>id</code>, <code>NAME</code>) VALUES ('5', 'e');</td>
+<td style="text-align:left">INSERT INTO <code>users</code> (<code>id</code>, <code>NAME</code>) VALUES ('5', 'e');</td>
+<td style="text-align:left">会话1插入或更新会提示错误，会话2插入或更新会提示等待</td>
+</tr>
+<tr>
+<td style="text-align:left">unlock tables;</td>
+<td style="text-align:left">INSERT INTO <code>users</code> (<code>id</code>, <code>NAME</code>) VALUES ('5', 'e');</td>
+<td style="text-align:left">会话1释放锁后，会话2完成插入操作</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t478.2.3 加写锁">8.2.3 加写锁 <a href="#t478.2.3 加写锁"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">会话1</th>
+<th style="text-align:left">会话2</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">lock table users write;</td>
+<td style="text-align:left">连接数据库</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">select * from users;</td>
+<td style="text-align:left">select * from users;</td>
+<td style="text-align:left">会话1可以对锁定表进行插入更新和删除操作,会话2的查询操作也会被阻塞</td>
+</tr>
+<tr>
+<td style="text-align:left">unlock tables;</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">会话1释放锁，会话2返回结果</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>读锁会阻塞写，但是不会阻塞读。而写锁则会把读和写都阻塞</p>
+</blockquote>
+<h3 id="t488.3 行锁">8.3 行锁 <a href="#t488.3 行锁"> # </a></h3>
+<ul>
+<li>行锁偏向InnoDB存储引擎，开销大，加锁慢，会出现死锁，锁定粒度最小，发生锁冲突的概率最低，并发度也最高</li>
+<li>InnoDB与MYISAM的最大不同有两点：一是支持事务（TRANSACTION）；二是采用了行级锁</li>
+</ul>
+<h4 id="t498.3.1 行锁支持事务">8.3.1 行锁支持事务 <a href="#t498.3.1 行锁支持事务"> # </a></h4>
+<h5 id="t508.3.1.1 并发事务处理带来的问题">8.3.1.1 并发事务处理带来的问题 <a href="#t508.3.1.1 并发事务处理带来的问题"> # </a></h5>
+<h6 id="t518.3.1.1.1 更新丢失（Lost Update）">8.3.1.1.1 更新丢失（Lost Update） <a href="#t518.3.1.1.1 更新丢失（Lost Update）"> # </a></h6>
+<ul>
+<li>当两个或多个事务选择同一行，然后基于最初选定的值更新该行时，由于每个事务都不知道其他事务的存在，就会发生丢失更新问题–最后的更新覆盖了由其他事务所做的更新。 </li>
+<li>后面的事务覆盖了前面的值,这是正常现象</li>
+</ul>
+<pre><code class="lang-js">create table account3 (id int,balance int) ENGINE=InnoDB;
+insert into account3(id,balance) values(<span class="hljs-number">1</span>,<span class="hljs-number">100</span>);
+insert into account3(id,balance) values(<span class="hljs-number">2</span>,<span class="hljs-number">100</span>);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">set</span> autocommit=0;
+begin;
+update account3 <span class="hljs-keyword">set</span> balance=90 where id=1;
+commit;
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">set</span> autocommit=0;
+begin;
+update account3 <span class="hljs-keyword">set</span> balance=80 where id=1;
+commit;
+</code></pre>
+<p>　　 </p>
+<h6 id="t528.3.1.1.2 脏读（Dirty Reads）">8.3.1.1.2 脏读（Dirty Reads） <a href="#t528.3.1.1.2 脏读（Dirty Reads）"> # </a></h6>
+<ul>
+<li>一个事务正在对一条记录做修改，在这个事务完成并提交前，这条记录的数据就处于不一致的状态；这时，另一个事务也来读取同一条记录，如果不加控制，第二个事务读取了这些<code>脏</code>数据，并据此作进一步的处理，就会产生未提交的数据依赖关系。这种现象被形象的叫做<code>脏读</code>。 </li>
+<li>一句话：事务A读取到了事务B已经修改但尚未提交的数据，还在这个数据基础上做了操作。此时，如果B事务回滚，A读取的数据无效，不符合一致性要求。 </li>
+<li>脏读是事务B里面修改了数据 ,这是不正常的 </li>
+<li>解决办法：如果在第一个事务提交前，任何其他事务不可读取其修改过的值，则可  以避免该问题。</li>
+</ul>
+<p>修改日志的隔离级别</p>
+<pre><code class="lang-js">-- 支持的存储引擎
+SHOW ENGINES;
+-- 当前的数据库默认引擎
+SHOW VARIABLES LIKE <span class="hljs-string">'storage_engine'</span>;
+SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+SELECT @@global.tx_isolation;
+SELECT @@session.tx_isolation;
+SELECT @@tx_isolation;
+</code></pre>
+<pre><code class="lang-js">start TRANSACTION;
+insert into account3(id,balance) values(<span class="hljs-number">3</span>,<span class="hljs-number">100</span>);
+</code></pre>
+<pre><code class="lang-js">start TRANSACTION;
+select * <span class="hljs-keyword">from</span> account3;
+</code></pre>
+<h6 id="t538.3.1.1.3 不可重复读（Non-Repeatable Reads）">8.3.1.1.3 不可重复读（Non-Repeatable Reads） <a href="#t538.3.1.1.3 不可重复读（Non-Repeatable Reads）"> # </a></h6>
+<ul>
+<li>一个事务在读取某些数据后的某个时间，再次读取以前读过的数据，却发现其读出的数据已经发生了改变、或某些记录已经被删除了！这种现象就叫做"不可重复读"。</li>
+<li>一句话：事务A读取到了事务B已经提交的修改数据，不符合隔离性,这是不正常的 </li>
+<li>解决办法：如果只有在修改事务完全提交之后才可以读取数据，则可以避免该问题</li>
+<li>针对的是update或delete</li>
+</ul>
+<p>修改日志级别</p>
+<pre><code class="lang-js">SET SESSION TRANSACTION ISOLATION LEVEL read committed;
+SET GLOBAL TRANSACTION ISOLATION LEVEL read committed;
+SELECT @@global.tx_isolation;
+SELECT @@session.tx_isolation;
+SELECT @@tx_isolation;
+</code></pre>
+<p>会话2</p>
+<pre><code class="lang-js">start TRANSACTION;
+select * <span class="hljs-keyword">from</span> account3;
+</code></pre>
+<p>会话2</p>
+<pre><code class="lang-js">start TRANSACTION;
+<span class="hljs-keyword">delete</span> <span class="hljs-keyword">from</span> account3 where id=<span class="hljs-number">1</span>;
+commit;
+</code></pre>
+<h6 id="t548.3.1.1.4 幻读（Phantom Reads）">8.3.1.1.4 幻读（Phantom Reads） <a href="#t548.3.1.1.4 幻读（Phantom Reads）"> # </a></h6>
+<ul>
+<li>一个事务按相同的查询条件重新读取以前检索过的数据，却发现其他事务插入了满足其查询条件的新数据，这种现象就称为"幻读"。 </li>
+<li>一句话：事务A读取到了事务B提交的新增数据，不符合隔离性</li>
+<li>幻读是事务B里面新增了数据,这是不正常的</li>
+<li>解决办法：如果在操作事务完成数据处理之前，任何其他事务都不可以添加新数据，则可避免该问题</li>
+<li>针对的是 <code>insert</code></li>
+<li>要更新隐藏的行之后才能看到幻读现象</li>
+</ul>
+<pre><code class="lang-js">SELECT @@tx_isolation;
+SET SESSION TRANSACTION ISOLATION LEVEL repeatable read;
+SET GLOBAL TRANSACTION ISOLATION LEVEL repeatable read;
+SELECT @@global.tx_isolation;
+SELECT @@session.tx_isolation;
+SELECT @@tx_isolation;
+</code></pre>
+<pre><code class="lang-js">start TRANSACTION;
+insert into account3(id,balance) values(<span class="hljs-number">5</span>,<span class="hljs-number">100</span>);
+commit;
+</code></pre>
+<pre><code class="lang-js">start TRANSACTION;
+select * <span class="hljs-keyword">from</span> account3;
+update account3 <span class="hljs-keyword">set</span> balance =balance-10;
+commit;
+</code></pre>
+<h5 id="t558.3.1.2 事务隔离五种级别">8.3.1.2 事务隔离五种级别 <a href="#t558.3.1.2 事务隔离五种级别"> # </a></h5>
+<ul>
+<li>read uncommitted : 读取尚未提交的数据 ：就是脏读</li>
+<li>read committed：读取已经提交的数据 ：可以解决脏读</li>
+<li>repeatable read：可重读读取：可以解决脏读和不可重复读 ---mysql默认的</li>
+<li>serializable：串行化：可以解决 脏读、不可重复读和幻读---相当于锁表</li>
+<li>Innodb的默认事务隔离级别是重复读 <code>repeatable read</code></li>
+</ul>
+<pre><code class="lang-js">SELECT @@tx_isolation;
+<span class="hljs-keyword">set</span> session transaction isolation level
+<span class="hljs-keyword">set</span> session transaction isolation level read uncommitted;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">隔离级别</th>
+<th style="text-align:left">脏读</th>
+<th style="text-align:left">非重复读</th>
+<th style="text-align:left">幻读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">read uncommitted</td>
+<td style="text-align:left">允许</td>
+<td style="text-align:left">允许</td>
+<td style="text-align:left">允许</td>
+</tr>
+<tr>
+<td style="text-align:left">read committed</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">允许</td>
+<td style="text-align:left">允许</td>
+</tr>
+<tr>
+<td style="text-align:left">repeatable read</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">允许</td>
+</tr>
+<tr>
+<td style="text-align:left">serializable</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
+<h5 id="t568.3.2 死锁">8.3.2 死锁 <a href="#t568.3.2 死锁"> # </a></h5>
+<ul>
+<li>只有在INNODB引擎上的索引键上才会启用行级锁</li>
+<li>Deadlock found when trying to get lock; try restarting transaction</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">会话1</th>
+<th style="text-align:left">会话2</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">set autocommit=0</td>
+<td style="text-align:left">set autocommit=0</td>
+<td style="text-align:left">都关闭默认提交</td>
+</tr>
+<tr>
+<td style="text-align:left">update account set balance = balance -10 where name = '张三'</td>
+<td style="text-align:left">update account2 set balance = balance -10 where name = '李四'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">update account2 set balance = balance -10 where name = '李四';</td>
+<td style="text-align:left">update account2 set balance = balance -10 where name = '张三';</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><a href="http://www.zsythink.net/archives/1233">日志级别</a></li>
+</ul>
+
+    

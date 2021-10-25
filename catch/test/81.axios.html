@@ -1,0 +1,1089 @@
+
+        <h2 id="t01.生成项目">1.生成项目 <a href="#t01.生成项目"> # </a></h2>
+<pre><code class="lang-js">npx create-react-app zaxios --typescript
+cd create-react-app
+yarn add axios @types/axios qs @types/qs parse-headers
+yarn add express body-parser
+yarn start
+</code></pre>
+<h2 id="t12. get请求">2. get请求 <a href="#t12. get请求"> # </a></h2>
+<ul>
+<li><a href="https://github.com/axios/axios">axios</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/1.axiosresponse.png" alt="1.axiosresponse"></p>
+<p><img src="http://img.zhufengpeixun.cn/2.axiosresponse.png" alt="2.axiosresponse.png"></p>
+<h3 id="t22.1 src\index.tsx">2.1 src\index.tsx <a href="#t22.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-tsx">import axios, { AxiosResponse } from './axios';
+const baseURL = 'http://localhost:8080';
+export interface User {
+    username: string;
+    password: string;
+}
+let user: User = {
+    username: 'zhufeng',
+    password: '123456'
+};
+axios({
+    method: 'get',
+    url: baseURL + '/get',
+    params: user
+}).then((response: AxiosResponse) =&gt; {
+    console.log(response);
+    return response.data;
+}).then((data: User) =&gt; {
+    console.log(data);
+}).catch(function (error: any) {
+    console.log(error);
+});
+</code></pre>
+<h3 id="t32.2 axios\index.tsx">2.2 axios\index.tsx <a href="#t32.2 axios\index.tsx"> # </a></h3>
+<p>src\axios\index.tsx</p>
+<pre><code class="lang-tsx">import Axios from './Axios';
+import { AxiosInstance } from './types';
+function createInstance(): AxiosInstance {
+    let context = new Axios();
+    let instance = Axios.prototype.request.bind(context);
+    instance = Object.assign(instance, Axios.prototype, context);
+    return instance as AxiosInstance;
+}
+var axios = createInstance();
+export default axios;
+export * from './types';
+</code></pre>
+<h3 id="t42.2 axios\Axios.tsx">2.2 axios\Axios.tsx <a href="#t42.2 axios\Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-tsx">import { AxiosRequestConfig, AxiosResponse } from './types';
+import qs from 'qs';
+import parse from 'parse-headers';
+class Axios {
+    request(config: AxiosRequestConfig): Promise<axiosresponse> {
+        return this.dispatchRequest(config);
+    }
+    dispatchRequest(config: AxiosRequestConfig): Promise<axiosresponse> {
+        return new Promise((resolve, reject) =&gt; {
+            let { method = 'get', url, params } = config;
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+                url = url + (url.indexOf('?') == -1 ? '?' : '&amp;') + paramsString;
+            }
+            request.open(method, url, true);
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+                if (request.readyState === 4) {
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+                        resolve(response);
+                    } else {
+                        reject('请求失败');
+                    }
+                }
+            }
+            request.send();
+        });
+    }
+}
+export default Axios;
+</axiosresponse></axiosresponse></code></pre>
+<h3 id="t52.3 axios\types.tsx">2.3 axios\types.tsx <a href="#t52.3 axios\types.tsx"> # </a></h3>
+<p>src\axios\types.tsx</p>
+<pre><code class="lang-tsx">export type Methods = 'GET' | 'get' | 'POST' | 'post' | 'PUT' | 'put' | 'DELETE' | 'delete';
+export interface AxiosInstance {
+    <t =="" any="">(config: AxiosRequestConfig): Promise<axiosresponse<t>&gt;
+}
+export interface AxiosRequestConfig {
+    url: string;
+    method?: Methods;
+    params?: Record<string, any="">
+}
+
+export interface AxiosResponse<t =="" any=""> {
+    data: T;
+    status: number;
+    statusText: string;
+    headers: any;
+    config: AxiosRequestConfig;
+    request?: any;
+}
+</t></string,></axiosresponse<t></t></code></pre>
+<h2 id="t63. POST请求">3. POST请求 <a href="#t63. POST请求"> # </a></h2>
+<h3 id="t73.1 src\index.tsx">3.1 src\index.tsx <a href="#t73.1 src\index.tsx"> # </a></h3>
+<pre><code class="lang-diff">import axios, { AxiosResponse } from './axios';
+const baseURL = 'http://localhost:8080';
+export interface User {
+    username: string;
+    password: string;
+}
+let user: User = {
+    username: 'zhufeng',
+    password: '123456'
+};
+axios({
+<span class="hljs-addition">+    method: 'post',</span>
+<span class="hljs-addition">+    url: baseURL + '/post',</span>
+<span class="hljs-addition">+    headers: { 'Content-Type': 'application/json' },</span>
+<span class="hljs-addition">+    data: user,</span>
+}).then((response: AxiosResponse) =&gt; {
+    console.log(response);
+    return response.data;
+}).then((data: User) =&gt; {
+    console.log(data);
+}).catch(function (error: any) {
+    console.log(error);
+});
+</code></pre>
+<h3 id="t83.2 axios\types.tsx">3.2 axios\types.tsx <a href="#t83.2 axios\types.tsx"> # </a></h3>
+<p>src\axios\types.tsx</p>
+<pre><code class="lang-diff">export type Methods = 'GET' | 'get' | 'POST' | 'post' | 'PUT' | 'put' | 'DELETE' | 'delete';
+export interface AxiosInstance {
+    &lt;T = any&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt;
+}
+export interface AxiosRequestConfig {
+    url: string;
+    method?: Methods;
+    params?: Record&lt;string, any&gt;;
+<span class="hljs-addition">+    data?: Record&lt;string, any&gt;;</span>
+<span class="hljs-addition">+    headers?: Record&lt;string, any&gt;;</span>
+}
+
+export interface AxiosResponse&lt;T = any&gt; {
+    data: T;
+    status: number;
+    statusText: string;
+    headers: any;
+    config: AxiosRequestConfig;
+    request?: any;
+}
+</code></pre>
+<h3 id="t93.3 axios\Axios.tsx">3.3 axios\Axios.tsx <a href="#t93.3 axios\Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-diff">import { AxiosRequestConfig, AxiosResponse } from './types';
+import qs from 'qs';
+import parse from 'parse-headers';
+class Axios {
+    request(config: AxiosRequestConfig): Promise&lt;AxiosResponse&gt; {
+        return this.dispatchRequest(config);
+    }
+    dispatchRequest(config: AxiosRequestConfig): Promise&lt;AxiosResponse&gt; {
+        return new Promise((resolve, reject) =&gt; {
+<span class="hljs-addition">+           let { method = 'get', url, params, headers, data } = config;</span>
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+                url = url + (url.indexOf('?') == -1 ? '?' : '&amp;') + paramsString;
+            }
+            request.open(method, url, true);
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+                if (request.readyState <span class="hljs-comment">=== 4) {</span>
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+                        resolve(response);
+                    } else {
+                        reject('请求失败');
+                    }
+                }
+            }
+<span class="hljs-addition">+           if (headers) {</span>
+<span class="hljs-addition">+               for (let key in headers) {</span>
+<span class="hljs-addition">+                   request.setRequestHeader(key, headers[key]);</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+           let body: string | null = null;</span>
+<span class="hljs-addition">+           if (data &amp;&amp; typeof data == 'object') {</span>
+<span class="hljs-addition">+               body = JSON.stringify(data);</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+           request.send(body);</span>
+        });
+    }
+}
+export default Axios;
+</code></pre>
+<h2 id="t104. 错误处理">4. 错误处理 <a href="#t104. 错误处理"> # </a></h2>
+<ul>
+<li>网络异常</li>
+<li>超时异常</li>
+<li>错误状态码</li>
+</ul>
+<h3 id="t114.1 axios\Axios.tsx">4.1 axios\Axios.tsx <a href="#t114.1 axios\Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-diff">import { AxiosRequestConfig, AxiosResponse } from './types';
+import qs from 'qs';
+import parse from 'parse-headers';
+class Axios {
+    request(config: AxiosRequestConfig): Promise&lt;AxiosResponse&gt; {
+        return this.dispatchRequest(config);
+    }
+    dispatchRequest(config: AxiosRequestConfig): Promise&lt;AxiosResponse&gt; {
+        return new Promise((resolve, reject) =&gt; {
+<span class="hljs-addition">+           let { method = 'get', url, params, headers, data, timeout } = config;</span>
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+                url = url + (url.indexOf('?') == -1 ? '?' : '&amp;') + paramsString;
+            }
+            request.open(method, url, true);
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+<span class="hljs-addition">+               if (request.readyState === 4 &amp;&amp; request.status !== 0) {</span>
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+                        resolve(response);
+                    } else {
+<span class="hljs-addition">+                        reject(new Error(`Request failed with status code ${request.status}`));</span>
+                    }
+                }
+            }
+            if (headers) {
+                for (let key in headers) {
+                    request.setRequestHeader(key, headers[key]);
+                }
+            }
+            let body: string | null = null;
+            if (data &amp;&amp; typeof data == 'object') {
+                body = JSON.stringify(data);
+            }
+<span class="hljs-addition">+           request.onerror = () =&gt; { //网络异常</span>
+<span class="hljs-addition">+               reject(new Error('Network Error'));</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+           if (timeout) {</span>
+<span class="hljs-addition">+               request.timeout = timeout;</span>
+<span class="hljs-addition">+               request.ontimeout = () =&gt; { //超时异常</span>
+<span class="hljs-addition">+                   reject(new Error(`timeout of ${timeout}ms exceeded`));</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           }</span>
+            request.send(body);
+        });
+    }
+}
+export default Axios;
+</code></pre>
+<h3 id="t124.2 src\index.tsx">4.2 src\index.tsx <a href="#t124.2 src\index.tsx"> # </a></h3>
+<h4 id="t134.2.1 网络错误">4.2.1 网络错误 <a href="#t134.2.1 网络错误"> # </a></h4>
+<pre><code class="lang-diff"><span class="hljs-addition">+setTimeout(() =&gt; {</span>
+    axios({
+        method: 'post',
+        url: baseURL + '/post',
+        headers: { 'Content-Type': 'application/json' },
+        data: user,
+    }).then((response: AxiosResponse) =&gt; {
+        console.log(response);
+        return response.data;
+    }).then((data: User) =&gt; {
+        console.log(data);
+    }).catch(function (error: any) {
+        console.log(error);
+    });
+<span class="hljs-addition">+}, 5000);</span>
+</code></pre>
+<h4 id="t144.2.2 超时">4.2.2 超时 <a href="#t144.2.2 超时"> # </a></h4>
+<pre><code class="lang-diff">axios({
+    method: 'post',
+<span class="hljs-addition">+    url: baseURL + '/post_timeout?timeout=3000',</span>
+    headers: { 'Content-Type': 'application/json' },
+<span class="hljs-addition">+    timeout: 1000,</span>
+    data: user,
+}).then((response: AxiosResponse) =&gt; {
+    console.log(response);
+    return response.data;
+}).then((data: User) =&gt; {
+    console.log(data);
+}).catch(function (error: any) {
+    console.log(error);
+});
+</code></pre>
+<h4 id="t154.2.3 错误状态码">4.2.3 错误状态码 <a href="#t154.2.3 错误状态码"> # </a></h4>
+<pre><code class="lang-diff">axios({
+    method: 'post',
+<span class="hljs-addition">+    url: baseURL + '/post_status?code=300',</span>
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 1000,
+    data: user,
+}).then((response: AxiosResponse) =&gt; {
+    console.log(response);
+    return response.data;
+}).then((data: User) =&gt; {
+    console.log(data);
+}).catch(function (error: any) {
+    console.log(error);
+});
+</code></pre>
+<h2 id="t165. 拦截器功能">5. 拦截器功能 <a href="#t165. 拦截器功能"> # </a></h2>
+<h3 id="t175.1 src\index.tsx">5.1 src\index.tsx <a href="#t175.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-diff">import axios from './axios'
+import { AxiosResponse, AxiosRequestConfig } from './axios';
+const baseURL = 'http://localhost:8080';
+interface User {
+    username: string;
+    password: string;
+}
+let user: User = {
+    username: 'zhufeng',
+    password: '123456'
+};
+<span class="hljs-addition">+console.time('cost');</span>
+<span class="hljs-addition">+axios.interceptors.request.use((config: AxiosRequestConfig) =&gt; {</span>
+<span class="hljs-addition">+    console.timeEnd('cost');</span>
+<span class="hljs-addition">+    config.headers!.name += '1';</span>
+<span class="hljs-addition">+    return config;</span>
+<span class="hljs-addition">+    //return Promise.reject('在1处失败了!');</span>
+<span class="hljs-addition">+})</span>
+<span class="hljs-addition">+let request_interceptor = axios.interceptors.request.use((config: AxiosRequestConfig) =&gt; {</span>
+<span class="hljs-addition">+    config.headers!.name += '2';</span>
+<span class="hljs-addition">+    return config;</span>
+<span class="hljs-addition">+})</span>
+<span class="hljs-addition">+axios.interceptors.request.use((config: AxiosRequestConfig) =&gt; {</span>
+<span class="hljs-addition">+    return new Promise&lt;AxiosRequestConfig&gt;(function (resolve) {</span>
+<span class="hljs-addition">+        setTimeout(function () {</span>
+<span class="hljs-addition">+            config.headers!.name += '3';</span>
+<span class="hljs-addition">+            resolve(config);</span>
+<span class="hljs-addition">+        }, 3000);</span>
+<span class="hljs-addition">+    });</span>
+<span class="hljs-addition">+})</span>
+<span class="hljs-addition">+axios.interceptors.request.eject(request_interceptor);</span>
+<span class="hljs-addition">+axios.interceptors.response.use((response: AxiosResponse) =&gt; {</span>
+<span class="hljs-addition">+    response.data.username += '1'</span>
+<span class="hljs-addition">+    return response;</span>
+<span class="hljs-addition">+})</span>
+<span class="hljs-addition">+let response_interceptor = axios.interceptors.response.use((response: AxiosResponse) =&gt; {</span>
+<span class="hljs-addition">+    response.data.username += '2'</span>
+<span class="hljs-addition">+    return response;</span>
+<span class="hljs-addition">+})</span>
+<span class="hljs-addition">+axios.interceptors.response.use((response: AxiosResponse) =&gt; {</span>
+<span class="hljs-addition">+    response.data.username += '3';</span>
+<span class="hljs-addition">+    return response;</span>
+<span class="hljs-addition">+    //return Promise.reject('失败了');</span>
+<span class="hljs-addition">+})</span>
+
+<span class="hljs-addition">+axios.interceptors.response.eject(response_interceptor);</span>
+axios&lt;User&gt;({
+    method: 'post',
+<span class="hljs-addition">+    url: baseURL + '/post',</span>
+<span class="hljs-addition">+    headers: { 'Content-Type': 'application/json', name: 'name' },</span>
+    data: user,
+<span class="hljs-addition">+}).then((response: AxiosRequestConfig | AxiosResponse&lt;User&gt;) =&gt; {</span>
+    console.log(response);
+    console.timeEnd('cost');
+<span class="hljs-addition">+    return response.data as User;</span>
+}).then((data: User) =&gt; {
+    console.log(data);
+}).catch(function (error: any) {
+    console.log('error', error);
+});
+</code></pre>
+<h3 id="t185.2 src\axios\types.tsx">5.2 src\axios\types.tsx <a href="#t185.2 src\axios\types.tsx"> # </a></h3>
+<p>src\axios\types.tsx</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import AxiosInterceptorManager from './AxiosInterceptorManager';</span>
+export type Methods = 'GET' | 'get' | 'POST' | 'post' | 'PUT' | 'put' | 'DELETE' | 'delete';
+export interface AxiosInstance {
+    &lt;T = any&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt;;
+<span class="hljs-addition">+    interceptors: {</span>
+<span class="hljs-addition">+        request: AxiosInterceptorManager&lt;AxiosRequestConfig&gt;;</span>
+<span class="hljs-addition">+        response: AxiosInterceptorManager&lt;AxiosResponse&gt;;</span>
+<span class="hljs-addition">+    };</span>
+}
+export interface AxiosRequestConfig {
+    url: string;
+    method?: Methods;
+    params?: Record&lt;string, any&gt;;
+    data?: Record&lt;string, any&gt;;
+    headers?: Record&lt;string, any&gt;;
+    timeout?: number;
+}
+
+export interface AxiosResponse&lt;T = any&gt; {
+    data: T;
+    status: number;
+    statusText: string;
+    headers: any;
+    config: AxiosRequestConfig;
+    request?: any;
+}
+</code></pre>
+<h3 id="t195.3 AxiosInterceptorManager.ts">5.3 AxiosInterceptorManager.ts <a href="#t195.3 AxiosInterceptorManager.ts"> # </a></h3>
+<p>src\axios\AxiosInterceptorManager.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> interface OnFulfilledFn&lt;V&gt; {
+    (value: V): V | <span class="hljs-built_in">Promise</span>&lt;V&gt;
+}
+
+<span class="hljs-keyword">export</span> interface OnRejectedFn {
+    (error: any): any
+}
+<span class="hljs-keyword">export</span> interface Interceptor&lt;T = any&gt; {
+    <span class="hljs-attr">onFulfilled</span>: OnFulfilledFn&lt;T&gt;
+    onRejected?: OnRejectedFn
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InterceptorManager</span>&lt;<span class="hljs-title">V</span>&gt; </span>{
+    private interceptors: <span class="hljs-built_in">Array</span>&lt;Interceptor&lt;V&gt; | <span class="hljs-literal">null</span>&gt; = []
+    use(onFulfilled: OnFulfilledFn&lt;V&gt;, onRejected?: OnRejectedFn): number {
+        <span class="hljs-keyword">this</span>.interceptors.push({
+            onFulfilled,
+            onRejected
+        })
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.interceptors.length - <span class="hljs-number">1</span>;
+    }
+    eject(id: number): <span class="hljs-keyword">void</span> {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.interceptors[id]) {
+            <span class="hljs-keyword">this</span>.interceptors[id] = <span class="hljs-literal">null</span>;
+        }
+    }
+}
+</code></pre>
+<h3 id="t205.3 src\axios\Axios.tsx">5.3 src\axios\Axios.tsx <a href="#t205.3 src\axios\Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-diff">import { AxiosRequestConfig, AxiosResponse } from './types';
+<span class="hljs-addition">+import AxiosInterceptorManager, { Interceptor } from './AxiosInterceptorManager';</span>
+import qs from 'qs';
+import parse from 'parse-headers';
+<span class="hljs-addition">+interface Interceptors {</span>
+<span class="hljs-addition">+    request: AxiosInterceptorManager&lt;AxiosRequestConfig&gt;;</span>
+<span class="hljs-addition">+    response: AxiosInterceptorManager&lt;AxiosResponse&gt;;</span>
+<span class="hljs-addition">+}</span>
+class Axios {
+<span class="hljs-addition">+    public interceptors: Interceptors = {</span>
+<span class="hljs-addition">+        request: new AxiosInterceptorManager&lt;AxiosRequestConfig&gt;(),</span>
+<span class="hljs-addition">+        response: new AxiosInterceptorManager&lt;AxiosResponse&gt;()</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    request&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; {</span>
+<span class="hljs-deletion">-        return this.dispatchRequest(config);</span>
+<span class="hljs-addition">+        const chain: Interceptor[] = [</span>
+<span class="hljs-addition">+            {</span>
+<span class="hljs-addition">+                onFulfilled: this.dispatchRequest,</span>
+<span class="hljs-addition">+                onRejected: undefined</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        ]</span>
+<span class="hljs-addition">+        this.interceptors.request.interceptors.forEach((interceptor: Interceptor&lt;AxiosRequestConfig&gt; | null) =&gt; {</span>
+<span class="hljs-addition">+            interceptor &amp;&amp; chain.unshift(interceptor);</span>
+<span class="hljs-addition">+        })</span>
+
+<span class="hljs-addition">+        this.interceptors.response.interceptors.forEach((interceptor: Interceptor&lt;AxiosResponse&lt;T&gt;&gt; | null) =&gt; {</span>
+<span class="hljs-addition">+            interceptor &amp;&amp; chain.push(interceptor)</span>
+<span class="hljs-addition">+        })</span>
+<span class="hljs-addition">+        let promise: Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; = Promise.resolve(config);</span>
+
+<span class="hljs-addition">+        while (chain.length) {</span>
+<span class="hljs-addition">+            const { onFulfilled, onRejected } = chain.shift()!;</span>
+<span class="hljs-addition">+            promise = promise.then(onFulfilled, onRejected);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        return promise;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    dispatchRequest&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt; {</span>
+<span class="hljs-addition">+        return new Promise&lt;AxiosResponse&lt;T&gt;&gt;((resolve, reject) =&gt; {</span>
+            let { method = 'get', url, params, headers, data, timeout } = config;
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+                url = url + (url.indexOf('?') == -1 ? '?' : '&amp;') + paramsString;
+            }
+            request.open(method, url, true);
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+                if (request.readyState <span class="hljs-comment">=== 4 &amp;&amp; request.status !== 0) {</span>
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+                        resolve(response);
+                    } else {
+                        reject(new Error(`Request failed with status code ${request.status}`));
+                    }
+                }
+            }
+            if (headers) {
+                for (let key in headers) {
+                    request.setRequestHeader(key, headers[key]);
+                }
+            }
+            let body: string | null = null;
+            if (data &amp;&amp; typeof data == 'object') {
+                body = JSON.stringify(data);
+            }
+            request.onerror = () =&gt; { //网络异常
+                reject(new Error('Network Error'));
+            }
+            if (timeout) {
+                request.timeout = timeout;
+                request.ontimeout = () =&gt; { //超时异常
+                    reject(new Error(`timeout of ${timeout}ms exceeded`));
+                }
+            }
+            request.send(body);
+        });
+    }
+}
+export default Axios;
+</code></pre>
+<h2 id="t216. 合并配置">6. 合并配置 <a href="#t216. 合并配置"> # </a></h2>
+<h3 id="t226.1 axios\types.tsx">6.1 axios\types.tsx <a href="#t226.1 axios\types.tsx"> # </a></h3>
+<p>src\axios\types.tsx</p>
+<pre><code class="lang-diff">export interface AxiosRequestConfig extends Record&lt;string, any&gt; {
+<span class="hljs-addition">+   url?: string;</span>
+    method?: Methods;
+    params?: Record&lt;string, any&gt;;
+    data?: Record&lt;string, any&gt;;
+    headers?: Record&lt;string, any&gt;;
+    timeout?: number;
+}
+</code></pre>
+<h3 id="t236.2 Axios.tsx">6.2 Axios.tsx <a href="#t236.2 Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-diff">import { AxiosRequestConfig, AxiosResponse } from './types';
+import AxiosInterceptorManager, { Interceptor } from './AxiosInterceptorManager';
+import qs from 'qs';
+import parse from 'parse-headers';
+interface Interceptors {
+    request: AxiosInterceptorManager&lt;AxiosRequestConfig&gt;;
+    response: AxiosInterceptorManager&lt;AxiosResponse&gt;;
+}
+<span class="hljs-addition">+let defaults: AxiosRequestConfig = {</span>
+<span class="hljs-addition">+    method: 'get',</span>
+<span class="hljs-addition">+    timeout: 0,</span>
+<span class="hljs-addition">+    headers: {</span>
+<span class="hljs-addition">+        common: {</span>
+<span class="hljs-addition">+            accept: 'application/json'</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let getStyleMethods = ['get', 'head', 'delete', 'options'];</span>
+<span class="hljs-addition">+getStyleMethods.forEach((method: string) =&gt; {</span>
+<span class="hljs-addition">+    defaults.headers![method] = {};</span>
+<span class="hljs-addition">+});</span>
+
+<span class="hljs-addition">+let postStyleMethods = ['put', 'post', 'patch'];</span>
+<span class="hljs-addition">+postStyleMethods.forEach((method: string) =&gt; {</span>
+<span class="hljs-addition">+    defaults.headers![method] = {};</span>
+<span class="hljs-addition">+});</span>
+<span class="hljs-addition">+let allMethods = [...getStyleMethods, ...postStyleMethods];</span>
+class Axios {
+<span class="hljs-addition">+    public defaults: AxiosRequestConfig = defaults;</span>
+    public interceptors: Interceptors = {
+        request: new AxiosInterceptorManager&lt;AxiosRequestConfig&gt;(),
+        response: new AxiosInterceptorManager&lt;AxiosResponse&gt;()
+    }
+    request&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; {
+        //return this.dispatchRequest(config);
+<span class="hljs-addition">+       config.headers = Object.assign(this.defaults.headers, config.headers);</span>
+        const chain: Interceptor[] = [
+            {
+                onFulfilled: this.dispatchRequest,
+                onRejected: undefined
+            }
+        ]
+        this.interceptors.request.interceptors.forEach((interceptor: Interceptor&lt;AxiosRequestConfig&gt; | null) =&gt; {
+            interceptor &amp;&amp; chain.unshift(interceptor);
+        })
+
+        this.interceptors.response.interceptors.forEach((interceptor: Interceptor&lt;AxiosResponse&lt;T&gt;&gt; | null) =&gt; {
+            interceptor &amp;&amp; chain.push(interceptor)
+        })
+        let promise: Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; = Promise.resolve(config);
+
+        while (chain.length) {
+            const { onFulfilled, onRejected } = chain.shift()!;
+            promise = promise.then(onFulfilled, onRejected);
+        }
+        return promise;
+    }
+    dispatchRequest&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt; {
+        return new Promise&lt;AxiosResponse&lt;T&gt;&gt;((resolve, reject) =&gt; {
+            let { method = 'get', url, params, headers, data, timeout } = config;
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+<span class="hljs-addition">+               url = url + (url!.indexOf('?') == -1 ? '?' : '&amp;') + paramsString;</span>
+            }
+<span class="hljs-addition">+            request.open(method, url!, true);</span>
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+                if (request.readyState <span class="hljs-comment">=== 4 &amp;&amp; request.status !== 0) {</span>
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+                        resolve(response);
+                    } else {
+                        reject(new Error(`Request failed with status code ${request.status}`));
+                    }
+                }
+            }
+<span class="hljs-addition">+            if (headers) {</span>
+<span class="hljs-addition">+                for (let key in headers) {</span>
+<span class="hljs-addition">+                    if (key === 'common' || allMethods.includes(key)) {</span>
+<span class="hljs-addition">+                        for (let key2 in headers[key]) {</span>
+<span class="hljs-addition">+                            request.setRequestHeader(key2, headers[key][key2]);</span>
+<span class="hljs-addition">+                        }</span>
+<span class="hljs-addition">+                    } else {</span>
+<span class="hljs-addition">+                        request.setRequestHeader(key, headers[key]);</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+            let body: string | null = null;
+            if (data &amp;&amp; typeof data == 'object') {
+                body = JSON.stringify(data);
+            }
+            request.onerror = () =&gt; { //网络异常
+                reject(new Error('Network Error'));
+            }
+            if (timeout) {
+                request.timeout = timeout;
+                request.ontimeout = () =&gt; { //超时异常
+                    reject(new Error(`timeout of ${timeout}ms exceeded`));
+                }
+            }
+            request.send(body);
+        });
+    }
+}
+export default Axios;
+</code></pre>
+<h2 id="t247.转换请求与响应">7.转换请求与响应 <a href="#t247.转换请求与响应"> # </a></h2>
+<h3 id="t257.1 axios\types.tsx">7.1 axios\types.tsx <a href="#t257.1 axios\types.tsx"> # </a></h3>
+<p>src\axios\types.tsx</p>
+<pre><code class="lang-diff">export interface AxiosRequestConfig extends Record&lt;string, any&gt; {
+    url?: string;
+    method?: Methods;
+    params?: Record&lt;string, any&gt;;
+    data?: Record&lt;string, any&gt;;
+    headers?: Record&lt;string, any&gt;;
+    timeout?: number;
+<span class="hljs-addition">+    transformRequest?: (data: Record&lt;string, any&gt;, headers: Record&lt;string, any&gt;) =&gt; any;</span>
+<span class="hljs-addition">+    transformResponse?: (data: any) =&gt; any;</span>
+}
+</code></pre>
+<h3 id="t267.2 axios\Axios.tsx">7.2 axios\Axios.tsx <a href="#t267.2 axios\Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-diff">import { AxiosRequestConfig, AxiosResponse } from './types';
+import AxiosInterceptorManager, { Interceptor } from './AxiosInterceptorManager';
+import qs from 'qs';
+import parse from 'parse-headers';
+interface Interceptors {
+    request: AxiosInterceptorManager&lt;AxiosRequestConfig&gt;;
+    response: AxiosInterceptorManager&lt;AxiosResponse&gt;;
+}
+let defaults: AxiosRequestConfig = {
+    method: 'get',
+    timeout: 0,
+    headers: {
+        common: {
+            accept: 'application/json'
+        }
+    },
+<span class="hljs-addition">+    transformRequest: function (data: Record&lt;string, any&gt;, headers: Record&lt;string, any&gt;) {</span>
+<span class="hljs-addition">+        headers['content-type'] = 'application/x-www-form-urlencoded';</span>
+<span class="hljs-addition">+        return qs.stringify(data);</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    transformResponse(data: any) {</span>
+<span class="hljs-addition">+        if (typeof data == 'string')</span>
+<span class="hljs-addition">+            data = JSON.parse(data);</span>
+<span class="hljs-addition">+        return data;</span>
+<span class="hljs-addition">+    },</span>
+}
+let getStyleMethods = ['get', 'head', 'delete', 'options'];
+getStyleMethods.forEach((method: string) =&gt; {
+    defaults.headers![method] = {};
+});
+
+let postStyleMethods = ['put', 'post', 'patch'];
+postStyleMethods.forEach((method: string) =&gt; {
+    defaults.headers![method] = {};
+});
+let allMethods = [...getStyleMethods, ...postStyleMethods];
+class Axios {
+    public defaults: AxiosRequestConfig = defaults;
+    public interceptors: Interceptors = {
+        request: new AxiosInterceptorManager&lt;AxiosRequestConfig&gt;(),
+        response: new AxiosInterceptorManager&lt;AxiosResponse&gt;()
+    }
+    request&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; {
+        //return this.dispatchRequest(config);
+<span class="hljs-addition">+        if (config.transformRequest &amp;&amp; config.data)</span>
+<span class="hljs-addition">+            config.data = config.transformRequest(config.data, config.headers = {});</span>
+        config.headers = Object.assign(this.defaults.headers, config.headers);
+        const chain: Interceptor[] = [
+            {
+                onFulfilled: this.dispatchRequest,
+                onRejected: undefined
+            }
+        ]
+        this.interceptors.request.interceptors.forEach((interceptor: Interceptor&lt;AxiosRequestConfig&gt; | null) =&gt; {
+            interceptor &amp;&amp; chain.unshift(interceptor);
+        })
+
+        this.interceptors.response.interceptors.forEach((interceptor: Interceptor&lt;AxiosResponse&lt;T&gt;&gt; | null) =&gt; {
+            interceptor &amp;&amp; chain.push(interceptor)
+        })
+        let promise: Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; = Promise.resolve(config);
+
+        while (chain.length) {
+            const { onFulfilled, onRejected } = chain.shift()!;
+            promise = promise.then(onFulfilled, onRejected);
+        }
+        return promise;
+    }
+    dispatchRequest&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt; {
+        return new Promise&lt;AxiosResponse&lt;T&gt;&gt;((resolve, reject) =&gt; {
+            let { method = 'get', url, params, headers, data, timeout } = config;
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+                url = url + (url!.indexOf('?') == -1 ? '?' : '&amp;') + paramsString;
+            }
+            request.open(method, url!, true);
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+                if (request.readyState <span class="hljs-comment">=== 4 &amp;&amp; request.status !== 0) {</span>
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+<span class="hljs-addition">+                        if (config.transformResponse) {</span>
+<span class="hljs-addition">+                            response.data = config.transformResponse(response.data);</span>
+<span class="hljs-addition">+                        }</span>
+                        resolve(response);
+                    } else {
+                        reject(new Error(`Request failed with status code ${request.status}`));
+                    }
+                }
+            }
+            if (headers) {
+                for (let key in headers) {
+                    if (key <span class="hljs-comment">=== 'common' || allMethods.includes(key)) {</span>
+                        for (let key2 in headers[key]) {
+                            request.setRequestHeader(key2, headers[key][key2]);
+                        }
+                    } else {
+                        request.setRequestHeader(key, headers[key]);
+                    }
+                }
+            }
+            let body: string | null = null;
+            if (data &amp;&amp; typeof data == 'object') {
+                body = JSON.stringify(data);
+            }
+            request.onerror = () =&gt; { //网络异常
+                reject(new Error('Network Error'));
+            }
+            if (timeout) {
+                request.timeout = timeout;
+                request.ontimeout = () =&gt; { //超时异常
+                    reject(new Error(`timeout of ${timeout}ms exceeded`));
+                }
+            }
+            request.send(body);
+        });
+    }
+}
+export default Axios;
+</code></pre>
+<h2 id="t278.任务取消">8.任务取消 <a href="#t278.任务取消"> # </a></h2>
+<h3 id="t288.1 src\index.tsx">8.1 src\index.tsx <a href="#t288.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'./axios'</span>
+<span class="hljs-keyword">import</span> { AxiosResponse, AxiosRequestConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">'./axios'</span>;
+interface User {
+    <span class="hljs-attr">username</span>: string;
+    password: string;
+}
+<span class="hljs-keyword">const</span> CancelToken = axios.CancelToken;
+<span class="hljs-keyword">const</span> source = CancelToken.source();
+axios({
+    <span class="hljs-attr">method</span>: <span class="hljs-string">'post'</span>,
+    <span class="hljs-attr">baseURL</span>: <span class="hljs-string">'http://localhost:8080'</span>,
+    <span class="hljs-attr">url</span>: <span class="hljs-string">'/post_timeout?timeout=2000'</span>,
+    <span class="hljs-attr">timeout</span>: <span class="hljs-number">3000</span>,
+    <span class="hljs-attr">cancelToken</span>: source.token
+}).then(<span class="hljs-function">(<span class="hljs-params">response: AxiosRequestConfig | AxiosResponse&lt;User&gt;</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(response);
+    <span class="hljs-keyword">return</span> response.data <span class="hljs-keyword">as</span> User;
+}).then(<span class="hljs-function">(<span class="hljs-params">data: User</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(data);
+}).catch(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error: any</span>) </span>{
+    <span class="hljs-keyword">if</span> (axios.isCancel(error)) {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'请求取消'</span>, error);
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'error'</span>, error);
+    }
+});
+source.cancel(<span class="hljs-string">'用户取消请求'</span>);
+</code></pre>
+<h3 id="t298.2 axios\types.tsx">8.2 axios\types.tsx <a href="#t298.2 axios\types.tsx"> # </a></h3>
+<p>src\axios\types.tsx</p>
+<pre><code class="lang-diff">export interface AxiosInstance {
+    &lt;T = any&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt;;
+    interceptors: {
+        request: AxiosInterceptorManager&lt;AxiosRequestConfig&gt;;
+        response: AxiosInterceptorManager&lt;AxiosResponse&gt;;
+    };
+<span class="hljs-addition">+    CancelToken: any;</span>
+<span class="hljs-addition">+    isCancel: any</span>
+}
+</code></pre>
+<h3 id="t308.3 axios\cancel.tsx">8.3 axios\cancel.tsx <a href="#t308.3 axios\cancel.tsx"> # </a></h3>
+<p>src\axios\cancel.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Cancel</span> </span>{
+    <span class="hljs-keyword">constructor</span>(public reason: string) { }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isCancel</span>(<span class="hljs-params">error: any</span>) </span>{
+    <span class="hljs-keyword">return</span> error <span class="hljs-keyword">instanceof</span> Cancel;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CancelToken</span> </span>{
+    public resolve: any;
+    source() {
+        <span class="hljs-keyword">return</span> {
+            <span class="hljs-attr">token</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+                <span class="hljs-keyword">this</span>.resolve = resolve;
+            }),
+            <span class="hljs-attr">cancel</span>: <span class="hljs-function">(<span class="hljs-params">reason: string</span>) =&gt;</span> {
+                <span class="hljs-keyword">this</span>.resolve(<span class="hljs-keyword">new</span> Cancel(reason));
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="t318.4 axios\index.tsx">8.4 axios\index.tsx <a href="#t318.4 axios\index.tsx"> # </a></h3>
+<p>src\axios\index.tsx</p>
+<pre><code class="lang-diff">import Axios from './Axios';
+import { AxiosInstance } from './types';
+<span class="hljs-addition">+import { CancelToken, isCancel } from './cancel';</span>
+function createInstance(): AxiosInstance {
+    let context = new Axios();
+    let instance = Axios.prototype.request.bind(context);
+    instance = Object.assign(instance, Axios.prototype, context);
+    return instance as AxiosInstance;
+}
+var axios = createInstance();
+<span class="hljs-addition">+axios.CancelToken = new CancelToken();</span>
+<span class="hljs-addition">+axios.isCancel = isCancel;</span>
+export default axios;
+export * from './types';
+</code></pre>
+<h3 id="t328.5 axios\Axios.tsx">8.5 axios\Axios.tsx <a href="#t328.5 axios\Axios.tsx"> # </a></h3>
+<p>src\axios\Axios.tsx</p>
+<pre><code class="lang-diff">import { AxiosRequestConfig, AxiosResponse } from './types';
+import AxiosInterceptorManager, { Interceptor } from './AxiosInterceptorManager';
+import qs from 'qs';
+import parse from 'parse-headers';
+interface Interceptors {
+    request: AxiosInterceptorManager&lt;AxiosRequestConfig&gt;;
+    response: AxiosInterceptorManager&lt;AxiosResponse&gt;;
+}
+let defaults: AxiosRequestConfig = {
+    method: 'get',
+    timeout: 0,
+    headers: {
+        common: {
+            accept: 'application/json'
+        }
+    },
+    transformRequest: function (data: Record&lt;string, any&gt;, headers: Record&lt;string, any&gt;) {
+        headers['content-type'] = 'application/x-www-form-urlencoded';
+        return qs.stringify(data);
+    },
+    transformResponse(data: any) {
+        if (typeof data == 'string')
+            data = JSON.parse(data);
+        return data;
+    },
+}
+let getStyleMethods = ['get', 'head', 'delete', 'options'];
+getStyleMethods.forEach((method: string) =&gt; {
+    defaults.headers![method] = {};
+});
+
+let postStyleMethods = ['put', 'post', 'patch'];
+postStyleMethods.forEach((method: string) =&gt; {
+    defaults.headers![method] = {};
+});
+let allMethods = [...getStyleMethods, ...postStyleMethods];
+class Axios {
+    public defaults: AxiosRequestConfig = defaults;
+    public interceptors: Interceptors = {
+        request: new AxiosInterceptorManager&lt;AxiosRequestConfig&gt;(),
+        response: new AxiosInterceptorManager&lt;AxiosResponse&gt;()
+    }
+    request&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; {
+        //return this.dispatchRequest(config);
+        if (config.transformRequest &amp;&amp; config.data)
+            config.data = config.transformRequest(config.data, config.headers = {});
+        config.headers = Object.assign(this.defaults.headers, config.headers);
+        config = Object.assign(this.defaults, config);
+        if (!config.url!.startsWith('http') &amp;&amp; config.baseURL) {
+            config.url = config.baseURL + config.url;
+        }
+        const chain: Interceptor[] = [
+            {
+                onFulfilled: this.dispatchRequest,
+                onRejected: undefined
+            }
+        ]
+        this.interceptors.request.interceptors.forEach((interceptor: Interceptor&lt;AxiosRequestConfig&gt; | null) =&gt; {
+            interceptor &amp;&amp; chain.unshift(interceptor);
+        })
+
+        this.interceptors.response.interceptors.forEach((interceptor: Interceptor&lt;AxiosResponse&lt;T&gt;&gt; | null) =&gt; {
+            interceptor &amp;&amp; chain.push(interceptor)
+        })
+        let promise: Promise&lt;AxiosRequestConfig | AxiosResponse&lt;T&gt;&gt; = Promise.resolve(config);
+
+        while (chain.length) {
+            const { onFulfilled, onRejected } = chain.shift()!;
+            promise = promise.then(onFulfilled, onRejected);
+        }
+        return promise;
+    }
+    dispatchRequest&lt;T&gt;(config: AxiosRequestConfig): Promise&lt;AxiosResponse&lt;T&gt;&gt; {
+        return new Promise&lt;AxiosResponse&lt;T&gt;&gt;((resolve, reject) =&gt; {
+            let { method = 'get', url, params, headers, data, timeout } = config;
+            let request: XMLHttpRequest = new XMLHttpRequest();
+            if (params) {
+                let paramsString = qs.stringify(params);
+                url = url + (url!.indexOf('?') <span class="hljs-comment">=== -1 ? '?' : '&amp;') + paramsString;</span>
+            }
+            request.open(method, url!, true);
+            request.responseType = 'json';
+            request.onreadystatechange = () =&gt; {
+                if (request.readyState <span class="hljs-comment">=== 4 &amp;&amp; request.status !== 0) {</span>
+                    if (request.status &gt;= 200 &amp;&amp; request.status &lt; 300) {
+                        let response: AxiosResponse = {
+                            data: request.response,
+                            status: request.status,
+                            statusText: request.statusText,
+                            headers: parse(request.getAllResponseHeaders()),
+                            config: config,
+                            request
+                        }
+                        if (config.transformResponse) {
+                            response.data = config.transformResponse(response.data);
+                        }
+                        resolve(response);
+                    } else {
+                        reject(new Error(`Request failed with status code ${request.status}`));
+                    }
+                }
+            }
+            if (headers) {
+                for (let key in headers) {
+                    if (key <span class="hljs-comment">=== 'common' || allMethods.includes(key)) {</span>
+                        for (let key2 in headers[key]) {
+                            request.setRequestHeader(key2, headers[key][key2]);
+                        }
+                    } else {
+                        request.setRequestHeader(key, headers[key]);
+                    }
+                }
+            }
+            let body: string | null = null;
+            if (data &amp;&amp; typeof data == 'object') {
+                body = JSON.stringify(data);
+            }
+            request.onerror = () =&gt; { //网络异常
+                reject(new Error('Network Error'));
+            }
+<span class="hljs-addition">+            if (config.cancelToken) {</span>
+<span class="hljs-addition">+                config.cancelToken.then((reason: string) =&gt; {</span>
+<span class="hljs-addition">+                    request.abort();</span>
+<span class="hljs-addition">+                    reject(reason);</span>
+<span class="hljs-addition">+                });</span>
+<span class="hljs-addition">+            }</span>
+            if (timeout) {
+                request.timeout = timeout;
+                request.ontimeout = () =&gt; { //超时异常
+                    reject(new Error(`timeout of ${timeout}ms exceeded`));
+                }
+            }
+            request.send(body);
+        });
+    }
+}
+export default Axios;
+</code></pre>
+<h2 id="t339.后端接口">9.后端接口 <a href="#t339.后端接口"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">let</span> bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">true</span> }));
+app.use(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res, next</span>) </span>{
+    res.set({
+        <span class="hljs-string">'Access-Control-Allow-Origin'</span>: <span class="hljs-string">'http://localhost:3000'</span>,
+        <span class="hljs-string">'Access-Control-Allow-Credentials'</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-string">'Access-Control-Allow-Methods'</span>: <span class="hljs-string">'GET,POST, PUT, DELETE, OPTIONS'</span>,
+        <span class="hljs-string">'Access-Control-Allow-Headers'</span>: <span class="hljs-string">'Content-Type,name'</span>
+    });
+    <span class="hljs-keyword">if</span> (req.method === <span class="hljs-string">'OPTIONS'</span>) {
+        <span class="hljs-keyword">return</span> res.sendStatus(<span class="hljs-number">200</span>);
+    }
+    next();
+});
+app.get(<span class="hljs-string">'/get'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    res.json(req.query);
+});
+app.post(<span class="hljs-string">'/post'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    res.json(req.body);
+});
+app.post(<span class="hljs-string">'/post_timeout'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-keyword">let</span> { timeout } = req.query;
+    <span class="hljs-built_in">console</span>.log(req.query);
+
+    <span class="hljs-keyword">if</span> (timeout) {
+        timeout = <span class="hljs-built_in">parseInt</span>(timeout);
+    } <span class="hljs-keyword">else</span> {
+        timeout = <span class="hljs-number">0</span>;
+    }
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        res.json(req.body);
+    }, timeout);
+});
+app.post(<span class="hljs-string">'/post_status'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-keyword">let</span> { code } = req.query;
+    <span class="hljs-keyword">if</span> (code) {
+        code = <span class="hljs-built_in">parseInt</span>(code);
+    } <span class="hljs-keyword">else</span> {
+        code = <span class="hljs-number">200</span>;
+    }
+    res.statusCode = code;
+    res.json(req.body);
+});
+app.listen(<span class="hljs-number">8080</span>);
+</code></pre>
+
+    

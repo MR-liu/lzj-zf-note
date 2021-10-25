@@ -1,0 +1,140 @@
+
+        <h2 id="t01.loader 的配置">1.loader 的配置 <a href="#t01.loader 的配置"> # </a></h2>
+<h3 id="t11.1 webpack config">1.1 webpack config <a href="#t11.1 webpack config"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>: {
+        <span class="hljs-attr">rules</span>: [
+            {
+                <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.css/</span>,
+                <span class="hljs-attr">use</span>: [
+                    { <span class="hljs-attr">loader</span>: <span class="hljs-string">'style-loader'</span> },
+                    { <span class="hljs-attr">loader</span>: <span class="hljs-string">'css-loader'</span> }
+                ]
+            }
+        ]
+}
+</code></pre>
+<h3 id="t21.2 inline内联">1.2 inline内联 <a href="#t21.2 inline内联"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'style-loader!css-loader!style.css'</span>;
+</code></pre>
+<h2 id="t32.RuleSet">2.RuleSet <a href="#t32.RuleSet"> # </a></h2>
+<ul>
+<li>RuleSet 类主要作用于过滤加载 module 时符合匹配条件规则的 loader</li>
+<li>RuleSet 在内部会有一个默认的 module.defaultRules 配置</li>
+<li>在真正加载 module 之前会和你在 webpack config 配置文件当中的自定义 module.rules 进行合并，然后转化成对应的匹配过滤器</li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/WebpackOptionsDefaulter.js#L60">WebpackOptionsDefaulter</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/RuleSet.js#L104">RuleSet</a></li>
+</ul>
+<pre><code class="lang-js">[
+    { <span class="hljs-attr">type</span>: <span class="hljs-string">'javascript/auto'</span>, <span class="hljs-attr">resolve</span>: {} },
+    { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.mjs$/i</span>,<span class="hljs-attr">type</span>: <span class="hljs-string">'javascript/esm'</span>,<span class="hljs-attr">resolve</span>: { <span class="hljs-attr">mainFields</span>: [<span class="hljs-built_in">Array</span>] } },
+    { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.json$/i</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'json'</span> },
+    { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.wasm$/i</span>, <span class="hljs-attr">type</span>: <span class="hljs-string">'webassembly/experimental'</span> }
+]
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModuleFactory</span> </span>{
+    <span class="hljs-keyword">this</span>.ruleSet = <span class="hljs-keyword">new</span> RuleSet(options.defaultRules.concat(options.rules));
+}
+</code></pre>
+<h3 id="t42.1 rule配置">2.1 rule配置 <a href="#t42.1 rule配置"> # </a></h3>
+<ul>
+<li>test 用以匹配满足条件的 loader</li>
+<li>include 用以匹配满足条件的 loader</li>
+<li>exclude 排除满足条件 loader</li>
+<li>resource <a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/RuleSet.js#L183">condition </a></li>
+<li>resourceQuery 在路径中带 query 参数的匹配规则</li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/RuleSet.js#L183">normalizeRule</a>作用实际就是对传入的 rules 配置进行序列化(格式化)的处理为统一的格式</li>
+<li><a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/RuleSet.js#L413">normalizeCondition</a> 函数执行后始终返回的是一个函数，这个函数的用途就是接受模块的路径，然后使用你所定义的匹配使用去看是否满足对应的要求，如果满足那么会使用这个 loader，如果不满足那么便会过滤掉</li>
+<li>在 RuleSet 构造函数内部使用静态方法<a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/RuleSet.js#L351">normalizeUse</a>  方法来输出最终和 condition 对应的 rule 结果</li>
+<li>经过 normalizeUse 函数的格式化处理，最终的 rule 结果为一个数组，内部的 object 元素都包含 loader/options 等字段</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">static</span> normalizeRule(rule, refs, ident) {
+    <span class="hljs-keyword">let</span> condition = {
+        <span class="hljs-attr">test</span>: rule.test,
+        <span class="hljs-attr">include</span>: rule.include,
+        <span class="hljs-attr">exclude</span>: rule.exclude
+    };
+    newRule.resource = RuleSet.normalizeCondition(condition);
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">static</span> normalizeCondition(condition) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> condition === <span class="hljs-string">"string"</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">str</span> =&gt;</span> str.indexOf(condition) === <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> condition === <span class="hljs-string">"function"</span>) {
+        <span class="hljs-keyword">return</span> condition;
+    }
+    <span class="hljs-keyword">if</span> (condition <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">RegExp</span>) {
+        <span class="hljs-keyword">return</span> condition.test.bind(condition);
+    }
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">static</span> normalizeUse(use, ident) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> use === <span class="hljs-string">"function"</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">data</span> =&gt;</span> RuleSet.normalizeUse(use(data), ident);
+    }
+}
+</code></pre>
+<p>normalizeUse结果</p>
+<pre><code class="lang-js">[
+    {<span class="hljs-attr">loader</span>:<span class="hljs-string">'style-loader'</span>},
+    {<span class="hljs-attr">loader</span>:<span class="hljs-string">'css-loader'</span>}
+]
+</code></pre>
+<p>rules:</p>
+<pre><code class="lang-js"> [
+  {
+    <span class="hljs-attr">resource</span>: [<span class="hljs-built_in">Function</span>],
+    <span class="hljs-attr">resourceQuery</span>: [<span class="hljs-built_in">Function</span>],
+    <span class="hljs-attr">use</span>: [  
+      {<span class="hljs-attr">loader</span>:<span class="hljs-string">'style-loader'</span>},
+      {<span class="hljs-attr">loader</span>:<span class="hljs-string">'css-loader'</span>}
+    ]
+  }
+]
+</code></pre>
+<p><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModuleFactory.js#L270">ruleSet.exec</a></p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> result = <span class="hljs-keyword">this</span>.ruleSet.exec({
+    <span class="hljs-attr">resource</span>: resourcePath,
+    resourceQuery
+});
+</code></pre>
+<pre><code class="lang-js">[
+    {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'use'</span>,
+        <span class="hljs-attr">value</span>: {
+            <span class="hljs-attr">loader</span>: <span class="hljs-string">'style-loader'</span>,
+            <span class="hljs-attr">options</span>: {}
+        },
+        <span class="hljs-attr">enforce</span>: <span class="hljs-literal">undefined</span>
+    },
+    {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'use'</span>,
+        <span class="hljs-attr">value</span>: {
+            <span class="hljs-attr">loader</span>: <span class="hljs-string">'css-loader'</span>,
+            <span class="hljs-attr">options</span>: {}
+        },
+        <span class="hljs-attr">enforce</span>: <span class="hljs-literal">undefined</span>
+    }
+]
+</code></pre>
+<h2 id="t53.创建模块">3.创建模块 <a href="#t53.创建模块"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModuleFactory.js#L115">实例化ruleSet</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/RuleSet.js">RuleSet</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/Compilation.js">Compilation.moduleFactory.create</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModuleFactory.js#L373">NormalModuleFactory.create</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModuleFactory.js#L159-L371">resolver</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/webpackloaderflow.jpg" alt="webpackloaderflow"></p>
+<h2 id="t64.编译模块">4.编译模块 <a href="#t64.编译模块"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/Compilation.js#L1111">Compilation.buildModule</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/Compilation.js#L739">Compilation.module.build</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModule.js#L427">NormalModule.js.build</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModule.js#L287">NormalModule.doBuild</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModule.js#L295">NormalModule.runLoaders</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModule.js#L482">NormalModule.parser</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ruleloader.jpg" alt="ruleloader"></p>
+
+    

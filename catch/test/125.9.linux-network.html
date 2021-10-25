@@ -1,0 +1,118 @@
+
+        <h2 id="t01. 配置IP地址">1. 配置IP地址 <a href="#t01. 配置IP地址"> # </a></h2>
+<h3 id="t11.1 ifconfig临时配置IP">1.1 ifconfig临时配置IP <a href="#t11.1 ifconfig临时配置IP"> # </a></h3>
+<ul>
+<li>查看与配置网络状态</li>
+</ul>
+<h2 id="t23. 查看网络环境">3. 查看网络环境 <a href="#t23. 查看网络环境"> # </a></h2>
+<h3 id="t33.1 查询网络状态">3.1 查询网络状态 <a href="#t33.1 查询网络状态"> # </a></h3>
+<ul>
+<li>netstat 选项</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-t</td>
+<td style="text-align:left">列出TCP协议端口</td>
+</tr>
+<tr>
+<td style="text-align:left">-u</td>
+<td style="text-align:left">列出UDP协议端口</td>
+</tr>
+<tr>
+<td style="text-align:left">-n</td>
+<td style="text-align:left">不使用域名与服务名，而使用IP地址和端口号</td>
+</tr>
+<tr>
+<td style="text-align:left">-l</td>
+<td style="text-align:left">仅列出在监听状态网络服务</td>
+</tr>
+<tr>
+<td style="text-align:left">-a</td>
+<td style="text-align:left">列出所有的网络连接</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">netstat -tlun
+netstat -an | more
+netstat -unt | grep  ESTABLISHED
+</code></pre>
+<h2 id="t44. 网络测试命令">4. 网络测试命令 <a href="#t44. 网络测试命令"> # </a></h2>
+<h3 id="t54.1 ping">4.1 ping <a href="#t54.1 ping"> # </a></h3>
+<ul>
+<li>ping [选项] ip或域名</li>
+<li>测试指定IP或域名的网络状况</li>
+<li>选项<ul>
+<li>-c  次数指定ping包的次数</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">ping www.baidu.com -c <span class="hljs-number">3</span>
+</code></pre>
+<h3 id="t64.2 wget">4.2 wget <a href="#t64.2 wget"> # </a></h3>
+<ul>
+<li>下载命令</li>
+</ul>
+<pre><code class="lang-js">wget http:<span class="hljs-comment">//www.baidu.com</span>
+</code></pre>
+<h2 id="t75.远程登录">5.远程登录 <a href="#t75.远程登录"> # </a></h2>
+<h3 id="t85.1 SSH协议原理">5.1 SSH协议原理 <a href="#t85.1 SSH协议原理"> # </a></h3>
+<h4 id="t95.1.1 对称加密算法">5.1.1 对称加密算法 <a href="#t95.1.1 对称加密算法"> # </a></h4>
+<ul>
+<li>采用单密钥系统的加密方法，同一个密钥可以同时用作信息的加密和解密，这种加密被称为对称加密。</li>
+<li>非对称加密算法 需要公钥和私钥</li>
+</ul>
+<h4 id="t105.1.2 SSH 安全外壳协议">5.1.2 SSH 安全外壳协议 <a href="#t105.1.2 SSH 安全外壳协议"> # </a></h4>
+<ul>
+<li>ssh 用户名@ip</li>
+<li>远程管理指定Linux服务器</li>
+</ul>
+<pre><code class="lang-js">[root@192-171-207-101-static ~]# ssh root@192.171.207.101
+The authenticity of host '192.171.207.101 (192.171.207.101)' can't be established.
+RSA key fingerprint is a4:97:52:eb:0a:0b:35:a0:98:7d:4f:c8:3b:dc:f9:0a.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.171.207.101' (RSA) to the list of known hosts.
+</code></pre>
+<p>/root/.ssh/known_hosts</p>
+<pre><code class="lang-js"><span class="hljs-number">192.171</span><span class="hljs-number">.207</span><span class="hljs-number">.101</span> ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAomDpQxV3RmjJyKkf7elMTInbdm+<span class="hljs-regexp">/ZLnFpfbAryi5PSb2ewfYbwRaBcVl1lBta6yjFuz0J12p9qy90DBhadvoBsfwTB8lQhmlT8B2eCcHr0bfLa1IdKMcjImxRJiD4v0emCGFquHnHIr41vs8uxQ2Ek28mH/</span><span class="hljs-number">1</span>JC0e/+VPEvylBB4+Kk2789ACdAlmhGTtlu7zgeUoLaWQSl1/<span class="hljs-number">6</span>g7zfSLIz+<span class="hljs-regexp">/U8qGiRSPaGT+M40oqx/</span>PZdoGOMTRhHgNIR5qgvcNaJXhlZGYT42fLFSmtzUHJ030hP7JGZ99oXS20/mnc8qvonC9itp0+K/nCj5g6uR/gPFb5B0NmTZCM2/gcLkHumw==
+</code></pre>
+<h4 id="t115.1.3 scp">5.1.3 scp <a href="#t115.1.3 scp"> # </a></h4>
+<ul>
+<li>scp是 secure copy的缩写, scp是linux系统下基于ssh登陆进行安全的远程文件拷贝命令</li>
+<li>linux的scp命令可以在linux服务器之间复制文件和目录</li>
+<li>命令格式 scp [参数] [原路径] [目标路径]</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-r</td>
+<td style="text-align:left">递归复制整个目录</td>
+</tr>
+<tr>
+<td style="text-align:left">-v</td>
+<td style="text-align:left">详细方式显示输出</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t125.1.3.1 从本地服务器复制到远程服务器">5.1.3.1 从本地服务器复制到远程服务器 <a href="#t125.1.3.1 从本地服务器复制到远程服务器"> # </a></h5>
+<pre><code class="lang-js">scp local_file remote_username@remote_ip:remote_folder  
+scp -r local_folder remote_username@remote_ip:remote_folder  
+</code></pre>
+<h5 id="t135.1.3.2 从远程服务器复制到本地服务器">5.1.3.2 从远程服务器复制到本地服务器 <a href="#t135.1.3.2 从远程服务器复制到本地服务器"> # </a></h5>
+<pre><code class="lang-js">scp  remote_username@remote_ip:remote_folder  local_file
+scp -r  remote_username@remote_ip:remote_folder local_folder
+</code></pre>
+
+    

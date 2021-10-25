@@ -1,0 +1,161 @@
+
+        <h2 id="t01. Groovy">1. Groovy <a href="#t01. Groovy"> # </a></h2>
+<ul>
+<li>Groovy是用于Java虚拟机的一种敏捷的动态语言，它是一种成熟的面向对象编程语言，既可以用于面向对象编程，又可以用作纯粹的脚本语言。使用该种语言不必编写过多的代码，同时又具有闭包和动态语言中的其它特性</li>
+<li>Groovy完全 兼容Java语法</li>
+</ul>
+<h2 id="t12. Groovy语法">2. Groovy语法 <a href="#t12. Groovy语法"> # </a></h2>
+<h3 id="t22.1 字符串">2.1 字符串 <a href="#t22.1 字符串"> # </a></h3>
+<ul>
+<li>可选类型定义</li>
+<li>字符串可以用单引号，双引号，和三个单引号的表达方式</li>
+</ul>
+<pre><code class="lang-js">def name='zhufeng'
+println 'hello $name'
+println "hello $name"
+println '''hello
+ $name'''
+</code></pre>
+<h3 id="t32.2 定义class">2.2 定义class <a href="#t32.2 定义class"> # </a></h3>
+<ul>
+<li>编译器给属性自动添加getter/setter方法</li>
+<li>属性可以直接用点号来获取</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span></span>{
+    <span class="hljs-built_in">String</span> name
+    int age
+    Person(name,age){
+        <span class="hljs-keyword">this</span>.name = name
+        <span class="hljs-keyword">this</span>.age = age
+    }
+}
+Person p = <span class="hljs-keyword">new</span> Person(<span class="hljs-string">'zhufeng'</span>,<span class="hljs-number">10</span>)
+println p.name
+p.setAge(<span class="hljs-number">11</span>)
+println p.age
+</code></pre>
+<h3 id="t42.3 assert">2.3 assert <a href="#t42.3 assert"> # </a></h3>
+<ul>
+<li>自带assert语句</li>
+<li>调用方法时括号是可选的</li>
+</ul>
+<pre><code class="lang-js">def version =<span class="hljs-number">1</span>
+assert version == <span class="hljs-number">1</span>
+println(version)
+</code></pre>
+<h3 id="t52.4 集合API">2.4 集合API <a href="#t52.4 集合API"> # </a></h3>
+<h4 id="t62.4.1 List">2.4.1 List <a href="#t62.4.1 List"> # </a></h4>
+<pre><code class="lang-js">def range = <span class="hljs-number">0.</span><span class="hljs-number">.4</span>
+println range.class
+assert range <span class="hljs-keyword">instanceof</span> List
+</code></pre>
+<h4 id="t72.4.2 ArrayList">2.4.2 ArrayList <a href="#t72.4.2 ArrayList"> # </a></h4>
+<pre><code class="lang-js">def coll = [<span class="hljs-string">"Groovy"</span>, <span class="hljs-string">"Java"</span>, <span class="hljs-string">"Ruby"</span>]
+assert  coll <span class="hljs-keyword">instanceof</span> Collection
+assert coll <span class="hljs-keyword">instanceof</span> ArrayList
+assert coll.size() == <span class="hljs-number">3</span>
+assert coll.getClass() == ArrayList
+
+添加元素
+coll.add(<span class="hljs-string">"Python"</span>)
+coll &lt;&lt; <span class="hljs-string">"Smalltalk"</span>
+coll[<span class="hljs-number">5</span>] = <span class="hljs-string">"Perl"</span>
+
+查找元素
+assert coll[<span class="hljs-number">1</span>] == <span class="hljs-string">"Java"</span>
+</code></pre>
+<h4 id="t82.4.3 LinkedHashMap">2.4.3 LinkedHashMap <a href="#t82.4.3 LinkedHashMap"> # </a></h4>
+<pre><code class="lang-js">def maps = [name:<span class="hljs-string">'zhufeng'</span>,<span class="hljs-attr">age</span>:<span class="hljs-number">10</span>]
+maps.home = <span class="hljs-string">'beijing'</span>
+assert maps.size() == <span class="hljs-number">3</span>
+assert maps.getClass() == LinkedHashMap
+</code></pre>
+<h3 id="t92.5 循环">2.5 循环 <a href="#t92.5 循环"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++){
+  println i
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">for</span>(i <span class="hljs-keyword">in</span> <span class="hljs-number">0.</span><span class="hljs-number">.5</span>){
+  println i
+}
+</code></pre>
+<h3 id="t102.6 函数">2.6 函数 <a href="#t102.6 函数"> # </a></h3>
+<h4 id="t112.6.1 定义一个函数">2.6.1 定义一个函数 <a href="#t112.6.1 定义一个函数"> # </a></h4>
+<pre><code class="lang-js">最后一行的为返回值  不需要用<span class="hljs-keyword">return</span> 
+
+def stage(){
+
+} 
+</code></pre>
+<h4 id="t122.6.2 参数类型">2.6.2 参数类型 <a href="#t122.6.2 参数类型"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-built_in">String</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arg1,args2</span>)</span>{<span class="hljs-comment">//无需指定参数类型</span>
+}
+def  nonReturnTypeFunc(){
+     last_line   <span class="hljs-comment">//最后一行代码的执行结果就是本函数的返回值</span>
+}
+<span class="hljs-comment">//如果指定了函数返回类型，则可不必加def关键字来定义函数</span>
+<span class="hljs-built_in">String</span>  getString(){
+   <span class="hljs-keyword">return</span> <span class="hljs-string">"I am a string"</span>
+}
+</code></pre>
+<h3 id="t132.7 闭包">2.7 闭包 <a href="#t132.7 闭包"> # </a></h3>
+<ul>
+<li>闭包是一种数据类型，它代表了一段可执行的代码</li>
+<li>闭包是一个类型为<code>groovy.lang.Closure</code>的代码块</li>
+<li>闭包可以赋值给变量，作为参数传递给方法，并且像普通方法一样来调用</li>
+<li>闭包可以访问上下文的变量，函数不可以</li>
+</ul>
+<pre><code class="lang-js">def xxx = {paramters -&gt; code} 
+def xxx = {无参数，纯code}  这种<span class="hljs-keyword">case</span>不需要-&gt;符号
+<span class="hljs-string">`
+</span></code></pre>
+<h4 id="t142.7.1 闭包格式">2.7.1 闭包格式 <a href="#t142.7.1 闭包格式"> # </a></h4>
+<ul>
+<li>闭包[closureParameters-&gt;] 是可选的，参数的类型也是可选的</li>
+<li>如果我们不指定参数的类型，会由编译器自动推断。如果闭包只有一个参数，这个参数可以省略，我们可以直接使用it来访问该参数</li>
+</ul>
+<pre><code class="lang-js">{
+    [closureParameters -&gt; ] 
+    statements 
+}
+</code></pre>
+<pre><code class="lang-js">def it1 = { it -&gt; println it }
+def it2 = { name -&gt; println name }
+def it3 = { <span class="hljs-built_in">String</span> x, int y -&gt; println <span class="hljs-string">"${x} 's value is ${y}"</span> }
+
+it1(<span class="hljs-string">'aaa'</span>)
+it2(<span class="hljs-string">'bbb'</span>)
+it3(<span class="hljs-string">'ccc'</span>,<span class="hljs-number">10</span>)
+</code></pre>
+<h4 id="t152.7.2 闭包返回值">2.7.2 闭包返回值 <a href="#t152.7.2 闭包返回值"> # </a></h4>
+<ul>
+<li>闭包总会返回一个值，返回值是闭包的最后一条语句的值(如果没有显式的return语句)</li>
+</ul>
+<pre><code class="lang-js">def name2 = <span class="hljs-string">'zhufeng'</span>
+def greeting = {
+    <span class="hljs-string">'hello '</span> + name2
+}
+
+println greeting()
+</code></pre>
+<h4 id="t162.7.3 闭包作为方法参数">2.7.3 闭包作为方法参数 <a href="#t162.7.3 闭包作为方法参数"> # </a></h4>
+<pre><code class="lang-js">
+Integer increment(Closure closure, Integer count){<span class="hljs-comment">//闭包作为第一个参数</span>
+  closure() + count
+}
+
+assert increment({ <span class="hljs-number">10</span> }, <span class="hljs-number">2</span>) == <span class="hljs-number">12</span>
+
+</code></pre>
+<h2 id="t173. Groovy实例">3. Groovy实例 <a href="#t173. Groovy实例"> # </a></h2>
+<pre><code class="lang-js">def stage(name,closure){
+    name+closure()
+}
+
+def r = stage(<span class="hljs-string">'Preparation'</span>){
+    <span class="hljs-number">5</span>
+}
+println r <span class="hljs-comment">//10</span>
+</code></pre>
+
+    

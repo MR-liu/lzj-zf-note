@@ -1,0 +1,344 @@
+
+        <h2 id="t01. 使用React.Fragment">1. 使用React.Fragment <a href="#t01. 使用React.Fragment"> # </a></h2>
+<ul>
+<li>使用<code>React.Fragment</code>来避免向 DOM 添加额外的节点</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Users</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">React.Fragment</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>用户1<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>用户2<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">React.Fragment</span>&gt;</span></span>
+    );
+  }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Users</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+</code></pre>
+<h2 id="t12. 使用 React.Lazy 延迟加载组件">2. 使用 React.Lazy 延迟加载组件 <a href="#t12. 使用 React.Lazy 延迟加载组件"> # </a></h2>
+<ul>
+<li><code>React.Lazy</code>帮助我们按需加载组件，从而减少我们应用程序的加载时间，因为只加载我们所需的组件。</li>
+<li><code>React.lazy</code> 接受一个函数，这个函数内部调用 import() 动态导入。它必须返回一个 Promise，该 Promise 需要 resolve 一个 defalut export 的 React 组件。</li>
+<li>React.Suspense 用于包装延迟组件以在加载组件时显示后备内容。</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component,lazy, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Loading <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Loading'</span>;
+<span class="hljs-keyword">const</span> AppTitle  = lazy(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-comment">/* webpackChunkName: "title" */</span><span class="hljs-string">'./components/Title'</span>))
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    state = {<span class="hljs-attr">visible</span>:<span class="hljs-literal">false</span>}
+    show = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">visible</span>:<span class="hljs-literal">true</span>});
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+             {this.state.visible&amp;&amp;(
+                 <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Loading</span>/&gt;</span>}&gt;
+                    <span class="hljs-tag">&lt;<span class="hljs-name">AppTitle</span>/&gt;</span>
+                 <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+             )}
+             <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.show}</span>&gt;</span>加载<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/&gt;</span></span>
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+
+</code></pre>
+<h2 id="t23. 错误边界(Error Boundaries)">3. 错误边界(Error Boundaries) <a href="#t23. 错误边界(Error Boundaries)"> # </a></h2>
+<ul>
+<li>如果当一个组件异步加载下载js文件时，网络错误，无法下载 js 文件</li>
+<li>Suspense 无法处理这种错误情况， 在 react 中有一个 错误边界 （Error Boundaries）的概念，用来解决这种问题，它是利用了 react 生命周期的 componetDidCatch 方法来处理</li>
+<li>有两种方式，一种是 生命周期 componentDidCatch 来处理错误，还有一种 是 静态方法 static getDerivedStateFromError 来处理错误，</li>
+<li>请使用<code>static getDerivedStateFromError()</code>渲染备用 UI ，使用 componentDidCatch() 打印错误信息。</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component,lazy, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Loading <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Loading'</span>;
+<span class="hljs-keyword">const</span> AppTitle  = lazy(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-comment">/* webpackChunkName: "title" */</span><span class="hljs-string">'./components/Title'</span>))
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    state = {<span class="hljs-attr">visible</span>:<span class="hljs-literal">false</span>,<span class="hljs-attr">isError</span>: <span class="hljs-literal">false</span>}
+    show = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">visible</span>:<span class="hljs-literal">true</span>});
+    }
+
+    <span class="hljs-keyword">static</span> getDerivedStateFromError(error) {
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">isError</span>: <span class="hljs-literal">true</span> };
+    }
+
+    componentDidCatch (err, info) {
+      <span class="hljs-built_in">console</span>.log(err, info)
+    }
+    render() {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state.isError) {
+            <span class="hljs-keyword">return</span> (<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>error<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>)
+        }
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+             {this.state.visible&amp;&amp;(
+                 <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Loading</span>/&gt;</span>}&gt;
+                    <span class="hljs-tag">&lt;<span class="hljs-name">AppTitle</span>/&gt;</span>
+                 <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+             )}
+             <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.show}</span>&gt;</span>加载<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/&gt;</span></span>
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+</code></pre>
+<h2 id="t34. PureComponent">4. PureComponent <a href="#t34. PureComponent"> # </a></h2>
+<ul>
+<li>当一个组件的<code>props</code>或<code>state</code>变更，React 会将最新返回的元素与之前渲染的元素进行对比，以此决定是否有必要更新真实的 DOM，当它们不相同时 React 会更新该 DOM。</li>
+<li>如果渲染的组件非常多时可以通过覆盖生命周期方法 shouldComponentUpdate 来进行优化</li>
+<li>shouldComponentUpdate 方法会在重新渲染前被触发。其默认实现是返回 true,如果组件不需要更新，可以在<code>shouldComponentUpdate</code>中返回 false 来跳过整个渲染过程。其包括该组件的 render 调用以及之后的操作</li>
+<li>PureComponent通过prop和state的浅比较来实现<code>shouldComponentUpdate</code></li>
+</ul>
+<h3 id="t43.1 App.js">3.1 App.js <a href="#t43.1 App.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Button,message} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> PureComponent <span class="hljs-keyword">from</span> <span class="hljs-string">'./PureComponent'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PureComponent</span></span>{
+  state = {
+    <span class="hljs-attr">title</span>:<span class="hljs-string">'计数器'</span>,
+    <span class="hljs-attr">number</span>:<span class="hljs-number">0</span>
+  }
+  add = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-built_in">parseInt</span>(<span class="hljs-keyword">this</span>.amount.value)});
+  }
+  render(){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'App render'</span>);
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Title2</span> <span class="hljs-attr">title</span>=<span class="hljs-string">{this.state.title}/</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> <span class="hljs-attr">number</span>=<span class="hljs-string">{this.state.number}/</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{inst</span>=&gt;</span>this.amount = inst}/&gt;
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.add}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PureComponent</span></span>{
+  render(){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Counter render'</span>);
+    <span class="hljs-keyword">return</span> (
+     <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.props.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-comment">//类组件可以用继承</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Title</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PureComponent</span></span>{
+  render(){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Title render'</span>);
+    <span class="hljs-keyword">return</span> (
+     <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-comment">//函数组件可以和memo</span>
+<span class="hljs-keyword">const</span> Title2 = React.memo(<span class="hljs-function"><span class="hljs-params">props</span>=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Title2 render'</span>);
+  <span class="hljs-keyword">return</span>  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+});
+
+<span class="hljs-comment">//memo的实现</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">memo</span>(<span class="hljs-params">func</span>)</span>{
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Proxy</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PureComponent</span></span>{
+    render(){
+      <span class="hljs-keyword">return</span> func(<span class="hljs-keyword">this</span>.props);
+    }
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Proxy</span>;
+}
+<span class="hljs-comment">//memo的另一种实现 接收一个函数组件</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">memo2</span>(<span class="hljs-params">Func</span>)</span>{
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Proxy</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">PureComponent</span></span>{
+    render(){
+      <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Func</span> {<span class="hljs-attr">...this.props</span>}/&gt;</span></span>
+    }
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Proxy</span>;
+}
+</code></pre>
+<h3 id="t53.2 PureComponent">3.2 PureComponent <a href="#t53.2 PureComponent"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">shallowEqual</span>(<span class="hljs-params">obj1,obj2</span>)</span>{
+    <span class="hljs-keyword">if</span>(obj1 === obj2){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">if</span>(<span class="hljs-keyword">typeof</span> obj1 != <span class="hljs-string">'object'</span> || obj1 === <span class="hljs-literal">null</span> ||<span class="hljs-keyword">typeof</span> obj2 != <span class="hljs-string">'object'</span> || obj2 === <span class="hljs-literal">null</span> ){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">let</span> keys1 = <span class="hljs-built_in">Object</span>.keys(obj1);
+    <span class="hljs-keyword">let</span> keys2 = <span class="hljs-built_in">Object</span>.keys(obj2);
+    <span class="hljs-keyword">if</span>(keys1.length != keys2.length){
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> key <span class="hljs-keyword">of</span> keys1){
+        <span class="hljs-keyword">if</span>(!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]){
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PureComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    isPureReactComponent = <span class="hljs-literal">true</span>
+    shouldComponentUpdate(nextProps,nextState){
+        <span class="hljs-keyword">return</span> !shallowEqual(<span class="hljs-keyword">this</span>.props,nextProps)||!shallowEqual(<span class="hljs-keyword">this</span>.state,nextState)
+    }
+}
+</code></pre>
+<h2 id="t65. 长列表优化">5. 长列表优化 <a href="#t65. 长列表优化"> # </a></h2>
+<ul>
+<li><p>用数组保存所有列表元素的位置，只渲染可视区内的列表元素，当可视区滚动时，根据滚动的offset大小以及所有列表元素的位置，计算在可视区应该渲染哪些元素</p>
+</li>
+<li><p><a href="https://www.npmjs.com/package/react-window">react-window</a></p>
+</li>
+<li><a href="https://react-window.now.sh/#/examples/list/fixed-size">fixed-size</a></li>
+<li><a href="https://www.npmjs.com/package/react-virtualized">react-virtualized</a></li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"ie=edge"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>长列表优化<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="css">
+    *{
+        <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+        <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-selector-tag">ul</span>,<span class="hljs-selector-tag">li</span>{
+        <span class="hljs-attribute">list-style</span>: none;
+    }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"container"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"height:150px;overflow:auto"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"list"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"content-placeholder"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+      <span class="hljs-keyword">const</span> ITEM_HEIGHT = <span class="hljs-number">30</span>;
+      <span class="hljs-keyword">const</span> ITEM_COUNT = <span class="hljs-number">10</span>;
+
+      <span class="hljs-built_in">window</span>.onload = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">const</span> container = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"#container"</span>);
+        <span class="hljs-keyword">const</span> containerHeight = container.clientHeight;
+        <span class="hljs-keyword">const</span> list = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"#list"</span>);
+        list.style.height = containerHeight+<span class="hljs-string">'px'</span>;
+        <span class="hljs-keyword">const</span> visibleCount = <span class="hljs-built_in">Math</span>.ceil(containerHeight / ITEM_HEIGHT);
+        <span class="hljs-keyword">const</span> placeholder = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"#content-placeholder"</span>);
+        list.appendChild(renderNodes(<span class="hljs-number">0</span>, visibleCount));
+        placeholder.style.height = (ITEM_COUNT * ITEM_HEIGHT -containerHeight) + <span class="hljs-string">"px"</span>;
+        container.addEventListener(<span class="hljs-string">"scroll"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+          list.style.webkitTransform = <span class="hljs-string">`translateY(<span class="hljs-subst">${container.scrollTop}</span>px)`</span>;
+          list.innerHTML = <span class="hljs-string">""</span>;
+          <span class="hljs-keyword">const</span> firstIndex = <span class="hljs-built_in">Math</span>.floor(container.scrollTop / ITEM_HEIGHT);
+          list.appendChild(renderNodes(firstIndex, firstIndex + visibleCount));
+        });
+      };
+
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderNodes</span>(<span class="hljs-params">from, to</span>) </span>{
+        <span class="hljs-keyword">const</span> fragment = <span class="hljs-built_in">document</span>.createDocumentFragment();
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-keyword">from</span>; i &lt; to; i++) {
+          <span class="hljs-keyword">const</span> el = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"li"</span>);
+          el.style.height=<span class="hljs-string">'30px'</span>;
+          el.innerHTML = i + <span class="hljs-number">1</span>;
+          fragment.appendChild(el);
+        }
+        <span class="hljs-keyword">return</span> fragment;
+      }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, lazy, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> { FixedSizeList <span class="hljs-keyword">as</span> List } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-window'</span>;
+
+<span class="hljs-keyword">const</span> Row = <span class="hljs-function">(<span class="hljs-params">{ index, style }</span>) =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{style}</span>&gt;</span>Row {index}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-keyword">const</span> Container = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">List</span>
+    <span class="hljs-attr">height</span>=<span class="hljs-string">{150}</span>
+    <span class="hljs-attr">itemCount</span>=<span class="hljs-string">{1000}</span>
+    <span class="hljs-attr">itemSize</span>=<span class="hljs-string">{35}</span>
+    <span class="hljs-attr">width</span>=<span class="hljs-string">{300}</span>
+  &gt;</span>
+    {Row}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">List</span>&gt;</span></span>
+);
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Container</span>/&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"#root"</span>));
+
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, lazy, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-comment">//import { FixedSizeList as List } from 'react-window';</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">List</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    state = {<span class="hljs-attr">start</span>:<span class="hljs-number">1</span>}
+    <span class="hljs-keyword">constructor</span>(){
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.containerRef = React.createRef();
+    }
+    componentDidMount(){
+        <span class="hljs-keyword">this</span>.containerRef.current.addEventListener(<span class="hljs-string">'scroll'</span>,()=&gt;{
+            <span class="hljs-keyword">let</span> scrollTop = <span class="hljs-keyword">this</span>.containerRef.current.scrollTop;
+            <span class="hljs-keyword">let</span> start = <span class="hljs-built_in">Math</span>.floor(scrollTop/<span class="hljs-keyword">this</span>.props.itemSize);<span class="hljs-comment">//起始的索引</span>
+            <span class="hljs-keyword">this</span>.setState({start});
+        });
+    }
+    render(){
+        <span class="hljs-keyword">let</span> {width,height,itemCount,itemSize} = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">let</span> containerStyle = {height,width,<span class="hljs-attr">position</span>:<span class="hljs-string">'relative'</span>,<span class="hljs-attr">border</span>:<span class="hljs-string">'1px solid red'</span>,<span class="hljs-attr">overflow</span>:<span class="hljs-string">'auto'</span>};
+        <span class="hljs-keyword">let</span> itemStyle = {<span class="hljs-attr">height</span>:itemSize,<span class="hljs-attr">width</span>:<span class="hljs-string">'100%'</span>,<span class="hljs-attr">position</span>:<span class="hljs-string">'absolute'</span>,<span class="hljs-attr">left</span>:<span class="hljs-number">0</span>,<span class="hljs-attr">top</span>:<span class="hljs-number">0</span>};
+        <span class="hljs-keyword">let</span> render = <span class="hljs-keyword">this</span>.props.children;
+        <span class="hljs-keyword">let</span> children = [];
+        <span class="hljs-keyword">let</span> size = <span class="hljs-built_in">Math</span>.floor(height/itemSize)+<span class="hljs-number">1</span>;<span class="hljs-comment">//每页的条数</span>
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> index=<span class="hljs-keyword">this</span>.state.start;index&lt;=<span class="hljs-keyword">this</span>.state.start+size;index++){
+            <span class="hljs-keyword">let</span> style = {...itemStyle,<span class="hljs-attr">top</span>:(index<span class="hljs-number">-1</span>)*itemSize};
+            children.push(render({index,style}));
+        }
+        <span class="hljs-keyword">let</span> topStyle = {<span class="hljs-attr">width</span>:<span class="hljs-string">'100%'</span>,<span class="hljs-attr">height</span>:itemSize*<span class="hljs-keyword">this</span>.start};
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{containerStyle}</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.containerRef}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{width:</span>'<span class="hljs-attr">100</span>%',<span class="hljs-attr">height:itemSize</span>*<span class="hljs-attr">itemCount</span>}}&gt;</span>
+                    {children}
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">const</span> Row = <span class="hljs-function">(<span class="hljs-params">{ index, style }</span>) =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{style}</span>&gt;</span>Row{index}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-keyword">const</span> Container = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">List</span>
+    <span class="hljs-attr">height</span>=<span class="hljs-string">{150}</span>
+    <span class="hljs-attr">itemCount</span>=<span class="hljs-string">{100}</span>
+    <span class="hljs-attr">itemSize</span>=<span class="hljs-string">{30}</span>
+    <span class="hljs-attr">width</span>=<span class="hljs-string">{300}</span>
+  &gt;</span>
+    {Row}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">List</span>&gt;</span></span>
+);
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Container</span>/&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"#root"</span>));
+</code></pre>
+<h2 id="t76. react devtool">6. react devtool <a href="#t76. react devtool"> # </a></h2>
+<ul>
+<li><a href="https://github.com/facebook/react-devtools">react-devtools</a></li>
+<li><a href="http://react.html.cn/blog/2018/09/10/introducing-the-react-profiler.html">profiler</a></li>
+<li><a href="https://react-flame-graph.now.sh/">react-flame-graph</a></li>
+</ul>
+
+    

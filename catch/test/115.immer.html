@@ -1,0 +1,197 @@
+
+        <h2 id="t01. 共享可变状态">1. 共享可变状态 <a href="#t01. 共享可变状态"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> objA = { <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> };
+<span class="hljs-keyword">let</span> objB = objA;
+objB.name = <span class="hljs-string">'jiagou'</span>;
+<span class="hljs-built_in">console</span>.log(objA.name);
+</code></pre>
+<h2 id="t12. 解决方案">2. 解决方案 <a href="#t12. 解决方案"> # </a></h2>
+<ul>
+<li>深度拷贝</li>
+<li><a href="https://github.com/facebook/immutable-js">immutable-js</a></li>
+<li><a href="http://www.zhufengpeixun.com/grow/html/62.6.react-immutable.html">immutable</a></li>
+</ul>
+<h2 id="t23.immer">3.immer <a href="#t23.immer"> # </a></h2>
+<ul>
+<li><a href="https://github.com/immerjs/immer">immer</a> 是 mobx 的作者写的一个 immutable 库</li>
+<li>核心实现是利用 ES6 的 proxy,几乎以最小的成本实现了 js 的不可变数据结构</li>
+</ul>
+<pre><code class="lang-js">cnpm i --save immer
+</code></pre>
+<h2 id="t34.produce">4.produce <a href="#t34.produce"> # </a></h2>
+<ul>
+<li>对 draftState 的修改都会反应到 nextState 上</li>
+<li>而 Immer 使用的结构是共享的，nextState 在结构上又与 currentState 共享未修改的部分</li>
+</ul>
+<h3 id="t44.1 基本使用">4.1 基本使用 <a href="#t44.1 基本使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { produce } <span class="hljs-keyword">from</span> <span class="hljs-string">'immer'</span>;
+<span class="hljs-keyword">let</span> baseState = {}
+
+<span class="hljs-keyword">let</span> nextState = produce(baseState, (draft) =&gt; {
+
+})
+<span class="hljs-built_in">console</span>.log(baseState===nextState);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { produce } <span class="hljs-keyword">from</span> <span class="hljs-string">'immer'</span>;
+<span class="hljs-keyword">let</span> baseState = {
+  <span class="hljs-attr">ids</span>: [<span class="hljs-number">1</span>],
+  <span class="hljs-attr">pos</span>: {
+    <span class="hljs-attr">x</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">1</span> 
+  }
+}
+
+<span class="hljs-keyword">let</span> nextState = produce(baseState, (draft) =&gt; {
+  draft.ids.push(<span class="hljs-number">2</span>);
+})
+<span class="hljs-built_in">console</span>.log(baseState.ids === nextState.ids);<span class="hljs-comment">//false</span>
+<span class="hljs-built_in">console</span>.log(baseState.pos === nextState.pos);<span class="hljs-comment">//true</span>
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/immergraph.gif" alt="immergraph.gif"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { produce } <span class="hljs-keyword">from</span> <span class="hljs-string">'immer'</span>
+
+<span class="hljs-keyword">const</span> baseState = {
+  <span class="hljs-attr">list</span>: [<span class="hljs-string">'1'</span>, <span class="hljs-string">'2'</span>]
+}
+<span class="hljs-keyword">const</span> result = produce(baseState, (draft) =&gt; {
+  draft.list.push(<span class="hljs-string">'3'</span>)
+})
+<span class="hljs-built_in">console</span>.log(baseState);
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+<h3 id="t54.2 实现">4.2 实现 <a href="#t54.2 实现"> # </a></h3>
+<h4 id="t64.2.1 immer\index.js">4.2.1 immer\index.js <a href="#t64.2.1 immer\index.js"> # </a></h4>
+<p>src\immer\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {produce} <span class="hljs-keyword">from</span> <span class="hljs-string">'./core'</span>;
+</code></pre>
+<h4 id="t74.2.2 immer\is.js">4.2.2 immer\is.js <a href="#t74.2.2 immer\is.js"> # </a></h4>
+<p>src\immer\is.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> isObject = <span class="hljs-function">(<span class="hljs-params">val</span>) =&gt;</span> <span class="hljs-built_in">Object</span>.prototype.toString.call(val) === <span class="hljs-string">'[object Object]'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> isArray = <span class="hljs-function">(<span class="hljs-params">val</span>) =&gt;</span> <span class="hljs-built_in">Array</span>.isArray(val);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> isFunction = <span class="hljs-function">(<span class="hljs-params">val</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> val === <span class="hljs-string">'function'</span>;
+</code></pre>
+<h4 id="t84.2.3 src\immer\core.js">4.2.3 src\immer\core.js <a href="#t84.2.3 src\immer\core.js"> # </a></h4>
+<p>src\immer\core.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> is  <span class="hljs-keyword">from</span> <span class="hljs-string">'./is'</span>;
+<span class="hljs-keyword">export</span>  <span class="hljs-keyword">const</span> INTERNAL = <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">'INTERNAL'</span>);
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">produce</span>(<span class="hljs-params">baseState, producer</span>) </span>{
+    <span class="hljs-keyword">const</span> proxy = toProxy(baseState);
+    producer(proxy);
+    <span class="hljs-keyword">const</span> internal = proxy[INTERNAL];<span class="hljs-keyword">debugger</span>
+    <span class="hljs-keyword">return</span> internal.mutated ? internal.draftState : baseState;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toProxy</span>(<span class="hljs-params">baseState, valueChange</span>) </span>{
+    <span class="hljs-keyword">let</span> keyToProxy = {};
+    <span class="hljs-keyword">let</span> internal = {
+        <span class="hljs-attr">draftState</span>: createDraftState(baseState),
+        keyToProxy,
+        <span class="hljs-attr">mutated</span>: <span class="hljs-literal">false</span>
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Proxy</span>(baseState, {
+        <span class="hljs-keyword">get</span>(target, key) {
+            <span class="hljs-keyword">if</span> (key === INTERNAL) {
+                <span class="hljs-keyword">return</span> internal;
+            }
+            <span class="hljs-keyword">const</span> value = target[key];
+            <span class="hljs-keyword">if</span> (is.isObject(value) || is.isArray(value)) {
+                <span class="hljs-keyword">if</span> (key <span class="hljs-keyword">in</span> keyToProxy) {
+                    <span class="hljs-keyword">return</span> keyToProxy[key];
+                } <span class="hljs-keyword">else</span> {
+                    keyToProxy[key] = toProxy(value, () =&gt; {
+                        internal.mutated = <span class="hljs-literal">true</span>;
+                        <span class="hljs-keyword">const</span> proxyOfChild = keyToProxy[key];
+                        <span class="hljs-keyword">const</span> { draftState } = proxyOfChild[INTERNAL];
+                        internal.draftState[key] = draftState;
+                        valueChange &amp;&amp; valueChange();
+                    })
+                    <span class="hljs-keyword">return</span> keyToProxy[key];
+                }
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (is.isFunction(value)) {
+                internal.mutated = <span class="hljs-literal">true</span>;
+                valueChange &amp;&amp; valueChange();
+                <span class="hljs-keyword">return</span> value.bind(internal.draftState);
+            }
+            <span class="hljs-keyword">return</span> internal.mutated ? internal.draftState[key] : baseState[key];
+        },
+        <span class="hljs-keyword">set</span>(target, key, value) {
+            internal.mutated = <span class="hljs-literal">true</span>;
+            <span class="hljs-keyword">let</span> {draftState}= internal;
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> target) {
+                draftState[key] = key <span class="hljs-keyword">in</span> draftState ? draftState[key] : target[key];
+            }
+            draftState[key] = value;
+            valueChange &amp;&amp; valueChange();
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        }
+    });
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createDraftState</span>(<span class="hljs-params">baseState</span>) </span>{
+        <span class="hljs-keyword">if</span> (is.isArray(baseState)) {
+            <span class="hljs-keyword">return</span> [...baseState];
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (is.isObject(baseState)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign({}, baseState);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> baseState;
+        }
+    }
+}
+
+
+</code></pre>
+<h2 id="t95.useImmerState.js">5.useImmerState.js <a href="#t95.useImmerState.js"> # </a></h2>
+<h3 id="t105.1 基本使用">5.1 基本使用 <a href="#t105.1 基本使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {useImmerState} <span class="hljs-keyword">from</span> <span class="hljs-string">'./immer'</span>
+<span class="hljs-keyword">let</span> id = <span class="hljs-number">1</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Todos</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> [todos, setTodos] = useImmerState({
+    <span class="hljs-attr">list</span>: []
+  })
+  <span class="hljs-keyword">const</span> addTodo = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> setTodos(<span class="hljs-function">(<span class="hljs-params">draft</span>) =&gt;</span> {
+    draft.list.push(id++)
+  })
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{addTodo}</span>&gt;</span>增加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        {
+          todos.list.map((item, index) =&gt; <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>)
+        }
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+  )
+}
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Todos</span> /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t115.2 useImmerState.js">5.2 useImmerState.js <a href="#t115.2 useImmerState.js"> # </a></h3>
+<p>src\immer\useImmerState.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { useState, useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { toProxy, INTERNAL } <span class="hljs-keyword">from</span> <span class="hljs-string">'./core'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> is <span class="hljs-keyword">from</span> <span class="hljs-string">'./is'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useImmerState</span>(<span class="hljs-params">baseState</span>) </span>{
+    <span class="hljs-keyword">const</span> [state, setState] = useState(baseState);
+    <span class="hljs-keyword">const</span> draftRef = useRef(toProxy(baseState, () =&gt; {
+        queueMicrotask(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            <span class="hljs-keyword">const</span> internalState = draftRef.current[INTERNAL];
+            <span class="hljs-keyword">const</span> newState = internalState.draftState;
+            setState(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-keyword">return</span> (is.isArray(newState) ? [...newState] : <span class="hljs-built_in">Object</span>.assign({}, newState));
+            });
+        })
+    }));
+    <span class="hljs-keyword">const</span> updateDraft = <span class="hljs-function">(<span class="hljs-params">producer</span>) =&gt;</span> producer(draftRef.current);
+    <span class="hljs-keyword">return</span> [state, updateDraft];
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useImmerState;
+</code></pre>
+<h3 id="t125.3 immer\index.js">5.3 immer\index.js <a href="#t125.3 immer\index.js"> # </a></h3>
+<p>src\immer\index.js</p>
+<pre><code class="lang-diff">export {produce} from './core';
+<span class="hljs-addition">+export {default as useImmerState} from './useImmerState';</span>
+</code></pre>
+
+    

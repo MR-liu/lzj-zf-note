@@ -1,0 +1,590 @@
+
+        <h2 id="t01. 什么是HMR">1. 什么是HMR <a href="#t01. 什么是HMR"> # </a></h2>
+<ul>
+<li>Hot Module Replacement是指当你对代码修改并保存后，webpack将会对代码进行得新打包，并将新的模块发送到浏览器端，浏览器用新的模块替换掉旧的模块，以实现在不刷新浏览器的前提下更新页面。</li>
+<li>相对于<code>live reload</code>刷新页面的方案，HMR的优点在于可以保存应用的状态,提高了开发效率</li>
+</ul>
+<h2 id="t12. 搭建HMR项目">2. 搭建HMR项目 <a href="#t12. 搭建HMR项目"> # </a></h2>
+<h3 id="t22.1 安装依赖的模块">2.1 安装依赖的模块 <a href="#t22.1 安装依赖的模块"> # </a></h3>
+<pre><code class="lang-js">cnpm i webpack@<span class="hljs-number">4.39</span><span class="hljs-number">.1</span> webpack-cli@<span class="hljs-number">3.3</span><span class="hljs-number">.6</span> webpack-dev-server@<span class="hljs-number">3.7</span><span class="hljs-number">.2</span> mime html-webpack-plugin express socket.io -S
+</code></pre>
+<h3 id="t32.2 package.json">2.2 package.json <a href="#t32.2 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"zhufeng_hmr"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"main"</span>: <span class="hljs-string">"index.js"</span>,
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"webpack"</span>,
+    <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"webpack-dev-server"</span>
+  },
+  <span class="hljs-attr">"keywords"</span>: [],
+  <span class="hljs-attr">"author"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"license"</span>: <span class="hljs-string">"ISC"</span>,
+  <span class="hljs-attr">"dependencies"</span>: {
+    <span class="hljs-attr">"webpack"</span>: <span class="hljs-string">"4.39.1"</span>,
+    <span class="hljs-attr">"webpack-cli"</span>: <span class="hljs-string">"3.3.6"</span>,
+    <span class="hljs-attr">"webpack-dev-server"</span>: <span class="hljs-string">"3.7.2"</span>
+  }
+}
+</code></pre>
+<h3 id="t42.2 webpack.config.js">2.2 webpack.config.js <a href="#t42.2 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">'./src/index.js'</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">'main.js'</span>,
+        <span class="hljs-attr">path</span>: path.join(__dirname, <span class="hljs-string">'dist'</span>)
+    },
+    <span class="hljs-attr">devServer</span>: {
+        <span class="hljs-attr">contentBase</span>:path.join(__dirname, <span class="hljs-string">'dist'</span>)
+    },
+    <span class="hljs-attr">plugins</span>:[
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>:<span class="hljs-string">'./src/index.html'</span>,
+            <span class="hljs-attr">filename</span>:<span class="hljs-string">'index.html'</span>
+        })
+    ]
+}
+</code></pre>
+<h3 id="t52.3 src\index.js">2.3 src\index.js <a href="#t52.3 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>)</span>{
+   <span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./title'</span>).default;
+   root.innerHTML= title;
+}
+render();
+</code></pre>
+<h3 id="t62.4 src\title.js">2.4 src\title.js <a href="#t62.4 src\title.js"> # </a></h3>
+<p>src\title.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-string">'hello'</span>;
+</code></pre>
+<h3 id="t72.5 src\index.html">2.5 src\index.html <a href="#t72.5 src\index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-js">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
+    &lt;title&gt;webpack热更新&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="root"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="t82.6 dist\bundle.js">2.6 dist\bundle.js <a href="#t82.6 dist\bundle.js"> # </a></h3>
+<p>dist\main.js</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">modules</span>) </span>{
+    <span class="hljs-keyword">var</span> installedModules = {};
+    <span class="hljs-comment">//封装的客户端的require方法</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+        <span class="hljs-comment">//判断此模块是否在缓存中</span>
+        <span class="hljs-keyword">if</span>(installedModules[moduleId]) {
+      <span class="hljs-comment">//如果在缓存中的话返回缓存模块的导出对象</span>
+            <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+        }
+    <span class="hljs-comment">//创建一个模块并且把它放在缓存中</span>
+        <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+            <span class="hljs-attr">i</span>: moduleId,<span class="hljs-comment">//模块ID</span>
+            <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">//是否已经加载false</span>
+            <span class="hljs-attr">exports</span>: {}<span class="hljs-comment">//导出对象默认为空对象</span>
+        };
+
+        <span class="hljs-comment">//执行模块函数</span>
+        modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+
+        <span class="hljs-comment">//把模块标识为已经加载</span>
+        <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+
+        <span class="hljs-comment">//返回模块的导出对象</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+    }
+
+    <span class="hljs-comment">//暴露模块对象并挂载到__webpack_require__.m属性上</span>
+    __webpack_require__.m = modules;
+
+    <span class="hljs-comment">//暴露已经安装的模块到模板的缓存上</span>
+    __webpack_require__.c = installedModules;
+
+    <span class="hljs-comment">// define getter function for harmony exports</span>
+  <span class="hljs-comment">//在exports对象上定义name属性的getter方法</span>
+    __webpack_require__.d = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">exports, name, getter</span>) </span>{
+    <span class="hljs-comment">//判断exports对象上是否有name属性</span>
+        <span class="hljs-keyword">if</span>(!__webpack_require__.o(exports, name)) {
+      <span class="hljs-comment">//在exports对象上添加name属性，可枚举为true,get为getter,当访问该属性时，该方法会被执行，</span>
+            <span class="hljs-built_in">Object</span>.defineProperty(exports, name, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: getter });
+        }
+    };
+
+    <span class="hljs-comment">//在导出对象上定义__esModule属性</span>
+    __webpack_require__.r = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">exports</span>) </span>{
+    <span class="hljs-comment">//如果有这样的Symbol的话</span>
+        <span class="hljs-keyword">if</span>(<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.toStringTag) {
+            <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+        }<span class="hljs-comment">//否则定义一个__esModule属性</span>
+        <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+    };
+
+    <span class="hljs-comment">// create a fake namespace object 创建一个命名空间对象</span>
+    <span class="hljs-comment">// mode &amp; 1: value is a module id, require it 值是模块ID，加载它</span>
+    <span class="hljs-comment">// mode &amp; 2: merge all properties of value into the ns 把所有的属性合并到命名空间上</span>
+    <span class="hljs-comment">// mode &amp; 4: return value when already ns object 当已经是命名空间对象的话直接返回值</span>
+    <span class="hljs-comment">// mode &amp; 8|1: behave like require 就像require一样</span>
+    __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">value, mode</span>) </span>{
+        <span class="hljs-keyword">if</span>(mode &amp; <span class="hljs-number">1</span>) value = __webpack_require__(value);<span class="hljs-comment">//直接加载</span>
+        <span class="hljs-keyword">if</span>(mode &amp; <span class="hljs-number">8</span>) <span class="hljs-keyword">return</span> value;  <span class="hljs-comment">//不用加载，直接返回</span>
+    <span class="hljs-comment">//如果value已经是ns对象并且__esModule属性为true的话就直接返回value</span>
+        <span class="hljs-keyword">if</span>((mode &amp; <span class="hljs-number">4</span>) &amp;&amp; <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">'object'</span> &amp;&amp; value &amp;&amp; value.__esModule) <span class="hljs-keyword">return</span> value;
+        <span class="hljs-comment">//否则就创建一个空对象,加载这个对象,</span>
+    <span class="hljs-keyword">var</span> ns = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
+        __webpack_require__.r(ns);<span class="hljs-comment">//在对象上设置__esModule属性为true</span>
+        <span class="hljs-built_in">Object</span>.defineProperty(ns, <span class="hljs-string">'default'</span>, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">value</span>: value });
+    <span class="hljs-comment">//如果mode为2，并且value不是字符串，把值的所有属性都定义到ns对象上</span>
+        <span class="hljs-keyword">if</span>(mode &amp; <span class="hljs-number">2</span> &amp;&amp; <span class="hljs-keyword">typeof</span> value != <span class="hljs-string">'string'</span>) <span class="hljs-keyword">for</span>(<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> value) __webpack_require__.d(ns, key, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">key</span>) </span>{ <span class="hljs-keyword">return</span> value[key]; }.bind(<span class="hljs-literal">null</span>, key));
+        <span class="hljs-comment">//返回ns对象</span>
+    <span class="hljs-keyword">return</span> ns;
+    };
+
+    <span class="hljs-comment">// getDefaultExport function for compatibility with non-harmony modules</span>
+    __webpack_require__.n = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module</span>) </span>{
+    <span class="hljs-comment">//如果是__esModule,getDefault方法返回模块的default属性,getModuleExports返回模块本身</span>
+        <span class="hljs-keyword">var</span> getter = <span class="hljs-built_in">module</span> &amp;&amp; <span class="hljs-built_in">module</span>.__esModule ?
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefault</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>[<span class="hljs-string">'default'</span>]; } :
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getModuleExports</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>; };
+    <span class="hljs-comment">//给getter添加一个a的属性，就是gett方法本身  </span>
+        __webpack_require__.d(getter, <span class="hljs-string">'a'</span>, getter);
+        <span class="hljs-keyword">return</span> getter;
+    };
+
+    <span class="hljs-comment">// Object.prototype.hasOwnProperty.call 判断对象上是否有属性 o=own</span>
+    __webpack_require__.o = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">object, property</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(object, property); };
+
+    <span class="hljs-comment">// __webpack_public_path__ 公开访问路径</span>
+    __webpack_require__.p = <span class="hljs-string">""</span>;
+
+    <span class="hljs-comment">// Load entry module and return exports 加载入口模块并且返回导出对象</span>
+    <span class="hljs-keyword">return</span> __webpack_require__(__webpack_require__.s = <span class="hljs-string">"./src/index.js"</span>);
+})
+({
+
+ <span class="hljs-string">"./src/index.js"</span>:
+ (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, __webpack_exports__, __webpack_require__</span>) </span>{
+<span class="hljs-built_in">eval</span>(<span class="hljs-string">`
+__webpack_require__.r(__webpack_exports__);//因为是es模块，所以要添加__esModule属性
+var _title__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(\"./src/title.js\");
+function render(){
+  let root = document.getElementById('root');
+  root.innerHTML= _title__WEBPACK_IMPORTED_MODULE_0__[\"default\"];
+}
+render();`</span>);
+}),
+
+ <span class="hljs-string">"./src/title.js"</span>:
+ (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, __webpack_exports__, __webpack_require__</span>) </span>{
+<span class="hljs-built_in">eval</span>(<span class="hljs-string">`
+__webpack_require__.r(__webpack_exports__);//因为是es模块，所以要添加__esModule属性
+__webpack_exports__[\"default\"] = ('hello');
+`</span>);
+ })
+});
+</code></pre>
+<h2 id="t93. webpack的编译流程">3. webpack的编译流程 <a href="#t93. webpack的编译流程"> # </a></h2>
+<ul>
+<li>初始化参数：从配置文件和 Shell 语句中读取与合并参数，得出最终的参数； 开始编译：用上一步得到的参数初始化 <code>Compiler</code> 对象，加载所有配置的插件，执行对象的 <code>run</code> 方法开始执行编译；</li>
+<li>确定入口：根据配置中的 entry 找出所有的入口文件；</li>
+<li>编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理；</li>
+<li>完成模块编译：在经过第4步使用 Loader 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系；</li>
+<li>输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 <code>Chunk</code>，再把每个 Chunk 转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会；</li>
+<li>输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统。<blockquote>
+<p>在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果。
+chunk 就是若干 module 打成的包，一个 chunk 应该包括多个 module，一般来说最终会形成一个 file。而 js 以外的资源，webpack 会通过各种 loader 转化成一个 module，这个模块会被打包到某个 chunk 中，并不会形成一个单独的 chunk</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="t103. 实现热更新">3. 实现热更新 <a href="#t103. 实现热更新"> # </a></h2>
+<h3 id="t113.1  webpack.config.js">3.1  webpack.config.js <a href="#t113.1  webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">module.exports = {
+    devServer:{
+<span class="hljs-addition">+        hot:true,</span>
+        contentBase:path.join(__dirname,'dist')
+    },
+    plugins:[
+<span class="hljs-addition">+        new webpack.HotModuleReplacementPlugin()</span>
+    ]
+}
+</code></pre>
+<h3 id="t123.2 index.js">3.2 index.js <a href="#t123.2 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import './client';
+let root = document.getElementById('root');
+function render(){
+   let title = require('./title').default;
+   root.innerHTML= title;
+}
+render();
+
+<span class="hljs-addition">+if(module.hot){</span>
+<span class="hljs-addition">+  module.hot.accept(['./title'],()=&gt;{</span>
+<span class="hljs-addition">+      render();</span>
+<span class="hljs-addition">+  });</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h2 id="t134. debug">4. debug <a href="#t134. debug"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/webpackhmr.png" alt="webpackhmr.png"></p>
+<p>debugger.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">debugger</span>
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./node_modules/webpack-dev-server/bin/webpack-dev-server.js'</span>);
+</code></pre>
+<h2 id="t145. 源代码位置">5. 源代码位置 <a href="#t145. 源代码位置"> # </a></h2>
+<h3 id="t155.1. 服务器部分">5.1. 服务器部分 <a href="#t155.1. 服务器部分"> # </a></h3>
+<ol>
+<li>启动webpack-dev-server服务器</li>
+<li>创建webpack实例</li>
+<li>创建Server服务器</li>
+<li>添加webpack的<code>done</code>事件回调，在编译完成后会向浏览器发送消息</li>
+<li>创建express应用app</li>
+<li>使用监控模式开始启动webpack编译,在 webpack 的 watch 模式下，文件系统中某一个文件发生修改，webpack 监听到文件变化，根据配置文件对模块重新编译打包，并将打包后的代码通过简单的 JavaScript 对象保存在内存中</li>
+<li>设置文件系统为内存文件系统</li>
+<li>添加webpack-dev-middleware中间件</li>
+<li>创建http服务器并启动服务</li>
+<li>使用sockjs在浏览器端和服务端之间建立一个 websocket 长连接，将 webpack 编译打包的各个阶段的状态信息告知浏览器端,浏览器端根据这些<code>socket</code>消息进行不同的操作。当然服务端传递的最主要信息还是新模块的<code>hash</code>值，后面的步骤根据这一<code>hash</code>值来进行模块热替换</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">步骤</th>
+<th style="text-align:left">代码位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1.启动webpack-dev-server服务器</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/bin/webpack-dev-server.js#L73">webpack-dev-server.js#L159</a></td>
+</tr>
+<tr>
+<td style="text-align:left">2.创建webpack实例</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/bin/webpack-dev-server.js#L89">webpack-dev-server.js#L89</a></td>
+</tr>
+<tr>
+<td style="text-align:left">3.创建Server服务器</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/bin/webpack-dev-server.js#L107">webpack-dev-server.js#L100</a></td>
+</tr>
+<tr>
+<td style="text-align:left">4. 添加webpack的<code>done</code>事件回调</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js#L122">Server.js#L120</a></td>
+</tr>
+<tr>
+<td style="text-align:left">编译完成向客户端发送消息</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js#L184">Server.js#L183</a></td>
+</tr>
+<tr>
+<td style="text-align:left">5.创建express应用app</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js#L123">Server.js#L121</a></td>
+</tr>
+<tr>
+<td style="text-align:left">6. 添加webpack-dev-middleware中间件</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js#L121">Server.js#L121</a></td>
+</tr>
+<tr>
+<td style="text-align:left">中间件负责返回生成的文件</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-middleware/blob/v3.7.0/lib/middleware.js#L20">middleware.js#L20</a></td>
+</tr>
+<tr>
+<td style="text-align:left">启动webpack编译</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-middleware/blob/v3.7.0/index.js#L51">index.js#L51</a></td>
+</tr>
+<tr>
+<td style="text-align:left">7. 设置文件系统为内存文件系统</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-middleware/blob/v3.7.0/lib/fs.js#L115">fs.js#L115</a></td>
+</tr>
+<tr>
+<td style="text-align:left">8. 创建http服务器并启动服务</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js#L135">Server.js#L135</a></td>
+</tr>
+<tr>
+<td style="text-align:left">9. 使用sockjs在浏览器端和服务端之间建立一个 websocket 长连接</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js#L745">Server.js#L745</a></td>
+</tr>
+<tr>
+<td style="text-align:left">创建socket服务器</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/servers/SockJSServer.js#L34">SockJSServer.js#L34</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="t165.2. 客户端部分">5.2. 客户端部分 <a href="#t165.2. 客户端部分"> # </a></h3>
+<ol>
+<li><code>webpack-dev-server/client-src/default/index.js</code>端会监听到此<code>hash</code>消息,会保存此hash值</li>
+<li>客户端收到<code>ok</code>的消息后会执行<code>reloadApp</code>方法进行更新</li>
+<li>在reloadApp中会进行判断，是否支持热更新，如果支持的话发射<code>webpackHotUpdate</code>事件,如果不支持则直接刷新浏览器</li>
+<li>在<code>webpack/hot/dev-server.js</code>会监听<code>webpackHotUpdate</code>事件,然后执行<code>check()</code>方法进行检查</li>
+<li>在check方法里会调用<code>module.hot.check</code>方法</li>
+<li>它通过调用 <code>JsonpMainTemplate.runtime</code>的<code>hotDownloadManifest</code>方法，向 server 端发送 Ajax 请求，服务端返回一个 <code>Manifest</code>文件，该 <code>Manifest</code> 包含了所有要更新的模块的 <code>hash</code> 值和chunk名</li>
+<li>调用<code>JsonpMainTemplate.runtime</code>的<code>hotDownloadUpdateChunk</code>方法通过JSONP请求获取到最新的模块代码</li>
+<li>补丁JS取回来后会调用<code>JsonpMainTemplate.runtime.js</code>的<code>webpackHotUpdate</code>方法，里面会调用<code>hotAddUpdateChunk</code>方法,用新的模块替换掉旧的模块</li>
+<li>然后会调用<code>HotModuleReplacement.runtime.js</code>的<code>hotAddUpdateChunk</code>方法动态更新模块代
+码</li>
+<li>然后调用<code>hotApply</code>方法进行热更新</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">步骤</th>
+<th style="text-align:left">代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1. <code>webpack-dev-server/client</code>端会监听到此hash消息</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/client-src/default/index.js#L54">index.js#L54</a></td>
+</tr>
+<tr>
+<td style="text-align:left">2. 客户端收到<code>ok</code>的消息后会执行<code>reloadApp</code>方法进行更新</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/client-src/default/index.js#L101">index.js#L101</a></td>
+</tr>
+<tr>
+<td style="text-align:left">3. 在reloadApp中会进行判断，是否支持热更新，如果支持的话发射<code>webpackHotUpdate</code>事件,如果不支持则直接刷新浏览器</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/client-src/default/utils/reloadApp.js#L7">reloadApp.js#L7</a></td>
+</tr>
+<tr>
+<td style="text-align:left">4. 在<code>webpack/hot/dev-server.js</code>会监听<code>webpackHotUpdate</code>事件</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/hot/dev-server.js#L55">dev-server.js#L55</a></td>
+</tr>
+<tr>
+<td style="text-align:left">5. 在check方法里会调用<code>module.hot.check</code>方法</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/hot/dev-server.js#L13">dev-server.js#L13</a></td>
+</tr>
+<tr>
+<td style="text-align:left">6. <code>HotModuleReplacement.runtime</code>请求Manifest</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/HotModuleReplacement.runtime.js#L180">HotModuleReplacement.runtime.js#L180</a></td>
+</tr>
+<tr>
+<td style="text-align:left">7. 它通过调用 <code>JsonpMainTemplate.runtime</code>的<code>hotDownloadManifest</code>方法</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/web/JsonpMainTemplate.runtime.js#L23">JsonpMainTemplate.runtime.js#L23</a></td>
+</tr>
+<tr>
+<td style="text-align:left">8. 调用<code>JsonpMainTemplate.runtime</code>的<code>hotDownloadUpdateChunk</code>方法通过JSONP请求获取到最新的模块代码</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/web/JsonpMainTemplate.runtime.js#L14">JsonpMainTemplate.runtime.js#L14</a></td>
+</tr>
+<tr>
+<td style="text-align:left">9. 补丁JS取回来后会调用<code>JsonpMainTemplate.runtime.js</code>的<code>webpackHotUpdate</code>方法</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/web/JsonpMainTemplate.runtime.js#L8">JsonpMainTemplate.runtime.js#L8</a></td>
+</tr>
+<tr>
+<td style="text-align:left">10. 然后会调用<code>HotModuleReplacement.runtime.js</code>的<code>hotAddUpdateChunk</code>方法动态更新模块代码</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/HotModuleReplacement.runtime.js#L222">HotModuleReplacement.runtime.js#L222</a></td>
+</tr>
+<tr>
+<td style="text-align:left">11.然后调用<code>hotApply</code>方法进行热更新</td>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/HotModuleReplacement.runtime.js#L257">HotModuleReplacement.runtime.js#L257</a> <a href="https://github.com/webpack/webpack/blob/v4.39.1/lib/HotModuleReplacement.runtime.js#L278">HotModuleReplacement.runtime.js#L278</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="t175.3 相关代码">5.3 相关代码 <a href="#t175.3 相关代码"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/bin/webpack-dev-server.js">webpack-dev-server.js</a></li>
+<li><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/Server.js">Server.js</a></li>
+<li><a href="https://github.com/webpack/webpack-dev-middleware/blob/v3.7.0/index.js">webpack-dev-middleware/index.js</a></li>
+<li><a href="https://github.com/webpack/webpack-dev-server/blob/v3.7.2/lib/servers/SockJSServer.js">SockJSServer.js</a></li>
+</ul>
+<h2 id="t186. 实现热更新">6. 实现热更新 <a href="#t186. 实现热更新"> # </a></h2>
+<h3 id="t196.1 webpack-dev-server.js">6.1 webpack-dev-server.js <a href="#t196.1 webpack-dev-server.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> mime = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mime'</span>);
+<span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);
+<span class="hljs-comment">//1. 启动webpack-dev-server服务器</span>
+<span class="hljs-comment">//2. 创建webpack实例</span>
+<span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack.config'</span>);
+<span class="hljs-keyword">let</span> compiler = webpack(config);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Server</span></span>{
+    <span class="hljs-keyword">constructor</span>(compiler){
+        <span class="hljs-keyword">this</span>.compiler = compiler;
+        <span class="hljs-comment">//4. 添加webpack的`done`事件回调，在编译完成后会向浏览器发送消息</span>
+        <span class="hljs-keyword">let</span> lastHash;
+        <span class="hljs-keyword">let</span> sockets=[];
+        compiler.hooks.done.tap(<span class="hljs-string">'webpack-dev-server'</span>, (stats) =&gt; {
+           lastHash = stats.hash;
+           sockets.forEach(<span class="hljs-function"><span class="hljs-params">socket</span>=&gt;</span>{
+             socket.emit(<span class="hljs-string">'hash'</span>,stats.hash);
+             socket.emit(<span class="hljs-string">'ok'</span>);
+           });
+        });
+        <span class="hljs-comment">//5. 创建express应用app</span>
+        <span class="hljs-keyword">let</span> app = <span class="hljs-keyword">new</span> express();
+
+        <span class="hljs-comment">//6. 使用监控模式开始启动webpack编译,在 webpack 的 watch 模式下，文件系统中某一个文件发生修改，webpack 监听到文件变化，根据配置文件对模块重新编译打包，并将打包后的代码通过简单的 JavaScript 对象保存在内存中</span>
+        compiler.watch(config.watchOptions||{}, (err)=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'编译成功'</span>);
+        });
+        <span class="hljs-comment">//7. 设置文件系统为内存文件系统</span>
+        <span class="hljs-keyword">const</span> MemoryFileSystem = <span class="hljs-built_in">require</span>(<span class="hljs-string">'memory-fs'</span>);
+        <span class="hljs-keyword">const</span> fs = <span class="hljs-keyword">new</span> MemoryFileSystem();;
+        compiler.outputFileSystem = fs;
+        <span class="hljs-comment">//8. 添加webpack-dev-middleware中间件</span>
+        <span class="hljs-keyword">const</span> devMiddleware = <span class="hljs-function">(<span class="hljs-params">req,res,next</span>)=&gt;</span>{
+            <span class="hljs-keyword">if</span>(req.url === <span class="hljs-string">'/favicon.ico'</span>){
+                <span class="hljs-keyword">return</span> res.sendStatus(<span class="hljs-number">404</span>);
+            }
+            <span class="hljs-keyword">let</span> filename = path.join(config.output.path,req.url.slice(<span class="hljs-number">1</span>));
+            <span class="hljs-built_in">console</span>.error(filename);
+            <span class="hljs-keyword">if</span>(fs.statSync(filename).isFile()){
+                <span class="hljs-keyword">let</span> content = fs.readFileSync(filename);
+                res.header(<span class="hljs-string">'Content-Type'</span>,mime.getType(filename));
+                res.send(content);
+            }<span class="hljs-keyword">else</span>{
+                next();
+            }
+        }
+        app.use(devMiddleware);
+        <span class="hljs-comment">//8. 创建http服务器并启动服务</span>
+        <span class="hljs-keyword">this</span>.server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>).createServer(app);
+        <span class="hljs-comment">// 10. 使用sockjs在浏览器端和服务端之间建立一个 websocket 长连接，将 webpack 编译打包的各个阶段的状态信息告知浏览器端,浏览器端根据这些`socket`消息进行不同的操作。当然服务端传递的最主要信息还是新模块的`hash`值，后面的步骤根据这一`hash`值来进行模块热替换</span>
+        <span class="hljs-keyword">let</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io'</span>)(<span class="hljs-keyword">this</span>.server);
+        io.on(<span class="hljs-string">'connection'</span>,(socket)=&gt;{
+            sockets.push(socket);
+            <span class="hljs-keyword">if</span>(lastHash){
+                socket.emit(<span class="hljs-string">'hash'</span>,lastHash);
+                socket.emit(<span class="hljs-string">'ok'</span>);
+            }
+        });
+    }
+    <span class="hljs-comment">//9. 创建http服务器并启动服务</span>
+    listen(port){
+         <span class="hljs-keyword">this</span>.server.listen(port,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(port+<span class="hljs-string">'服务启动成功!'</span>)
+        });
+    }
+}
+<span class="hljs-comment">//3. 创建Server服务器</span>
+<span class="hljs-keyword">let</span> server = <span class="hljs-keyword">new</span> Server(compiler);
+server.listen(<span class="hljs-number">8000</span>);
+</code></pre>
+<h3 id="t206.2 client.js">6.2 client.js <a href="#t206.2 client.js"> # </a></h3>
+<p>src\client.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">let</span> socket = io(<span class="hljs-string">'/'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Emitter</span></span>{
+  <span class="hljs-keyword">constructor</span>(){
+    <span class="hljs-keyword">this</span>.listeners = {};
+  }
+  emit(type){
+    <span class="hljs-keyword">this</span>.listeners[type]&amp;&amp;<span class="hljs-keyword">this</span>.listeners[type]();
+  }
+  on(type,listener){
+    <span class="hljs-keyword">this</span>.listeners[type] = listener;
+  }
+}
+<span class="hljs-keyword">const</span> hotEmitter= <span class="hljs-keyword">new</span> Emitter();
+
+<span class="hljs-keyword">let</span> hotCurrentHash;
+<span class="hljs-keyword">let</span> currentHash;
+<span class="hljs-keyword">const</span> onConnected = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'客户端已经连接'</span>);
+  <span class="hljs-comment">//1. `webpack-dev-server/client`端会监听到此hash消息</span>
+  socket.on(<span class="hljs-string">'hash'</span>,(hash)=&gt;{
+    currentHash = hash;
+  });
+  <span class="hljs-comment">//2. 客户端收到`ok`的消息后会执行`reloadApp`方法进行更新</span>
+  socket.on(<span class="hljs-string">'ok'</span>,()=&gt;{
+      reloadApp(<span class="hljs-literal">true</span>);
+  });
+  socket.on(<span class="hljs-string">'disconnect'</span>,()=&gt;{
+    hotCurrentHash=currentHash=<span class="hljs-literal">null</span>;
+  });
+}
+<span class="hljs-comment">// 3. 在reloadApp中会进行判断，是否支持热更新，如果支持的话发射`webpackHotUpdate`事件,如果不支持则直接刷新浏览器</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reloadApp</span>(<span class="hljs-params">hot</span>)</span>{
+  <span class="hljs-keyword">if</span>(!hot){
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">window</span>.location.reload();
+  }
+  hotEmitter.emit(<span class="hljs-string">'webpackHotUpdate'</span>);
+}
+
+<span class="hljs-comment">//4. 在`webpack/hot/dev-server.js`会监听`webpackHotUpdate`事件,在监听里会调用hotCheck方法</span>
+hotEmitter.on(<span class="hljs-string">"webpackHotUpdate"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">if</span>(!hotCurrentHash || hotCurrentHash === currentHash){
+      <span class="hljs-keyword">return</span> hotCurrentHash = currentHash;
+  }
+  <span class="hljs-comment">//5. 在check方法里会调用`module.hot.check`方法</span>
+  hotCheck();
+});
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hotCheck</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-comment">//6. 它通过调用 `JsonpMainTemplate.runtime`的`hotDownloadManifest`方法，向 server 端发送 Ajax 请求，服务端返回一个 `Manifest`文件，该 `Manifest` 包含了所有要更新的模块的 `hash` 值和chunk名</span>
+  hotDownloadManifest().then(<span class="hljs-function"><span class="hljs-params">update</span>=&gt;</span>{
+      <span class="hljs-keyword">let</span> chunkIds = <span class="hljs-built_in">Object</span>.keys(update.c);
+      chunkIds.forEach(<span class="hljs-function">(<span class="hljs-params">chunkId</span>)=&gt;</span>{
+           <span class="hljs-comment">//7. 调用`JsonpMainTemplate.runtime`的`hotDownloadUpdateChunk`方法通过JSONP请求获取到最新的模块代码</span>
+            hotDownloadUpdateChunk(chunkId);
+      });
+  });
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hotDownloadUpdateChunk</span>(<span class="hljs-params">chunkId</span>) </span>{
+  <span class="hljs-keyword">var</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"script"</span>);
+  script.charset = <span class="hljs-string">"utf-8"</span>;
+  script.src = <span class="hljs-string">"/"</span> + chunkId + <span class="hljs-string">"."</span> + hotCurrentHash + <span class="hljs-string">".hot-update.js"</span>;
+  <span class="hljs-built_in">document</span>.head.appendChild(script);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hotDownloadManifest</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve,reject</span>)=&gt;</span>{
+   <span class="hljs-keyword">var</span> request = <span class="hljs-keyword">new</span> XMLHttpRequest();
+   <span class="hljs-keyword">var</span> requestPath = <span class="hljs-string">"/"</span> + hotCurrentHash + <span class="hljs-string">".hot-update.json"</span>;
+   request.open(<span class="hljs-string">"GET"</span>, requestPath, <span class="hljs-literal">true</span>);
+   request.onreadystatechange = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span>(request.readyState == <span class="hljs-number">4</span>){
+     <span class="hljs-keyword">let</span> update = <span class="hljs-built_in">JSON</span>.parse(request.responseText);
+     resolve(update);
+    }
+   }
+   request.send();
+  });
+}
+<span class="hljs-comment">//9. 补丁JS取回来后会调用`JsonpMainTemplate.runtime.js`的`webpackHotUpdate`方法，里面会调用`hotAddUpdateChunk`方法,用新的模块替换掉旧的模块</span>
+<span class="hljs-comment">//10. 然后会调用`HotModuleReplacement.runtime.js`的`hotAddUpdateChunk`方法动态更新模块代码</span>
+<span class="hljs-comment">//11. 然后调用`hotApply`方法进行热更新</span>
+<span class="hljs-built_in">window</span>.webpackHotUpdate = <span class="hljs-function">(<span class="hljs-params">chunkId, moreModules</span>)=&gt;</span>{
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> moduleId <span class="hljs-keyword">in</span> moreModules){
+    <span class="hljs-keyword">let</span> oldModule =  __webpack_require__.c[moduleId];
+    <span class="hljs-keyword">let</span> {parents,children} = oldModule;
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = __webpack_require__.c[moduleId] = {
+          <span class="hljs-attr">i</span>: moduleId,
+          <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,<span class="hljs-attr">exports</span>: {},
+          parents,children,
+          <span class="hljs-attr">hot</span>: <span class="hljs-built_in">window</span>.hotCreateModule(moduleId)
+     };
+     moreModules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports,__webpack_require__);
+     <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+    parents.forEach(<span class="hljs-function"><span class="hljs-params">parent</span>=&gt;</span>{
+      <span class="hljs-keyword">let</span> parentModule = __webpack_require__.c[parent];
+      parentModule.hot&amp;&amp;parentModule.hot._acceptedDependencies[moduleId]&amp;&amp;parentModule.hot._acceptedDependencies[moduleId]();
+    });
+    hotCurrentHash = currentHash;
+  }
+}
+socket.on(<span class="hljs-string">'connect'</span>,onConnected);
+</code></pre>
+<h3 id="t216.3 HotModuleReplacement.runtime.js">6.3 HotModuleReplacement.runtime.js <a href="#t216.3 HotModuleReplacement.runtime.js"> # </a></h3>
+<p>webpack\lib\HotModuleReplacement.runtime.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hotCreateModule</span>(<span class="hljs-params">moduleId</span>) </span>{
+         <span class="hljs-keyword">var</span> hot = {
+              <span class="hljs-attr">_acceptedDependencies</span>: {},
+              <span class="hljs-attr">accept</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">dep, callback</span>) </span>{
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; dep.length; i++){
+                  hot._acceptedDependencies[dep[i]] = callback;
+                }
+              }
+        }
+        <span class="hljs-keyword">return</span> hot;
+    }
+</code></pre>
+
+    

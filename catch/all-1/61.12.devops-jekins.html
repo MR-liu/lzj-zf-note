@@ -1,0 +1,487 @@
+
+        <h2 id="t01. 持续集成">1. 持续集成 <a href="#t01. 持续集成"> # </a></h2>
+<ul>
+<li>持续集成(Continuous Integration,CI) 代码合并、构建、布署、测试在一起，不断执行这个过程并对结果进行反馈</li>
+<li>持续部署(Continuous Deloyment,CD) 部署到生产环境</li>
+<li>持续交付(Continuous Delivery,CD) 部署到生产环境，给用户使用</li>
+<li>DevOps 是一个完整的面向IT运维的工作流，以 IT 自动化以及持续集成（CI）、持续部署（CD）为基础，来优化程式开发、测试、系统运维等所有环节</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/cicd.jpg" alt="cicd"></p>
+<h2 id="t12. Jenkins">2. Jenkins <a href="#t12. Jenkins"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/cicdwithoutdocker.png" alt="cicdwithoutdocker"></p>
+<p><img src="http://img.zhufengpeixun.cn/dockercicd.png" alt="dockercicd"></p>
+<h2 id="t23. Git安装">3. Git安装 <a href="#t23. Git安装"> # </a></h2>
+<h3 id="t33.1 git服务器">3.1 git服务器 <a href="#t33.1 git服务器"> # </a></h3>
+<h4 id="t43.1.1 安装git">3.1.1 安装git <a href="#t43.1.1 安装git"> # </a></h4>
+<pre><code class="lang-js">yum install -y git
+</code></pre>
+<h4 id="t53.1.2 创建git用户">3.1.2 创建git用户 <a href="#t53.1.2 创建git用户"> # </a></h4>
+<pre><code class="lang-js">useradd git
+passwd git
+</code></pre>
+<h4 id="t63.1.3 创建仓库">3.1.3 创建仓库 <a href="#t63.1.3 创建仓库"> # </a></h4>
+<pre><code class="lang-js">su - git
+mkdir -p ~<span class="hljs-regexp">/repos/</span>app.git
+cd ~<span class="hljs-regexp">/repos/</span>app.git
+git --bare init
+</code></pre>
+<h3 id="t73.2 git客户端(web服务器)">3.2 git客户端(web服务器) <a href="#t73.2 git客户端(web服务器)"> # </a></h3>
+<h4 id="t83.2.1 安装git">3.2.1 安装git <a href="#t83.2.1 安装git"> # </a></h4>
+<pre><code class="lang-js">yum install -y git
+</code></pre>
+<pre><code class="lang-js">cd /usr/local/src
+git clone git@<span class="hljs-number">192.168</span><span class="hljs-number">.20</span><span class="hljs-number">.131</span>:<span class="hljs-regexp">/home/gi</span>t/repos/app.git
+cd app
+git config --global user.email <span class="hljs-string">"zhufengjiagou@126.com"</span>
+git config --global user.name <span class="hljs-string">"zhufengjiagou"</span>
+touch index.html
+git add -A
+git commit -m<span class="hljs-string">"init"</span>
+git push origin master
+</code></pre>
+<h4 id="t93.2.2 免密码登录">3.2.2 免密码登录 <a href="#t93.2.2 免密码登录"> # </a></h4>
+<h5 id="t103.2.2.1 生成秘钥">3.2.2.1 生成秘钥 <a href="#t103.2.2.1 生成秘钥"> # </a></h5>
+<ul>
+<li>先登录web服务器生成秘钥并拷贝公钥<pre><code class="lang-js">ssh-keygen -t rsa
+cat ~<span class="hljs-regexp">/.ssh/i</span>d_rsa.pub 
+</code></pre>
+</li>
+</ul>
+<h5 id="t113.2.2.2 拷贝公钥">3.2.2.2 拷贝公钥 <a href="#t113.2.2.2 拷贝公钥"> # </a></h5>
+<ul>
+<li>再登录git服务器</li>
+<li>要注意如果你要免登录<code>git</code>用户，就需要把自己的公钥拷贝到<code>git</code>用户的<code>authorized_keys</code>文件里</li>
+</ul>
+<pre><code class="lang-js">ssh-keygen -t rsa
+chmod <span class="hljs-number">700</span> /home/git/.ssh
+vi /home/git/.ssh/authorized_keys 
+chmod <span class="hljs-number">600</span> /home/git/.ssh/authorized_keys
+</code></pre>
+<h5 id="t123.2.2.3 允许公钥登录">3.2.2.3 允许公钥登录 <a href="#t123.2.2.3 允许公钥登录"> # </a></h5>
+<ul>
+<li>再登录git服务器</li>
+<li>vim /etc/ssh/sshd_config </li>
+</ul>
+<pre><code class="lang-js">PubkeyAuthentication yes
+</code></pre>
+<pre><code class="lang-js">systemctl restart sshd
+</code></pre>
+<h2 id="t134. Jenkins">4. Jenkins <a href="#t134. Jenkins"> # </a></h2>
+<ul>
+<li><a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">jdk</a></li>
+<li><a href="https://jenkins.io">jenkins官网</a></li>
+</ul>
+<h3 id="t144.1 安装JDK">4.1 安装JDK <a href="#t144.1 安装JDK"> # </a></h3>
+<ul>
+<li><a href="https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase10-4425482.html">jdk</a></li>
+</ul>
+<pre><code class="lang-js">cd /usr/local/src
+wget http:<span class="hljs-comment">//img.zhufengpeixun.cn/jdk1.8.0_211.tar.gz</span>
+tar -xzvf jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211.tar.gz 
+cp -r /usr/local/src/jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211 /usr/java
+rm -rf /usr/bin/java　&amp;&amp;　ln -s /usr/java/jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211/bin/java /usr/bin/java
+</code></pre>
+<h3 id="t154.2 修改配置文件">4.2 修改配置文件 <a href="#t154.2 修改配置文件"> # </a></h3>
+<p>vi /etc/profile</p>
+<pre><code class="lang-js">JAVA_HOME=<span class="hljs-regexp">/usr/</span>java/jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211
+<span class="hljs-keyword">export</span> CLASSPATH=.:${JAVA_HOME}/jre/lib/rt.jar:${JAVA_HOME}/lib/dt.jar:${JAVA_HOME}/lib/tools.jar
+<span class="hljs-keyword">export</span> PATH=$PATH:${JAVA_HOME}/bin
+</code></pre>
+<h3 id="t164.3 生效配置">4.3 生效配置 <a href="#t164.3 生效配置"> # </a></h3>
+<pre><code class="lang-js">source /etc/profile
+java --version
+</code></pre>
+<h3 id="t174.4 安装jenkins">4.4 安装jenkins <a href="#t174.4 安装jenkins"> # </a></h3>
+<pre><code class="lang-js">wget -O /etc/yum.repos.d/jenkins.repo https:<span class="hljs-comment">//pkg.jenkins.io/redhat-stable/jenkins.repo</span>
+rpm --<span class="hljs-keyword">import</span> https:<span class="hljs-comment">//pkg.jenkins.io/redhat-stable/jenkins.io.key</span>
+yum install -y jenkins
+</code></pre>
+<h3 id="t184.5 关闭防火墙">4.5 关闭防火墙 <a href="#t184.5 关闭防火墙"> # </a></h3>
+<pre><code class="lang-js">systemctl stop firewalld.service
+systemctl disable firewalld.service
+</code></pre>
+<pre><code class="lang-js">javap -v JNLPMain.class
+J2SE <span class="hljs-number">8</span> = <span class="hljs-number">52</span>
+J2SE <span class="hljs-number">7</span> = <span class="hljs-number">51</span>
+J2SE <span class="hljs-number">6.0</span> = <span class="hljs-number">50</span>
+J2SE <span class="hljs-number">5.0</span> = <span class="hljs-number">49</span>
+JDK <span class="hljs-number">1.4</span> = <span class="hljs-number">48</span>
+JDK <span class="hljs-number">1.3</span> = <span class="hljs-number">47</span>
+JDK <span class="hljs-number">1.2</span> = <span class="hljs-number">46</span>
+JDK <span class="hljs-number">1.1</span> = <span class="hljs-number">45</span>
+</code></pre>
+<h3 id="t194.6 启动jenkins">4.6 启动jenkins <a href="#t194.6 启动jenkins"> # </a></h3>
+<pre><code class="lang-js">systemctl start jenkins
+systemctl daemon-reload
+systemctl status jenkins
+</code></pre>
+<h3 id="t204.7 选择java版本">4.7 选择java版本 <a href="#t204.7 选择java版本"> # </a></h3>
+<p>vi /etc/init.d/jenkins</p>
+<pre><code class="lang-js">candidates="
+#/etc/alternatives/java
+#/usr/lib/jvm/java-1.8.0/bin/java
+#/usr/lib/jvm/jre-1.8.0/bin/java
+#/usr/lib/jvm/java-1.7.0/bin/java
+#/usr/lib/jvm/jre-1.7.0/bin/java
+/usr/bin/java
+"
+</code></pre>
+<h3 id="t214.8 运行用户">4.8 运行用户 <a href="#t214.8 运行用户"> # </a></h3>
+<p>一定要改一下root用户，不然流水线SCM拉不到脚本
+vi /etc/sysconfig/jenkins </p>
+<pre><code class="lang-js">JENKINS_USER=<span class="hljs-string">"root"</span>
+</code></pre>
+<h3 id="t224.8 访问jenkins">4.8 访问jenkins <a href="#t224.8 访问jenkins"> # </a></h3>
+<p><a href="http://192.168.20.133:8080">http://192.168.20.133:8080</a></p>
+<h3 id="t234.9 安装maven">4.9 安装maven <a href="#t234.9 安装maven"> # </a></h3>
+<pre><code class="lang-js">yum install maven -y
+
+# rpm -ql maven
+
+/etc/m2.conf
+/etc/maven
+/etc/maven/settings.xml
+/usr/bin/mvn
+/usr/share/maven/conf/settings.xml
+</code></pre>
+<h3 id="t244.10 使用jenkins">4.10 使用jenkins <a href="#t244.10 使用jenkins"> # </a></h3>
+<ul>
+<li><a href="https://plugins.jenkins.io/">jenkins</a></li>
+<li>OWASP(Open Web Application Security Project),开放式Web应用程序安全项目,它识别项目依赖关系，并检查是否存在任何已知的和公开的漏洞.</li>
+<li>PAM（Pluggable Authentication Modules ）是由Sun提出的一种认证机制。它通过提供一些动态链接库和一套统一的API，将系统提供的服务和该服务的认证方式分开，使得系统管理员可以灵活地根据需要给不同的服务配置不同的认证方式而无需更改服务程序，同时也便于向系统中添加新的认证手段。 PAM模块是一种嵌入式模块，修改后即时生效。</li>
+<li>LDAP（Light Directory Access Portocol）,它是基于X.500标准的轻量级目录访问协议</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">插件名称</th>
+<th style="text-align:left">插件作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Folders</td>
+<td style="text-align:left">(<a href="https://plugins.jenkins.io/cloudbees-folder),这个插件支持用户使用目录管理项目，目录支持嵌套，并且支持目录中创建视图">https://plugins.jenkins.io/cloudbees-folder),这个插件支持用户使用目录管理项目，目录支持嵌套，并且支持目录中创建视图</a></td>
+</tr>
+<tr>
+<td style="text-align:left">OWASP Markup Formatter</td>
+<td style="text-align:left">OWASP标记格式化程序插件,使用OWASP Java HTML Sanitizer ，可以在项目描述等中输入安全的HTML标记</td>
+</tr>
+<tr>
+<td style="text-align:left">Build Timeout</td>
+<td style="text-align:left">构建超时,此插件允许构建在指定的时间过后自动终止</td>
+</tr>
+<tr>
+<td style="text-align:left">Credentials Binding</td>
+<td style="text-align:left">证书绑定</td>
+</tr>
+<tr>
+<td style="text-align:left">Timestamper</td>
+<td style="text-align:left">将时间戳添加到控制台输出</td>
+</tr>
+<tr>
+<td style="text-align:left">Workspace Cleanup</td>
+<td style="text-align:left">(<a href="https://plugins.jenkins.io/ws-cleanup),这个插件支持在构建前后">https://plugins.jenkins.io/ws-cleanup),这个插件支持在构建前后</a> 删除或者部分删除workspace</td>
+</tr>
+<tr>
+<td style="text-align:left">Ant</td>
+<td style="text-align:left">向Jenkins添加Apache Ant支持</td>
+</tr>
+<tr>
+<td style="text-align:left">Gradle</td>
+<td style="text-align:left">这个插件允许Jenkins直接调用Gradle构建脚本</td>
+</tr>
+<tr>
+<td style="text-align:left">Pipeline</td>
+<td style="text-align:left">管道,一套插件可让您协调自动化</td>
+</tr>
+<tr>
+<td style="text-align:left">Pipeline: GitHub Groovy Libraries</td>
+<td style="text-align:left">允许从GitHub动态加载Pipeline Groovy库</td>
+</tr>
+<tr>
+<td style="text-align:left">Pipeline: Stage View</td>
+<td style="text-align:left">查看每一步的执行结果</td>
+</tr>
+<tr>
+<td style="text-align:left">GitHub Branch Source</td>
+<td style="text-align:left">GitHub组织文件夹插件</td>
+</tr>
+<tr>
+<td style="text-align:left">Git</td>
+<td style="text-align:left">(<a href="https://plugins.jenkins.io/git),支持使用Github、GitLab、Gerrit等系统管理代码仓库">https://plugins.jenkins.io/git),支持使用Github、GitLab、Gerrit等系统管理代码仓库</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Subversion</td>
+<td style="text-align:left">(<a href="https://plugins.jenkins.io/subversion),支持Subversion系统管理源代码">https://plugins.jenkins.io/subversion),支持Subversion系统管理源代码</a></td>
+</tr>
+<tr>
+<td style="text-align:left">SSH Slaves</td>
+<td style="text-align:left">SSH登录到一个远程服务器以执行必要的脚本</td>
+</tr>
+<tr>
+<td style="text-align:left">Matrix Authorization Strategy</td>
+<td style="text-align:left">矩阵授权策略插件,提供基于矩阵的安全授权策略（全局和每个项目）</td>
+</tr>
+<tr>
+<td style="text-align:left">PAM Authentication</td>
+<td style="text-align:left">为Jenkins添加Unix可插入身份验证模块（PAM）支持</td>
+</tr>
+<tr>
+<td style="text-align:left">LDAP</td>
+<td style="text-align:left">(<a href="https://plugins.jenkins.io/ldap),这个插件允许使用LDAP对用户进行认证，LDAP">https://plugins.jenkins.io/ldap),这个插件允许使用LDAP对用户进行认证，LDAP</a> 服务器可以为Active Directory 或者 OpenLDAP</td>
+</tr>
+<tr>
+<td style="text-align:left">Email Extension</td>
+<td style="text-align:left">这个插件是Jenkins的电子邮件发布者的替代品。它允许配置电子邮件通知的各个方面：发送电子邮件时，应该收到谁以及电子邮件说明的内容</td>
+</tr>
+<tr>
+<td style="text-align:left">Mailer</td>
+<td style="text-align:left">发邮件服务</td>
+</tr>
+<tr>
+<td style="text-align:left">Localization: Chinese (Simplified)</td>
+<td style="text-align:left">本地化构建</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t254.11 下载插件加速">4.11 下载插件加速 <a href="#t254.11 下载插件加速"> # </a></h3>
+<ul>
+<li><a href="http://mirrors.jenkins-ci.org/status.html">mirrors</a></li>
+<li><a href="https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json">update-center</a></li>
+</ul>
+<h3 id="t264.12 创建管理员用户">4.12 创建管理员用户 <a href="#t264.12 创建管理员用户"> # </a></h3>
+<h3 id="t274.13 主要功能">4.13 主要功能 <a href="#t274.13 主要功能"> # </a></h3>
+<ul>
+<li>新建任务</li>
+<li>用户</li>
+<li>构建历史</li>
+<li>系统管理</li>
+<li>我的视图</li>
+<li>Credentials</li>
+<li>新建视图</li>
+</ul>
+<h2 id="t285. 角色和用户管理">5. 角色和用户管理 <a href="#t285. 角色和用户管理"> # </a></h2>
+<ul>
+<li>安装 Role-based Authorization Strategy 插件</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/manageroles.png" alt="manageroles"></p>
+<p><img src="http://img.zhufengpeixun.cn/assignusers.png" alt="assignusers"></p>
+<p><img src="http://img.zhufengpeixun.cn/jprojects.png" alt="jprojects"></p>
+<h2 id="t296. 参数化构建">6. 参数化构建 <a href="#t296. 参数化构建"> # </a></h2>
+<ul>
+<li>Extended Choice Parameter 插件</li>
+<li>Git Parameter 插件</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/parameterbuild.png" alt="parameterbuild"></p>
+<p><img src="http://img.zhufengpeixun.cn/execshell.png" alt="execshell"></p>
+<p><img src="http://img.zhufengpeixun.cn/extendparameterbuild.png" alt="extendparameterbuild"></p>
+<p><img src="http://img.zhufengpeixun.cn/buildspec.png" alt="buildspec"></p>
+<p>vi /etc/sysconfig/jenkins
+一定要改一下root用户，不然流水线SCM拉不到脚本</p>
+<pre><code class="lang-js">JENKINS_USER=<span class="hljs-string">"root"</span>
+</code></pre>
+<pre><code class="lang-js">git branch test
+git checkout test
+git branch
+touch <span class="hljs-number">5.</span>txt
+git add -A
+git commit -m<span class="hljs-string">"add 5.txt"</span>
+git git push origin test
+git push origin test
+</code></pre>
+<h2 id="t307. 主从模式">7. 主从模式 <a href="#t307. 主从模式"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/masterslave2.jpg" alt="masterslave2"></p>
+<p><img src="http://img.zhufengpeixun.cn/configureslave.png" alt="configureslave"></p>
+<p><img src="http://img.zhufengpeixun.cn/limitproject.png" alt="limitproject"></p>
+<p><img src="http://img.zhufengpeixun.cn/configslave2.png" alt="configslave2"></p>
+<h2 id="t318. 流水线">8. 流水线 <a href="#t318. 流水线"> # </a></h2>
+<ul>
+<li>Pipeline 插件</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/mystageview.png" alt="mystageview"></p>
+<p><img src="http://img.zhufengpeixun.cn/pipelinegrammar.png" alt="pipelinegrammar"></p>
+<pre><code class="lang-js">node {
+    stage (<span class="hljs-string">'checkout'</span>){
+       echo <span class="hljs-string">"checkout"</span>
+    }
+    stage (<span class="hljs-string">'build'</span>){
+        echo <span class="hljs-string">"build"</span>
+    }
+    stage (<span class="hljs-string">'deploy'</span>){
+        echo <span class="hljs-string">"deploy"</span>
+    }
+    stage (<span class="hljs-string">'test'</span>){
+        echo <span class="hljs-string">"test"</span>
+    }
+}
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/scmscript.png" alt="scmscript"></p>
+<pre><code class="lang-js">node(<span class="hljs-string">'slave'</span>) {
+    stage (<span class="hljs-string">'checkout'</span>){
+       echo <span class="hljs-string">"checkout2"</span>
+       sleep time: <span class="hljs-number">10</span>, <span class="hljs-attr">unit</span>: <span class="hljs-string">'SECONDS'</span>
+    }
+    stage (<span class="hljs-string">'build'</span>){
+        echo <span class="hljs-string">"build"</span>
+    }
+    stage (<span class="hljs-string">'deploy'</span>){
+        echo <span class="hljs-string">"deploy"</span>
+    }
+    stage (<span class="hljs-string">'test'</span>){
+        echo <span class="hljs-string">"test"</span>
+    }
+}
+</code></pre>
+<h2 id="t329. 邮件通知">9. 邮件通知 <a href="#t329. 邮件通知"> # </a></h2>
+<ul>
+<li>Email Extension Plugin 插件 </li>
+</ul>
+<h2 id="t3310. 发布PHP项目">10. 发布PHP项目 <a href="#t3310. 发布PHP项目"> # </a></h2>
+<h3 id="t3410.1 创建本地项目">10.1 创建本地项目 <a href="#t3410.1 创建本地项目"> # </a></h3>
+<ul>
+<li>先登录git服务器创建php仓库</li>
+</ul>
+<pre><code class="lang-js">mkdir -p /home/git/repos/dev-php.git
+cd /home/git/repos/dev-php.git
+git init --bare
+</code></pre>
+<h3 id="t3510.2 拉取代码">10.2 拉取代码 <a href="#t3510.2 拉取代码"> # </a></h3>
+<ul>
+<li>拉取并初始化本地仓库<pre><code class="lang-js">git clone  git@<span class="hljs-number">192.168</span><span class="hljs-number">.20</span><span class="hljs-number">.131</span>:<span class="hljs-regexp">/home/gi</span>t/repos/dev-php.git
+cd php
+echo <span class="hljs-string">"&lt;?php echo info()?&gt;"</span> &gt; index.php
+git add -A
+git commit -m<span class="hljs-string">"add index.php"</span>
+git push origin master
+</code></pre>
+</li>
+</ul>
+<h3 id="t3610.3 部署环境">10.3 部署环境 <a href="#t3610.3 部署环境"> # </a></h3>
+<ul>
+<li>安装php</li>
+<li>安装nginx</li>
+</ul>
+<h3 id="t3710.4 创建项目">10.4 创建项目 <a href="#t3710.4 创建项目"> # </a></h3>
+<h4 id="t3810.4.1 构建参数">10.4.1 构建参数 <a href="#t3810.4.1 构建参数"> # </a></h4>
+<p><img src="http://img.zhufengpeixun.cn/constphp.png" alt="constphp"></p>
+<p><img src="http://img.zhufengpeixun.cn/phppipeline.png" alt="phppipeline"></p>
+<h4 id="t3910.4.2 pipeline脚本">10.4.2 pipeline脚本 <a href="#t3910.4.2 pipeline脚本"> # </a></h4>
+<ul>
+<li>先在git服务器里创建一个<code>dev-php</code>项目</li>
+<li>然后到web服务器上克隆此项目并在里面添加文件</li>
+<li>在pipeline服务器里添加新的脚本</li>
+<li><p>给web服务器添加标签名并在pipeline脚本中引用</p>
+</li>
+<li><p>web服务器上的工作目录 /var/lib/jenkins/workspace/dev-php </p>
+</li>
+<li>credentialsId  git/git</li>
+</ul>
+<p>cat /root/pipeline/Jenkinsfile-php</p>
+<pre><code class="lang-js">node('webserver') {
+    stage ('checkout'){
+       checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '8e8e63f9-4806-4f2e-8633-c92badbdefd7', url: "git@192.168.20.131:/home/git/repos/${JOB_NAME}.git"]]])
+    }
+    stage ('build'){
+       sh '''rm -rf ${WORKSPACE}/.git
+       [ -e /data/backup ] ||  mkdir -p /data/backup
+       [ -e /usr/share/nginx/html/${JOB_NAME} ] || mkdir /usr/share/nginx/html/${JOB_NAME}
+       mv /usr/share/nginx/html/${JOB_NAME} /data/backup/${JOB_NAME}"-$(date +%F_%T)"
+       cp -rf ${WORKSPACE} /usr/share/nginx/html'''
+    }
+    stage ('test'){
+        sh "curl http://www.${JOB_NAME}.com/status"
+    }
+}
+</code></pre>
+<h2 id="t4011. 发布Java项目">11. 发布Java项目 <a href="#t4011. 发布Java项目"> # </a></h2>
+<h3 id="t4111.1 创建本地项目">11.1 创建本地项目 <a href="#t4111.1 创建本地项目"> # </a></h3>
+<ul>
+<li>先登录git服务器创建java仓库</li>
+</ul>
+<pre><code class="lang-js">mkdir -p /home/git/repos/dev-java.git
+cd /home/git/repos/dev-java.git
+git init --bare
+</code></pre>
+<h3 id="t4210.2 拉取代码">10.2 拉取代码 <a href="#t4210.2 拉取代码"> # </a></h3>
+<ul>
+<li>拉取并初始化本地仓库<pre><code class="lang-js">git clone git@github.com:zhufengnodejs/blog2.git
+git clone git@<span class="hljs-number">192.168</span><span class="hljs-number">.20</span><span class="hljs-number">.131</span>:<span class="hljs-regexp">/home/gi</span>t/repos/dev-java.git
+git add -A &amp;&amp; git commit -m<span class="hljs-string">"blog2"</span> &amp;&amp; git push origin master
+</code></pre>
+</li>
+</ul>
+<h3 id="t4310.3 部署环境">10.3 部署环境 <a href="#t4310.3 部署环境"> # </a></h3>
+<ul>
+<li>jdk</li>
+<li>maven</li>
+<li>tomcat</li>
+</ul>
+<h3 id="t4410.4 pipeline脚本">10.4 pipeline脚本 <a href="#t4410.4 pipeline脚本"> # </a></h3>
+<pre><code class="lang-js">node ("webserver") {
+   stage('git checkout') { 
+       checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '8e8e63f9-4806-4f2e-8633-c92badbdefd7', url: "git@192.168.20.131:/home/git/repos/${JOB_NAME}.git"]]])
+   }
+   stage('maven build') {
+        sh '''export JAVA_HOME=/usr/java/jdk1.8.0_211
+        /usr/bin/mvn clean package'''
+   }
+   stage('deploy') {
+        sh '''
+        JENKINS_NODE_COOKIE=dontkillme
+        export JAVA_HOME=/usr/java/jdk1.8.0_211
+        TOMCAT_NAME=tomcat
+        TOMCAT_HOME=/usr/local/$TOMCAT_NAME
+        WWWROOT=$TOMCAT_HOME/webapps/ROOT
+
+        if [ -d $WWWROOT ]; then
+           mv $WWWROOT /data/backup/${TOMCAT_NAME}-$(date +"%F_%T")
+        fi
+        unzip ${WORKSPACE}/target/*.war -d $WWWROOT
+        PID=$(ps -ef |grep $TOMCAT_NAME |egrep -v "grep|$$" |awk '{print $2}')
+        [ -n "$PID" ] &amp;&amp; kill -9 $PID
+        /bin/bash $TOMCAT_HOME/bin/startup.sh'''
+   }
+   stage('test') {
+       sh "curl http://www.de-java.com/status.html"
+   }
+}
+</code></pre>
+<h2 id="t4512. Jenkins+Docker实现持续集成">12. Jenkins+Docker实现持续集成 <a href="#t4512. Jenkins+Docker实现持续集成"> # </a></h2>
+<pre><code class="lang-js">node ("webserver") { 
+   stage('Git Checkout') { 
+        checkout([$class: 'GitSCM', branches: [[name: '$Tag']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'git@192.168.0.219:/home/git/solo.git']]])
+   }
+   stage('Maven Build') {
+        sh '''
+        export JAVA_HOME=/usr/local/jdk1.8
+        /usr/local/maven3.5/bin/mvn clean package -Dmaven.test.skip=true
+        '''
+   }
+   stage('Build and Push Image') {
+    sh '''
+        REPOSITORY=192.168.0.2/project/dev-docker:${Tag}
+        cat &gt; Dockerfile &lt;&lt; EOF
+        FROM 192.168.0.2/library/tomcat-85:latest
+        RUN rm -rf /usr/local/tomcat/webapps/ROOT
+        COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
+        CMD ["catalina.sh", "run"]
+        EOF
+        docker build -t $REPOSITORY .
+        docker login -u zhangrenyang -p xxx= 192.168.0.2
+        docker push $REPOSITORY
+    '''
+   }
+   stage('Deploy to Docker') {
+        sh '''
+        REPOSITORY=192.168.0.219/project/dev-docker:${Tag}
+        docker rm -f dev-docker: |true
+        docker image rm $REPOSITORY |true
+        docker login -u zhangrenyang -p xxx= 192.168.0.2
+        docker container run -d --name dev-docker -v /usr/local/jdk1.8:/usr/local/jdk -p 88:8080 $REPOSITORY
+        '''
+   }
+}
+</code></pre>
+
+    

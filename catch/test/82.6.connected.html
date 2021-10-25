@@ -1,0 +1,294 @@
+
+        <h2 id="t01. 生成项目">1. 生成项目 <a href="#t01. 生成项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app zhufeng_connected_router_ts --typescript
+cd zhufeng_connected_router_ts
+cnpm i react-router-dom @types/react-router-dom   -S
+cnpm i redux react-redux @types/react-redux redux-thunk  redux-logger @types/redux-logger connected-react-router -S
+</code></pre>
+<h2 id="t12.跑通项目">2.跑通项目 <a href="#t12.跑通项目"> # </a></h2>
+<h3 id="t22.1 src\index.tsx">2.1 src\index.tsx <a href="#t22.1 src\index.tsx"> # </a></h3>
+<pre><code class="lang-js">import React from 'react';
+import ReactDOM from 'react-dom';
+import { Route, Link } from 'react-router-dom';
+import Home from './components/Home';
+import Counter from './components/Counter';
+import { ConnectedRouter } from './connected-react-router'
+import history from './history';
+import store from './store';
+import { Provider } from 'react-redux'
+ReactDOM.render(
+    &lt;Provider store={store}&gt;
+        &lt;ConnectedRouter history={history}&gt;
+            &lt;&gt;
+                &lt;Link to="/"&gt;Home&lt;/Link&gt;
+                &lt;Link to="/counter"&gt;Counter&lt;/Link&gt;
+                &lt;Route exact={true} path="/" component={Home} /&gt;
+                &lt;Route path="/counter" component={Counter} /&gt;
+            &lt;/&gt;
+        &lt;/ConnectedRouter&gt;
+    &lt;/Provider&gt;
+    , document.getElementById('root'));
+</code></pre>
+<h3 id="t32.2 store\index.tsx">2.2 store\index.tsx <a href="#t32.2 store\index.tsx"> # </a></h3>
+<p>src\store\index.tsx </p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { applyMiddleware, createStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>
+<span class="hljs-keyword">import</span> { routerMiddleware } <span class="hljs-keyword">from</span> <span class="hljs-string">'../connected-react-router'</span>
+<span class="hljs-keyword">import</span> history <span class="hljs-keyword">from</span> <span class="hljs-string">'../history'</span>;
+<span class="hljs-keyword">import</span> reducers <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">const</span> store = applyMiddleware(routerMiddleware(history))(createStore)(reducers);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h3 id="t42.3 history.tsx">2.3 history.tsx <a href="#t42.3 history.tsx"> # </a></h3>
+<p>src\history.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createHashHistory } <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>
+<span class="hljs-keyword">let</span> history = createHashHistory();
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> history;
+</code></pre>
+<h3 id="t52.4 reducers\index.tsx">2.4 reducers\index.tsx <a href="#t52.4 reducers\index.tsx"> # </a></h3>
+<p>src\store\reducers\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { combineReducers, ReducersMapObject, Action, AnyAction, Reducer } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>
+<span class="hljs-keyword">import</span> { connectRouter, RouterState } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../connected-react-router'</span>
+<span class="hljs-keyword">import</span> counter, { CounterState } <span class="hljs-keyword">from</span> <span class="hljs-string">'./counter'</span>;
+<span class="hljs-keyword">import</span> history <span class="hljs-keyword">from</span> <span class="hljs-string">'../../history'</span>;
+interface Reducers {
+    <span class="hljs-attr">router</span>: RouterState,
+    <span class="hljs-attr">counter</span>: CounterState;
+}
+<span class="hljs-keyword">let</span> reducers: ReducersMapObject&lt;Reducers, any&gt; = {
+    <span class="hljs-attr">router</span>: connectRouter(history),
+    counter
+};
+<span class="hljs-keyword">export</span> type RootState = {
+    [key <span class="hljs-keyword">in</span> keyof <span class="hljs-keyword">typeof</span> reducers]: ReturnType&lt;<span class="hljs-keyword">typeof</span> reducers[key]&gt;
+}
+<span class="hljs-keyword">let</span> rootReducer: Reducer&lt;RootState, AnyAction&gt; = combineReducers&lt;RootState, AnyAction&gt;(reducers);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> rootReducer;
+</code></pre>
+<h3 id="t62.5 reducers\counter.tsx">2.5 reducers\counter.tsx <a href="#t62.5 reducers\counter.tsx"> # </a></h3>
+<p>src\store\reducers\counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+<span class="hljs-keyword">import</span> { AnyAction } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">export</span> interface CounterState {
+    <span class="hljs-attr">number</span>: number
+}
+<span class="hljs-keyword">let</span> initialState: CounterState = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> }
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state: CounterState = initialState, action: AnyAction</span>): <span class="hljs-title">CounterState</span> </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> types.INCREMENT:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">case</span> types.DECREMENT:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+</code></pre>
+<h3 id="t72.6 action-types.tsx">2.6 action-types.tsx <a href="#t72.6 action-types.tsx"> # </a></h3>
+<p>src\store\action-types.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> INCREMENT = <span class="hljs-string">'INCREMENT'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> DECREMENT = <span class="hljs-string">'DECREMENT'</span>;
+</code></pre>
+<h3 id="t82.7 actions\counter.tsx">2.7 actions\counter.tsx <a href="#t82.7 actions\counter.tsx"> # </a></h3>
+<p>src\store\actions\counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+<span class="hljs-keyword">import</span> { push } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../connected-react-router'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+    increment() {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: types.INCREMENT }
+    },
+    decrement() {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: types.DECREMENT }
+    },
+    go(path: string) {
+        <span class="hljs-keyword">return</span> push(path);
+    }
+}
+</code></pre>
+<h3 id="t92.8 components\Home.tsx">2.8 components\Home.tsx <a href="#t92.8 components\Home.tsx"> # </a></h3>
+<p>src\components\Home.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { RouteComponentProps } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router'</span>;
+interface IParams { }
+type RouteProps = RouteComponentProps&lt;IParams&gt;;
+type Props = RouteProps &amp; {
+    children?: any
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Home</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> this.props.history.go(-1)}&gt;返回<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t102.9 Counter.tsx">2.9 Counter.tsx <a href="#t102.9 Counter.tsx"> # </a></h3>
+<p>src\components\Counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> actions <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/actions/counter'</span>;
+<span class="hljs-keyword">import</span> { CounterState } <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/reducers/counter'</span>;
+<span class="hljs-keyword">import</span> { RootState } <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/reducers'</span>;
+type Props = CounterState &amp; <span class="hljs-keyword">typeof</span> actions;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.props.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.props.increment}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.props.decrement}</span>&gt;</span>-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> this.props.go('/')}&gt;Home<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">let</span> mapStateToProps = (state: RootState): <span class="hljs-function"><span class="hljs-params">CounterState</span> =&gt;</span> state.counter;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    mapStateToProps,
+    actions
+)(Counter);
+</code></pre>
+<h2 id="t113.实现connected-react-router">3.实现connected-react-router <a href="#t113.实现connected-react-router"> # </a></h2>
+<h3 id="t123.1 index.tsx">3.1 index.tsx <a href="#t123.1 index.tsx"> # </a></h3>
+<p>src\connected-react-router\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> push <span class="hljs-keyword">from</span> <span class="hljs-string">'./push'</span>;
+<span class="hljs-keyword">import</span> routerMiddleware <span class="hljs-keyword">from</span> <span class="hljs-string">'./routerMiddleware'</span>;
+<span class="hljs-keyword">import</span> connectRouter <span class="hljs-keyword">from</span> <span class="hljs-string">'./connectRouter'</span>;
+<span class="hljs-keyword">import</span> ConnectedRouter <span class="hljs-keyword">from</span> <span class="hljs-string">'./ConnectedRouter'</span>;
+<span class="hljs-keyword">export</span> {
+    push, routerMiddleware, connectRouter, ConnectedRouter
+}
+<span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+</code></pre>
+<h3 id="t133.2 types.tsx">3.2 types.tsx <a href="#t133.2 types.tsx"> # </a></h3>
+<p>src\connected-react-router\types.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { LocationState, Location } <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CALL_HISTORY_METHOD: <span class="hljs-string">'@@router/CALL_HISTORY_METHOD'</span> = <span class="hljs-string">'@@router/CALL_HISTORY_METHOD'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> LOCATION_CHANGE: <span class="hljs-string">'@@router/LOCATION_CHANGE'</span> = <span class="hljs-string">'@@router/LOCATION_CHANGE'</span>;
+<span class="hljs-keyword">export</span> interface LocationActionPayload&lt;A = any[]&gt; {
+    <span class="hljs-attr">method</span>: string;
+    args?: A;
+}
+<span class="hljs-comment">//这是一个调用历史对象方法的action</span>
+<span class="hljs-comment">//告诉 中间件，我要调用history对象的方法 method args   history[method](...args);</span>
+<span class="hljs-keyword">export</span> interface CallHistoryMethodAction&lt;A = any[]&gt; {
+    <span class="hljs-attr">type</span>: <span class="hljs-keyword">typeof</span> CALL_HISTORY_METHOD;
+    payload: LocationActionPayload&lt;A&gt;;
+}
+
+<span class="hljs-keyword">export</span> interface LocationChangeAction&lt;S = LocationState&gt; {
+    <span class="hljs-attr">type</span>: <span class="hljs-keyword">typeof</span> LOCATION_CHANGE;
+    payload: LocationChangePayload&lt;S&gt;;
+}
+<span class="hljs-keyword">export</span> interface LocationChangePayload&lt;S = LocationState&gt; extends RouterState&lt;S&gt; {
+    <span class="hljs-attr">isFirstRendering</span>: boolean;
+}
+<span class="hljs-keyword">export</span> type Action = <span class="hljs-string">'PUSH'</span> | <span class="hljs-string">'POP'</span> | <span class="hljs-string">'REPLACE'</span>;
+<span class="hljs-keyword">export</span> type RouterActionType = Action;
+<span class="hljs-keyword">export</span> interface RouterState&lt;S = LocationState&gt; {
+    <span class="hljs-attr">location</span>: Location&lt;S&gt;
+    action: RouterActionType
+}
+</code></pre>
+<h3 id="t143.3 push.tsx">3.3 push.tsx <a href="#t143.3 push.tsx"> # </a></h3>
+<p>src\connected-react-router\push.tsx</p>
+<pre><code class="lang-js">import { LocationState, Path, LocationDescriptorObject } from 'history';
+import { CALL_HISTORY_METHOD, CallHistoryMethodAction } from './';
+export default function push&lt;S = LocationState&gt;(location: LocationDescriptorObject&lt;S&gt;): CallHistoryMethodAction&lt;[LocationDescriptorObject&lt;S&gt;]&gt;;
+export default function push&lt;S = LocationState&gt;(location: LocationDescriptorObject&lt;S&gt;): CallHistoryMethodAction&lt;[LocationDescriptorObject&lt;S&gt;]&gt; {
+    return {
+        type: CALL_HISTORY_METHOD,
+        payload: {
+            method: 'push',
+            args: [location]//history.push(location);
+        }
+    }
+}
+</code></pre>
+<h3 id="t153.4 routerMiddleware.tsx">3.4 routerMiddleware.tsx <a href="#t153.4 routerMiddleware.tsx"> # </a></h3>
+<p>src\connected-react-router\routerMiddleware.tsx</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">import</span> { History } <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-keyword">import</span> { CALL_HISTORY_METHOD } <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">history: History</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">api: any</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">next: any</span>) </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">action: any</span>) </span>{
+                <span class="hljs-comment">//如果相等说明派发的这个动作就是 store.dispatch(push({pathname:'/'}));</span>
+                <span class="hljs-keyword">if</span> (action.type === CALL_HISTORY_METHOD) {
+                    <span class="hljs-keyword">let</span> method: <span class="hljs-string">'push'</span> | <span class="hljs-string">'go'</span> = action.payload.method;
+                    history[method](action.payload.args[<span class="hljs-number">0</span>]);
+                } <span class="hljs-keyword">else</span> {
+                    next(action);
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="t163.5 connectRouter.tsx">3.5 connectRouter.tsx <a href="#t163.5 connectRouter.tsx"> # </a></h3>
+<p>src\connected-react-router\connectRouter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { ReactReduxContext } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> { Router } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router'</span>;
+<span class="hljs-keyword">import</span> { History, Location, UnregisterCallback } <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-keyword">import</span> { LOCATION_CHANGE, Action } <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-comment">//react-router-dom</span>
+<span class="hljs-comment">/**
+ * 这个组件的主要工作就是订阅路径变化事件，当路径发生变化后向仓库派发动作
+ * 改变仓库状态对象的router属性
+ */</span>
+interface Props {
+    <span class="hljs-attr">history</span>: History
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConnectedRouter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    <span class="hljs-keyword">static</span> contextType = ReactReduxContext;
+    unListen: UnregisterCallback
+    componentDidMount() {
+        <span class="hljs-comment">//调用history的listen方法进行监听，监听路径的变化 ，当路径发生变化之后会执行此监听函数，</span>
+        <span class="hljs-keyword">this</span>.unListen = <span class="hljs-keyword">this</span>.props.history.listen(<span class="hljs-function">(<span class="hljs-params">location: Location, action: Action</span>) =&gt;</span> {
+            <span class="hljs-keyword">this</span>.context.store.dispatch({
+                <span class="hljs-attr">type</span>: LOCATION_CHANGE,
+                <span class="hljs-attr">payload</span>: {
+                    location,
+                    action
+                }
+            })
+        });
+    }
+    componentWillUnmount() {
+        <span class="hljs-keyword">this</span>.unListen();
+    }
+    render() {
+        <span class="hljs-keyword">let</span> { history, children } = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span> <span class="hljs-attr">history</span>=<span class="hljs-string">{history}</span>&gt;</span>
+                {children}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t173.6 connectRouter.tsx">3.6 connectRouter.tsx <a href="#t173.6 connectRouter.tsx"> # </a></h3>
+<p>src\connected-react-router\connectRouter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { History, LocationState } <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-keyword">import</span> { AnyAction } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">import</span> { LocationChangeAction, LOCATION_CHANGE, RouterState } <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">connectRouter</span>&lt;<span class="hljs-title">S</span> = <span class="hljs-title">LocationState</span>&gt;(<span class="hljs-params">history: History</span>) </span>{
+    <span class="hljs-keyword">let</span> initialState: RouterState&lt;S&gt; = {
+        <span class="hljs-attr">action</span>: history.action,
+        <span class="hljs-attr">location</span>: history.location
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state: RouterState&lt;S&gt; = initialState, action: AnyAction</span>) </span>{
+        <span class="hljs-keyword">if</span> (action.type === LOCATION_CHANGE) {
+            <span class="hljs-keyword">return</span> (action <span class="hljs-keyword">as</span> LocationChangeAction).payload;
+        }
+        <span class="hljs-keyword">return</span> state;
+    }
+}
+<span class="hljs-comment">//saga=&gt;dva=&gt;umi=&gt;antdesignpro</span>
+</code></pre>
+
+    

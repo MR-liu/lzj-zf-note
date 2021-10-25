@@ -1,0 +1,2324 @@
+
+        <h2 id="t01.安装">1.安装 <a href="#t01.安装"> # </a></h2>
+<h3 id="t11.1.安装mysql">1.1.安装mysql <a href="#t11.1.安装mysql"> # </a></h3>
+<ul>
+<li><a href="https://dev.mysql.com/downloads/mysql/">mysql</a></li>
+</ul>
+<h3 id="t21.2.安装redis">1.2.安装redis <a href="#t21.2.安装redis"> # </a></h3>
+<ul>
+<li><a href="https://redis.io/">redis</a></li>
+</ul>
+<h3 id="t31.3.安装nginx">1.3.安装nginx <a href="#t31.3.安装nginx"> # </a></h3>
+<ul>
+<li><a href="http://nginx.org/en/download.html">nginx</a></li>
+</ul>
+<h2 id="t42. 配置nginx">2. 配置nginx <a href="#t42. 配置nginx"> # </a></h2>
+<h3 id="t52.1 nginx.conf">2.1 nginx.conf <a href="#t52.1 nginx.conf"> # </a></h3>
+<pre><code class="lang-js">http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main '$time_iso8601    -    -    $remote_addr    $http_host    $status    $request_time    $request_length    $body_bytes_sent    15d04347-be16-b9ab-0029-24e4b6645950    -    -    9689c3ea-5155-2df7-a719-e90d2dedeb2c 937ba755-116a-18e6-0735-312cba23b00c    -    -    $request_uri    $http_user_agent    -    sample=-&amp;_UC_agent=-&amp;device_id=-&amp;-    -    -    -';
+    access_log  logs/access.log  main;
+    server {
+        listen       80;
+        server_name  localhost;
+        if ($time_iso8601 ~ "^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})") {
+         set $year $1;
+         set $month $2;
+         set $day $3;
+         set $hour $4;
+         set $minute $5;
+        }
+        access_log  logs/$year$month-$day-$hour-$minute.log  main;
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">$time_iso8601</td>
+<td style="text-align:left">服务器时间的ISO 8610格式</td>
+</tr>
+<tr>
+<td style="text-align:left">$remote_addr</td>
+<td style="text-align:left">客户端地址</td>
+</tr>
+<tr>
+<td style="text-align:left">$http_host</td>
+<td style="text-align:left">主机名</td>
+</tr>
+<tr>
+<td style="text-align:left">$status</td>
+<td style="text-align:left">HTTP响应代码</td>
+</tr>
+<tr>
+<td style="text-align:left">$request_time</td>
+<td style="text-align:left">处理客户端请求使用的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">$request_length</td>
+<td style="text-align:left">请求的长度</td>
+</tr>
+<tr>
+<td style="text-align:left">$body_bytes_sent</td>
+<td style="text-align:left">传输给客户端的字节数</td>
+</tr>
+<tr>
+<td style="text-align:left">$request_uri</td>
+<td style="text-align:left">包含一些客户端请求参数的原始URI</td>
+</tr>
+<tr>
+<td style="text-align:left">$http_user_agent</td>
+<td style="text-align:left">客户端用户代理</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t63. 下载项目">3. 下载项目 <a href="#t63. 下载项目"> # </a></h2>
+<pre><code class="lang-js">git clone https:<span class="hljs-comment">//gitee.com/zhufengpeixun/monitor.git</span>
+</code></pre>
+<h2 id="t74.埋点上报">4.埋点上报 <a href="#t74.埋点上报"> # </a></h2>
+<h3 id="t84.1 安装">4.1 安装 <a href="#t84.1 安装"> # </a></h3>
+<pre><code class="lang-js">cd monitor/sdk
+cnpm install
+</code></pre>
+<h3 id="t94.2 配置">4.2 配置 <a href="#t94.2 配置"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.dt &amp;&amp; dt.set({
+  <span class="hljs-attr">pid</span>: <span class="hljs-string">'template'</span>, <span class="hljs-comment">// [必填]项目id,</span>
+  <span class="hljs-attr">uuid</span>: <span class="hljs-string">'uuid'</span>, <span class="hljs-comment">// [可选]设备唯一id, 用于计算uv数&amp;设备分布. 一般在cookie中可以取到, 没有uuid可用设备macidfa/imei替代. 或者在storage的key中存入随机数字, 模拟设备唯一id.</span>
+  <span class="hljs-attr">ucid</span>: <span class="hljs-string">'ucid'</span>, <span class="hljs-comment">// [可选]用户ucid, 用于发生异常时追踪用户信息, 一般在cookie中可以取到, 没有可传空字符串</span>
+  <span class="hljs-attr">is_test</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 是否为测试数据, 默认为false(测试模式下打点数据仅供浏览, 不会展示在系统中)</span>
+  <span class="hljs-attr">record</span>: {
+    <span class="hljs-attr">time_on_page</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 是否监控用户在线时长数据, 默认为true</span>
+    <span class="hljs-attr">performance</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 是否监控页面载入性能, 默认为true</span>
+    <span class="hljs-attr">js_error</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">//  是否监控页面报错信息, 默认为true</span>
+    <span class="hljs-comment">// 配置需要监控的页面报错类别, 仅在js_error为true时生效, 默认均为true(可以将配置改为false, 以屏蔽不需要报的错误类别)</span>
+    <span class="hljs-attr">js_error_report_config</span>: {
+      <span class="hljs-attr">ERROR_RUNTIME</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// js运行时报错</span>
+      <span class="hljs-attr">ERROR_SCRIPT</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// js资源加载失败</span>
+      <span class="hljs-attr">ERROR_STYLE</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// css资源加载失败</span>
+      <span class="hljs-attr">ERROR_IMAGE</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 图片资源加载失败</span>
+      <span class="hljs-attr">ERROR_AUDIO</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 音频资源加载失败</span>
+      <span class="hljs-attr">ERROR_VIDEO</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 视频资源加载失败</span>
+      <span class="hljs-attr">ERROR_CONSOLE</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// vue运行时报错</span>
+      <span class="hljs-attr">ERROR_TRY_CATCH</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 未catch错误</span>
+      <span class="hljs-comment">// 自定义检测函数, 上报前最后判断是否需要报告该错误</span>
+      <span class="hljs-comment">// 回调函数说明</span>
+      <span class="hljs-comment">// 传入参数 =&gt; </span>
+      <span class="hljs-comment">//            desc:  字符串, 错误描述</span>
+      <span class="hljs-comment">//            stack: 字符串, 错误堆栈信息</span>
+      <span class="hljs-comment">// 返回值 =&gt;  </span>
+      <span class="hljs-comment">//            true  : 上报打点请求</span>
+      <span class="hljs-comment">//            false : 不需要上报</span>
+      <span class="hljs-attr">checkErrrorNeedReport</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">desc, stack</span>)</span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+      }
+    }
+  },
+  <span class="hljs-comment">// 业务方的js版本号, 会随着打点数据一起上传, 方便区分数据来源</span>
+  <span class="hljs-comment">// 可以不填, 默认为1.0.0</span>
+  <span class="hljs-attr">version</span>: <span class="hljs-string">'1.0.0'</span>,
+  <span class="hljs-comment">// test.com/detail/1.html</span>
+  <span class="hljs-comment">// test.com/detail/2.html</span>
+  <span class="hljs-comment">// test.com/detail/3.html</span>
+  <span class="hljs-comment">// 这种页面来说, 虽然url不同, 但他们本质上是同一个页面</span>
+  <span class="hljs-comment">// 因此需要业务方传入一个处理函数, 根据当前url解析出真实的页面类型</span>
+  <span class="hljs-attr">getPageType</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">location</span>)</span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${location.host}</span><span class="hljs-subst">${location.pathname}</span>`</span> }
+})
+</code></pre>
+<h3 id="t104.3 监控类型">4.3 监控类型 <a href="#t104.3 监控类型"> # </a></h3>
+<h4 id="t114.3.1 time_on_page(用户在线时长统计)">4.3.1 time_on_page(用户在线时长统计) <a href="#t114.3.1 time_on_page(用户在线时长统计)"> # </a></h4>
+<ul>
+<li>t_r_duration_distribution</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// 用户在线时长统计</span>
+<span class="hljs-keyword">const</span> OFFLINE_MILL = <span class="hljs-number">15</span> * <span class="hljs-number">60</span> * <span class="hljs-number">1000</span> <span class="hljs-comment">// 15分钟不操作认为不在线</span>
+<span class="hljs-keyword">const</span> SEND_MILL = <span class="hljs-number">5</span> * <span class="hljs-number">1000</span> <span class="hljs-comment">// 每5s打点一次</span>
+
+<span class="hljs-keyword">let</span> lastTime = <span class="hljs-built_in">Date</span>.now()
+<span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'click'</span>, () =&gt; {
+  <span class="hljs-comment">// 检查是否监控用户在线时长</span>
+  <span class="hljs-keyword">const</span> isTimeOnPageFlagOn = _.get(
+    commonConfig,
+    [<span class="hljs-string">'record'</span>, <span class="hljs-string">'time_on_page'</span>],
+    _.get(DEFAULT_CONFIG, [<span class="hljs-string">'record'</span>, <span class="hljs-string">'time_on_page'</span>])
+  )
+  <span class="hljs-keyword">const</span> isOldTimeOnPageFlagOn = _.get(commonConfig, [<span class="hljs-string">'online'</span>], <span class="hljs-literal">false</span>)
+  <span class="hljs-keyword">const</span> needRecordTimeOnPage = isTimeOnPageFlagOn || isOldTimeOnPageFlagOn
+  <span class="hljs-keyword">if</span> (needRecordTimeOnPage === <span class="hljs-literal">false</span>) {
+    debugLogger(<span class="hljs-string">`config.record.time_on_page值为false, 跳过停留时长打点`</span>)
+    <span class="hljs-keyword">return</span>
+  }
+
+  <span class="hljs-keyword">const</span> now = <span class="hljs-built_in">Date</span>.now();
+  <span class="hljs-keyword">const</span> duration = now - lastTime;
+  <span class="hljs-keyword">if</span> (duration &gt; OFFLINE_MILL) {
+    lastTime = <span class="hljs-built_in">Date</span>.now()
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (duration &gt; SEND_MILL) {
+    lastTime = <span class="hljs-built_in">Date</span>.now()
+    debugLogger(<span class="hljs-string">'发送用户留存时间埋点, 埋点内容 =&gt; '</span>, { <span class="hljs-attr">duration_ms</span>: duration })
+    <span class="hljs-comment">// 用户在线时长</span>
+    log.product(<span class="hljs-number">10001</span>, { <span class="hljs-attr">duration_ms</span>: duration });
+  }
+}, <span class="hljs-literal">false</span>)
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"product"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">10001</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"duration_ms"</span>: <span class="hljs-number">21553</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {}
+    }
+}
+</code></pre>
+<h4 id="t124.3.2 performance(页面载入性能)">4.3.2 performance(页面载入性能) <a href="#t124.3.2 performance(页面载入性能)"> # </a></h4>
+<p><img src="http://img.zhufengpeixun.cn/renderscope3.jpg" alt="renderscope3"></p>
+<h4 id="t134.3.2.1 sdk\src\index.js">4.3.2.1 sdk\src\index.js <a href="#t134.3.2.1 sdk\src\index.js"> # </a></h4>
+<p>sdk\src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.onload = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-comment">// 检查是否监控性能指标</span>
+  <span class="hljs-keyword">const</span> isPerformanceFlagOn = _.get(
+    commonConfig,
+    [<span class="hljs-string">'record'</span>, <span class="hljs-string">'performance'</span>],
+    _.get(DEFAULT_CONFIG, [<span class="hljs-string">'record'</span>, <span class="hljs-string">'performance'</span>])
+  )
+  <span class="hljs-keyword">const</span> isOldPerformanceFlagOn = _.get(commonConfig, [<span class="hljs-string">'performance'</span>], <span class="hljs-literal">false</span>)
+  <span class="hljs-keyword">const</span> needRecordPerformance = isPerformanceFlagOn || isOldPerformanceFlagOn
+  <span class="hljs-keyword">if</span> (needRecordPerformance === <span class="hljs-literal">false</span>) {
+    debugLogger(<span class="hljs-string">`config.record.performance值为false, 跳过性能指标打点`</span>)
+    <span class="hljs-keyword">return</span>
+  }
+
+  <span class="hljs-keyword">const</span> performance = <span class="hljs-built_in">window</span>.performance
+  <span class="hljs-keyword">if</span> (!performance) {
+    <span class="hljs-comment">// 当前浏览器不支持</span>
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'你的浏览器不支持 performance 接口'</span>)
+    <span class="hljs-keyword">return</span>
+  }
+  <span class="hljs-keyword">const</span> times = performance.timing.toJSON()
+
+  debugLogger(<span class="hljs-string">'发送页面性能指标数据, 上报内容 =&gt; '</span>, {
+    ...times,
+    <span class="hljs-attr">url</span>: <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-built_in">window</span>.location.host}</span><span class="hljs-subst">${<span class="hljs-built_in">window</span>.location.pathname}</span>`</span>
+  })
+
+  log(<span class="hljs-string">'perf'</span>, <span class="hljs-number">20001</span>, {
+    ...times,
+    <span class="hljs-attr">url</span>: <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-built_in">window</span>.location.host}</span><span class="hljs-subst">${<span class="hljs-built_in">window</span>.location.pathname}</span>`</span>
+  })
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"perf"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">20001</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"connectStart"</span>: <span class="hljs-number">1592020165386</span>,
+            <span class="hljs-attr">"navigationStart"</span>: <span class="hljs-number">1592020165383</span>,
+            <span class="hljs-attr">"loadEventEnd"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"domLoading"</span>: <span class="hljs-number">1592020165401</span>,
+            <span class="hljs-attr">"secureConnectionStart"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"fetchStart"</span>: <span class="hljs-number">1592020165386</span>,
+            <span class="hljs-attr">"domContentLoadedEventStart"</span>: <span class="hljs-number">1592020165630</span>,
+            <span class="hljs-attr">"responseStart"</span>: <span class="hljs-number">1592020165393</span>,
+            <span class="hljs-attr">"responseEnd"</span>: <span class="hljs-number">1592020165394</span>,
+            <span class="hljs-attr">"domInteractive"</span>: <span class="hljs-number">1592020165630</span>,
+            <span class="hljs-attr">"domainLookupEnd"</span>: <span class="hljs-number">1592020165386</span>,
+            <span class="hljs-attr">"redirectStart"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"requestStart"</span>: <span class="hljs-number">1592020165387</span>,
+            <span class="hljs-attr">"unloadEventEnd"</span>: <span class="hljs-number">1592020165398</span>,
+            <span class="hljs-attr">"unloadEventStart"</span>: <span class="hljs-number">1592020165397</span>,
+            <span class="hljs-attr">"domComplete"</span>: <span class="hljs-number">1592020165630</span>,
+            <span class="hljs-attr">"domainLookupStart"</span>: <span class="hljs-number">1592020165386</span>,
+            <span class="hljs-attr">"loadEventStart"</span>: <span class="hljs-number">1592020165630</span>,
+            <span class="hljs-attr">"domContentLoadedEventEnd"</span>: <span class="hljs-number">1592020165630</span>,
+            <span class="hljs-attr">"redirectEnd"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"connectEnd"</span>: <span class="hljs-number">1592020165386</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {}
+    }
+}
+</code></pre>
+<h4 id="t144.3.3 js_error(页面报错)">4.3.3 js_error(页面报错) <a href="#t144.3.3 js_error(页面报错)"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">错误类型</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ERROR_RUNTIME</td>
+<td style="text-align:left">js运行时报错</td>
+</tr>
+<tr>
+<td style="text-align:left">ERROR_SCRIPT</td>
+<td style="text-align:left">js资源加载失败</td>
+</tr>
+<tr>
+<td style="text-align:left">ERROR_IMAGE</td>
+<td style="text-align:left">图片资源加载失败</td>
+</tr>
+<tr>
+<td style="text-align:left">ERROR_AUDIO</td>
+<td style="text-align:left">音频资源加载失败</td>
+</tr>
+<tr>
+<td style="text-align:left">ERROR_VIDEO</td>
+<td style="text-align:left">视频资源加载失败</td>
+</tr>
+<tr>
+<td style="text-align:left">ERROR_CONSOLE</td>
+<td style="text-align:left">vue运行时报错</td>
+</tr>
+<tr>
+<td style="text-align:left">ERROR_TRY_CATCH</td>
+<td style="text-align:left">未catch错误</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t154.3.3.1 ERROR_RUNTIME">4.3.3.1 ERROR_RUNTIME <a href="#t154.3.3.1 ERROR_RUNTIME"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+    <span class="hljs-comment">// 过滤 target 为 window 的异常，避免与上面的 onerror 重复</span>
+    <span class="hljs-keyword">var</span> errorTarget = event.target
+    <span class="hljs-keyword">if</span> (errorTarget !== <span class="hljs-built_in">window</span> &amp;&amp; errorTarget.nodeName &amp;&amp; LOAD_ERROR_TYPE[errorTarget.nodeName.toUpperCase()]) {
+      handleError(formatLoadError(errorTarget))
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-comment">// onerror会被覆盖, 因此转为使用Listener进行监控</span>
+      <span class="hljs-keyword">let</span> { message, filename, lineno, colno, error } = event
+      handleError(formatRuntimerError(message, filename, lineno, colno, error))
+    }
+}, <span class="hljs-literal">true</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">formatRuntimerError</span> (<span class="hljs-params">message, source, lineno, colno, error</span>) </span>{
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">type</span>: ERROR_RUNTIME,
+    <span class="hljs-attr">desc</span>: message + <span class="hljs-string">' at '</span> + source + <span class="hljs-string">':'</span> + lineno + <span class="hljs-string">':'</span> + colno,
+    <span class="hljs-attr">stack</span>: error &amp;&amp; error.stack ? error.stack : <span class="hljs-string">'no stack'</span> 
+  }
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(a.b);
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_JS_RUNTIME_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"Uncaught ReferenceError: a is not defined at http://localhost:9000/:53:21"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"ReferenceError: a is not defined\n    at http://localhost:9000/:53:21"</span>
+        }
+    }
+}
+</code></pre>
+<h5 id="t164.3.3.2 LOAD_ERROR">4.3.3.2 LOAD_ERROR <a href="#t164.3.3.2 LOAD_ERROR"> # </a></h5>
+<pre><code class="lang-html">      <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/error.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/error.css"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/error.gif"</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">""</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">audio</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/error.mp3"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">audio</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">video</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/error.mp4"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">video</span>&gt;</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">formatLoadError</span> (<span class="hljs-params">errorTarget</span>) </span>{
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">type</span>: LOAD_ERROR_TYPE[errorTarget.nodeName.toUpperCase()],
+    <span class="hljs-attr">desc</span>: errorTarget.baseURI + <span class="hljs-string">'@'</span> + (errorTarget.src || errorTarget.href),
+    <span class="hljs-attr">stack</span>: <span class="hljs-string">'no stack'</span>
+  }
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_SCRIPT_LOAD_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"http://localhost:9000/@http://localhost:9000/error.js"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"no stack"</span>
+        }
+    }
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_CSS_LOAD_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"http://localhost:9000/@http://localhost:9000/error.css"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"no stack"</span>
+        }
+    }
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_IMAGE_LOAD_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"http://localhost:9000/@http://localhost:9000/error.gif"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"no stack"</span>
+        }
+    }
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_VIDEO_LOAD_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"http://localhost:9000/@http://localhost:9000/error.mp4"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"no stack"</span>
+        }
+    }
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_AUDIO_LOAD_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"http://localhost:9000/@http://localhost:9000/error.mp3"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"no stack"</span>
+        }
+    }
+}
+</code></pre>
+<h5 id="t174.3.3.2 LOAD_ERROR">4.3.3.2 LOAD_ERROR <a href="#t174.3.3.2 LOAD_ERROR"> # </a></h5>
+<pre><code class="lang-js"> <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'vue error'</span>);
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_CONSOLE_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"vue error"</span>
+        }
+    }
+}
+</code></pre>
+<h5 id="t184.3.3.3 ERROR_TRY_CATCH">4.3.3.3 ERROR_TRY_CATCH <a href="#t184.3.3.3 ERROR_TRY_CATCH"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">exec</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'未捕获错误'</span>);
+}
+<span class="hljs-built_in">window</span>.dt.tryJS.wrap(exec);
+exec._wrapped();
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"error"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">7</span>,
+        <span class="hljs-attr">"detail"</span>: {
+            <span class="hljs-attr">"error_no"</span>: <span class="hljs-string">"页面报错_TRY_CATCH_ERROR"</span>,
+            <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+        },
+        <span class="hljs-attr">"extra"</span>: {
+            <span class="hljs-attr">"desc"</span>: <span class="hljs-string">"未捕获错误"</span>,
+            <span class="hljs-attr">"stack"</span>: <span class="hljs-string">"Error: 未捕获错误\n    at Function.exec (http://localhost:9000/:56:17)\n    at Function.func._wrapped (webpack-internal:///./src/js-tracker/try.js:31:21)\n    at http://localhost:9000/:59:14"</span>
+        }
+    }
+}
+</code></pre>
+<h4 id="t194.3.4 手工上报">4.3.4 手工上报 <a href="#t194.3.4 手工上报"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-comment">//错误上报</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> Elog = log.error = <span class="hljs-function">(<span class="hljs-params">code, detail, extra</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> log(<span class="hljs-string">'error'</span>, code, detail, extra)
+}
+<span class="hljs-comment">//产品数据上报</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> Plog = log.product = <span class="hljs-function">(<span class="hljs-params">code, detail, extra</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> log(<span class="hljs-string">'product'</span>, code, detail, extra)
+}
+<span class="hljs-comment">//普通信息上报</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> Ilog = log.info = <span class="hljs-function">(<span class="hljs-params">code, detail, extra</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> log(<span class="hljs-string">'info'</span>, code, detail, extra)
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.dt.product(<span class="hljs-number">19999</span>, {}, {})
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"d"</span>: {
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"product"</span>,
+        <span class="hljs-attr">"code"</span>: <span class="hljs-number">19999</span>,
+        <span class="hljs-attr">"detail"</span>: {},
+        <span class="hljs-attr">"extra"</span>: {}
+    }
+}
+</code></pre>
+<h2 id="t205.数据处理">5.数据处理 <a href="#t205.数据处理"> # </a></h2>
+<h3 id="t215.1 安装server">5.1 安装server <a href="#t215.1 安装server"> # </a></h3>
+<pre><code class="lang-js">cd server 
+npm install
+</code></pre>
+<h3 id="t225.2 配置">5.2 配置 <a href="#t225.2 配置"> # </a></h3>
+<h4 id="t235.2.1 配置mysql">5.2.1 配置mysql <a href="#t235.2.1 配置mysql"> # </a></h4>
+<p>server\src\configs\mysql.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> development = {
+  <span class="hljs-attr">host</span>: <span class="hljs-string">'127.0.0.1'</span>,
+  <span class="hljs-attr">port</span>: <span class="hljs-string">'3306'</span>,
+  <span class="hljs-attr">user</span>: <span class="hljs-string">'root'</span>,
+  <span class="hljs-attr">password</span>: <span class="hljs-string">'5f8b8a5d650637f8'</span>,
+  <span class="hljs-attr">database</span>: <span class="hljs-string">'platform'</span>
+}
+</code></pre>
+<h4 id="t245.2.2  配置redis">5.2.2  配置redis <a href="#t245.2.2  配置redis"> # </a></h4>
+<p>server\src\configs\redis.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> development = {
+  <span class="hljs-attr">host</span>: <span class="hljs-string">'127.0.0.1'</span>,
+  <span class="hljs-attr">port</span>: <span class="hljs-string">'6379'</span>
+}
+</code></pre>
+<h3 id="t255.3 数据解析">5.3 数据解析 <a href="#t255.3 数据解析"> # </a></h3>
+<h3 id="t265.3.1 数据存储">5.3.1 数据存储 <a href="#t265.3.1 数据存储"> # </a></h3>
+<h3 id="t275.3.1.1 表名说明">5.3.1.1 表名说明 <a href="#t275.3.1.1 表名说明"> # </a></h3>
+<ul>
+<li>所有表都以<code>t_</code>开头</li>
+<li>原始表添加<code>_o</code>后缀，即<code>t_o_</code></li>
+<li>结果表添加<code>-r</code>后续，即<code>t_r_</code></li>
+<li>表名、字段名默认使用下划线方式命名，不区分大小写</li>
+<li>数据库编码字符集为<code>utf8mb4</code></li>
+<li>记录ID用<code>unsigned bigint</code></li>
+<li>如果字段名有关键字，需要加<code>_c</code>前缀</li>
+<li>所有表中必须有<code>update_time</code> 和<code>create_time</code>字段</li>
+</ul>
+<h3 id="t285.3.1.2 数据库表">5.3.1.2 数据库表 <a href="#t285.3.1.2 数据库表"> # </a></h3>
+<p>t_o_project 项目名</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>display_name</code> varchar(50) NOT NULL DEFAULT '' COMMENT '项目名称'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_name</code> varchar(50) NOT NULL DEFAULT '' COMMENT '项目代号(替代项目id, 方便debug)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>c_desc</code> varchar(100) NOT NULL DEFAULT '' COMMENT '备注信息'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>rate</code> int(10) NOT NULL DEFAULT '10000' COMMENT '数据抽样比率'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>is_delete</code> tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否已删除(1 =&gt; 是, 0 =&gt; 否)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '创建人ucid'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '更新人ucid'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_behavior_distribution</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>code</code> varchar(50) NOT NULL DEFAULT '' COMMENT '用户行为标识'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>name</code> varchar(50) NOT NULL DEFAULT '' COMMENT '用户点击名称'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>url</code> varchar(200) NOT NULL DEFAULT '' COMMENT '用户点击页面'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) NOT NULL DEFAULT '0' COMMENT '点击总量'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(30) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同有三种可能,  hour =&gt; YYYY-MM-DD_HH, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(20) NOT NULL DEFAULT 'day' COMMENT '统计尺度(hour/day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布详情记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_duration_distribution 用户停留时间表</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_stay_ms</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '总停留毫秒数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_uv</code> int(10) NOT NULL DEFAULT '0' COMMENT '总uv数(从uv表中获取)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(30) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同有两种可能, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(20) NOT NULL DEFAULT 'day' COMMENT '统计尺度(day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布详情记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_http_error_distribution</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'http响应码总数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>http_code_2xx_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'http响应码2xx总数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>http_code_3xx_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'http响应码3xx总数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>http_code_4xx_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'http响应码4xx总数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>http_code_5xx_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'http响应码5xx总数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>http_code_other_count</code> int(10) NOT NULL DEFAULT '0' COMMENT '其他http响应码总数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布详情记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(30) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同有三种可能,  hour =&gt; YYYY-MM-DD_HH, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(20) NOT NULL DEFAULT 'hour' COMMENT '统计尺度(hour/day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_page_view</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'pv数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(30) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同有三种可能,  hour =&gt; YYYY-MM-DD_HH, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(20) NOT NULL DEFAULT 'hour' COMMENT '统计尺度(hour/day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_system_browser</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>browser</code> varchar(20) NOT NULL DEFAULT '' COMMENT '浏览器品牌'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>browser_version</code> varchar(50) NOT NULL DEFAULT '' COMMENT '浏览器详情'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '数量总和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_month</code> varchar(15) NOT NULL DEFAULT '' COMMENT '统计时间段, YYYY-MM格式 =&gt; 2018-09'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_system_runtime_version</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>runtime_version</code> varchar(50) NOT NULL DEFAULT '' COMMENT '应用版本号'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '数量总和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_month</code> varchar(15) NOT NULL DEFAULT '' COMMENT '统计时间段, YYYY-MM格式 =&gt; 2018-09'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_system_device</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>device_vendor</code> varchar(50) NOT NULL DEFAULT '' COMMENT '设备制造商'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>device_model</code> varchar(50) NOT NULL DEFAULT '' COMMENT '设备详情'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '数量总和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_month</code> varchar(15) NOT NULL DEFAULT '' COMMENT '统计时间段, YYYY-MM格式 =&gt; 2018-09'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_system_os</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>os</code> varchar(50) NOT NULL DEFAULT '' COMMENT '操作系统名'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>os_version</code> varchar(50) NOT NULL DEFAULT '' COMMENT '操作系统版本'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '数量总和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_month</code> varchar(15) NOT NULL DEFAULT '' COMMENT '统计时间段, YYYY-MM格式 =&gt; 2018-09'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_unique_view</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10) NOT NULL DEFAULT '0' COMMENT 'uv数'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(30) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同有三种可能,  hour =&gt; YYYY-MM-DD_HH, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(20) NOT NULL DEFAULT 'hour' COMMENT '统计尺度(hour/day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_alarm_config</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '要报警项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>owner_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '项目所有人id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_type</code> varchar(20) NOT NULL DEFAULT '' COMMENT '报警错误类型'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_name</code> varchar(255) NOT NULL DEFAULT '' COMMENT '要报警错误名字'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>time_range_s</code> int(20) unsigned NOT NULL DEFAULT '0' COMMENT '报警时间范围_秒'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>max_error_count</code> int(20) unsigned NOT NULL DEFAULT '0' COMMENT '报警错误数阈值'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>alarm_interval_s</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '报警时间间隔_秒'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>is_enable</code> tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '是否开启本条报警配置1：是0：否'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>note</code> varchar(255) NOT NULL DEFAULT '' COMMENT '配置说明'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>is_delete</code> tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否删除(1 =&gt; 是, 0 =&gt; 否)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '创建此记录的人'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '更新此记录的人'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '创建此记录的时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '更新此记录的时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_user</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ucid</code> varchar(50) NOT NULL DEFAULT '' COMMENT '贝壳ucid'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>account</code> varchar(50) NOT NULL DEFAULT '' COMMENT '账户名,不能重复'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>email</code> varchar(50) NOT NULL DEFAULT '' COMMENT '邮箱'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>password_md5</code> varchar(32) NOT NULL DEFAULT '' COMMENT 'md5后的password'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>nickname</code> varchar(20) NOT NULL DEFAULT '' COMMENT '昵称'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>role</code> varchar(50) NOT NULL DEFAULT 'dev' COMMENT '角色(dev =&gt; 开发者,admin =&gt; 管理员)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>register_type</code> varchar(20) NOT NULL DEFAULT 'site' COMMENT '注册类型(site =&gt; 网站注册, third =&gt; 第三方登录)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>avatar_url</code> varchar(200) NOT NULL DEFAULT '<a href="http://ww1.sinaimg.cn/large/00749HCsly1fwofq2t1kaj30qn0qnaai.jpg'">http://ww1.sinaimg.cn/large/00749HCsly1fwofq2t1kaj30qn0qnaai.jpg'</a> COMMENT '头像地址, 默认使用贝壳logo'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>mobile</code> varchar(20) NOT NULL DEFAULT '' COMMENT '手机号'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>is_delete</code> tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否删除(1 =&gt; 是, 0 =&gt; 否)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_project_member</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '项目参与者ucid'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>role</code> varchar(20) NOT NULL DEFAULT '' COMMENT '参与者角色(owner =&gt; 组长, dev =&gt; 成员)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>need_alarm</code> tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否需要报警(0 =&gt; 不需要, 1 =&gt; 需要)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>is_delete</code> tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否已删除(0 =&gt; 未删除, 1 =&gt; 已删除)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '创建者ucid'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '更新者ucid'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '创建此记录的时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '更新此记录的时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_new_user_summary</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>total_count</code> int(10)    NOT NULL DEFAULT '0' COMMENT '数量总和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(20) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同三两种可能, hour =&gt; YYYY-MM-DD_HH, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(10) NOT NULL DEFAULT 'day' COMMENT '统计尺度(hour/day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(10) NOT NULL DEFAULT 0 COMMENT '城市分布详情记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_alarm_log</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>project_id</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '要报警项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>config_id</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '报警配置id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>send_at</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '报警时间戳'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_type</code> varchar(20) NOT NULL DEFAULT '' COMMENT '错误类型'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_name</code> varchar(255) NOT NULL DEFAULT '' COMMENT '错误名字'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>message</code> varchar(500) NOT NULL DEFAULT '' COMMENT '报警信息'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_monitor_1_202005</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_type</code> varchar(20) NOT NULL DEFAULT '' COMMENT '异常类型(目前是四种,分别对应前端的四种报错类型: api_data =&gt;前端数据结构报警, start_process =&gt; 启动过程异常, load_wv =&gt; Url加载空服务报警, api_code =&gt; 请求接口异常报警)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_name</code> varchar(255) NOT NULL DEFAULT '' COMMENT '错误名/错误代码,用于细分错误类别'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>http_code</code> int(10) NOT NULL DEFAULT '0' COMMENT 'http状态码, 没有则为0'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>monitor_ext_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '详情id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>during_ms</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '接口请求时长, 单位毫秒'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>request_size_b</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '接口请求体积, 单位b'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>response_size_b</code> int(10) unsigned NOT NULL DEFAULT '0' COMMENT '接口响应体积, 单位b'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>url</code> varchar(255) NOT NULL DEFAULT '' COMMENT '发生异常的url'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>country</code> varchar(10) NOT NULL DEFAULT '' COMMENT '所属国家'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>province</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属省份'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属城市'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>log_at</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '日志记录时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>md5</code> char(32) NOT NULL DEFAULT '' COMMENT '记录生成MD5'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_monitor_ext_1_202005</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ext_json</code> text COMMENT '异常记录扩展信息'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_uv_record_1_202005</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '项目id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>uuid</code> varchar(50) NOT NULL DEFAULT '' COMMENT '设备唯一标识'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>country</code> varchar(10) NOT NULL DEFAULT '' COMMENT '所属国家'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>province</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属省份'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属城市'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>visit_at_hour</code> varchar(20) NOT NULL DEFAULT '' COMMENT '访问日期, 数据格式为 YYYY-MM-DD_HH demo =&gt; 2018-08-02_23'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>pv_count</code> int(10) NOT NULL DEFAULT '0' COMMENT '时间段内同一uuid访问次数, 用于计算总pv'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_city_distribution_1_202005</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_json</code> text COMMENT '扩展字段'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_performance_1_202005</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>sum_indicator_value</code> bigInt(10) NOT NULL DEFAULT '0' COMMENT '性能指标求和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>pv</code> bigInt(10) NOT NULL DEFAULT '0' COMMENT '性能指标pv数,用于计算平均时长'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>indicator</code> varchar(50) NOT NULL DEFAULT '' COMMENT '性能指标:DNS响应时间/TCP时间/404数量/etc'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>url</code> varchar(255) NOT NULL DEFAULT '' COMMENT '页面url'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribute_id</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '城市分布详情记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(20) NOT NULL DEFAULT '' COMMENT '统计日期,格式根据统计尺度不同有四种可能,  minute =&gt; YYYY-MM-DD_HH:mm, hour =&gt; YYYY-MM-DD_HH, day =&gt; YYYY-MM-DD, month =&gt; YYYY-MM'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(10) NOT NULL DEFAULT 'minute' COMMENT '统计尺度(minute/hour/day/month)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_system_collection_1</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>uuid</code> varchar(50) NOT NULL DEFAULT '' COMMENT '设备唯一标识'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>browser</code> varchar(50) NOT NULL DEFAULT '' COMMENT '浏览器品牌'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>browser_version</code> varchar(100) NOT NULL DEFAULT '' COMMENT '浏览器版本详情'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>engine</code> varchar(100) NOT NULL DEFAULT '' COMMENT '内核名称'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>engine_version</code> varchar(100) NOT NULL DEFAULT '' COMMENT '内核版本详情'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>device_vendor</code> varchar(100) NOT NULL DEFAULT '' COMMENT '手机品牌'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>device_model</code> varchar(100) NOT NULL DEFAULT '' COMMENT '手机型号'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>os</code> varchar(50) NOT NULL DEFAULT '' COMMENT '操作系统'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>os_version</code> varchar(50) NOT NULL DEFAULT '' COMMENT '操作系统详情'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>country</code> varchar(10) NOT NULL DEFAULT '' COMMENT '所属国家'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>province</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属省份'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属城市'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>runtime_version</code> varchar(50) NOT NULL DEFAULT '' COMMENT '应用版本'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>visit_at_month</code> varchar(20) NOT NULL DEFAULT '' COMMENT '访问日期, 数据格式为 YYYY-MM demo =&gt; 2018-09'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>log_at</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '日志记录时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '数据库更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_o_user_first_login_at_1</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ucid</code> varchar(20) NOT NULL DEFAULT '' COMMENT '用户id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>first_visit_at</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '用户首次访问时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>country</code> varchar(10) NOT NULL DEFAULT '' COMMENT '所属国家'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>province</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属省份'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city</code> varchar(15) NOT NULL DEFAULT '' COMMENT '所属城市'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> bigint(20) NOT NULL DEFAULT '0' COMMENT '更新时间'</td>
+</tr>
+</tbody>
+</table>
+<p>t_r_error_summary_1_202005</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>id</code> bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '记录id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_type</code> varchar(20) NOT NULL DEFAULT '' COMMENT '错误类型'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_name</code> varchar(255) NOT NULL DEFAULT '' COMMENT '错误名字'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>url_path</code> varchar(255) NOT NULL DEFAULT '' COMMENT '错误URL_PATH'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>city_distribution_id</code> bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '城市分布详情id'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_at_time</code> varchar(20) NOT NULL DEFAULT '' COMMENT '统计时间(按类型不同,day:YYYY-MM-DD;hour:YYYY-MM-DD_HH;minute:YYYY-MM-DD_HH:mm)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>count_type</code> varchar(10) NOT NULL DEFAULT 'day' COMMENT '统计类型(day天,hour小时,minute分)'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>error_count</code> int(10) NOT NULL DEFAULT '0' COMMENT '数量总和'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>create_time</code> int(20) NOT NULL DEFAULT '0' COMMENT '创建时间'</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>update_time</code> int(20) NOT NULL DEFAULT '0' COMMENT '更新时间'</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t295.3.2 指令">5.3.2 指令 <a href="#t295.3.2 指令"> # </a></h3>
+<h4 id="t305.3.2.1 指令帮助">5.3.2.1 指令帮助 <a href="#t305.3.2.1 指令帮助"> # </a></h4>
+<pre><code class="lang-js">node dist/fee.js -h
+<span class="hljs-attr">Usage</span>:
+  command [<span class="hljs-built_in">arguments</span>] [options]
+
+Global Options:
+  --env                            <span class="hljs-built_in">Set</span> NODE_ENV before running the commands
+  --no-ansi                        Disable colored output
+
+Available Commands:
+ Command
+  <span class="hljs-attr">Command</span>:Demo                     解析nginx日志, 分析pv
+ CreateCache
+  <span class="hljs-attr">CreateCache</span>:UpdatePerOneMinute   [每<span class="hljs-number">10</span>分钟执行一次] 主动调用方法, 更新Redis缓存, 每<span class="hljs-number">10</span>分钟更新一次
+ Parse
+  <span class="hljs-attr">Parse</span>:Device                     [按天] 解析nginx日志, 分析指定时间范围Device
+  <span class="hljs-attr">Parse</span>:MenuClick                  [按天] 解析nginx日志, 用户点击情况
+  <span class="hljs-attr">Parse</span>:Monitor                    [按分钟] 解析nginx日志, 分析Monitor
+  <span class="hljs-attr">Parse</span>:Performance                [按小时] 解析nginx日志, 分析分钟级别的指定时间范围内的性能指标
+  <span class="hljs-attr">Parse</span>:TimeOnSiteByHour           [按小时] 解析nginx日志, 分析记录指定时间范围内用户停留时长
+  <span class="hljs-attr">Parse</span>:UV                         [按小时] 解析nginx日志, 分析记录指定时间范围内的uv
+  <span class="hljs-attr">Parse</span>:UserFirstLoginAt           [按天] 解析nginx日志, 记录用户首次登陆时间
+ SaveLog
+  <span class="hljs-attr">SaveLog</span>:Nginx                    每一分钟读取Nginx日志文件，并解析
+ Summary
+  <span class="hljs-attr">Summary</span>:<span class="hljs-built_in">Error</span>                    [按分钟/按小时/按天] 根据历史数据, 汇总分析错误数
+  <span class="hljs-attr">Summary</span>:HttpError                [按天/按月] 基于数据表做统计, 统计http error分布情况
+  <span class="hljs-attr">Summary</span>:NewUser                  [按小时/按天/按月] 根据历史数据, 汇总分析记录指定时间范围内的新增用户数
+  <span class="hljs-attr">Summary</span>:Performance              [按小时/按天/按月] 根据历史数据, 汇总分析记录指定时间范围内的性能指标数据
+  <span class="hljs-attr">Summary</span>:SystemBrowser            [按月] 基于数据库统计浏览器占比
+  <span class="hljs-attr">Summary</span>:SystemDevice             [按月] 基于数据库统计设备占比
+  <span class="hljs-attr">Summary</span>:SystemOS                 [按月]基于数据库统计操作系统占比
+  <span class="hljs-attr">Summary</span>:SystemRuntimeVersion     [按月] 基于数据库统计浏览器占比
+  <span class="hljs-attr">Summary</span>:TimeOnSite               [按天/按月] 根据历史数据, 汇总分析记录指定时间范围内用户停留时长
+  <span class="hljs-attr">Summary</span>:UV                       [按小时/按天/按月] 根据历史数据, 汇总分析记录指定时间范围内的uv
+ Task
+  <span class="hljs-attr">Task</span>:Manager                     任务调度主进程, 只能启动一次
+ Utils
+  <span class="hljs-attr">Utils</span>:CleanOldLog                只保留当前月内数据, 每月<span class="hljs-number">20</span>号之后自动删除上个月数据
+  <span class="hljs-attr">Utils</span>:GenerateSQL                生成项目在指定日期范围内的建表SQL
+  <span class="hljs-attr">Utils</span>:TemplateSQL                生成项目在指定日期范围内的建表SQL
+  <span class="hljs-attr">Utils</span>:Test                       专业粘贴调试代码
+  <span class="hljs-attr">Utils</span>:TestUC                     测试UC接口
+ WatchDog
+  <span class="hljs-attr">WatchDog</span>:Alarm                   [根据报警配置] 监测每一条报警配置对应的项目错误
+  <span class="hljs-attr">WatchDog</span>:Saas                    [按分钟] 检查最近<span class="hljs-number">5</span>分钟内错误数是否超出阈值, 自动报警
+</code></pre>
+<h4 id="t315.3.2.2 初始化数据库">5.3.2.2 初始化数据库 <a href="#t315.3.2.2 初始化数据库"> # </a></h4>
+<ul>
+<li>创建<code>platform</code>数据库</li>
+<li><code>npm run watch</code></li>
+<li><code>node dist/fee.js Utils:GenerateSQL 1 '2020-06' '2020-06' &gt; init.sql</code></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//id, 抽样比率, 项目名(展示), 项目id, 负责人信息</span>
+REPLACE INTO <span class="hljs-string">`t_o_project`</span> (<span class="hljs-string">`id`</span>, <span class="hljs-string">`rate`</span>, <span class="hljs-string">`display_name`</span>, <span class="hljs-string">`project_name`</span>, <span class="hljs-string">`c_desc`</span>, <span class="hljs-string">`is_delete`</span>, <span class="hljs-string">`create_ucid`</span>, <span class="hljs-string">`update_ucid`</span>, <span class="hljs-string">`create_time`</span>, <span class="hljs-string">`update_time`</span>) VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">100</span>, <span class="hljs-string">'示例项目'</span>, <span class="hljs-string">'template'</span>, <span class="hljs-string">'负责人'</span>, <span class="hljs-number">0</span>, <span class="hljs-string">''</span>, <span class="hljs-string">''</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
+</code></pre>
+<h4 id="t325.3.2.3 SaveLog:Nginx">5.3.2.3 SaveLog:Nginx <a href="#t325.3.2.3 SaveLog:Nginx"> # </a></h4>
+<ul>
+<li>每一分钟读取Nginx日志文件，并解析</li>
+</ul>
+<p>server\src\library\nginx\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> logPath = appConfig.absoluteLogPath
+</code></pre>
+<p>server\src\configs\app.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> development = {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'fee监控平台开发环境'</span>,
+  <span class="hljs-attr">port</span>: <span class="hljs-number">3000</span>,
+  <span class="hljs-attr">proxy</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">absoluteLogPath</span>: path.resolve(__dirname, <span class="hljs-string">'../../'</span>, <span class="hljs-string">'log'</span>)
+}
+</code></pre>
+<pre><code class="lang-js">node dist/fee.js SaveLog:Nginx
+</code></pre>
+<pre><code class="lang-js">收到数据, 当前共记录<span class="hljs-number">1</span>/<span class="hljs-number">1</span>条数据
+清洗后的日志路径 C:\afirst\monitor\server\log\nginx\raw\month_202006\day_13\<span class="hljs-number">16</span>\<span class="hljs-number">14.</span>log
+
+清洗后的日志路径 C:\afirst\monitor\server\log\nginx\json\month_202006\day_13\<span class="hljs-number">16</span>\<span class="hljs-number">14.</span>log
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"perf"</span>,
+    <span class="hljs-attr">"code"</span>: <span class="hljs-number">20001</span>,
+    <span class="hljs-attr">"detail"</span>: {
+        <span class="hljs-attr">"connectStart"</span>: <span class="hljs-number">1592036791666</span>,
+        <span class="hljs-attr">"navigationStart"</span>: <span class="hljs-number">1592036791361</span>,
+        <span class="hljs-attr">"loadEventEnd"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"domLoading"</span>: <span class="hljs-number">1592036791677</span>,
+        <span class="hljs-attr">"secureConnectionStart"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"fetchStart"</span>: <span class="hljs-number">1592036791362</span>,
+        <span class="hljs-attr">"domContentLoadedEventStart"</span>: <span class="hljs-number">1592036791976</span>,
+        <span class="hljs-attr">"responseStart"</span>: <span class="hljs-number">1592036791669</span>,
+        <span class="hljs-attr">"responseEnd"</span>: <span class="hljs-number">1592036791670</span>,
+        <span class="hljs-attr">"domInteractive"</span>: <span class="hljs-number">1592036791976</span>,
+        <span class="hljs-attr">"domainLookupEnd"</span>: <span class="hljs-number">1592036791365</span>,
+        <span class="hljs-attr">"redirectStart"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"requestStart"</span>: <span class="hljs-number">1592036791667</span>,
+        <span class="hljs-attr">"unloadEventEnd"</span>: <span class="hljs-number">1592036791674</span>,
+        <span class="hljs-attr">"unloadEventStart"</span>: <span class="hljs-number">1592036791674</span>,
+        <span class="hljs-attr">"domComplete"</span>: <span class="hljs-number">1592036791976</span>,
+        <span class="hljs-attr">"domainLookupStart"</span>: <span class="hljs-number">1592036791365</span>,
+        <span class="hljs-attr">"loadEventStart"</span>: <span class="hljs-number">1592036791976</span>,
+        <span class="hljs-attr">"domContentLoadedEventEnd"</span>: <span class="hljs-number">1592036791976</span>,
+        <span class="hljs-attr">"redirectEnd"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"connectEnd"</span>: <span class="hljs-number">1592036791667</span>,
+        <span class="hljs-attr">"url"</span>: <span class="hljs-string">"localhost:9000/"</span>
+    },
+    <span class="hljs-attr">"extra"</span>: {},
+    <span class="hljs-attr">"common"</span>: {
+        <span class="hljs-attr">"pid"</span>: <span class="hljs-string">"template"</span>,
+        <span class="hljs-attr">"uuid"</span>: <span class="hljs-string">"uuid2"</span>,
+        <span class="hljs-attr">"ucid"</span>: <span class="hljs-string">"ucid"</span>,
+        <span class="hljs-attr">"is_test"</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">"record"</span>: {
+            <span class="hljs-attr">"time_on_page"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"performance"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"js_error"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"js_error_report_config"</span>: {
+                <span class="hljs-attr">"ERROR_RUNTIME"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_SCRIPT"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_STYLE"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_IMAGE"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_AUDIO"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_VIDEO"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_CONSOLE"</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">"ERROR_TRY_CATCH"</span>: <span class="hljs-literal">true</span>
+            }
+        },
+        <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+        <span class="hljs-attr">"test"</span>: <span class="hljs-string">"b47ca710747e96f1c523ebab8022c19e9abaa56b"</span>,
+        <span class="hljs-attr">"timestamp"</span>: <span class="hljs-number">1592036791977</span>,
+        <span class="hljs-attr">"runtime_version"</span>: <span class="hljs-string">"1.0.0"</span>,
+        <span class="hljs-attr">"sdk_version"</span>: <span class="hljs-string">"1.0.40"</span>,
+        <span class="hljs-attr">"page_type"</span>: <span class="hljs-string">"localhost:9000/"</span>
+    },
+    <span class="hljs-attr">"md5"</span>: <span class="hljs-string">"382eecc357bb7c6629e139eb7eb6509e"</span>,
+    <span class="hljs-attr">"project_id"</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">"project_name"</span>: <span class="hljs-string">"template"</span>,
+    <span class="hljs-attr">"time"</span>: <span class="hljs-number">1592036792</span>,
+    <span class="hljs-attr">"ua"</span>: {
+        <span class="hljs-attr">"ua"</span>: <span class="hljs-string">"Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"</span>,
+        <span class="hljs-attr">"browser"</span>: {
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Mobile Safari"</span>,
+            <span class="hljs-attr">"version"</span>: <span class="hljs-string">"13.0.3"</span>,
+            <span class="hljs-attr">"major"</span>: <span class="hljs-string">"13"</span>
+        },
+        <span class="hljs-attr">"engine"</span>: {
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"WebKit"</span>,
+            <span class="hljs-attr">"version"</span>: <span class="hljs-string">"605.1.15"</span>
+        },
+        <span class="hljs-attr">"os"</span>: {
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"iOS"</span>,
+            <span class="hljs-attr">"version"</span>: <span class="hljs-string">"13.2.3"</span>
+        },
+        <span class="hljs-attr">"device"</span>: {
+            <span class="hljs-attr">"vendor"</span>: <span class="hljs-string">"Apple"</span>,
+            <span class="hljs-attr">"model"</span>: <span class="hljs-string">"iPhone"</span>,
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"mobile"</span>
+        },
+        <span class="hljs-attr">"cpu"</span>: {}
+    },
+    <span class="hljs-attr">"ip"</span>: <span class="hljs-string">"59.109.146.215"</span>,
+    <span class="hljs-attr">"country"</span>: <span class="hljs-string">"中国"</span>,
+    <span class="hljs-attr">"province"</span>: <span class="hljs-string">"北京"</span>,
+    <span class="hljs-attr">"city"</span>: <span class="hljs-string">"北京"</span>
+}
+</code></pre>
+<h4 id="t335.3.2.4 Parse:Performance">5.3.2.4 Parse:Performance <a href="#t335.3.2.4 Parse:Performance"> # </a></h4>
+<ul>
+<li>[按小时] 解析nginx日志, 分析分钟级别的指定时间范围内的性能指标</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Parse:Performance <span class="hljs-number">2020</span><span class="hljs-number">-06</span><span class="hljs-number">-13</span>_16:<span class="hljs-number">26</span>  <span class="hljs-number">2020</span><span class="hljs-number">-06</span><span class="hljs-number">-13</span>_16:<span class="hljs-number">26</span>
+</code></pre>
+<pre><code class="lang-js">{
+  [项目ID,url,指标,汇总的时间]:{
+    [国家,省,市],value：{指标和:<span class="hljs-number">614</span>,pv和:<span class="hljs-number">1</span>}
+  }
+}
+</code></pre>
+<pre><code class="lang-js">{
+  [<span class="hljs-number">1</span>,<span class="hljs-string">"localhost:9000/"</span>,<span class="hljs-string">"tcp_connect_ms"</span>,<span class="hljs-string">"2020-06-13_16:26"</span>]:{
+    [<span class="hljs-string">"中国"</span>,<span class="hljs-string">"北京"</span>,<span class="hljs-string">"北京"</span>],value：{<span class="hljs-string">"sum_indicator_value"</span>:<span class="hljs-number">614</span>,<span class="hljs-string">"pv"</span>:<span class="hljs-number">1</span>}
+  }
+}
+</code></pre>
+<h4 id="t345.3.2.5  Summary:Performance">5.3.2.5  Summary:Performance <a href="#t345.3.2.5  Summary:Performance"> # </a></h4>
+<ul>
+<li>[按小时/按天/按月] 根据历史数据, 汇总分析记录指定时间范围内的性能指标数据</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Summary:Performance <span class="hljs-string">"2020-06-13 16"</span> hour
+node dist/fee.js Summary:Performance <span class="hljs-number">2020</span><span class="hljs-number">-06</span><span class="hljs-number">-13</span> day
+node dist/fee.js Summary:Performance <span class="hljs-number">2020</span><span class="hljs-number">-06</span> month
+</code></pre>
+<h4 id="t355.3.2.5 Parse:TimeOnSiteByHour">5.3.2.5 Parse:TimeOnSiteByHour <a href="#t355.3.2.5 Parse:TimeOnSiteByHour"> # </a></h4>
+<ul>
+<li>[按小时] 解析nginx日志, 分析记录指定时间范围内用户停留时长</li>
+<li>t_r_city_distribution_1_202006</li>
+<li>t_r_duration_distribution</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js SaveLog:Nginx
+node dist/fee.js Parse:TimeOnSiteByHour <span class="hljs-string">"2020-06-13 22:30"</span>  <span class="hljs-string">"2020-06-13 22:30"</span>
+</code></pre>
+<h4 id="t365.3.2.6 Summary:TimeOnSite">5.3.2.6 Summary:TimeOnSite <a href="#t365.3.2.6 Summary:TimeOnSite"> # </a></h4>
+<ul>
+<li>[按小时] 解析nginx日志, 分析记录指定时间范围内用户停留时长</li>
+<li>t_r_duration_distribution</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Summary:TimeOnSite <span class="hljs-string">"2020-06 13"</span>  day
+node dist/fee.js Summary:TimeOnSite <span class="hljs-string">"2020-06"</span>  month
+</code></pre>
+<h4 id="t375.3.2.7 Parse:Monitor">5.3.2.7 Parse:Monitor <a href="#t375.3.2.7 Parse:Monitor"> # </a></h4>
+<ul>
+<li>[按分钟] 解析nginx日志, 分析Monitor</li>
+<li>t_o_monitor_1_202006</li>
+<li>t_o_monitor_ext_1_202006</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Parse:Monitor <span class="hljs-string">"2020-06-13 22:35"</span>  <span class="hljs-string">"2020-06-13 22:35"</span>
+</code></pre>
+<h4 id="t385.3.2.8 Summary:Error">5.3.2.8 Summary:Error <a href="#t385.3.2.8 Summary:Error"> # </a></h4>
+<ul>
+<li>[按分钟/按小时/按天] 根据历史数据, 汇总分析错误数</li>
+<li>t_r_error_summary_1_202006<pre><code class="lang-js">node dist/fee.js Summary:<span class="hljs-built_in">Error</span> <span class="hljs-string">"2020-06-13 22:35"</span>  minute
+node dist/fee.js Summary:<span class="hljs-built_in">Error</span> <span class="hljs-string">"2020-06-13 22"</span> hour
+node dist/fee.js Summary:<span class="hljs-built_in">Error</span> <span class="hljs-string">"2020-06-13"</span> day
+</code></pre>
+</li>
+</ul>
+<h4 id="t395.3.2.9 Parse:Device">5.3.2.9 Parse:Device <a href="#t395.3.2.9 Parse:Device"> # </a></h4>
+<ul>
+<li>[按天] 解析nginx日志, 分析指定时间范围Device</li>
+<li>t_o_system_collection_1</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Parse:Device <span class="hljs-string">"2020-06-13 22:58"</span>  <span class="hljs-string">"2020-06-13 22:58"</span>
+</code></pre>
+<pre><code class="lang-js">projectMap={
+  <span class="hljs-number">1</span>:{
+    <span class="hljs-string">"2020-06"</span>:{
+      <span class="hljs-string">"uuid"</span>:{
+        <span class="hljs-string">"browser"</span>:<span class="hljs-string">"Mobile Safari"</span>
+      }
+    }
+  }
+}
+</code></pre>
+<h4 id="t405.3.2.10 Summary">5.3.2.10 Summary <a href="#t405.3.2.10 Summary"> # </a></h4>
+<ul>
+<li>Summary:SystemBrowser            [按月] 基于数据库统计浏览器占比</li>
+<li>Summary:SystemDevice             [按月] 基于数据库统计设备占比</li>
+<li>Summary:SystemOS                 [按月]基于数据库统计操作系统占比</li>
+<li><p>Summary:SystemRuntimeVersion     [按月] 基于数据库统计浏览器占比</p>
+</li>
+<li><p>t_r_system_browser</p>
+</li>
+<li>t_r_system_device</li>
+<li>t_r_system_os</li>
+<li>t_r_system_runtime_version</li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Summary:SystemBrowser <span class="hljs-string">"2020-06"</span>  month
+node dist/fee.js Summary:SystemDevice <span class="hljs-string">"2020-06"</span>  month
+node dist/fee.js Summary:SystemOS <span class="hljs-string">"2020-06"</span>  month
+node dist/fee.js Summary:SystemRuntimeVersion <span class="hljs-string">"2020-06"</span>  month
+</code></pre>
+<h2 id="t416.计划任务">6.计划任务 <a href="#t416.计划任务"> # </a></h2>
+<ul>
+<li>server\src\commands\task\manage.js</li>
+</ul>
+<h3 id="t426.1 任务执行周期">6.1 任务执行周期 <a href="#t426.1 任务执行周期"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-number">1.</span>  每分钟一次(准实时)
+    <span class="hljs-number">1.</span>  原始数据入库
+        <span class="hljs-number">1.</span>  错误数据入库(延迟<span class="hljs-number">2</span>分钟)
+    <span class="hljs-number">2.</span>  按分钟统计
+        <span class="hljs-number">1.</span>  错误数据统计(延迟<span class="hljs-number">2</span>分钟)
+<span class="hljs-number">2.</span>  每<span class="hljs-number">10</span>分钟一次
+    <span class="hljs-number">1.</span>  原始数据入库
+        <span class="hljs-number">1.</span>  uv
+        <span class="hljs-number">2.</span>  页面性能指标
+        <span class="hljs-number">3.</span>  用户停留时长
+    <span class="hljs-number">2.</span>  按小时统计
+        <span class="hljs-number">1.</span>  uv
+        <span class="hljs-number">2.</span>  新用户数
+        <span class="hljs-number">3.</span>  页面性能指标
+        <span class="hljs-number">4.</span>  错误数据统计
+<span class="hljs-number">3.</span>  每小时一次
+    <span class="hljs-number">1.</span>  原始数据入库
+        <span class="hljs-number">1.</span>  设备数据
+        <span class="hljs-number">2.</span>  用户点击
+        <span class="hljs-number">3.</span>  首次登陆用户
+    <span class="hljs-number">2.</span>  按天统计(当天)
+        <span class="hljs-number">1.</span>  uv
+        <span class="hljs-number">2.</span>  新用户数
+        <span class="hljs-number">3.</span>  页面性能指标
+        <span class="hljs-number">4.</span>  错误数据统计
+        <span class="hljs-number">5.</span>  用户停留时长
+<span class="hljs-number">4.</span>  每六小时一次
+    <span class="hljs-number">1.</span>  按天统计(昨日)
+        <span class="hljs-number">1.</span>  uv
+        <span class="hljs-number">2.</span>  新用户数
+        <span class="hljs-number">3.</span>  页面性能指标
+        <span class="hljs-number">4.</span>  错误数据统计
+        <span class="hljs-number">5.</span>  用户停留时长
+    <span class="hljs-number">2.</span>  按月统计
+        <span class="hljs-number">1.</span>  uv
+        <span class="hljs-number">2.</span>  新用户数
+        <span class="hljs-number">3.</span>  页面性能指标
+        <span class="hljs-number">4.</span>  错误数据统计
+        <span class="hljs-number">5.</span>  用户停留时长
+        <span class="hljs-number">6.</span>  操作系统分布
+        <span class="hljs-number">7.</span>  设备分布
+        <span class="hljs-number">8.</span>  浏览器分布
+</code></pre>
+<h3 id="t436.2 执行任务">6.2 执行任务 <a href="#t436.2 执行任务"> # </a></h3>
+<ul>
+<li><a href="https://cron.qqe2.com/">cron</a></li>
+</ul>
+<pre><code class="lang-js">node dist/fee.js Task:saveLog
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> handle (args, options) {
+    <span class="hljs-keyword">let</span> that = <span class="hljs-keyword">this</span>
+    schedule.scheduleJob(<span class="hljs-string">'0 */1 * * * * *'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      that.log(<span class="hljs-string">'registerTaskRepeatPer1Minute 开始执行'</span>)
+      that.execCommand(<span class="hljs-string">'SaveLog:Nginx'</span>, []);
+    })
+  }
+</code></pre>
+<pre><code class="lang-js">*  *  *  *  *  *
+┬ ┬ ┬ ┬ ┬ ┬
+│ │ │ │ │  |
+│ │ │ │ │ └ day <span class="hljs-keyword">of</span> week (<span class="hljs-number">0</span> - <span class="hljs-number">7</span>) (<span class="hljs-number">0</span> or <span class="hljs-number">7</span> is Sun)
+│ │ │ │ └───── month (<span class="hljs-number">1</span> - <span class="hljs-number">12</span>)
+│ │ │ └────────── day <span class="hljs-keyword">of</span> month (<span class="hljs-number">1</span> - <span class="hljs-number">31</span>)
+│ │ └─────────────── hour (<span class="hljs-number">0</span> - <span class="hljs-number">23</span>)
+│ └──────────────────── minute (<span class="hljs-number">0</span> - <span class="hljs-number">59</span>)
+└───────────────────────── second (<span class="hljs-number">0</span> - <span class="hljs-number">59</span>, OPTIONAL)
+</code></pre>
+<h2 id="t447.前台展示">7.前台展示 <a href="#t447.前台展示"> # </a></h2>
+<h3 id="t457.1 启动接口">7.1 启动接口 <a href="#t457.1 启动接口"> # </a></h3>
+<pre><code class="lang-js">node dist/app.js
+</code></pre>
+<pre><code class="lang-js">需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/behavior/menu
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/behavior/online
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/os
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/browser/list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/browser
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/browser/
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/runtimeVersion
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/error/viser/area/
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/error/log/list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/error/distribution/url
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/error/distribution/
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/error/distribution/
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/error/distribution/
+不需要登录(Method: <span class="hljs-keyword">get</span>) =&gt;/api/log/content/test
+需要登录,也需要检验项目权限(Method: post) =&gt;/api/alarm/config/add
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/config/query
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/config/list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/config/delete
+需要登录,也需要检验项目权限(Method: post) =&gt;/api/alarm/config/update
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/config/error_name_list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/config/error_type_list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/log
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/alarm/log/line
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/user/detail
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/user/search
+需要登录,但不需要检验项目权限(Method: post) =&gt;/api/user/update
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/user/delete
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/user/search_uc
+不需要登录(Method: post) =&gt;/api/user/register
+需要登录,但不需要检验项目权限(Method: post) =&gt;/api/user/modify/password
+需要登录,但不需要检验项目权限(Method: post) =&gt;/api/user/modify/msg
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/user/destroy
+不需要登录(Method: post) =&gt;/api/login/site
+不需要登录(Method: post) =&gt;/api/login/uc
+不需要登录(Method: <span class="hljs-keyword">get</span>) =&gt;/api/logout
+不需要登录(Method: post) =&gt;/api/login/normal
+不需要登录(Method: <span class="hljs-keyword">get</span>) =&gt;/api/login/type
+不需要登录(Method: post) =&gt;/api/login
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/item/detail
+需要登录,但不需要检验项目权限(Method: post) =&gt;/api/project/item/add
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/item/list
+需要登录,但不需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/item/delete
+需要登录,但不需要检验项目权限(Method: post) =&gt;/api/project/item/update
+需要登录,也需要检验项目权限(Method: post) =&gt;/api/project/member/add
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/member/list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/member/delete
+需要登录,也需要检验项目权限(Method: post) =&gt;/api/project/member/update
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/summary/new_user/distribution_line
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/project/summary/new_user/distribution_map
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/performance/url_list
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/performance/url/overview
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/performance/project/overview
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/performance/url/line_chart
+需要登录,也需要检验项目权限(Method: <span class="hljs-keyword">get</span>) =&gt;/api/uv/count
+</code></pre>
+<h3 id="t467.2 启动前台">7.2 启动前台 <a href="#t467.2 启动前台"> # </a></h3>
+<pre><code class="lang-js">cd client
+cnpm i 
+npm run start
+</code></pre>
+<h3 id="t477.3 前端应用">7.3 前端应用 <a href="#t477.3 前端应用"> # </a></h3>
+<p>client\src\router\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> token = getToken();
+<span class="hljs-keyword">if</span> (!token &amp;&amp; to.name !== LOGIN_PAGE_NAME) {
+    <span class="hljs-comment">// 未登录且要跳转的页面不是登录页</span>
+    next({
+      <span class="hljs-attr">name</span>: LOGIN_PAGE_NAME <span class="hljs-comment">// 跳转到登录页</span>
+    })
+}
+</code></pre>
+<p>server\src\routes\api\user\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> register = RouterConfigBuilder.routerConfigBuilder(<span class="hljs-string">'/api/user/register'</span>, RouterConfigBuilder.METHOD_TYPE_POST, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+  <span class="hljs-keyword">const</span> body = _.get(req, [<span class="hljs-string">'body'</span>], {})
+}
+</code></pre>
+<p>server\src\model\project\user.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span> (<span class="hljs-params">account, userInfo</span>) </span>{
+  <span class="hljs-keyword">const</span> tableName = getTableName();  <span class="hljs-comment">// t_o_user</span>
+}
+</code></pre>
+<h3 id="t487.4 页面性能">7.4 页面性能 <a href="#t487.4 页面性能"> # </a></h3>
+<p><a href="http://localhost:8080/project/1/monitor/performance">http://localhost:8080/project/1/monitor/performance</a></p>
+<h4 id="t497.4.1 urlList">7.4.1 urlList <a href="#t497.4.1 urlList"> # </a></h4>
+<ul>
+<li>用来提供某时间范围内的URL性能列表，因为在查看性能指标的时候会按页面的URL来进行，所以在页面的初始阶段会提供一个接口函数来获取 这些性能指标对应的URL列表 </li>
+</ul>
+<p>client\src\view\performance\index.vue</p>
+<pre><code class="lang-js">    <span class="hljs-keyword">async</span> getUrlList (params = {}) {
+      <span class="hljs-keyword">const</span> {
+        st,
+        et,
+        summaryBy
+      } = params
+      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetchUrlList({
+        <span class="hljs-attr">st</span>: st || +<span class="hljs-keyword">this</span>.dateRange[<span class="hljs-number">0</span>],
+        <span class="hljs-attr">et</span>: et || +<span class="hljs-keyword">this</span>.dateRange[<span class="hljs-number">1</span>],
+        <span class="hljs-attr">summaryBy</span>: summaryBy || <span class="hljs-string">'minute'</span>
+      })
+      <span class="hljs-keyword">this</span>.urlData = <span class="hljs-function">(<span class="hljs-params">res.data || []</span>).<span class="hljs-params">map</span>(<span class="hljs-params">(item, index</span>) =&gt;</span> ({
+        <span class="hljs-attr">name</span>: item
+      }))
+      <span class="hljs-keyword">this</span>.url = _.get(<span class="hljs-keyword">this</span>, [<span class="hljs-string">'urlData'</span>, <span class="hljs-number">0</span>, <span class="hljs-string">'name'</span>], <span class="hljs-string">''</span>)
+      <span class="hljs-keyword">this</span>.getTimeDetail()
+      <span class="hljs-keyword">this</span>.getTimeLine()
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.urlColumns) {
+        <span class="hljs-keyword">this</span>.urlLoading = <span class="hljs-literal">false</span>
+      }
+    },
+</code></pre>
+<p>client\src\api\performance\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> fetchUrlList = <span class="hljs-function">(<span class="hljs-params">params</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> axios.request({
+    <span class="hljs-attr">url</span>: <span class="hljs-string">`project/<span class="hljs-subst">${getProjectId()}</span>/api/performance/url_list`</span>,
+    <span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span>,
+    <span class="hljs-attr">params</span>: {
+      ...params
+    }
+  })
+}
+</code></pre>
+<pre><code class="lang-js">Request URL: http:<span class="hljs-comment">//localhost:3000/project/1/api/performance/url_list?st=1591977600000&amp;et=1592051809707&amp;summaryBy=minute</span>
+</code></pre>
+<p>server\src\routes\api\performance\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> urlList = RouterConfigBuilder.routerConfigBuilder(<span class="hljs-string">'/api/performance/url_list'</span>, RouterConfigBuilder.METHOD_TYPE_GET, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+  <span class="hljs-keyword">let</span> projectId = _.get(req, [<span class="hljs-string">'fee'</span>, <span class="hljs-string">'project'</span>, <span class="hljs-string">'projectId'</span>], <span class="hljs-number">0</span>);
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'projectId '</span>,projectId);
+  <span class="hljs-keyword">let</span> request = _.get(req, [<span class="hljs-string">'query'</span>], {})
+  <span class="hljs-comment">// 获取开始&amp;结束时间</span>
+  <span class="hljs-keyword">let</span> startAt = _.get(request, [<span class="hljs-string">'st'</span>], <span class="hljs-number">0</span>)
+  <span class="hljs-keyword">let</span> endAt = _.get(request, [<span class="hljs-string">'et'</span>], <span class="hljs-number">0</span>)
+  <span class="hljs-keyword">const</span> summaryBy = _.get(request, <span class="hljs-string">'summaryBy'</span>, <span class="hljs-string">''</span>)
+  <span class="hljs-keyword">if</span> (_.includes([DATE_FORMAT.UNIT.DAY, DATE_FORMAT.UNIT.HOUR, DATE_FORMAT.UNIT.MINUTE], summaryBy) === <span class="hljs-literal">false</span>) {
+    res.send(API_RES.showError(<span class="hljs-string">`summaryBy参数不正确`</span>))
+    <span class="hljs-keyword">return</span>
+  }
+
+  <span class="hljs-keyword">const</span> currentStamp = moment().unix()
+
+  <span class="hljs-keyword">if</span> (startAt) {
+    startAt = _.floor(startAt / <span class="hljs-number">1000</span>)
+  } <span class="hljs-keyword">else</span> {
+    startAt = currentStamp
+  }
+  <span class="hljs-keyword">if</span> (endAt) {
+    endAt = _.ceil(endAt / <span class="hljs-number">1000</span>)
+  } <span class="hljs-keyword">else</span> {
+    endAt = currentStamp
+  }
+  <span class="hljs-keyword">let</span> urlList = <span class="hljs-keyword">await</span> MPerformance.getDistinctUrlListInRange(projectId, MPerformance.INDICATOR_TYPE_LIST, startAt, endAt, summaryBy)
+  res.send(API_RES.showResult(urlList))
+}
+)
+</code></pre>
+<p>server\src\model\parse\performance.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDistinctUrlListInRange</span> (<span class="hljs-params">projectId, indicatorList, startAt, endAt, countType = DATE_FORMAT.UNIT.MINUTE</span>) </span>{
+   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> tableName <span class="hljs-keyword">of</span> tableNameList) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'tableName,countType,indicatorList,countAtTimeList'</span>,tableName,countType,indicatorList,countAtTimeList);
+    <span class="hljs-keyword">let</span> rawRecordList = <span class="hljs-keyword">await</span> Knex
+      .distinct([<span class="hljs-string">'url'</span>])
+      .from(tableName)
+      .where({
+        <span class="hljs-attr">count_type</span>: countType
+      })
+      .whereIn(<span class="hljs-string">'indicator'</span>, indicatorList)
+      .whereIn(<span class="hljs-string">'count_at_time'</span>, countAtTimeList)
+      .catch(<span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+        Logger.warn(<span class="hljs-string">'查询失败, 错误原因 =&gt;'</span>, e)
+        <span class="hljs-keyword">return</span> []
+      })
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> rawRecord <span class="hljs-keyword">of</span> rawRecordList) {
+      <span class="hljs-keyword">if</span> (_.has(rawRecord, [<span class="hljs-string">'url'</span>])) {
+        <span class="hljs-keyword">let</span> url = _.get(rawRecord, [<span class="hljs-string">'url'</span>])
+        urlList.push(url)
+      }
+    }
+  }
+}
+<span class="hljs-comment">// performance distinctUrlList["localhost:9000/"]</span>
+</code></pre>
+<h4 id="t507.4.2 lineChartData">7.4.2 lineChartData <a href="#t507.4.2 lineChartData"> # </a></h4>
+<ul>
+<li>在获取 URL之后，根据对应的时间参数提供参数时间范围内的提定URL下面的所有指标折线图</li>
+</ul>
+<p>client\src\view\performance\index.vue</p>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> getTimeDetail (params = {}) {
+      <span class="hljs-keyword">const</span> {
+        st,
+        et,
+        url,
+        summaryBy
+      } = params
+      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetchTimeDetail({
+        <span class="hljs-attr">st</span>: st || +<span class="hljs-keyword">this</span>.dateRange[<span class="hljs-number">0</span>],
+        <span class="hljs-attr">et</span>: et || +<span class="hljs-keyword">this</span>.dateRange[<span class="hljs-number">1</span>],
+        <span class="hljs-attr">url</span>: url || <span class="hljs-keyword">this</span>.url,
+        <span class="hljs-attr">summaryBy</span>: summaryBy || <span class="hljs-string">'hour'</span>
+      })
+      <span class="hljs-keyword">const</span> dv = <span class="hljs-keyword">new</span> DataSet.View().source(res.data)
+      dv.transform({
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'rename'</span>,
+        <span class="hljs-attr">map</span>: {
+          <span class="hljs-attr">dns_lookup_ms</span>: <span class="hljs-string">'DNS查询耗时'</span>,
+          <span class="hljs-attr">response_request_ms</span>: <span class="hljs-string">'请求响应耗时'</span>,
+          <span class="hljs-attr">dom_parse_ms</span>: <span class="hljs-string">'DOM解析耗时'</span>,
+          <span class="hljs-attr">response_transfer_ms</span>: <span class="hljs-string">'内容传输耗时'</span>,
+          <span class="hljs-attr">load_resource_ms</span>: <span class="hljs-string">'资源加载耗时'</span>,
+          <span class="hljs-attr">dom_ready_ms</span>: <span class="hljs-string">'DOM_READY_耗时'</span>,
+          <span class="hljs-attr">first_render_ms</span>: <span class="hljs-string">'首次渲染耗'</span>,
+          <span class="hljs-attr">first_response_ms</span>: <span class="hljs-string">'首次可交互耗时'</span>,
+          <span class="hljs-attr">first_tcp_ms</span>: <span class="hljs-string">'首包时间耗时'</span>,
+          <span class="hljs-attr">load_complete_ms</span>: <span class="hljs-string">'页面完全加载耗时'</span>,
+          <span class="hljs-attr">ssl_connect_ms</span>: <span class="hljs-string">'SSL连接耗时'</span>,
+          <span class="hljs-attr">tcp_connect_ms</span>: <span class="hljs-string">'TCP链接耗时'</span>
+        }
+      })
+      dv.transform({
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'fold'</span>,
+        <span class="hljs-attr">fields</span>: [
+          <span class="hljs-string">'DNS查询耗时'</span>,
+          <span class="hljs-string">'请求响应耗时'</span>,
+          <span class="hljs-string">'DOM解析耗时'</span>,
+          <span class="hljs-string">'内容传输耗时'</span>,
+          <span class="hljs-string">'资源加载耗时'</span>,
+          <span class="hljs-string">'DOM_READY_耗时'</span>,
+          <span class="hljs-string">'首次渲染耗'</span>,
+          <span class="hljs-string">'首次可交互耗时'</span>,
+          <span class="hljs-string">'首包时间耗时'</span>,
+          <span class="hljs-string">'页面完全加载耗时'</span>,
+          <span class="hljs-string">'SSL连接耗时'</span>,
+          <span class="hljs-string">'TCP链接耗时'</span>
+        ],
+        <span class="hljs-attr">key</span>: <span class="hljs-string">'type'</span>,
+        <span class="hljs-attr">value</span>: <span class="hljs-string">'ms'</span>
+      })
+      <span class="hljs-keyword">const</span> data = dv.rows
+      <span class="hljs-keyword">this</span>.lineData = data
+      <span class="hljs-keyword">const</span> scale = [{
+        <span class="hljs-attr">dataKey</span>: <span class="hljs-string">'ms'</span>,
+        <span class="hljs-attr">sync</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">alias</span>: <span class="hljs-string">'ms'</span>,
+        <span class="hljs-attr">formatter</span>: <span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> value + <span class="hljs-string">' ms'</span>
+      }, {
+        <span class="hljs-attr">dataKey</span>: <span class="hljs-string">'index_timestamp_ms'</span>,
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'time'</span>,
+        <span class="hljs-attr">tickCount</span>: <span class="hljs-number">10</span>,
+        <span class="hljs-attr">mask</span>: <span class="hljs-string">'MM-DD HH:mm'</span>
+      }]
+      <span class="hljs-keyword">this</span>.lineScale = scale
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.lineData &amp;&amp; <span class="hljs-keyword">this</span>.lineScale) {
+        <span class="hljs-keyword">this</span>.isSpinShowDetail = <span class="hljs-literal">false</span>
+      }
+    },
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> fetchTimeDetail = <span class="hljs-function">(<span class="hljs-params">params</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> axios.request({
+    <span class="hljs-attr">url</span>: <span class="hljs-string">`project/<span class="hljs-subst">${getProjectId()}</span>/api/performance/url/line_chart`</span>,
+    <span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span>,
+    <span class="hljs-attr">params</span>: {
+      ...params
+    }
+  })
+}
+</code></pre>
+<pre><code class="lang-js">http:<span class="hljs-comment">//localhost:3000/project/1/api/performance/url/line_chart?st=1591977600000&amp;et=1592053122452&amp;url=localhost:9000%2F&amp;summaryBy=hour</span>
+</code></pre>
+<p>server\src\routes\api\performance\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> lineChartData = RouterConfigBuilder.routerConfigBuilder(<span class="hljs-string">'/api/performance/url/line_chart'</span>, RouterConfigBuilder.METHOD_TYPE_GET, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+  <span class="hljs-keyword">let</span> projectId = _.get(req, [<span class="hljs-string">'fee'</span>, <span class="hljs-string">'project'</span>, <span class="hljs-string">'projectId'</span>], <span class="hljs-number">0</span>)
+  <span class="hljs-keyword">let</span> request = _.get(req, [<span class="hljs-string">'query'</span>], {})
+  res.send(API_RES.showResult(resultList))
+}
+)
+</code></pre>
+<p>server\src\model\parse\performance.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDistinctUrlListInRange</span> (<span class="hljs-params">projectId, indicatorList, startAt, endAt, countType = DATE_FORMAT.UNIT.MINUTE</span>) </span>{
+
+</code></pre>
+<h4 id="t517.4.3 urlOverview">7.4.3 urlOverview <a href="#t517.4.3 urlOverview"> # </a></h4>
+<ul>
+<li>在获取 URL之后，可以根据此接口提供的时间范围指定的URL的各项指标平均值  </li>
+</ul>
+<p>client\src\view\performance\index.vue</p>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> getTimeLine (params = {}) {
+      <span class="hljs-keyword">const</span> {st,et} = params
+      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetchTimeLine({
+        <span class="hljs-attr">st</span>: st || +<span class="hljs-keyword">this</span>.dateRange[<span class="hljs-number">0</span>],
+        <span class="hljs-attr">et</span>: et || +<span class="hljs-keyword">this</span>.dateRange[<span class="hljs-number">1</span>],
+        <span class="hljs-attr">url</span>: <span class="hljs-keyword">this</span>.url,
+        <span class="hljs-attr">summaryBy</span>: <span class="hljs-string">'minute'</span>
+      })
+</code></pre>
+<p>client\src\api\performance\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> fetchTimeLine = <span class="hljs-function">(<span class="hljs-params">params</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> axios.request({
+    <span class="hljs-attr">url</span>: <span class="hljs-string">`project/<span class="hljs-subst">${getProjectId()}</span>/api/performance/url/overview`</span>,
+    <span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span>,
+    <span class="hljs-attr">params</span>: {
+      ...params
+    }
+  })
+}
+</code></pre>
+<pre><code class="lang-js">http:<span class="hljs-comment">//localhost:3000/project/1/api/performance/url/overview?st=1591977600000&amp;et=1592054332424&amp;url=localhost:9000%2F&amp;summaryBy=minute</span>
+</code></pre>
+<p>server\src\routes\api\performance\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> urlOverview = RouterConfigBuilder.routerConfigBuilder(<span class="hljs-string">'/api/performance/url/overview'</span>, RouterConfigBuilder.METHOD_TYPE_GET, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+  <span class="hljs-keyword">let</span> projectId = _.get(req, [<span class="hljs-string">'fee'</span>, <span class="hljs-string">'project'</span>, <span class="hljs-string">'projectId'</span>], <span class="hljs-number">0</span>)
+  <span class="hljs-keyword">let</span> request = _.get(req, [<span class="hljs-string">'query'</span>], {});
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getUrlOverviewInSameMonth</span> (<span class="hljs-params">projectId, urlList, startAt, endAt, countType</span>) </span>{
+}
+</code></pre>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/front-monitor">front-monitor</a></li>
+<li><code>node dist/fee.js Utils:TemplateSQL</code></li>
+</ul>
+
+    

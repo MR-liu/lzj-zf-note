@@ -1,0 +1,169 @@
+
+        <h2 id="t01. 什么是Mock">1. 什么是Mock <a href="#t01. 什么是Mock"> # </a></h2>
+<ul>
+<li>什么是Mock?? Mock其实就是真实数据存在之前，即调试期间的代替品</li>
+</ul>
+<h2 id="t12. 如何Mock数据？">2. 如何Mock数据？ <a href="#t12. 如何Mock数据？"> # </a></h2>
+<ul>
+<li>最low的方式将 Mock 数据写在代码里、json文件里；</li>
+<li>利用 Charles 、Fiddler等代理工具，将 URL 映射到本地文件；</li>
+<li>本地起 Mock Server，即mockjs，有点麻烦每次修改了后还要重启服务</li>
+</ul>
+<h2 id="t23. Mock语法">3. Mock语法 <a href="#t23. Mock语法"> # </a></h2>
+<ul>
+<li><a href="http://mockjs.com/examples.html">mockjs</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">占位符</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">@ip</td>
+<td style="text-align:left">随机输出一个IP</td>
+</tr>
+<tr>
+<td style="text-align:left">@id</td>
+<td style="text-align:left">随机输出长度18的字符，不接受参数</td>
+</tr>
+<tr>
+<td style="text-align:left">array/1-10</td>
+<td style="text-align:left">随机输出1-10长度的数组，也可以直接是固定长度</td>
+</tr>
+<tr>
+<td style="text-align:left">object/2</td>
+<td style="text-align:left">输出一个两个key值的对象</td>
+</tr>
+<tr>
+<td style="text-align:left">@image()</td>
+<td style="text-align:left">返回一个占位图url，支持size, background, foreground, format, text</td>
+</tr>
+<tr>
+<td style="text-align:left">@cname</td>
+<td style="text-align:left">生成一个中文名</td>
+</tr>
+<tr>
+<td style="text-align:left">@datetime</td>
+<td style="text-align:left">生成一个随机的时间</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> Mock = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mockjs'</span>);
+<span class="hljs-keyword">let</span> result = Mock.mock({
+    <span class="hljs-string">"code"</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">"message"</span>: <span class="hljs-string">"请求成功"</span>,
+    <span class="hljs-string">"data|20"</span>: [{
+        <span class="hljs-string">"id"</span>:<span class="hljs-string">"@id"</span>,
+        <span class="hljs-string">"ip"</span>:<span class="hljs-string">"@ip"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"@cname"</span>,
+        <span class="hljs-string">"userId"</span>: <span class="hljs-string">"@id"</span>,
+        <span class="hljs-string">"stars|2"</span>:[<span class="hljs-string">'★'</span>],
+        <span class="hljs-string">"colors|2"</span>:{<span class="hljs-attr">red</span>:<span class="hljs-string">'red'</span>,<span class="hljs-attr">yellow</span>:<span class="hljs-string">'yellow'</span>,<span class="hljs-attr">blue</span>:<span class="hljs-string">'blue'</span>},
+        <span class="hljs-string">"avatar"</span>:<span class="hljs-string">"@image()"</span>,
+        <span class="hljs-string">"createAt"</span>: <span class="hljs-string">"@datetime"</span>
+    }]
+})
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+<h2 id="t34. easy-mock">4. easy-mock <a href="#t34. easy-mock"> # </a></h2>
+<ul>
+<li><a href="https://easy-mock.com/">easy-mock</a></li>
+<li>Easy Mock就是一个在线创建mock的服务平台，帮你省去你 配置、安装、起服务、维护、多人协作Mock数据不互通等一系列繁琐的操作</li>
+</ul>
+<h2 id="t45. 基本用法">5. 基本用法 <a href="#t45. 基本用法"> # </a></h2>
+<pre><code class="lang-js">{
+  <span class="hljs-string">"data|5"</span>: [{
+    <span class="hljs-string">"id|1-1000"</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-string">"title"</span>: <span class="hljs-string">"@csentence"</span>,
+    <span class="hljs-string">"url"</span>: <span class="hljs-string">"@url"</span>,
+    <span class="hljs-string">"image"</span>: <span class="hljs-string">"@image(300x200)"</span>,
+    <span class="hljs-string">"createAt"</span>: <span class="hljs-string">"@datetime"</span>
+  }],
+  <span class="hljs-string">"code"</span>: <span class="hljs-number">0</span>
+}
+</code></pre>
+<h2 id="t55.高阶用法">5.高阶用法 <a href="#t55.高阶用法"> # </a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">对象</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Mock</td>
+<td style="text-align:left">Mock 对象</td>
+</tr>
+<tr>
+<td style="text-align:left">_req.url</td>
+<td style="text-align:left">获得请求 url 地址</td>
+</tr>
+<tr>
+<td style="text-align:left">_req.method</td>
+<td style="text-align:left">获取请求方法</td>
+</tr>
+<tr>
+<td style="text-align:left">_req.params</td>
+<td style="text-align:left">获取 url 参数对象</td>
+</tr>
+<tr>
+<td style="text-align:left">_req.querystring</td>
+<td style="text-align:left">获取查询参数字符串(url中?后面的部分)，不包含 ?</td>
+</tr>
+<tr>
+<td style="text-align:left">_req.query</td>
+<td style="text-align:left">将查询参数字符串进行解析并以对象的形式返回，如果没有查询参数字字符串则返回一个空对象</td>
+</tr>
+<tr>
+<td style="text-align:left">_req.body</td>
+<td style="text-align:left">当 post 请求以 x-www-form-urlencoded 方式提交时，我们可以拿到请求的参数对象</td>
+</tr>
+<tr>
+<td style="text-align:left">…</td>
+<td style="text-align:left">_req.cookies、ip、host等等 <a href="https://easy-mock.com/docs">docs</a></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">GET /mock/<span class="hljs-number">5</span>cfa0f3b9a819c502224e47f/news?%<span class="hljs-number">3</span>Fcode=<span class="hljs-number">0</span>&amp;name=zhufeng HTTP/<span class="hljs-number">1.1</span>
+<span class="hljs-attr">Accept</span>: application/json, *<span class="hljs-comment">/*
+Content-Type: application/json
+</span></code></pre>
+<pre><code class="lang-js"><span class="hljs-comment">//简单模拟登录，根据用户传入的参数，返回不同逻辑数据</span>
+{
+  <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">data</span>: {
+    <span class="hljs-attr">name</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">{
+      _req
+    }</span>) </span>{
+      <span class="hljs-keyword">return</span> _req.query.name;
+    },
+    <span class="hljs-attr">code</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">{
+      _req
+    }</span>) </span>{
+      <span class="hljs-keyword">return</span> _req.query.code ? <span class="hljs-number">0</span> : <span class="hljs-number">1</span>;
+    },
+    <span class="hljs-attr">data</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">{
+      _req,
+      Mock
+    }</span>) </span>{
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">token</span>: Mock.mock(<span class="hljs-string">"@guid()"</span>),
+        <span class="hljs-attr">userId</span>: Mock.mock(<span class="hljs-string">"@id(5)"</span>),
+        <span class="hljs-attr">cname</span>: Mock.mock(<span class="hljs-string">"@cname()"</span>),
+        <span class="hljs-attr">name</span>: Mock.mock(<span class="hljs-string">"@name()"</span>),
+        <span class="hljs-attr">avatar</span>: Mock.mock(<span class="hljs-string">"@image(200x100, #FF6600)"</span>)
+      }
+    }
+  }
+}
+</code></pre>
+<h2 id="t66.在线调试">6.在线调试 <a href="#t66.在线调试"> # </a></h2>
+<ul>
+<li><a href="https://easy-mock.com/mock/5a0aad39eace86040209063d/pjhApi_1510649145466/api/common/logins#!method=post">在线调试</a></li>
+</ul>
+
+    

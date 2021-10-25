@@ -1,0 +1,219 @@
+
+        <h2 id="t0实现表单组件">实现表单组件 <a href="#t0实现表单组件"> # </a></h2>
+<ul>
+<li>组件结构目录<pre><code>├── App.vue
+├── components
+│   ├── Form.vue
+│   ├── FormItem.vue
+│   └── Input.vue
+└── package.json
+</code></pre></li>
+</ul>
+<h2 id="t1表单组件的使用">表单组件的使用 <a href="#t1表单组件的使用"> # </a></h2>
+<ul>
+<li>Form 提供组件的数据</li>
+<li>FormItem 实现表单校验功能</li>
+<li>Input 输入内容时让FormItem发生校验</li>
+</ul>
+<h2 id="t2使用组件的方式">使用组件的方式 <a href="#t2使用组件的方式"> # </a></h2>
+<pre><code>&lt;template&gt;
+    &lt;el-form :model="form" :rules="rules"&gt;
+        &lt;el-form-item label="用户名" prop="username"&gt;
+            &lt;el-input v-model="form.username" &gt;&lt;/el-input&gt;
+        &lt;/el-form-item&gt;
+        &lt;el-form-item label="密码" prop="password"&gt;
+            &lt;el-input v-model="form.password" &gt;&lt;/el-input&gt;
+        &lt;/el-form-item&gt;
+        &lt;el-form-item&gt;
+        &lt;el-form-item&gt;
+            &lt;button&gt;确认提交&lt;/button&gt;
+        &lt;/el-form-item&gt;
+    &lt;/el-form&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import Form from './components/Form';
+import FormItem from './components/FormItem';
+import Input from './components/Input.vue';
+export default {
+    components:{
+        'el-form':Form,
+        'el-form-item':FormItem,
+        'el-input':Input
+    },
+    data(){
+        return {
+            form:{
+                username:'',
+                password:''
+            },
+            rules:{
+                username:[
+                    {required:true,message:'请输入用户名'}
+                ],
+                password:[
+                    {required:true,message:'请输入密码'}
+                ]
+            }
+        }
+    }
+}
+&lt;/script&gt;
+</code></pre><h2 id="t3Form组件的基本结构">Form组件的基本结构 <a href="#t3Form组件的基本结构"> # </a></h2>
+<pre><code>&lt;template&gt;
+    &lt;form onsubmit="return false"&gt;
+        &lt;slot&gt;&lt;/slot&gt;
+    &lt;/form&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    props:{
+        model:{
+            type:Object
+        },
+        rules:{
+            type:Object
+        }
+    }
+}
+&lt;/script&gt;
+</code></pre><h2 id="t4FormItem组件结构">FormItem组件结构 <a href="#t4FormItem组件结构"> # </a></h2>
+<pre><code>&lt;template&gt;
+    &lt;div&gt;
+        &lt;label v-if="label"&gt;{{label}}&lt;/label&gt;
+        &lt;slot&gt;&lt;/slot&gt;
+        &lt;div&gt;校验文字&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    props:{
+        label:String,
+        prop:String
+    }
+}
+&lt;/script&gt;
+</code></pre><h2 id="t5Input组件结构">Input组件结构 <a href="#t5Input组件结构"> # </a></h2>
+<pre><code>&lt;template&gt;
+    &lt;input type="text" :value="inputValue"&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    props:{
+        value:String
+    },
+    data(){
+        return {inputValue:this.value}
+    }
+}
+&lt;/script&gt;
+</code></pre><h2 id="t6实现组件间的数据传递">实现组件间的数据传递 <a href="#t6实现组件间的数据传递"> # </a></h2>
+<ul>
+<li>为了在formItem中可以拿到form组件中的数据<pre><code>provide(){
+  return {
+      form:this
+  }
+},
+</code></pre></li>
+</ul>
+<p>我们在form组件中直接将当前实例暴露出去</p>
+<ul>
+<li>为了能实现input组件和formItem间的通信<pre><code>import Vue from 'vue';
+Vue.prototype.$bus = new Vue();
+export default {
+  props:{
+      label:String,
+      prop:String
+  },
+  mounted(){
+      this.$bus.$on('input',(value)=&gt;{
+          console.log(value)
+      });
+  }
+}
+</code></pre></li>
+</ul>
+<p>我们在formItem组件中，通过eventsBus订阅input事件</p>
+<ul>
+<li>在input组件中监听输入事件进行数据的发射<pre><code>&lt;input type="text" :value="inputValue" @input="handleInput"&gt;
+handleInput(e){
+  // 更新数据
+  this.inputValue = e.target.value;
+  this.$bus.$emit('input',{
+      id:this.$parent &amp;&amp; this.$parent._uid,// 为了标识是哪个输入框
+      value:this.inputValue
+  }); // 发射输入事件
+}
+</code></pre></li>
+</ul>
+<ul>
+<li>在formItem中进行数据校验<pre><code>&lt;template&gt;
+  &lt;div&gt;
+      &lt;label v-if="label"&gt;{{label}}&lt;/label&gt;
+      &lt;slot&gt;&lt;/slot&gt;
+      &lt;!-- 有错误 显示错误提示信息 --&gt;
+      &lt;div v-if="validateStatus === 'error'"&gt;
+          {{validateContent}}
+      &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import Vue from 'vue';
+Vue.prototype.$bus = new Vue();
+export default {
+  props:{
+      label:String,
+      prop:String
+  },
+  inject:['form'], // 注入父级的实例
+  data(){ 
+      return {
+          validateStatus:'', // 当前表单是否通过校验
+          validateContent:'' // 当前校验后的信息
+      }
+  },  
+  methods:{
+      validate(value){
+         let rules = this.form.rules[this.prop]; // 获取当前对应的规则
+         rules.forEach(rule=&gt;{
+             // 如果必填 并且没有值，那就出错
+             if(rule.required &amp;&amp; !value){
+                 this.validateStatus = 'error';
+                 this.validateContent = rule.message
+             }else{
+                 this.validateStatus = '';
+                 this.validateContent = '';
+             }
+         })
+      }
+  },
+  mounted(){
+      this.$bus.$on('input',(data)=&gt;{
+         if(this._uid === data.id){ // 说明更改的是当前自己的输入框
+              this.validate(data.value);
+         }
+      });
+  }
+}
+&lt;/script&gt;
+</code></pre></li>
+</ul>
+<p>到目前为止基本的校验功能已经实现啦</p>
+<h2 id="t7当点击按钮时校验当前表单是否验证成功">当点击按钮时校验当前表单是否验证成功 <a href="#t7当点击按钮时校验当前表单是否验证成功"> # </a></h2>
+<pre><code>&lt;el-form :model="form" :rules="rules" ref="form"&gt;
+&lt;button @click="validate"&gt;确认提交&lt;/button&gt;
+validate(){ // form组件中校验是通过
+    this.$refs.form.validate((valid)=&gt;{
+        if(valid){
+            alert('校验通过')
+        }else{
+            alert('校验不通过')
+        }
+    });
+}
+
+// 在form组件中检查所有的formItem是否全部通过校验
+validate(cb){
+    cb(this.$children.every(child=&gt;child.validateStatus!='error'))
+}
+</code></pre>
+    

@@ -1,0 +1,439 @@
+
+        <h2 id="t01.生成项目">1.生成项目 <a href="#t01.生成项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app zhufengbinary
+cd zhufengbinary
+yarn start
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/browserbinary2.jpg" alt="browserbinary2"></p>
+<h2 id="t12.ArrayBuffer">2.ArrayBuffer <a href="#t12.ArrayBuffer"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a>对象用来表示通用的、固定长度的原始二进制数据缓冲区</li>
+<li>它是一个字节数组，通常在其他语言中称为<code>byte array</code></li>
+<li>你不能直接操作 <code>ArrayBuffer</code> 的内容，而是要通过<code>类型数组对象</code>或 <code>DataView</code> 对象来操作，它们会将缓冲区中的数据表示为特定的格式，并通过这些格式来读写缓冲区的内容。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/bytearray.jpg" alt="bytearray"></p>
+<pre><code class="lang-js"><span class="hljs-comment">//创建一个长度为8个字节的buffer</span>
+<span class="hljs-keyword">const</span> buffer = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ArrayBuffer</span>(<span class="hljs-number">8</span>);
+<span class="hljs-built_in">console</span>.log(buffer.byteLength);
+</code></pre>
+<h2 id="t23.TypedArray">3.TypedArray <a href="#t23.TypedArray"> # </a></h2>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">TypedArray</a>对象描述了一个底层的二进制数据缓冲区(binary data buffer)的一个类数组视图(view)</p>
+<ul>
+<li>但它本身不可以被实例化，甚至无法访问，你可以把它理解为接口,它有很多的实现</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">单个元素值的范围</th>
+<th style="text-align:left">大小(bytes)</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Int8Array</td>
+<td style="text-align:left">-128 to 127</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">8 位二进制有符号整数</td>
+</tr>
+<tr>
+<td style="text-align:left">Uint8Array</td>
+<td style="text-align:left">0 to 255</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">8 位无符号整数</td>
+</tr>
+<tr>
+<td style="text-align:left">Int16Array</td>
+<td style="text-align:left">-32768 to 32767</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">16 位二进制有符号整数</td>
+</tr>
+<tr>
+<td style="text-align:left">Uint16Array</td>
+<td style="text-align:left">0 to 65535</td>
+<td style="text-align:left">2</td>
+<td style="text-align:left">16 位无符号整数</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.zhufengpeixun.cn/TypedArray.jpg" alt="TypedArray"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> buffer = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ArrayBuffer</span>(<span class="hljs-number">8</span>);
+<span class="hljs-built_in">console</span>.log(buffer.byteLength);<span class="hljs-comment">//8</span>
+<span class="hljs-keyword">const</span> int8Array = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Int8Array</span>(buffer);
+<span class="hljs-built_in">console</span>.log(int8Array.length);<span class="hljs-comment">//8</span>
+<span class="hljs-keyword">const</span> int16Array = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Int16Array</span>(buffer);
+<span class="hljs-built_in">console</span>.log(int16Array.length);<span class="hljs-comment">//4</span>
+</code></pre>
+<h2 id="t34.DataView对象">4.DataView对象 <a href="#t34.DataView对象"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/DataView">DataView</a>视图是一个可以从二进制ArrayBuffer对象中读写多种数值类型的底层接口</li>
+<li><code>setInt8()</code>从DataView起始位置以byte为计数的指定偏移量(byteOffset)处储存一个8-bit数(一个字节)</li>
+<li><code>getInt8()</code>从DataView起始位置以byte为计数的指定偏移量(byteOffset)处获取一个8-bit数(一个字节)</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">new</span> <span class="hljs-built_in">DataView</span>(buffer [, byteOffset [, byteLength]])
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/DataView.jpg" alt="DataView"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> buffer = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ArrayBuffer</span>(<span class="hljs-number">8</span>);
+<span class="hljs-built_in">console</span>.log(buffer.byteLength);<span class="hljs-comment">//8个字节</span>
+<span class="hljs-keyword">const</span> view1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">DataView</span>(buffer);
+view1.setInt8(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>); 
+<span class="hljs-built_in">console</span>.log(view1.getInt8(<span class="hljs-number">0</span>));<span class="hljs-comment">//1</span>
+
+view1.setInt8(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>); 
+<span class="hljs-built_in">console</span>.log(view1.getInt8(<span class="hljs-number">1</span>));<span class="hljs-comment">//2</span>
+
+<span class="hljs-built_in">console</span>.log(view1.getInt16(<span class="hljs-number">0</span>));<span class="hljs-comment">//258</span>
+</code></pre>
+<h2 id="t45.Blob">5.Blob <a href="#t45.Blob"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Blob">Blob</a>对象表示一个不可变、原始数据的类文件对象。Blob 表示的不一定是JavaScript原生格式的数据。File 接口基于Blob，继承了 blob 的功能并将其扩展使其支持用户系统上的文件。</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Blob/Blob">Blob()</a> 构造函数返回一个新的 Blob 对象。 blob的内容由参数数组中给出的值的串联组成。</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/FileReader">FileReader</a> 对象允许Web应用程序异步读取存储在用户计算机上的文件（或原始数据缓冲区）的内容，使用 File 或 Blob 对象指定要读取的文件或数据。<ul>
+<li><code>readAsText()</code>：读取文本文件（可以使用txt打开的文件），返回文本字符串，默认编码是UTF-8</li>
+<li><code>readAsDataURL()</code>：读取文件获取一段以data开头的字符串，这段字符串的本质就是DataURL，DataURL是一种将文件嵌入到文档的方案。DataURL是将资源转换为base64编码的字符串形式,并且将这些内容直接储存在url中</li>
+</ul>
+</li>
+<li>构造函数 <code>var aBlob = new Blob( array, options );</code><ul>
+<li>array 是一个由<code>ArrayBuffer</code>, <code>ArrayBufferView</code>, <code>Blob</code>, <code>DOMString</code> 等对象构成的 Array ，或者其他类似对象的混合体，它将会被放进 Blob。DOMStrings会被编码为UTF-8。</li>
+<li>options 是一个可选的<code>BlobPropertyBag</code>字典<ul>
+<li><code>type</code> 默认值为 "",它代表了将会被放入到blob中的数组内容的MIME类型</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+     <span class="hljs-keyword">let</span> debug = { <span class="hljs-attr">name</span>: <span class="hljs-string">"zhufeng"</span> };
+     <span class="hljs-keyword">let</span> str = <span class="hljs-built_in">JSON</span>.stringify(debug);
+     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"str"</span>, str);
+
+     <span class="hljs-keyword">var</span> blob = <span class="hljs-keyword">new</span> Blob([str], { <span class="hljs-attr">type</span>: <span class="hljs-string">"application/json"</span> });
+     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"blob.size"</span>, blob.size);
+
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readBlob</span>(<span class="hljs-params">blob, type</span>) </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+                <span class="hljs-keyword">const</span> reader = <span class="hljs-keyword">new</span> FileReader();
+                reader.onload = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+                    resolve(event.target.result);
+                };
+                <span class="hljs-keyword">switch</span> (type) {
+                    <span class="hljs-keyword">case</span> <span class="hljs-string">"ArrayBuffer"</span>:
+                        reader.readAsArrayBuffer(blob);
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-string">"DataURL"</span>:
+                        reader.readAsDataURL(blob);
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">case</span> <span class="hljs-string">"Text"</span>:
+                        reader.readAsText(blob,<span class="hljs-string">'UTF-8'</span>);
+                        <span class="hljs-keyword">break</span>;
+                    <span class="hljs-keyword">default</span>:
+                        <span class="hljs-keyword">break</span>;
+                }
+            });
+        }
+        readBlob(blob, <span class="hljs-string">"ArrayBuffer"</span>).then(<span class="hljs-function">(<span class="hljs-params">buffer</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"buffer"</span>, buffer);
+        });
+        readBlob(blob, <span class="hljs-string">"DataURL"</span>).then(<span class="hljs-function">(<span class="hljs-params">base64String</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"base64String"</span>, base64String);
+        });
+        readBlob(blob, <span class="hljs-string">"Text"</span>).then(<span class="hljs-function">(<span class="hljs-params">text</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"text"</span>, text);
+        });
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h2 id="t56. Object URL">6. Object URL <a href="#t56. Object URL"> # </a></h2>
+<ul>
+<li>可以使用浏览器新的 API URL 对象通过方法生成一个地址来表示 <code>Blob</code> 数据</li>
+<li>格式为 <code>blob:&lt;origin&gt;/&lt;uuid&gt;</code></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL">URL.createObjectURL</a> 静态方法会创建一个 DOMString，其中包含一个表示参数中给出的对象的URL。这个 URL 的生命周期和创建它的窗口中的 document 绑定。这个新的URL 对象表示指定的 File 对象或 Blob 对象。</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL">revokeObjectURL</a> 静态方法用来释放一个之前已经存在的、通过调用 <code>URL.createObjectURL()</code> 创建的 URL 对象</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"download()"</span>&gt;</span>下载json<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+     <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">download</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">let</span> debug = { <span class="hljs-attr">hello</span>: <span class="hljs-string">"world"</span> };
+        <span class="hljs-keyword">let</span> str = <span class="hljs-built_in">JSON</span>.stringify(debug);
+        <span class="hljs-keyword">var</span> blob = <span class="hljs-keyword">new</span> Blob([str], { <span class="hljs-attr">type</span>: <span class="hljs-string">'application/json'</span> });
+        <span class="hljs-keyword">let</span> objectURL = URL.createObjectURL(blob);
+        <span class="hljs-keyword">const</span> a = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'a'</span>);
+        a.download = <span class="hljs-string">'hello.json'</span>;
+        a.rel = <span class="hljs-string">'noopener'</span>;
+        a.href = objectURL;
+        a.dispatchEvent(<span class="hljs-keyword">new</span> MouseEvent(<span class="hljs-string">'click'</span>));
+        URL.revokeObjectURL(objectURL);
+     }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h2 id="t67.图片预览和裁剪上传">7.图片预览和裁剪上传 <a href="#t67.图片预览和裁剪上传"> # </a></h2>
+<ul>
+<li><a href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">bootstrap.min.css</a></li>
+</ul>
+<h3 id="t77.1 src\index.js">7.1 src\index.js <a href="#t77.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Image <span class="hljs-keyword">from</span> <span class="hljs-string">'./Image'</span>;
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Image</span> /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t87.2 src\Image.js">7.2 src\Image.js <a href="#t87.2 src\Image.js"> # </a></h3>
+<p>src\Image.js</p>
+<pre><code class="lang-js">import React from 'react';
+export default class Image extends React.Component{
+   imageRef = React.createRef()   //图片
+   canvasRef = React.createRef()  //完整的canvas
+   avatarRef = React.createRef()  //裁剪后的头像
+   state = {
+    file:null,//添加的文件
+    dataURL:'',//转换成的base64字符串
+    times:1,//图片放大的倍数
+    lastLeft:0,//最后一个左边的距离
+    lastTop:0,//最后一个上面的距离
+    avatarDataURL:''//头像的base64字符串
+   }
+   handleChange = (event)=&gt;{//头像选择改变
+    let file = event.target.files[0];
+    let fileReader = new FileReader();//读取文件
+    fileReader.onload =  (event)=&gt; {
+      this.setState({file,dataURL:event.target.result});
+      this.imageRef.current.onload = ()=&gt;this.draw();//绘制到canvas上
+    };
+    fileReader.readAsDataURL(file);
+   }
+   draw=(left=this.state.lastLeft,top=this.state.lastTop)=&gt;{
+    let image = this.imageRef.current;//图像
+    let canvas = this.canvasRef.current;//canvas
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width, canvas.height);//清掉老图片
+    let imageWidth = image.width;//图片宽度
+    let imageHeight = image.height;//图片高度
+    if(imageWidth&gt;imageHeight){//如果宽比高度大
+      let times = canvas.width/imageWidth;
+      imageWidth=canvas.width*this.state.times;//让宽度等于canvas宽度
+      imageHeight=times*imageHeight*this.state.times;//然后让高度等比缩放
+    }else{
+      let times = canvas.height/imageHeight;
+      imageHeight=canvas.height*this.state.times;
+      imageWidth=times*imageWidth*this.state.times;
+    }
+    ctx.drawImage(image, (canvas.width-imageWidth)/2+left, (canvas.height-imageHeight)/2+top,imageWidth,imageHeight);
+   }
+   bigger = ()=&gt;{
+       this.setState({times:this.state.times+0.1},()=&gt;this.draw());
+   }
+   smaller = ()=&gt;{
+    this.setState({times:this.state.times-0.1},()=&gt;this.draw());
+   }
+   confirm = ()=&gt;{
+    let canvas = this.canvasRef.current;//头像canvas
+    const ctx = canvas.getContext("2d");
+    const imageData = ctx.getImageData(100, 100, 100, 100);//获取头像数据
+    let clipCanvas = document.createElement('canvas');
+    clipCanvas.width=100;
+    clipCanvas.height=100;
+    const clipContext = clipCanvas.getContext("2d");
+    clipContext.putImageData(imageData, 0, 0);
+    let dataUrl = clipCanvas.toDataURL();
+    this.avatarRef.current.src = dataUrl;
+    this.setState({avatarDataURL:dataUrl});
+   }
+   handleMouseDown = (event)=&gt;{
+    this.setState({startX:event.clientX,startY:event.clientY,startDrag:true});
+   }
+   handleMouseMove = (event)=&gt;{
+    if(this.state.startDrag)
+        this.draw((event.clientX - this.state.startX)+this.state.lastLeft,(event.clientY - this.state.startY)+this.state.lastTop);
+   }
+   handleMouseUp = (event)=&gt;{
+    this.setState({lastLeft:(event.clientX - this.state.startX)+this.state.lastLeft,lastTop:(event.clientY - this.state.startY)+this.state.lastTop,startDrag:false});
+   }
+   upload = ()=&gt;{
+    let bytes = atob(this.state.avatarDataURL.split(",")[1]);
+    let arrayBuffer = new ArrayBuffer(bytes.length);
+    let uint8Array = new Uint8Array(arrayBuffer);
+    for (let i = 0; i &lt; bytes.length; i++) {
+      uint8Array[i] = bytes.charCodeAt(i);
+    }
+    let blob =  new Blob([arrayBuffer], { type: 'image/png' });
+    let request = new XMLHttpRequest();
+    let formData = new FormData();
+    formData.append("name", "zhufeng");
+    formData.append("avatar", blob);
+    request.open("POST", 'http://localhost:8080/upload', true);
+    request.send(formData);
+   }
+   render(){
+       return (
+           &lt;div className="container"&gt;
+               &lt;div className="row"&gt;
+                   &lt;div className="col-md-12"&gt;
+                     &lt;input type="file" accept="image/*" onChange={this.handleChange} /&gt;
+                   &lt;/div&gt;
+               &lt;/div&gt;
+               &lt;div className="row"&gt;
+                   &lt;div className="col-md-4 image" &gt;
+                       {
+                           this.state.file&amp;&amp;(
+                            &lt;img className="img-responsive" src={this.state.dataURL} ref={this.imageRef} style={{border:'2px dashed green'}}/&gt;
+                           )
+                       }
+                   &lt;/div&gt;
+                   &lt;div className="col-md-4 clip" onMouseDown={this.handleMouseDown} onMouseMove={this.handleMouseMove} onMouseUp={this.handleMouseUp}&gt;
+                       {
+                           this.state.file&amp;&amp;(
+                            &lt;&gt;
+                                &lt;div style={{position:'relative'}}&gt;
+                                  &lt;canvas ref={this.canvasRef} width="300px" height="300px"  style={{border:'2px dashed blue'}}&gt;&lt;/canvas&gt;
+                                  &lt;div style={{width:100,height:100,backgroundColor:'yellow',opacity:.3,position:'absolute',left:100,top:100}}&gt;&lt;/div&gt;
+                                &lt;/div&gt;
+                                &lt;div className="btn-group" role="group" &gt;
+                                  &lt;button type="button" className="btn btn-default" onClick={()=&gt;this.bigger()}&gt;放大&lt;/button&gt;
+                                  &lt;button type="button" className="btn btn-default" onClick={()=&gt;this.smaller()}&gt;缩小&lt;/button&gt;
+                                  &lt;button type="button" className="btn btn-default" onClick={()=&gt;this.confirm()}&gt;确定&lt;/button&gt;
+                                &lt;/div&gt;
+                            &lt;/&gt;
+                           )
+                       }
+                   &lt;/div&gt;
+                   &lt;div className="col-md-4 avatar" &gt;
+                       {
+                           this.state.file&amp;&amp;(
+                            &lt;&gt;
+                             &lt;img  ref={this.avatarRef} style={{border:'2px dashed pink',width:'100px',height:'100px'}}/&gt;
+                             &lt;p&gt; &lt;button className="btn btn-default" onClick={this.upload}&gt;上传&lt;/button&gt;&lt;/p&gt;
+                            &lt;/&gt;
+                           )
+                       }
+                   &lt;/div&gt;
+               &lt;/div&gt;  
+           &lt;/div&gt;
+       )
+   }   
+}
+</code></pre>
+<h3 id="t97.3 server.js">7.3 server.js <a href="#t97.3 server.js"> # </a></h3>
+<p>server.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cors'</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(cors());
+app.use(express.static(path.join(__dirname,<span class="hljs-string">'public'</span>)));
+<span class="hljs-keyword">const</span> multer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'multer'</span>);
+app.use(multer({<span class="hljs-attr">dest</span>: <span class="hljs-string">'./uploads'</span>}).single(<span class="hljs-string">'avatar'</span>));
+app.post(<span class="hljs-string">'/upload'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">req, res</span>)</span>{
+    res.json({<span class="hljs-attr">success</span>:<span class="hljs-literal">true</span>});
+});
+app.listen(<span class="hljs-number">8080</span>,()=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'server started at port 8080'</span>);
+});
+</code></pre>
+<h2 id="t108.音频的裁剪和预览">8.音频的裁剪和预览 <a href="#t108.音频的裁剪和预览"> # </a></h2>
+<ul>
+<li><a href="https://github.com/Kagami/ffmpeg.js">ffmpeg</a></li>
+<li><a href="http://img.zhufengpeixun.cn/song.mp3">song</a></li>
+<li><a href="http://img.zhufengpeixun.cn/ffmpeg-worker-mp4.js">ffmpeg-worker-mp4.js</a></li>
+</ul>
+<h3 id="t118.1 index.js">8.1 index.js <a href="#t118.1 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Audio <span class="hljs-keyword">from</span> <span class="hljs-string">'./Audio'</span>;
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Audio</span> /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+
+</code></pre>
+<h3 id="t128.2 src\Audio.js">8.2 src\Audio.js <a href="#t128.2 src\Audio.js"> # </a></h3>
+<p>src\Audio.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'axios'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Audio</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  audioRef = React.createRef()
+  audioClipRef = React.createRef()
+  startRef = React.createRef()
+  endRef = React.createRef()
+  clip = <span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-keyword">this</span>.worker = createWorker(<span class="hljs-string">'/ffmpeg-worker-mp4.js'</span>);
+    <span class="hljs-keyword">let</span> response = <span class="hljs-keyword">await</span> axios({ <span class="hljs-attr">url</span>: <span class="hljs-string">'/song.mp3'</span>, <span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span>, <span class="hljs-attr">responseType</span>: <span class="hljs-string">'arraybuffer'</span> });
+    <span class="hljs-keyword">let</span> originArrayBuffer = response.data;
+    <span class="hljs-keyword">let</span> start = <span class="hljs-built_in">parseInt</span>(<span class="hljs-keyword">this</span>.startRef.current.value);
+    <span class="hljs-keyword">let</span> end = <span class="hljs-built_in">parseInt</span>(<span class="hljs-keyword">this</span>.endRef.current.value);
+    <span class="hljs-keyword">let</span> duration = end - start;
+    <span class="hljs-keyword">let</span> resultArrayBuffer = (<span class="hljs-keyword">await</span> toPromise(
+      <span class="hljs-keyword">this</span>.worker,
+      getClipCommand(originArrayBuffer, start, duration)
+    )).data.data.MEMFS[<span class="hljs-number">0</span>].data;
+
+    <span class="hljs-keyword">let</span> clipBlob = audioBufferToBlob(resultArrayBuffer);
+    <span class="hljs-keyword">let</span> audio= <span class="hljs-keyword">this</span>.audioClipRef.current 
+    audio.src = URL.createObjectURL(clipBlob);
+    audio.load();
+    audio.play();
+  };
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.startRef}</span> <span class="hljs-attr">defaultValue</span>=<span class="hljs-string">{0}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.endRef}</span> <span class="hljs-attr">defaultValue</span>=<span class="hljs-string">{10}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"primary"</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.clip}</span>&gt;</span>clip<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">audio</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.audioRef}</span> <span class="hljs-attr">controls</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/song.mp3"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">audio</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">audio</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.audioClipRef}</span> <span class="hljs-attr">controls</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">audio</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createWorker</span>(<span class="hljs-params">workerPath</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Worker(workerPath);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getClipCommand</span>(<span class="hljs-params">arrayBuffer, start = <span class="hljs-number">0</span>, duration = <span class="hljs-number">10</span></span>) </span>{
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">"run"</span>,
+    <span class="hljs-attr">arguments</span>: <span class="hljs-string">`-ss <span class="hljs-subst">${start}</span> -i input.mp3 <span class="hljs-subst">${
+      duration ? <span class="hljs-string">`-t <span class="hljs-subst">${duration}</span> `</span> : <span class="hljs-string">""</span>
+      }</span>-acodec copy output.mp3`</span>.split(<span class="hljs-string">" "</span>),
+    <span class="hljs-attr">MEMFS</span>: [
+      {
+        <span class="hljs-attr">data</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Uint8Array</span>(arrayBuffer),
+        <span class="hljs-attr">name</span>: <span class="hljs-string">"input.mp3"</span>
+      }
+    ]
+  };
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toPromise</span>(<span class="hljs-params">worker, info</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> onSuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+      <span class="hljs-keyword">switch</span> (event.data.type) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">"done"</span>:
+          worker.removeEventListener(<span class="hljs-string">"message"</span>, onSuccess);
+          resolve(event);
+          <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+          <span class="hljs-keyword">break</span>;
+      }
+    };
+    worker.addEventListener(<span class="hljs-string">"message"</span>, onSuccess);
+    info &amp;&amp; worker.postMessage(info);
+  });
+}
+
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">audioBufferToBlob</span>(<span class="hljs-params">arrayBuffer</span>) </span>{
+  <span class="hljs-keyword">const</span> file = <span class="hljs-keyword">new</span> File([arrayBuffer], <span class="hljs-string">'test.mp3'</span>, {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'audio/mp3'</span>,
+  });
+  <span class="hljs-keyword">return</span> file;
+}
+</code></pre>
+
+    

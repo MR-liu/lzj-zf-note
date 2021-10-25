@@ -1,0 +1,432 @@
+
+        <h2 id="t01. 原生JS实现计数器">1. 原生JS实现计数器 <a href="#t01. 原生JS实现计数器"> # </a></h2>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"counter-btn"</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">let</span> counterBtn = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'counter-btn'</span>);
+<span class="hljs-keyword">let</span> number = <span class="hljs-number">0</span>;
+counterBtn.addEventListener(<span class="hljs-string">'click'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    counterBtn.innerHTML = ++number;
+});
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h2 id="t12. HTML结构的复用">2. HTML结构的复用 <a href="#t12. HTML结构的复用"> # </a></h2>
+<h3 id="t22.1 index.html">2.1 index.html <a href="#t22.1 index.html"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"counter-app"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">let</span> counterApp = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'counter-app'</span>);
+counterApp.innerHTML = <span class="hljs-keyword">new</span> Counter().render();
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h3 id="t32.2 index.js">2.2 index.js <a href="#t32.2 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span></span>{
+  render(){
+      <span class="hljs-keyword">return</span> (
+          <span class="hljs-string">`
+          &lt;button id="counter-btn"&gt;
+            0
+          &lt;/button&gt;
+          `</span>
+      )
+  }
+}
+</code></pre>
+<h2 id="t43.生成DOM元素并添加事件">3.生成DOM元素并添加事件 <a href="#t43.生成DOM元素并添加事件"> # </a></h2>
+<h3 id="t53.1 index.html">3.1 index.html <a href="#t53.1 index.html"> # </a></h3>
+<pre><code class="lang-js">&lt;body&gt;
+&lt;div id="counter-app"&gt;&lt;/div&gt;
+
+&lt;script src="index.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+let counterApp = document.getElementById('counter-app');
+counterApp.appendChild(new Counter().render());
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="t63.2 index.js">3.2 index.js <a href="#t63.2 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span></span>{
+  <span class="hljs-keyword">constructor</span>(){
+      <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>};
+  }  
+  createDOMFromString(domString){
+    <span class="hljs-keyword">const</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+    div.innerHTML = domString;
+    <span class="hljs-keyword">return</span> div.children[<span class="hljs-number">0</span>];
+  }
+  increment (){
+    <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>};
+    <span class="hljs-keyword">let</span> oldElement = <span class="hljs-keyword">this</span>.domElement;
+    <span class="hljs-keyword">let</span> newElement = <span class="hljs-keyword">this</span>.render();
+    oldElement.parentElement.replaceChild(newElement,oldElement);
+  }
+  render(){
+     <span class="hljs-keyword">this</span>.domElement = <span class="hljs-keyword">this</span>.createDOMFromString(<span class="hljs-string">`
+     &lt;button id="counter-btn"&gt;
+        <span class="hljs-subst">${<span class="hljs-keyword">this</span>.state.number}</span>
+     &lt;/button&gt;
+     `</span>);
+     <span class="hljs-keyword">this</span>.domElement.addEventListener(<span class="hljs-string">'click'</span>,<span class="hljs-keyword">this</span>.increment.bind(<span class="hljs-keyword">this</span>));
+     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.domElement;
+  }
+}
+</code></pre>
+<h2 id="t74.抽象Component">4.抽象Component <a href="#t74.抽象Component"> # </a></h2>
+<h3 id="t84.1 index.html">4.1 index.html <a href="#t84.1 index.html"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"counter-app"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">let</span> counterApp = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'counter-app'</span>);
+<span class="hljs-keyword">new</span> Counter({<span class="hljs-attr">name</span>:<span class="hljs-string">'珠峰架构'</span>}).mount(counterApp);
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h3 id="t94.2 index.js">4.2 index.js <a href="#t94.2 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.trigger = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event,name</span>)</span>{
+    <span class="hljs-keyword">let</span> component = event.target.component;
+    component[name].call(component,event);
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">constructor</span>(props){
+        <span class="hljs-keyword">this</span>.props = props;
+    }
+    createDOMFromString(domString){
+        <span class="hljs-keyword">const</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+        div.innerHTML = domString;
+        <span class="hljs-keyword">return</span> div.children[<span class="hljs-number">0</span>];
+    }
+    setState(partialState){
+        <span class="hljs-keyword">this</span>.state = <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">this</span>.state,partialState);
+        <span class="hljs-keyword">let</span> oldElement = <span class="hljs-keyword">this</span>.domElement;
+        <span class="hljs-keyword">let</span> newElement = <span class="hljs-keyword">this</span>.renderElement();
+        oldElement.parentElement.replaceChild(newElement,oldElement);
+    }
+    renderElement(){
+        <span class="hljs-keyword">let</span> renderString = <span class="hljs-keyword">this</span>.render();
+        <span class="hljs-keyword">this</span>.domElement = <span class="hljs-keyword">this</span>.createDOMFromString(renderString);
+        <span class="hljs-keyword">this</span>.domElement.component = <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.domElement;
+    }
+    mount(container){
+        container.appendChild(<span class="hljs-keyword">this</span>.renderElement());
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+  <span class="hljs-keyword">constructor</span>(props){
+      <span class="hljs-keyword">super</span>(props);
+      <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>};
+  }  
+  increment(){
+   <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   },<span class="hljs-number">1000</span>);
+  }
+  render(){
+      <span class="hljs-keyword">return</span> (
+        <span class="hljs-string">`
+        &lt;button id="counter-btn" onclick="trigger(event,'increment')"&gt;
+         <span class="hljs-subst">${<span class="hljs-keyword">this</span>.props.name}</span>:<span class="hljs-subst">${<span class="hljs-keyword">this</span>.state.number}</span>
+        &lt;/button&gt;
+        `</span>
+      )
+  }
+}
+</code></pre>
+<h2 id="t105.setState可能是异步的">5.setState可能是异步的 <a href="#t105.setState可能是异步的"> # </a></h2>
+<ul>
+<li><a href="https://github.com/facebook/react/blob/35962a00084382b49d1f9e3bd36612925f360e5b/src/renderers/shared/reconciler/ReactUpdates.js#L199">源码</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/setState.png" alt="setState"></p>
+<h3 id="t115.1 index.html">5.1 index.html <a href="#t115.1 index.html"> # </a></h3>
+<pre><code class="lang-js">&lt;body&gt;
+&lt;div id="counter-app"&gt;&lt;/div&gt;
+&lt;script src="index.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+let counterApp = document.getElementById('counter-app');
+new Counter({name:'珠峰架构'}).mount(counterApp);
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<h3 id="t125.2 index.js">5.2 index.js <a href="#t125.2 index.js"> # </a></h3>
+<pre><code class="lang-js">
+<span class="hljs-keyword">let</span> batchingStrategy = {
+    <span class="hljs-attr">isBatchingUpdates</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">updaters</span>:[],
+    batchedUpdates(){
+        <span class="hljs-keyword">this</span>.updaters.forEach(<span class="hljs-function"><span class="hljs-params">updater</span> =&gt;</span> {
+            updater.component.updateComponent();
+        });
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Updater</span></span>{
+    <span class="hljs-keyword">constructor</span>(component){
+        <span class="hljs-keyword">this</span>.component = component;
+        <span class="hljs-keyword">this</span>.pendingStates = [];
+    }
+    addState(particalState){
+        <span class="hljs-keyword">this</span>.pendingStates.push(particalState);
+        batchingStrategy.isBatchingUpdates?batchingStrategy.updaters.push(<span class="hljs-keyword">this</span>):<span class="hljs-keyword">this</span>.component.updateComponent();
+    }
+}
+<span class="hljs-keyword">let</span> transaction = <span class="hljs-keyword">new</span> Transaction({
+    initialize() {
+        batchingStrategy.isBatchingUpdates = <span class="hljs-literal">true</span>;
+    },
+    close() {
+        batchingStrategy.isBatchingUpdates = <span class="hljs-literal">false</span>;
+        batchingStrategy.batchedUpdates();
+    }
+});
+<span class="hljs-built_in">window</span>.trigger = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event,name</span>)</span>{
+    batchingStrategy.isBatchingUpdates = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">let</span> component = event.target.component;
+    component[name].bind(component,event);
+    batchingStrategy.isBatchingUpdates = <span class="hljs-literal">false</span>;
+    batchingStrategy.batchedUpdates();
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">constructor</span>(props){
+        <span class="hljs-keyword">this</span>.props = props;
+        <span class="hljs-keyword">this</span>.$updater = <span class="hljs-keyword">new</span> Updater(<span class="hljs-keyword">this</span>);
+    }
+    createDOMFromString(domString){
+        <span class="hljs-keyword">const</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+        div.innerHTML = domString;
+        <span class="hljs-keyword">return</span> div.children[<span class="hljs-number">0</span>];
+    }
+    setState(particalState){
+        <span class="hljs-keyword">this</span>.$updater.addState(particalState);
+    }
+    updateComponent(){
+        <span class="hljs-keyword">let</span> pendingStates = <span class="hljs-keyword">this</span>.$updater.pendingStates;
+        pendingStates.forEach(<span class="hljs-function"><span class="hljs-params">particalState</span>=&gt;</span><span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">this</span>.state,particalState));
+        <span class="hljs-keyword">this</span>.$updater.pendingStates.length = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">let</span> oldElement = <span class="hljs-keyword">this</span>.domElement;
+        <span class="hljs-keyword">let</span> newElement = <span class="hljs-keyword">this</span>.renderElement();
+        oldElement.parentElement.replaceChild(newElement,oldElement);
+    }
+    renderElement(){
+        <span class="hljs-keyword">let</span> renderString = <span class="hljs-keyword">this</span>.render();
+        <span class="hljs-keyword">this</span>.domElement = <span class="hljs-keyword">this</span>.createDOMFromString(renderString);
+        <span class="hljs-keyword">this</span>.domElement.component = <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.domElement;
+    }
+    mount(container){
+        container.appendChild(<span class="hljs-keyword">this</span>.renderElement());
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+  <span class="hljs-keyword">constructor</span>(props){
+      <span class="hljs-keyword">super</span>(props);
+      <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>};
+  }  
+  increment(){
+   <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   },<span class="hljs-number">1000</span>);
+  }
+  render(){
+      <span class="hljs-keyword">return</span> (
+        <span class="hljs-string">`
+        &lt;button id="counter-btn" onclick="trigger(event,'increment')"&gt;
+         <span class="hljs-subst">${<span class="hljs-keyword">this</span>.props.name}</span>:<span class="hljs-subst">${<span class="hljs-keyword">this</span>.state.number}</span>
+        &lt;/button&gt;
+        `</span>
+      )
+  }
+}
+</code></pre>
+<h2 id="t136.事务">6.事务 <a href="#t136.事务"> # </a></h2>
+<ul>
+<li><p><a href="https://github.com/facebook/react/blob/6d5fe44c8602f666a043a4117ccc3bdb29b86e78/src/shared/utils/Transaction.js">源码</a></p>
+</li>
+<li><p>一个所谓的 Transaction 就是将需要执行的 method 使用 wrapper 封装起来，再通过 Transaction 提供的 perform 方法执行</p>
+</li>
+<li>而在 perform 之前，先执行所有 wrapper 中的 initialize 方法；perform 完成之后（即 method 执行后）再执行所有的 close 方法</li>
+<li>一组 initialize 及 close 方法称为一个 wrapper</li>
+</ul>
+<pre> *                       wrappers (injected at creation time)
+ *                                      +        +
+ *                                      |        |
+ *                    +-----------------|--------|--------------+
+ *                    |                 v        |              |
+ *                    |      +---------------+   |              |
+ *                    |   +--|    wrapper1   |---|----+         |
+ *                    |   |  +---------------+   v    |         |
+ *                    |   |          +-------------+  |         |
+ *                    |   |     +----|   wrapper2  |--------+   |
+ *                    |   |     |    +-------------+  |     |   |
+ *                    |   |     |                     |     |   |
+ *                    |   v     v                     v     v   | wrapper
+ *                    | +---+ +---+   +---------+   +---+ +---+ | invariants
+ * perform(anyMethod) | |   | |   |   |         |   |   | |   | | maintained
+ * +-----------------&gt;|-|---|-|---|--&gt;|anyMethod|---|---|-|---|-|--------&gt;
+ *                    | |   | |   |   |         |   |   | |   | |
+ *                    | |   | |   |   |         |   |   | |   | |
+ *                    | |   | |   |   |         |   |   | |   | |
+ *                    | +---+ +---+   +---------+   +---+ +---+ |
+ *                    |  initialize                    close    |
+ *                    +-----------------------------------------+
+ * 
+ </pre>
+
+<h3 id="t146.1 transaction">6.1 transaction <a href="#t146.1 transaction"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setState</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setState'</span>)
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Transaction</span> </span>{
+    <span class="hljs-keyword">constructor</span>(wrappers) {
+        <span class="hljs-keyword">this</span>.wrappers = wrappers;
+    }
+    perform(func) {
+        <span class="hljs-keyword">this</span>.wrappers.forEach(<span class="hljs-function"><span class="hljs-params">wrapper</span>=&gt;</span>wrapper.initialize())
+        func.call();
+        <span class="hljs-keyword">this</span>.wrappers.forEach(<span class="hljs-function"><span class="hljs-params">wrapper</span>=&gt;</span>wrapper.close())
+    }
+
+}
+<span class="hljs-keyword">let</span> transaction = <span class="hljs-keyword">new</span> Transaction([
+    {
+        initialize() {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'before1'</span>);
+        },
+        close() {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'after1'</span>);
+        }
+    },
+    {
+        initialize() {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'before2'</span>);
+        },
+        close() {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'after2'</span>);
+        }
+    }
+]);
+transaction.perform(setState);
+</code></pre>
+<h3 id="t156.2 index.js">6.2 index.js <a href="#t156.2 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Transaction</span> </span>{
+    <span class="hljs-keyword">constructor</span>(wrapper){
+        <span class="hljs-keyword">this</span>.wrapper = wrapper;
+    }
+    perform(func){
+        <span class="hljs-keyword">this</span>.wrapper.initialize();
+        func.call();
+        <span class="hljs-keyword">this</span>.wrapper.close();
+    }
+
+}
+<span class="hljs-keyword">let</span> batchingStrategy = {
+    <span class="hljs-attr">isBatchingUpdates</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">updaters</span>:[],
+    batchedUpdates(){
+        <span class="hljs-keyword">this</span>.updaters.forEach(<span class="hljs-function"><span class="hljs-params">updater</span> =&gt;</span> {
+            updater.component.updateComponent();
+        });
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Updater</span></span>{
+    <span class="hljs-keyword">constructor</span>(component){
+        <span class="hljs-keyword">this</span>.component = component;
+        <span class="hljs-keyword">this</span>.pendingStates = [];
+    }
+    addState(particalState){
+        <span class="hljs-keyword">this</span>.pendingStates.push(particalState);
+        batchingStrategy.isBatchingUpdates?batchingStrategy.updaters.push(<span class="hljs-keyword">this</span>):<span class="hljs-keyword">this</span>.component.updateComponent();
+    }
+}
+<span class="hljs-keyword">let</span> transaction = <span class="hljs-keyword">new</span> Transaction({
+    initialize() {
+        batchingStrategy.isBatchingUpdates = <span class="hljs-literal">true</span>;
+    },
+    close() {
+        batchingStrategy.isBatchingUpdates = <span class="hljs-literal">false</span>;
+        batchingStrategy.batchedUpdates();
+    }
+});
+<span class="hljs-built_in">window</span>.trigger = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event,name</span>)</span>{
+    <span class="hljs-keyword">let</span> component = event.target.component;
+    transaction.perform(component[name].bind(component,event));
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">constructor</span>(props){
+        <span class="hljs-keyword">this</span>.props = props;
+        <span class="hljs-keyword">this</span>.$updater = <span class="hljs-keyword">new</span> Updater(<span class="hljs-keyword">this</span>);
+    }
+    createDOMFromString(domString){
+        <span class="hljs-keyword">const</span> div = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+        div.innerHTML = domString;
+        <span class="hljs-keyword">return</span> div.children[<span class="hljs-number">0</span>];
+    }
+    setState(particalState){
+        <span class="hljs-keyword">this</span>.$updater.addState(particalState);
+    }
+    updateComponent(){
+        <span class="hljs-keyword">let</span> pendingStates = <span class="hljs-keyword">this</span>.$updater.pendingStates;
+        pendingStates.forEach(<span class="hljs-function"><span class="hljs-params">particalState</span>=&gt;</span><span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">this</span>.state,particalState));
+        <span class="hljs-keyword">this</span>.$updater.pendingStates.length = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">let</span> oldElement = <span class="hljs-keyword">this</span>.domElement;
+        <span class="hljs-keyword">let</span> newElement = <span class="hljs-keyword">this</span>.renderElement();
+        oldElement.parentElement.replaceChild(newElement,oldElement);
+    }
+    renderElement(){
+        <span class="hljs-keyword">let</span> renderString = <span class="hljs-keyword">this</span>.render();
+        <span class="hljs-keyword">this</span>.domElement = <span class="hljs-keyword">this</span>.createDOMFromString(renderString);
+        <span class="hljs-keyword">this</span>.domElement.component = <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.domElement;
+    }
+    mount(container){
+        container.appendChild(<span class="hljs-keyword">this</span>.renderElement());
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+  <span class="hljs-keyword">constructor</span>(props){
+      <span class="hljs-keyword">super</span>(props);
+      <span class="hljs-keyword">this</span>.state = {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>};
+  }  
+  increment(){
+   <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state);
+   },<span class="hljs-number">1000</span>);
+  }
+  render(){
+      <span class="hljs-keyword">return</span> (
+        <span class="hljs-string">`
+        &lt;button id="counter-btn" onclick="trigger(event,'increment')"&gt;
+         <span class="hljs-subst">${<span class="hljs-keyword">this</span>.props.name}</span>:<span class="hljs-subst">${<span class="hljs-keyword">this</span>.state.number}</span>
+        &lt;/button&gt;
+        `</span>
+      )
+  }
+}
+</code></pre>
+
+    

@@ -1,0 +1,579 @@
+
+        <h2 id="t01. webpack编译流程">1. webpack编译流程 <a href="#t01. webpack编译流程"> # </a></h2>
+<ul>
+<li>初始化参数：从配置文件和<code>Shell</code>语句中读取与合并参数，得出最终的参数；</li>
+<li>开始编译：用上一步得到的参数初始化<code>Compiler</code>对象，加载所有配置的插件，执行对象的<code>run</code>方法开始执行编译； 确定入口：根据配置中的<code>entry</code>找出所有的入口文件</li>
+<li>编译模块：从入口文件出发，调用所有配置的<code>Loader</code>对模块进行编译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理；</li>
+<li>完成模块编译：在经过第4步使用<code>Loader</code>翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系</li>
+<li>输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 <code>Chunk</code>，再把每个<code>Chunk</code>转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会</li>
+<li>输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统</li>
+</ul>
+<blockquote>
+<p>在以上过程中，<code>Webpack</code> 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果</p>
+</blockquote>
+<p><img src="http://img.zhufengpeixun.cn/webpackflow2.png" alt="webpackflowes"></p>
+<h2 id="t12.调试webpack">2.调试webpack <a href="#t12.调试webpack"> # </a></h2>
+<ul>
+<li><a href="https://webpack.js.org/api/cli">cli</a></li>
+</ul>
+<h3 id="t22.1 如何生成调试文件">2.1 如何生成调试文件 <a href="#t22.1 如何生成调试文件"> # </a></h3>
+<ul>
+<li>打开工程目录，点击调试按钮，再点击小齿轮的配置按钮系统就会生成launch.json配置文件</li>
+<li>修改好了以后直接点击F5就可以启动调试</li>
+</ul>
+<p>.vscode\launch.json</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.2.0"</span>,
+    <span class="hljs-attr">"configurations"</span>: [
+        {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"node"</span>,
+            <span class="hljs-attr">"request"</span>: <span class="hljs-string">"launch"</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"debug webpack"</span>,
+            <span class="hljs-attr">"cwd"</span>:<span class="hljs-string">"${workspaceFolder}"</span>,
+            <span class="hljs-attr">"program"</span>:<span class="hljs-string">"${workspaceFolder}/node_modules/webpack-cli/bin/cli.js"</span>
+        }
+    ]
+}
+</code></pre>
+<h3 id="t32.2 webpack.cmd">2.2 webpack.cmd <a href="#t32.2 webpack.cmd"> # </a></h3>
+<ul>
+<li><p><code>webpack-source\node_modules\.bin\webpack.cmd</code></p>
+</li>
+<li><p><code>%~dp0</code>是批处理文件所在的盘符:+路径(%~dp0 C:\vipdata\vipproject\webpack-source\node_modules.bin)</p>
+</li>
+<li><code>SETLOCAL</code>主要针对临时环境变量，不会影响到系统的变量环境设置，应与endlocal联用</li>
+<li><code>PATHEXT</code>当在一个相同的目录结构下，有相同的多个主文件名，不同的文件后缀名时，系统会根据PATHEXT中的后缀名，选择其中顺序最靠前的那一个</li>
+</ul>
+<pre><code class="lang-js">@IF EXIST <span class="hljs-string">"%~dp0\node.exe"</span> (<span class="hljs-comment">//如果当前盘符的根目录下存在node.exe,用当前的node执行</span>
+  <span class="hljs-string">"%~dp0\node.exe"</span>  <span class="hljs-string">"%~dp0\..\_webpack@4.39.3@webpack\bin\webpack.js"</span> %*
+) ELSE (<span class="hljs-comment">//如果当前的盘符没有node.exe</span>
+  @SETLOCAL
+  @SET PATHEXT=%PATHEXT:;.JS;=;%
+  node  <span class="hljs-string">"%~dp0\..\_webpack@4.39.3@webpack\bin\webpack.js"</span> %*
+)
+</code></pre>
+<h3 id="t42.3 webpack.js">2.3 webpack.js <a href="#t42.3 webpack.js"> # </a></h3>
+<ul>
+<li>node_modules\webpack\bin\webpack.js</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> pkgPath = <span class="hljs-built_in">require</span>.resolve(<span class="hljs-string">`<span class="hljs-subst">${installedClis[<span class="hljs-number">0</span>].package}</span>/package.json`</span>);
+<span class="hljs-keyword">const</span> pkg = <span class="hljs-built_in">require</span>(pkgPath);
+<span class="hljs-built_in">require</span>(path.resolve(
+    path.dirname(pkgPath),
+    pkg.bin[installedClis[<span class="hljs-number">0</span>].binName]
+));
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> pkgPath = <span class="hljs-built_in">require</span>.resolve(<span class="hljs-string">`webpack-cli/package.json`</span>);
+<span class="hljs-keyword">const</span> pkg = <span class="hljs-built_in">require</span>(pkgPath);
+<span class="hljs-built_in">require</span>(path.resolve(path.dirname(pkgPath),pkg.bin[<span class="hljs-string">'webpack-cli'</span>]));
+</code></pre>
+<pre><code class="lang-js">npx webpack = node ./node_modules/webpack-cli/bin/cli.js
+</code></pre>
+<h3 id="t52.4 cli.js">2.4 cli.js <a href="#t52.4 cli.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.config"</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(err);
+  <span class="hljs-built_in">console</span>.log(stats.toJson({
+    <span class="hljs-attr">entries</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">chunks</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">modules</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">_modules</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">assets</span>:<span class="hljs-literal">true</span>
+  }));
+});
+</code></pre>
+<h2 id="t63.Stats 对象">3.Stats 对象 <a href="#t63.Stats 对象"> # </a></h2>
+<ul>
+<li>在 Webpack 的回调函数中会得到stats对象</li>
+<li>这个对象实际来自于<code>Compilation.getStats()</code>，返回的是主要含有<code>modules</code>、<code>chunks</code>和<code>assets</code>三个属性值的对象。</li>
+<li>Stats对象本质上来自于<a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Stats.js">lib/Stats.js</a>的类实例</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">modules</td>
+<td style="text-align:left">记录了所有解析后的模块</td>
+</tr>
+<tr>
+<td style="text-align:left">chunks</td>
+<td style="text-align:left">记录了所有chunk</td>
+</tr>
+<tr>
+<td style="text-align:left">assets</td>
+<td style="text-align:left">记录了所有要生成的文件</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">npx webpack --profile --json &gt; stats.json
+</code></pre>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"errors"</span>: [],<span class="hljs-comment">// 错误字符串 (error string) 的数组</span>
+  <span class="hljs-attr">"warnings"</span>: [],<span class="hljs-comment">//警告字符串 (warning string) 的数组</span>
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"4.39.3"</span>,<span class="hljs-comment">// 用来编译的 webpack 的版本</span>
+  <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"3e945ec6b2c56d0b010e"</span>,<span class="hljs-comment">//编译使用的 hash</span>
+  <span class="hljs-attr">"time"</span>: <span class="hljs-number">66</span>, <span class="hljs-comment">// 编译耗时 (ms)</span>
+  <span class="hljs-attr">"builtAt"</span>: <span class="hljs-number">1567225465347</span>,<span class="hljs-comment">//编译的时间</span>
+  <span class="hljs-attr">"publicPath"</span>: <span class="hljs-string">""</span>,<span class="hljs-comment">//资源访问路径</span>
+  <span class="hljs-attr">"outputPath"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\dist"</span>,<span class="hljs-comment">//webpack输出目录</span>
+  <span class="hljs-attr">"assetsByChunkName"</span>: {<span class="hljs-comment">//用作映射的 chunk 的名称</span>
+    <span class="hljs-attr">"lazy"</span>: <span class="hljs-string">"lazy.bundle.js"</span>,<span class="hljs-comment">//chunk的名字叫lazy,lazy.bundle.js</span>
+    <span class="hljs-attr">"main"</span>: <span class="hljs-string">"bundle.js"</span><span class="hljs-comment">//chunk的名字叫main,打包出来了bundle.js</span>
+  },
+  <span class="hljs-attr">"assets"</span>: [<span class="hljs-comment">//asset 对象 (asset objects) 的数组</span>
+    {
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"bundle.js"</span>,<span class="hljs-comment">//文件名</span>
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">9043</span>,<span class="hljs-comment">//大小</span>
+      <span class="hljs-attr">"chunks"</span>: [<span class="hljs-comment">//包含的代码块</span>
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"chunkNames"</span>: [<span class="hljs-comment">//包含的代码块名称</span>
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"emitted"</span>: <span class="hljs-literal">true</span><span class="hljs-comment">//是否要生成</span>
+    },
+    {
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"lazy.bundle.js"</span>, <span class="hljs-comment">// 输出的文件名</span>
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">336</span>,<span class="hljs-comment">// 文件的大小</span>
+      <span class="hljs-attr">"chunks"</span>: [ <span class="hljs-comment">// 这个 asset 包含的 chunk 的 id</span>
+        <span class="hljs-string">"lazy"</span>
+      ],
+      <span class="hljs-attr">"chunkNames"</span>: [<span class="hljs-comment">// 这个 asset 包含的 chunk</span>
+        <span class="hljs-string">"lazy"</span>
+      ],
+      <span class="hljs-attr">"emitted"</span>: <span class="hljs-literal">true</span>  <span class="hljs-comment">// 表示这个 asset 是否会让它输出到 output 目录</span>
+    }
+  ],
+  <span class="hljs-attr">"filteredAssets"</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">"entrypoints"</span>: {
+    <span class="hljs-attr">"main"</span>: {
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [
+        <span class="hljs-string">"bundle.js"</span>
+      ],
+      <span class="hljs-attr">"children"</span>: {},
+      <span class="hljs-attr">"childAssets"</span>: {}
+    }
+  },
+  <span class="hljs-attr">"namedChunkGroups"</span>: {
+    <span class="hljs-attr">"main"</span>: {
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [
+        <span class="hljs-string">"bundle.js"</span>
+      ],
+      <span class="hljs-attr">"children"</span>: {},
+      <span class="hljs-attr">"childAssets"</span>: {}
+    },
+    <span class="hljs-attr">"lazy"</span>: {
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"lazy"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [
+        <span class="hljs-string">"lazy.bundle.js"</span>
+      ],
+      <span class="hljs-attr">"children"</span>: {},
+      <span class="hljs-attr">"childAssets"</span>: {}
+    }
+  },
+  <span class="hljs-attr">"chunks"</span>: [ <span class="hljs-comment">//chunk 对象 (chunk objects) 的数组</span>
+    {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"lazy"</span>, <span class="hljs-comment">// 这个 chunk 的id</span>
+      <span class="hljs-attr">"rendered"</span>: <span class="hljs-literal">true</span>,<span class="hljs-comment">// 表示这个 chunk 是否会参与进编译</span>
+      <span class="hljs-attr">"initial"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"entry"</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">// 表示这个 chunk 是否包含 webpack 的运行时</span>
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">24</span>,<span class="hljs-comment">//预估的模块大小</span>
+      <span class="hljs-attr">"names"</span>: [<span class="hljs-comment">// 包含在这个 chunk 内的 chunk 的名字的数组</span>
+        <span class="hljs-string">"lazy"</span>
+      ],
+      <span class="hljs-attr">"files"</span>: [
+        <span class="hljs-string">"lazy.bundle.js"</span>
+      ],
+      <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"d08a8b502d30324f81e1"</span>,
+      <span class="hljs-attr">"siblings"</span>: [],
+      <span class="hljs-attr">"parents"</span>: [<span class="hljs-comment">// 父 chunk 的 ids</span>
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"children"</span>: [],
+      <span class="hljs-attr">"childrenByOrder"</span>: {},
+      <span class="hljs-attr">"modules"</span>: [
+        {
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/lazy.js"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\lazy.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/lazy.js"</span>,
+          <span class="hljs-attr">"index"</span>: <span class="hljs-number">2</span>,
+          <span class="hljs-attr">"index2"</span>: <span class="hljs-number">2</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">24</span>,
+          <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"prefetched"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"chunks"</span>: [
+            <span class="hljs-string">"lazy"</span>
+          ],
+          <span class="hljs-attr">"issuer"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+          <span class="hljs-attr">"issuerId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"issuerName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"issuerPath"</span>: [
+            {
+              <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+              <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"profile"</span>: {
+                <span class="hljs-attr">"factory"</span>: <span class="hljs-number">18</span>,
+                <span class="hljs-attr">"building"</span>: <span class="hljs-number">14</span>
+              }
+            }
+          ],
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">4</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">2</span>
+          },
+          <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"assets"</span>: [],
+          <span class="hljs-attr">"reasons"</span>: [<span class="hljs-comment">// 生成 assets 的原因</span>
+            {
+              <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">//模块的ID</span>
+              <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,<span class="hljs-comment">//唯一标识</span>
+              <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">//模块</span>
+              <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">//模块名称</span>
+              <span class="hljs-attr">"type"</span>: <span class="hljs-string">"import()"</span>,<span class="hljs-comment">//类型</span>
+              <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./lazy"</span>,<span class="hljs-comment">//用户请求方式</span>
+              <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"2:0-46"</span><span class="hljs-comment">//在父模块中的位置</span>
+            }
+          ],
+          <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"optimizationBailout"</span>: [],
+          <span class="hljs-attr">"depth"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"source"</span>: <span class="hljs-string">"module.exports = 'lazy';"</span>
+        }
+      ],
+      <span class="hljs-attr">"filteredModules"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"origins"</span>: [
+        {
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">// 模块的ID</span>
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,<span class="hljs-comment">// 模块的位置</span>
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,<span class="hljs-comment">// 模块的地址</span>
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">//模块的相对地址</span>
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"2:0-46"</span>,
+          <span class="hljs-attr">"request"</span>: <span class="hljs-string">"./lazy"</span>,
+          <span class="hljs-attr">"reasons"</span>: [] <span class="hljs-comment">// 具体是哪行生成了这个chunk</span>
+        }
+      ]
+    },
+    {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"main"</span>,
+      <span class="hljs-attr">"rendered"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"initial"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"entry"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">162</span>,
+      <span class="hljs-attr">"names"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"files"</span>: [
+        <span class="hljs-string">"bundle.js"</span>
+      ],
+      <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"263cadc0459e8470151b"</span>,
+      <span class="hljs-attr">"siblings"</span>: [],
+      <span class="hljs-attr">"parents"</span>: [],
+      <span class="hljs-attr">"children"</span>: [<span class="hljs-comment">// 自己引用哪些chunk</span>
+        <span class="hljs-string">"lazy"</span>
+      ],
+      <span class="hljs-attr">"childrenByOrder"</span>: {}, <span class="hljs-comment">// 引用的顺序</span>
+      <span class="hljs-attr">"modules"</span>: [
+        {
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/hello.js"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\hello.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/hello.js"</span>,
+          <span class="hljs-attr">"index"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"index2"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">25</span>,
+          <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"prefetched"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"chunks"</span>: [
+            <span class="hljs-string">"main"</span>
+          ],
+          <span class="hljs-attr">"issuer"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+          <span class="hljs-attr">"issuerId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"issuerName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"issuerPath"</span>: [
+            {
+              <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+              <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"profile"</span>: {
+                <span class="hljs-attr">"factory"</span>: <span class="hljs-number">18</span>,
+                <span class="hljs-attr">"building"</span>: <span class="hljs-number">14</span>
+              }
+            }
+          ],
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">4</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">2</span>
+          },
+          <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"assets"</span>: [],
+          <span class="hljs-attr">"reasons"</span>: [
+            {
+              <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+              <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"type"</span>: <span class="hljs-string">"cjs require"</span>,
+              <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./hello"</span>,
+              <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"1:12-30"</span>
+            }
+          ],
+          <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"optimizationBailout"</span>: [],
+          <span class="hljs-attr">"depth"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"source"</span>: <span class="hljs-string">"module.exports = 'hello';"</span>
+        },
+        {
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"index"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"index2"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">137</span>,
+          <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"prefetched"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"chunks"</span>: [
+            <span class="hljs-string">"main"</span>
+          ],
+          <span class="hljs-attr">"issuer"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"issuerId"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"issuerName"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"issuerPath"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">18</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">14</span>
+          },
+          <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"assets"</span>: [],
+          <span class="hljs-attr">"reasons"</span>: [
+            {
+              <span class="hljs-attr">"moduleId"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"module"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"moduleName"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"type"</span>: <span class="hljs-string">"single entry"</span>,
+              <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"main"</span>
+            }
+          ],
+          <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"optimizationBailout"</span>: [],
+          <span class="hljs-attr">"depth"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"source"</span>: <span class="hljs-string">"let hello = require('./hello');\r\nimport(/* webpackChunkName: \"lazy\" */'./lazy').then(result=&gt;{\r\n    console.log(hello,resut.default)\r\n});"</span>
+        }
+      ],
+      <span class="hljs-attr">"filteredModules"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"origins"</span>: [
+        {
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"main"</span>,
+          <span class="hljs-attr">"request"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"reasons"</span>: []
+        }
+      ]
+    }
+  ],
+  <span class="hljs-attr">"modules"</span>: [<span class="hljs-comment">// 模块对象 (module objects) 的数组</span>
+    {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/hello.js"</span>,<span class="hljs-comment">//模块ID</span>
+      <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\hello.js"</span>,<span class="hljs-comment">//webpack内部使用的唯一的标识</span>
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/hello.js"</span>,<span class="hljs-comment">// 实际文件的地址</span>
+      <span class="hljs-attr">"index"</span>: <span class="hljs-number">1</span>,<span class="hljs-comment">//索引</span>
+      <span class="hljs-attr">"index2"</span>: <span class="hljs-number">0</span>,<span class="hljs-comment">//索引</span>
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">25</span>,<span class="hljs-comment">// 预估模块的大小 (byte)</span>
+      <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,<span class="hljs-comment">// 表示这个模块是否会被缓存</span>
+      <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,<span class="hljs-comment">// 表示这个模块会参与 Loaders , 解析, 并被编译</span>
+      <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">// 每一个对这个模块的请求都会包裹在 `try... catch` 内</span>
+      <span class="hljs-attr">"prefetched"</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">// 表示这个模块是否会被 prefetched</span>
+      <span class="hljs-attr">"chunks"</span>: [<span class="hljs-comment">//此模块在哪个代码块内</span>
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"issuer"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,<span class="hljs-comment">//使用者唯一标识</span>
+      <span class="hljs-attr">"issuerId"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">//使用者ID</span>
+      <span class="hljs-attr">"issuerName"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">//使用者名称</span>
+      <span class="hljs-attr">"issuerPath"</span>: [<span class="hljs-comment">//使用者路径</span>
+        {
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"profile"</span>: { <span class="hljs-comment">//这个模块特有的编译时间数据(ms)</span>
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">18</span>,<span class="hljs-comment">// 解决依赖的时间</span>
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">14</span> <span class="hljs-comment">// 载入和解析的时间</span>
+          }
+        }
+      ],
+      <span class="hljs-attr">"profile"</span>: {
+        <span class="hljs-attr">"factory"</span>: <span class="hljs-number">4</span>,<span class="hljs-comment">// 解决依赖的时间</span>
+        <span class="hljs-attr">"building"</span>: <span class="hljs-number">2</span><span class="hljs-comment">// 载入和解析的时间</span>
+      },
+      <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,<span class="hljs-comment">//是否失败</span>
+      <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,<span class="hljs-comment">// 处理模块时错误的数量</span>
+      <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,<span class="hljs-comment">// 处理模块时警告的数量</span>
+      <span class="hljs-attr">"assets"</span>: [],<span class="hljs-comment">//在哪个资源内</span>
+      <span class="hljs-attr">"reasons"</span>: [
+        {
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">// 模块的 ID</span>
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,<span class="hljs-comment">// 模块的地址</span>
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/index.js"</span>,<span class="hljs-comment">// 所基于模块的相对地址 context</span>
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"cjs require"</span>,<span class="hljs-comment">// 使用的请求的种类 (require或import)</span>
+          <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./hello"</span>,<span class="hljs-comment">// 用来 `import` 或者 `require` 的源字符串</span>
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"1:12-30"</span> <span class="hljs-comment">// 导致这个被加入依赖图标的代码行数</span>
+        }
+      ],
+      <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,<span class="hljs-comment">//提供的导出对象</span>
+      <span class="hljs-attr">"optimizationBailout"</span>: [],<span class="hljs-comment">//失败时的优化</span>
+      <span class="hljs-attr">"depth"</span>: <span class="hljs-number">1</span>,<span class="hljs-comment">//模块深度</span>
+      <span class="hljs-attr">"source"</span>: <span class="hljs-string">"module.exports = 'hello';"</span><span class="hljs-comment">// 字符串化的输入</span>
+    },
+    {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"index"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"index2"</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">137</span>,
+      <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"prefetched"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"issuer"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"issuerId"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"issuerName"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"issuerPath"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"profile"</span>: {
+        <span class="hljs-attr">"factory"</span>: <span class="hljs-number">18</span>,
+        <span class="hljs-attr">"building"</span>: <span class="hljs-number">14</span>
+      },
+      <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"assets"</span>: [],
+      <span class="hljs-attr">"reasons"</span>: [
+        {
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"module"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"single entry"</span>,
+          <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"main"</span>
+        }
+      ],
+      <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"optimizationBailout"</span>: [],
+      <span class="hljs-attr">"depth"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"source"</span>: <span class="hljs-string">"let hello = require('./hello');\r\nimport(/* webpackChunkName: \"lazy\" */'./lazy').then(result=&gt;{\r\n    console.log(hello,resut.default)\r\n});"</span>
+    },
+    {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/lazy.js"</span>,
+      <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\lazy.js"</span>,
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/lazy.js"</span>,
+      <span class="hljs-attr">"index"</span>: <span class="hljs-number">2</span>,
+      <span class="hljs-attr">"index2"</span>: <span class="hljs-number">2</span>,
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">24</span>,
+      <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"prefetched"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"lazy"</span>
+      ],
+      <span class="hljs-attr">"issuer"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+      <span class="hljs-attr">"issuerId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"issuerName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"issuerPath"</span>: [
+        {
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">18</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">14</span>
+          }
+        }
+      ],
+      <span class="hljs-attr">"profile"</span>: {
+        <span class="hljs-attr">"factory"</span>: <span class="hljs-number">4</span>,
+        <span class="hljs-attr">"building"</span>: <span class="hljs-number">2</span>
+      },
+      <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"assets"</span>: [],
+      <span class="hljs-attr">"reasons"</span>: [
+        {
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\vipdata\\vipproject\\webpack-source\\src\\index.js"</span>,
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"import()"</span>,
+          <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./lazy"</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"2:0-46"</span>
+        }
+      ],
+      <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"optimizationBailout"</span>: [],
+      <span class="hljs-attr">"depth"</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">"source"</span>: <span class="hljs-string">"module.exports = 'lazy';"</span>
+    }
+  ],
+  <span class="hljs-attr">"filteredModules"</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">"logging"</span>: {
+    <span class="hljs-attr">"webpack.buildChunkGraph.visitModules"</span>: {
+      <span class="hljs-attr">"entries"</span>: [],
+      <span class="hljs-attr">"filteredEntries"</span>: <span class="hljs-number">5</span>,
+      <span class="hljs-attr">"debug"</span>: <span class="hljs-literal">false</span>
+    }
+  },
+  <span class="hljs-attr">"children"</span>: []
+}
+</code></pre>
+<h2 id="t74. 主要工作流程">4. 主要工作流程 <a href="#t74. 主要工作流程"> # </a></h2>
+<ul>
+<li>Webpack 的运行流程是一个串行的过程，从启动到结束会依次执行以下流程：</li>
+<li><code>初始化参数</code>：从配置文件和 Shell 语句中读取与合并参数，得出最终的参数；</li>
+<li>开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的run方法开始执行编译；
+确定入口：根据配置中的 entry 找出所有的入口文件</li>
+<li>编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行编译，再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理；</li>
+<li>完成模块编译：在经过第4步使用 Loader 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系；</li>
+<li>输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk，再把每个 Chunk 转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会；</li>
+<li>输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统。</li>
+<li>在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/webpackcode.jpg" alt="webpackcode"></p>
+
+    

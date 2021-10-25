@@ -1,0 +1,692 @@
+
+        <h2 id="t01. monorepo管理">1. monorepo管理 <a href="#t01. monorepo管理"> # </a></h2>
+<ul>
+<li>Monorepo 是管理项目代码的一个方式，指在一个项目仓库(repo)中管理多个模块/包(package)</li>
+<li>monorepo 最主要的好处是统一的工作流和代码共享</li>
+<li><a href="https://github.com/lerna/lerna">Lerna</a>是一个管理多个 npm 模块的工具,优化维护多包的工作流，解决多个包互相依赖，且发布需要手动维护多个包的问题</li>
+<li><a href="https://classic.yarnpkg.com/en/docs/cli/">yarn</a></li>
+</ul>
+<h3 id="t11.1 MultiRepo">1.1 MultiRepo <a href="#t11.1 MultiRepo"> # </a></h3>
+<h4 id="t21.1.1 优点">1.1.1 优点 <a href="#t21.1.1 优点"> # </a></h4>
+<ul>
+<li>各模块的管理自由度较高，可以自行选择构建工具、依赖管理、单元测试等配套设施</li>
+<li>各模块的体积也不会太大</li>
+</ul>
+<h4 id="t31.1.2 缺点">1.1.2 缺点 <a href="#t31.1.2 缺点"> # </a></h4>
+<ul>
+<li>仓库分散不好找，分支管理混乱</li>
+<li>版本更新繁琐，如果公共模块发生了变化，需要对所有的模块进行依赖更新</li>
+<li>CHANGELOG不好梳理，无法自动关联各个模块的变动</li>
+</ul>
+<h3 id="t41.2 MonoRepo">1.2 MonoRepo <a href="#t41.2 MonoRepo"> # </a></h3>
+<h4 id="t51.2.1 优点">1.2.1 优点 <a href="#t51.2.1 优点"> # </a></h4>
+<ul>
+<li>一个仓库维护多个模块，方便好找</li>
+<li>方便版本管理和依赖管理，模块之间的引用调试都比较方便</li>
+<li>方便统一生成CHANGELOG</li>
+</ul>
+<h4 id="t61.2.2 缺点">1.2.2 缺点 <a href="#t61.2.2 缺点"> # </a></h4>
+<ul>
+<li>统一构建工具, 需要构建工具能构建所的模块</li>
+<li>仓库体积变大</li>
+</ul>
+<h3 id="t71.3 使用lerna">1.3 使用lerna <a href="#t71.3 使用lerna"> # </a></h3>
+<h4 id="t81.3.1 安装lerna">1.3.1 安装lerna <a href="#t81.3.1 安装lerna"> # </a></h4>
+<pre><code class="lang-js">npm i lerna -g
+</code></pre>
+<h4 id="t91.3.2 初始化项目">1.3.2 初始化项目 <a href="#t91.3.2 初始化项目"> # </a></h4>
+<pre><code class="lang-js">mkdir lerna-project
+cd lerna-project
+
+lerna init
+lerna notice cli v4<span class="hljs-number">.0</span><span class="hljs-number">.0</span>
+lerna info Initializing Git repository
+lerna info Creating package.json
+lerna info Creating lerna.json
+lerna info Creating packages directory
+lerna success Initialized Lerna files
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/1609568698164" alt="lerna-init"></p>
+<h4 id="t101.3.3 package.json">1.3.3 package.json <a href="#t101.3.3 package.json"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"root"</span>,
+  <span class="hljs-attr">"private"</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 私有的,用来管理整个项目,不会被发布到npm</span>
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"lerna"</span>: <span class="hljs-string">"^4.0.0"</span>
+  }
+}
+</code></pre>
+<h4 id="t111.3.4 lerna.json">1.3.4 lerna.json <a href="#t111.3.4 lerna.json"> # </a></h4>
+<p>lerna.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"packages"</span>: [
+    <span class="hljs-string">"packages/*"</span>
+  ],
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>
+}
+
+</code></pre>
+<h3 id="t121.4 yarn workspace">1.4 yarn workspace <a href="#t121.4 yarn workspace"> # </a></h3>
+<ul>
+<li><code>yarn workspace</code>允许我们使用 <code>monorepo</code> 的形式来管理项目</li>
+<li>在安装 node_modules 的时候它不会安装到每个子项目的 node_modules 里面，而是直接安装到根目录下面，这样每个子项目都可以读取到根目录的 node_modules</li>
+<li>整个项目只有根目录下面会有一份 <code>yarn.lock</code> 文件。子项目也会被 <code>link</code> 到 <code>node_modules</code> 里面，这样就允许我们就可以直接用 import 导入对应的项目</li>
+<li><code>yarn.lock</code>文件是自动生成的,也完全Yarn来处理.<code>yarn.lock</code>锁定你安装的每个依赖项的版本，这可以确保你不会意外获得不良依赖</li>
+</ul>
+<h4 id="t131.4.1 开启workspace">1.4.1 开启workspace <a href="#t131.4.1 开启workspace"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+  "name": "root",
+  "private": true, 
+<span class="hljs-addition">+  "workspaces": [</span>
+<span class="hljs-addition">+    "packages/*"</span>
+<span class="hljs-addition">+  ],</span>
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  }
+}
+</code></pre>
+<h4 id="t141.3.2 创建子项目">1.3.2 创建子项目 <a href="#t141.3.2 创建子项目"> # </a></h4>
+<ul>
+<li>react是React核心，包含了<code>React.createElement</code>等代码</li>
+<li>shared 存放各个模块公用的全局变量和方法</li>
+<li>scheduler 实现了优先级调度功能</li>
+<li>react-reconciler 提供了协调器的功能</li>
+<li>react-dom 提供了渲染到DOM的功能</li>
+</ul>
+<pre><code class="lang-js">lerna create react
+lerna create shared
+lerna create scheduler
+lerna create react-reconciler
+lerna create react-dom
+</code></pre>
+<h4 id="t151.3.3 添加依赖">1.3.3 添加依赖 <a href="#t151.3.3 添加依赖"> # </a></h4>
+<ul>
+<li><a href="https://classic.yarnpkg.com/en/docs/cli">yarnpkg</a></li>
+<li><a href="https://github.com/lerna/lerna#readme">lerna</a></li>
+</ul>
+<h5 id="t161.3.3.1 设置加速镜像">1.3.3.1 设置加速镜像 <a href="#t161.3.3.1 设置加速镜像"> # </a></h5>
+<pre><code class="lang-js">yarn config <span class="hljs-keyword">get</span> registry
+yarn config <span class="hljs-keyword">set</span> registry http://registry.npm.taobao.org/
+yarn config <span class="hljs-keyword">set</span> registry http://registry.npmjs.org/
+</code></pre>
+<h4 id="t171.3.4 常用命令">1.3.4 常用命令 <a href="#t171.3.4 常用命令"> # </a></h4>
+<h5 id="t181.3.4.1 根空间添加依赖">1.3.4.1 根空间添加依赖 <a href="#t181.3.4.1 根空间添加依赖"> # </a></h5>
+<pre><code class="lang-js">yarn add chalk --ignore-workspace-root-check
+</code></pre>
+<h5 id="t191.3.4.2 给某个项目添加依赖">1.3.4.2 给某个项目添加依赖 <a href="#t191.3.4.2 给某个项目添加依赖"> # </a></h5>
+<pre><code class="lang-js">yarn workspace react add object-assign
+</code></pre>
+<h5 id="t201.3.4.3 安装和link">1.3.4.3 安装和link <a href="#t201.3.4.3 安装和link"> # </a></h5>
+<pre><code class="lang-js">yarn install
+lerna bootstrap --npm-client yarn --use-workspaces
+</code></pre>
+<h5 id="t211.3.4.4 其它命令">1.3.4.4 其它命令 <a href="#t211.3.4.4 其它命令"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">作用</th>
+<th style="text-align:left">命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">查看工作空间信息</td>
+<td style="text-align:left">yarn workspaces info</td>
+</tr>
+<tr>
+<td style="text-align:left">删除所有的 node_modules</td>
+<td style="text-align:left">lerna clean 等于 yarn workspaces run clean</td>
+</tr>
+<tr>
+<td style="text-align:left">重新获取所有的 node_modules</td>
+<td style="text-align:left">yarn install --force</td>
+</tr>
+<tr>
+<td style="text-align:left">查看缓存目录</td>
+<td style="text-align:left">yarn cache dir</td>
+</tr>
+<tr>
+<td style="text-align:left">清除本地缓存</td>
+<td style="text-align:left">yarn cache clean</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t222. 调试源码">2. 调试源码 <a href="#t222. 调试源码"> # </a></h2>
+<h3 id="t232.1 下载代码">2.1 下载代码 <a href="#t232.1 下载代码"> # </a></h3>
+<pre><code class="lang-js">git clone https:<span class="hljs-comment">//gitee.com/mirrors/react.git</span>
+
+</code></pre>
+<h3 id="t242.2 编译源码">2.2 编译源码 <a href="#t242.2 编译源码"> # </a></h3>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/how-to-contribute.html#development-workflow">development-workflow</a></li>
+</ul>
+<pre><code class="lang-js">cd react
+yarn build react,shared,scheduler,react-reconciler,react-dom --type=NODE
+cd build/node_modules/react
+yarn link
+cd build/node_modules/react-dom
+yarn link
+</code></pre>
+<pre><code class="lang-js">create-react-app debug-react17
+cd debug-react17
+yarn link react react-dom
+</code></pre>
+<h2 id="t253. setState的更新是同步还是异步的?">3. setState的更新是同步还是异步的? <a href="#t253. setState的更新是同步还是异步的?"> # </a></h2>
+<h3 id="t263.1 setState">3.1 setState <a href="#t263.1 setState"> # </a></h3>
+<ul>
+<li>在开发中我们并不能直接通过修改state的值来让界面发生更新<ul>
+<li>因为修改了state之后，希望React根据最新的State来重新渲染界面，但是这种方式的修改React并不知道数据发生了变化</li>
+<li>React并没有实现类似于Vue2中的Object.defineProperty或者Vue3中的Proxy的方式来监听数据的变化</li>
+<li>必须通过setState来告知React数据已经发生了变化</li>
+</ul>
+</li>
+</ul>
+<h3 id="t273.2 异步更新">3.2 异步更新 <a href="#t273.2 异步更新"> # </a></h3>
+<ul>
+<li>React在执行setState的时候会把更新的内容放入队列</li>
+<li>在事件执行结束后会计算state的数据，然后执行回调</li>
+<li>最后根据最新的state计算虚拟DOM更新真实DOM</li>
+<li>优点<ul>
+<li>保持内部一致性。如果改为同步更新的方式，尽管 setState 变成了同步，但是 props 不是</li>
+<li>为后续的架构升级启用并发更新,React 会在 setState 时，根据它们的数据来源分配不同的优先级，这些数据来源有：事件回调句柄、动画效果等，再根据优先级并发处理，提升渲染性能</li>
+<li>setState设计为异步，可以显著的提升性能</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+  state = {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>}
+  buttonClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'buttonClick'</span>);
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state.number);
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state.number);
+  }
+  divClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'divClick'</span>);
+  }
+  render(){
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.divClick}</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"counter"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.state.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.buttonClick}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span>/&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t283.3 回调执行">3.3 回调执行 <a href="#t283.3 回调执行"> # </a></h3>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+class Counter extends React.Component{
+  state = {number:0}
+  buttonClick = ()=&gt;{
+    console.log('buttonClick');
+<span class="hljs-addition">+   this.setState({number:this.state.number+1},()=&gt;{</span>
+<span class="hljs-addition">+     console.log(this.state.number);</span>
+<span class="hljs-addition">+   }); </span>
+<span class="hljs-addition">+   this.setState({number:this.state.number+1},()=&gt;{</span>
+<span class="hljs-addition">+     console.log(this.state.number);</span>
+<span class="hljs-addition">+   });</span>
+  }
+  divClick = ()=&gt;{
+    console.log('divClick');
+  }
+  render(){
+    return (
+      &lt;div onClick={this.divClick} id="counter"&gt;
+        &lt;p&gt;{this.state.number}&lt;/p&gt;
+        &lt;button onClick={this.buttonClick}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+ReactDOM.render(&lt;Counter/&gt;,document.getElementById('root'));
+</code></pre>
+<h3 id="t293.4 函数更新">3.4 函数更新 <a href="#t293.4 函数更新"> # </a></h3>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+class Counter extends React.Component{
+  state = {number:0}
+  buttonClick = ()=&gt;{
+    console.log('buttonClick');
+<span class="hljs-addition">+   this.setState((state)=&gt;({number:state.number+1}),()=&gt;{</span>
+<span class="hljs-addition">+     console.log(this.state.number);</span>
+<span class="hljs-addition">+   });</span>
+<span class="hljs-addition">+  </span>
+<span class="hljs-addition">+   this.setState((state)=&gt;({number:state.number+1}),()=&gt;{</span>
+<span class="hljs-addition">+     console.log(this.state.number);</span>
+<span class="hljs-addition">+   });</span>
+
+  }
+  divClick = ()=&gt;{
+    console.log('divClick');
+  }
+  render(){
+    return (
+      &lt;div onClick={this.divClick} id="counter"&gt;
+        &lt;p&gt;{this.state.number}&lt;/p&gt;
+        &lt;button onClick={this.buttonClick}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+ReactDOM.render(&lt;Counter/&gt;,document.getElementById('root'));
+</code></pre>
+<h3 id="t303.5 同步执行">3.5 同步执行 <a href="#t303.5 同步执行"> # </a></h3>
+<ul>
+<li>在React的生命周期函数和合成事件中可以修改批量更新的变量<code>isBatchingUpdates</code></li>
+<li>可以设置为批量，其它地方如<code>addEventListener</code>、<code>setTimeout和setInterval</code>里无法设置</li>
+</ul>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+class Counter extends React.Component{
+  state = {number:0}
+  buttonClick = ()=&gt;{
+    console.log('buttonClick');// 2234
+    this.setState((state)=&gt;({number:state.number+1}),()=&gt;{
+      console.log(this.state.number);
+    });
+
+    this.setState((state)=&gt;({number:state.number+1}),()=&gt;{
+      console.log(this.state.number);
+    });
+<span class="hljs-addition">+   setTimeout(()=&gt;{</span>
+<span class="hljs-addition">+     this.setState((state)=&gt;({number:state.number+1}),()=&gt;{</span>
+<span class="hljs-addition">+       console.log(this.state.number);</span>
+<span class="hljs-addition">+     });</span>
+<span class="hljs-addition">+    </span>
+<span class="hljs-addition">+     this.setState((state)=&gt;({number:state.number+1}),()=&gt;{</span>
+<span class="hljs-addition">+       console.log(this.state.number);</span>
+<span class="hljs-addition">+     });</span>
+    });
+
+  }
+  divClick = ()=&gt;{
+    console.log('divClick');
+  }
+  render(){
+    return (
+      &lt;div onClick={this.divClick} id="counter"&gt;
+        &lt;p&gt;{this.state.number}&lt;/p&gt;
+        &lt;button onClick={this.buttonClick}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+ReactDOM.render(&lt;Counter/&gt;,document.getElementById('root'));
+
+</code></pre>
+<h3 id="t313.6 强行批量更新">3.6 强行批量更新 <a href="#t313.6 强行批量更新"> # </a></h3>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+class Counter extends React.Component{
+  state = {number:0}
+  buttonClick = ()=&gt;{
+    console.log('buttonClick');// 2234
+    setTimeout(()=&gt;{
+<span class="hljs-addition">+     ReactDOM.unstable_batchedUpdates(()=&gt;{</span>
+<span class="hljs-addition">+       this.setState((state)=&gt;({number:state.number+1}));</span>
+<span class="hljs-addition">+       console.log(this.state.number);</span>
+<span class="hljs-addition">+     });</span>
+    });
+  }
+  divClick = ()=&gt;{
+    console.log('divClick');
+  }
+  render(){
+    return (
+      &lt;div onClick={this.divClick} id="counter"&gt;
+        &lt;p&gt;{this.state.number}&lt;/p&gt;
+        &lt;button onClick={this.buttonClick}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    )
+  }
+}
+ReactDOM.render(&lt;Counter/&gt;,document.getElementById('root'));
+</code></pre>
+<h3 id="t323.7 并发更新">3.7 并发更新 <a href="#t323.7 并发更新"> # </a></h3>
+<ul>
+<li>启用<code>concurrent</code>模式</li>
+</ul>
+<pre><code class="lang-diff"><span class="hljs-addition">+ReactDOM.unstable_createRoot(document.getElementById('root')).render(&lt;Counter/&gt;);</span>
+<span class="hljs-addition">+ReactDOM.createRoot(document.getElementById('root')).render(&lt;Counter/&gt;);</span>
+</code></pre>
+<h2 id="t334.实现setState">4.实现setState <a href="#t334.实现setState"> # </a></h2>
+<p><img src="https://img.zhufengpeixun.com/d6da53bd57c6623a994ea922a88becfe" alt="d6da53bd57c6623a994ea922a88becfe"></p>
+<h3 id="t344.1 src\index.js">4.1 src\index.js <a href="#t344.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { HostRoot, ClassComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactWorkTags'</span>;
+<span class="hljs-keyword">import</span> { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactFiberClassComponent'</span>;
+<span class="hljs-keyword">import</span> { NoMode, ConcurrentMode } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactTypeOfMode'</span>;
+<span class="hljs-keyword">import</span> { batchedUpdates } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactFiberWorkLoop'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">constructor</span>() {
+    <span class="hljs-keyword">super</span>();
+    <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> };
+  }
+  onClick = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">number</span>: <span class="hljs-keyword">this</span>.state.number + <span class="hljs-number">1</span> });
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setState1'</span>, <span class="hljs-keyword">this</span>.state.number);
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">number</span>: <span class="hljs-keyword">this</span>.state.number + <span class="hljs-number">1</span> });
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setState2'</span>, <span class="hljs-keyword">this</span>.state.number);
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">number</span>: <span class="hljs-keyword">this</span>.state.number + <span class="hljs-number">1</span> });
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout setState1'</span>, <span class="hljs-keyword">this</span>.state.number);
+      <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">number</span>: <span class="hljs-keyword">this</span>.state.number + <span class="hljs-number">1</span> });
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout setState2'</span>, <span class="hljs-keyword">this</span>.state.number);
+    });
+  }
+  render() {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'render'</span>, <span class="hljs-keyword">this</span>.state.number);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.state.number;
+  }
+}
+<span class="hljs-keyword">let</span> counterInstance = <span class="hljs-keyword">new</span> Counter();
+<span class="hljs-keyword">let</span> mode = ConcurrentMode;
+<span class="hljs-keyword">let</span> rootFiber = { <span class="hljs-attr">tag</span>: HostRoot, <span class="hljs-attr">updateQueue</span>: [], mode }
+<span class="hljs-keyword">let</span> counterFiber = { <span class="hljs-attr">tag</span>: ClassComponent, <span class="hljs-attr">updateQueue</span>: [], mode }
+counterFiber.stateNode = counterInstance;
+counterInstance._reactInternals = counterFiber;
+counterFiber.return = rootFiber;
+rootFiber.child = counterFiber;
+<span class="hljs-comment">//合成事件</span>
+<span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,(nativeEvent)=&gt;{
+  <span class="hljs-keyword">let</span> syntheticEvent = {nativeEvent};
+  batchedUpdates(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>counterInstance.onClick(syntheticEvent));
+});
+<span class="hljs-comment">//1.同步不批量</span>
+<span class="hljs-comment">//counterInstance.onClick();</span>
+<span class="hljs-comment">//2.同步批量</span>
+<span class="hljs-comment">//batchedUpdates(counterInstance.onClick);</span>
+<span class="hljs-comment">//3.异步批量</span>
+<span class="hljs-comment">//counterInstance.onClick();</span>
+</code></pre>
+<h3 id="t354.2 src\ReactWorkTags.js">4.2 src\ReactWorkTags.js <a href="#t354.2 src\ReactWorkTags.js"> # </a></h3>
+<p>src\ReactWorkTags.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> HostRoot = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ClassComponent = <span class="hljs-number">1</span>;
+</code></pre>
+<h3 id="t364.3 src\ReactTypeOfMode.js">4.3 src\ReactTypeOfMode.js <a href="#t364.3 src\ReactTypeOfMode.js"> # </a></h3>
+<p>src\ReactTypeOfMode.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> NoMode = <span class="hljs-number">0b00000</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ConcurrentMode = <span class="hljs-number">0b00100</span>;
+</code></pre>
+<h3 id="t374.4 src\ReactFiberClassComponent.js">4.4 src\ReactFiberClassComponent.js <a href="#t374.4 src\ReactFiberClassComponent.js"> # </a></h3>
+<p>src\ReactFiberClassComponent.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {scheduleUpdateOnFiber} <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactFiberWorkLoop'</span>;
+<span class="hljs-keyword">let</span> classComponentUpdater = {
+    <span class="hljs-attr">enqueueSetState</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">inst, payload</span>) </span>{
+        <span class="hljs-keyword">const</span> fiber = <span class="hljs-keyword">get</span>(inst);
+        const update = createUpdate();
+        update.payload = payload;
+        enqueueUpdate(fiber, update);
+        scheduleUpdateOnFiber(fiber);
+    }
+}
+function <span class="hljs-keyword">get</span>(inst){
+    <span class="hljs-keyword">return</span> inst._reactInternals;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createUpdate</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">return</span> {};
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">enqueueUpdate</span>(<span class="hljs-params">fiber, update</span>) </span>{
+    <span class="hljs-keyword">var</span> updateQueue = fiber.updateQueue;
+    updateQueue.push(update);
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>.updater = classComponentUpdater;
+    }
+    setState(partialState) {
+        <span class="hljs-keyword">this</span>.updater.enqueueSetState(<span class="hljs-keyword">this</span>, partialState);
+    }
+}
+</code></pre>
+<h3 id="t384.5 src\ReactFiberWorkLoop.js">4.5 src\ReactFiberWorkLoop.js <a href="#t384.5 src\ReactFiberWorkLoop.js"> # </a></h3>
+<p>src\ReactFiberWorkLoop.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">import</span> { ClassComponent, HostRoot } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactWorkTags'</span>;
+<span class="hljs-keyword">import</span> {NoMode,ConcurrentMode} <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactTypeOfMode'</span>
+<span class="hljs-keyword">let</span> syncQueue;
+<span class="hljs-keyword">let</span> NoLanePriority = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> SyncLanePriority = <span class="hljs-number">12</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> NoContext = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> BatchedContext = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> executionContext = NoContext;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">markUpdateLaneFromFiberToRoot</span>(<span class="hljs-params">fiber</span>) </span>{
+    <span class="hljs-keyword">let</span> parent = fiber.return;
+    <span class="hljs-keyword">while</span> (parent) {
+        fiber = parent;
+        parent = parent.return;
+    }
+    <span class="hljs-keyword">if</span> (fiber.tag === HostRoot) {
+        <span class="hljs-keyword">return</span> fiber;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getExecutionContext</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> executionContext;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">batchedUpdates</span>(<span class="hljs-params">fn</span>) </span>{
+    <span class="hljs-keyword">const</span> prevExecutionContext = executionContext;
+    executionContext |= BatchedContext;
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">return</span> fn();
+    } <span class="hljs-keyword">finally</span> {
+      executionContext = prevExecutionContext;
+      <span class="hljs-keyword">if</span> (executionContext === NoContext) {
+        flushSyncCallbackQueue();
+      }
+    }
+  }
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scheduleUpdateOnFiber</span>(<span class="hljs-params">fiber</span>) </span>{
+    <span class="hljs-keyword">let</span> root = markUpdateLaneFromFiberToRoot(fiber);
+    ensureRootIsScheduled(root);
+    <span class="hljs-keyword">if</span> (executionContext === NoContext &amp;&amp; (fiber.mode &amp; ConcurrentMode) === NoMode) {
+        flushSyncCallbackQueue();
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ensureRootIsScheduled</span>(<span class="hljs-params">root</span>) </span>{
+    <span class="hljs-keyword">let</span> existingCallbackPriority = root.callbackPriority;
+    <span class="hljs-keyword">let</span> newCallbackPriority = SyncLanePriority;
+    <span class="hljs-keyword">if</span> (existingCallbackPriority === newCallbackPriority) {
+        <span class="hljs-keyword">return</span>;
+    }
+    scheduleSyncCallback(performSyncWorkOnRoot.bind(<span class="hljs-literal">null</span>, root));
+    queueMicrotask(flushSyncCallbackQueue);
+    root.callbackPriority = newCallbackPriority;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">flushSyncCallbackQueue</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span>(syncQueue){
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; syncQueue.length; i++) {
+            <span class="hljs-keyword">let</span> callback = syncQueue[i];
+            <span class="hljs-keyword">do</span> {
+                callback = callback();
+            } <span class="hljs-keyword">while</span> (callback);
+        }
+        syncQueue = <span class="hljs-literal">null</span>;
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scheduleSyncCallback</span>(<span class="hljs-params">callback</span>) </span>{
+    <span class="hljs-keyword">if</span> (!syncQueue) {
+        syncQueue = [callback];
+    } <span class="hljs-keyword">else</span> {
+        syncQueue.push(callback);
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">performSyncWorkOnRoot</span>(<span class="hljs-params">workInProgress</span>) </span>{
+    <span class="hljs-keyword">let</span> root = workInProgress;
+    <span class="hljs-keyword">while</span> (workInProgress) {
+        <span class="hljs-keyword">if</span> (workInProgress.tag === ClassComponent) {
+            <span class="hljs-keyword">let</span> inst = workInProgress.stateNode;
+            inst.state = processUpdateQueue(inst,workInProgress);
+            workInProgress.stateNode.render();
+        }
+        workInProgress = workInProgress.child;
+    }
+    commitRoot(root);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processUpdateQueue</span>(<span class="hljs-params">inst,workInProgress</span>)</span>{
+    <span class="hljs-keyword">return</span>  workInProgress.updateQueue.reduce(<span class="hljs-function">(<span class="hljs-params">state, update</span>) =&gt;</span> ({ ...state, ...update.payload }), inst.state);;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">commitRoot</span>(<span class="hljs-params">root</span>)</span>{
+    root.callbackPriority = NoLanePriority;
+}
+</code></pre>
+<h2 id="t395.React中的优先级">5.React中的优先级 <a href="#t395.React中的优先级"> # </a></h2>
+<ul>
+<li>不同事件产生的更新优先级不同</li>
+</ul>
+<h3 id="t405.1 React中的优先级">5.1 React中的优先级 <a href="#t405.1 React中的优先级"> # </a></h3>
+<ul>
+<li>事件优先级：按照用户事件的交互紧急程度，划分的优先级</li>
+<li>更新优先级：事件导致React产生的更新对象（update）的优先级（update.lane）</li>
+<li>任务优先级：产生更新对象之后，React去执行一个更新任务，这个任务所持有的优先级</li>
+<li>调度优先级：Scheduler依据React更新任务生成一个调度任务，这个调度任务所持有的优先级</li>
+</ul>
+<blockquote>
+<p>前三者属于React的优先级机制，第四个属于<code>scheduler</code>的优先级机制</p>
+</blockquote>
+<h3 id="t415.2 事件优先级">5.2 事件优先级 <a href="#t415.2 事件优先级"> # </a></h3>
+<ul>
+<li>离散事件（DiscreteEvent）：click、keydown等，这些事件的触发不是连续的，优先级为 0</li>
+<li>用户阻塞事件（UserBlockingEvent）：drag、scroll、mouseover等，特点是连续触发，阻塞渲染，优先级为1</li>
+<li>连续事件（ContinuousEvent）：canplay、error，优先级最高，为2</li>
+</ul>
+<p>src\react\packages\shared\ReactTypes.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> DiscreteEvent = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> UserBlockingEvent = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ContinuousEvent = <span class="hljs-number">2</span>;
+</code></pre>
+<p>src\react\packages\scheduler\src\Scheduler.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unstable_runWithPriority</span>(<span class="hljs-params">priorityLevel, eventHandler</span>) </span>{
+  <span class="hljs-keyword">switch</span> (priorityLevel) {
+    <span class="hljs-keyword">case</span> ImmediatePriority:
+    <span class="hljs-keyword">case</span> UserBlockingPriority:
+    <span class="hljs-keyword">case</span> NormalPriority:
+    <span class="hljs-keyword">case</span> LowPriority:
+    <span class="hljs-keyword">case</span> IdlePriority:
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">default</span>:
+      priorityLevel = NormalPriority;
+  }
+  <span class="hljs-keyword">var</span> previousPriorityLevel = currentPriorityLevel;
+  currentPriorityLevel = priorityLevel;
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">return</span> eventHandler();
+  } <span class="hljs-keyword">finally</span> {
+    currentPriorityLevel = previousPriorityLevel;
+  }
+}
+</code></pre>
+<h3 id="t425.3 更新优先级">5.3 更新优先级 <a href="#t425.3 更新优先级"> # </a></h3>
+<ul>
+<li>setState本质上是调用enqueueSetState,生成一个update对象，这时候会计算它的更新优先级，即update.lane</li>
+<li>首先找出Scheduler中记录的优先级<code>schedulerPriority</code>，然后计算更新优先级</li>
+</ul>
+<p>src\react\packages\react-reconciler\src\ReactFiberLane.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> TotalLanes = <span class="hljs-number">31</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> NoLanes: Lanes = <span class="hljs-comment">/*                        */</span> <span class="hljs-number">0b0000000000000000000000000000000</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> NoLane: Lane = <span class="hljs-comment">/*                          */</span> <span class="hljs-number">0b0000000000000000000000000000000</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SyncLane: Lane = <span class="hljs-comment">/*                        */</span> <span class="hljs-number">0b0000000000000000000000000000001</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SyncBatchedLane: Lane = <span class="hljs-comment">/*                 */</span> <span class="hljs-number">0b0000000000000000000000000000010</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> InputDiscreteHydrationLane: Lane = <span class="hljs-comment">/*      */</span> <span class="hljs-number">0b0000000000000000000000000000100</span>;
+<span class="hljs-keyword">const</span> InputDiscreteLanes: Lanes = <span class="hljs-comment">/*                    */</span> <span class="hljs-number">0b0000000000000000000000000011000</span>;
+
+<span class="hljs-keyword">const</span> InputContinuousHydrationLane: Lane = <span class="hljs-comment">/*           */</span> <span class="hljs-number">0b0000000000000000000000000100000</span>;
+<span class="hljs-keyword">const</span> InputContinuousLanes: Lanes = <span class="hljs-comment">/*                  */</span> <span class="hljs-number">0b0000000000000000000000011000000</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> DefaultHydrationLane: Lane = <span class="hljs-comment">/*            */</span> <span class="hljs-number">0b0000000000000000000000100000000</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> DefaultLanes: Lanes = <span class="hljs-comment">/*                   */</span> <span class="hljs-number">0b0000000000000000000111000000000</span>;
+
+<span class="hljs-keyword">const</span> TransitionHydrationLane: Lane = <span class="hljs-comment">/*                */</span> <span class="hljs-number">0b0000000000000000001000000000000</span>;
+<span class="hljs-keyword">const</span> TransitionLanes: Lanes = <span class="hljs-comment">/*                       */</span> <span class="hljs-number">0b0000000001111111110000000000000</span>;
+
+<span class="hljs-keyword">const</span> RetryLanes: Lanes = <span class="hljs-comment">/*                            */</span> <span class="hljs-number">0b0000011110000000000000000000000</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SomeRetryLane: Lanes = <span class="hljs-comment">/*                  */</span> <span class="hljs-number">0b0000010000000000000000000000000</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SelectiveHydrationLane: Lane = <span class="hljs-comment">/*          */</span> <span class="hljs-number">0b0000100000000000000000000000000</span>;
+
+<span class="hljs-keyword">const</span> NonIdleLanes = <span class="hljs-comment">/*                                 */</span> <span class="hljs-number">0b0000111111111111111111111111111</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> IdleHydrationLane: Lane = <span class="hljs-comment">/*               */</span> <span class="hljs-number">0b0001000000000000000000000000000</span>;
+<span class="hljs-keyword">const</span> IdleLanes: Lanes = <span class="hljs-comment">/*                             */</span> <span class="hljs-number">0b0110000000000000000000000000000</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> OffscreenLane: Lane = <span class="hljs-comment">/*                   */</span> <span class="hljs-number">0b1000000000000000000000000000000</span>;
+
+<span class="hljs-keyword">let</span> currentUpdateLanePriority = NoLanePriority;
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getCurrentUpdateLanePriority</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> currentUpdateLanePriority;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setCurrentUpdateLanePriority</span>(<span class="hljs-params">newLanePriority</span>) </span>{
+  currentUpdateLanePriority = newLanePriority;
+}
+</code></pre>
+<h3 id="t435.4 任务优先级">5.4 任务优先级 <a href="#t435.4 任务优先级"> # </a></h3>
+<ul>
+<li>update会被一个React的更新任务执行</li>
+<li>任务优先级被用来区分多个更新任务的紧急程度</li>
+<li>收敛同等优先级的任务调度</li>
+<li>高优先级任务及时响应</li>
+</ul>
+<p>src\react\packages\react-reconciler\src\ReactFiberLane.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SyncLanePriority: LanePriority = <span class="hljs-number">15</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SyncBatchedLanePriority: LanePriority = <span class="hljs-number">14</span>;
+
+<span class="hljs-keyword">const</span> InputDiscreteHydrationLanePriority: LanePriority = <span class="hljs-number">13</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> InputDiscreteLanePriority: LanePriority = <span class="hljs-number">12</span>;
+
+<span class="hljs-keyword">const</span> InputContinuousHydrationLanePriority: LanePriority = <span class="hljs-number">11</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> InputContinuousLanePriority: LanePriority = <span class="hljs-number">10</span>;
+
+<span class="hljs-keyword">const</span> DefaultHydrationLanePriority: LanePriority = <span class="hljs-number">9</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> DefaultLanePriority: LanePriority = <span class="hljs-number">8</span>;
+
+<span class="hljs-keyword">const</span> TransitionHydrationPriority: LanePriority = <span class="hljs-number">7</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> TransitionPriority: LanePriority = <span class="hljs-number">6</span>;
+
+<span class="hljs-keyword">const</span> RetryLanePriority: LanePriority = <span class="hljs-number">5</span>;
+
+<span class="hljs-keyword">const</span> SelectiveHydrationLanePriority: LanePriority = <span class="hljs-number">4</span>;
+
+<span class="hljs-keyword">const</span> IdleHydrationLanePriority: LanePriority = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">const</span> IdleLanePriority: LanePriority = <span class="hljs-number">2</span>;
+
+<span class="hljs-keyword">const</span> OffscreenLanePriority: LanePriority = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> NoLanePriority: LanePriority = <span class="hljs-number">0</span>;
+</code></pre>
+<h3 id="t445.5 调度优先级">5.5 调度优先级 <a href="#t445.5 调度优先级"> # </a></h3>
+<ul>
+<li>一旦任务被调度，那么它就会进入scheduler</li>
+<li>在Scheduler中，这个任务会被包装一下，生成一个属于Scheduler自己的task，这个task持有的优先级就是调度优先级</li>
+</ul>
+<p>src\react\packages\react-reconciler\src\SchedulerWithReactIntegration.old.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ImmediatePriority: ReactPriorityLevel = <span class="hljs-number">99</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> UserBlockingPriority: ReactPriorityLevel = <span class="hljs-number">98</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> NormalPriority: ReactPriorityLevel = <span class="hljs-number">97</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> LowPriority: ReactPriorityLevel = <span class="hljs-number">96</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> IdlePriority: ReactPriorityLevel = <span class="hljs-number">95</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> NoPriority: ReactPriorityLevel = <span class="hljs-number">90</span>;
+</code></pre>
+
+    

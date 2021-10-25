@@ -1,0 +1,916 @@
+
+        <h2 id="t01. OSI七层模型">1. OSI七层模型 <a href="#t01. OSI七层模型"> # </a></h2>
+<p><code>Open System Interconnection</code>适用于所有的网络</p>
+<ul>
+<li>分工带来效能</li>
+<li>将复杂的流程分解为几个功能相对单一的子进程</li>
+<li>整个流程更加清晰，复杂问题简单化</li>
+<li>更容易发现问题并针对性的解决问题<ul>
+<li>应用层(Application) 提供网络与用户应用软件之间的接口服务(HTTP)</li>
+<li>表示层(Presentation) 提供格式化的表示和转换数据服务，如加密和压缩()</li>
+<li>会话层(Session) 提供包括访问验证和会话管理在内的建立和维护应用之间通信的机制()</li>
+<li>传输层(Transimission) 提供建立、维护和取消传输连接功能，负责可靠地传输数据(TCP)</li>
+<li>网络层(Network) 处理网络间路由，确保数据及时传送(路由器)</li>
+<li>数据链路层(DataLink) 负责无错传输数据，确认帧、发错重传等(交换机)</li>
+<li>物理层(Physics) 提供机械、电气、功能和过程特性(网卡、网线、双绞线、同轴电缆、中继器)</li>
+</ul>
+</li>
+</ul>
+<h3 id="t11.1 分层模型">1.1 分层模型 <a href="#t11.1 分层模型"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/osi.png" alt="分层模型"></p>
+<h3 id="t21.2 封装过程">1.2 封装过程 <a href="#t21.2 封装过程"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/19.receive.png" alt="connect"></p>
+<h2 id="t32. TCP/IP参考模型">2. TCP/IP参考模型 <a href="#t32. TCP/IP参考模型"> # </a></h2>
+<ul>
+<li>TCP/IP是传输控制协议/网络互联协议的简称</li>
+<li>早期的TCP/IP模型是一个四层结构，从下往上依次是网络接口层、互联网层、传输层和应用层</li>
+<li>后来在使用过程中，借鉴OSI七层参考模型，将网络接口层划分为了物理层和数据链路层，形成五层结构</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpip.png" alt="tcpip"></p>
+<h3 id="t42.1 协议的概念和作用">2.1 协议的概念和作用 <a href="#t42.1 协议的概念和作用"> # </a></h3>
+<ul>
+<li>为了让计算机能够通信，计算机需要定义通信规则，这些规则就是协议</li>
+<li>规则是多种，协议也有多种</li>
+<li>协议就是数据封装格式+传输</li>
+</ul>
+<h3 id="t52.2 常用协议">2.2 常用协议 <a href="#t52.2 常用协议"> # </a></h3>
+<ul>
+<li>TCP/IP协议被称为传输控制协议/互联网协议，又称网络通讯协议</li>
+<li>是由网络层的IP协议和传输层的TCP协议组成，是一个很大的协议集合</li>
+<li>物理层和数据链路层没有定义任何特定协议，支持所有的标准和专用的协议</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/protocal.png" alt="分层模型"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">层级</th>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">应用层</td>
+<td style="text-align:left">HTTP</td>
+<td style="text-align:left">超文本传输协议（HTTP，HyperText Transfer Protocol)是互联网上应用最为广泛的一种网络协议</td>
+</tr>
+<tr>
+<td style="text-align:left">应用层</td>
+<td style="text-align:left">FTP</td>
+<td style="text-align:left">文件传输协议（英文：File Transfer Protocol，缩写：FTP）是用于在网络上进行文件传输的一套标准协议，使用客户/服务器模式</td>
+</tr>
+<tr>
+<td style="text-align:left">应用层</td>
+<td style="text-align:left">TFTP</td>
+<td style="text-align:left">(Trivial File Transfer Protocol,简单文件传输协议)是TCP/IP协议族中的一个用来在客户机与服务器之间进行简单文件传输的协议</td>
+</tr>
+<tr>
+<td style="text-align:left">应用层</td>
+<td style="text-align:left">SMTP</td>
+<td style="text-align:left">简单邮件传输协议 (Simple Mail Transfer Protocol, SMTP) 是在Internet传输Email的事实标准</td>
+</tr>
+<tr>
+<td style="text-align:left">应用层</td>
+<td style="text-align:left">SNMP</td>
+<td style="text-align:left">简单网络管理协议（SNMP，Simple Network Management Protocol），由一组网络管理的标准组成，包含一个应用层协议（application layer protocol）、数据库模型（database schema）和一组资源对象,该协议能够支持网络管理系统，用以监测连接到网络上的设备是否有任何引起管理上关注的情况。</td>
+</tr>
+<tr>
+<td style="text-align:left">应用层</td>
+<td style="text-align:left">DNS</td>
+<td style="text-align:left">域名系统（英文：Domain Name System，缩写：DNS）是互联网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">TCP（Transmission Control Protocol 传输控制协议）是一种面向连接的、可靠的、基于字节流的传输层通信协议</td>
+</tr>
+<tr>
+<td style="text-align:left">传输层</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">UDP 是User Datagram Protocol的简称， 中文名是用户数据报协议，是OSI（Open System Interconnection，开放式系统互联） 参考模型中一种无连接的传输层协议，提供面向事务的简单不可靠信息传送服务</td>
+</tr>
+<tr>
+<td style="text-align:left">传输层</td>
+<td style="text-align:left">ICMP</td>
+<td style="text-align:left">ICMP（Internet Control Message Protocol）Internet控制报文协议。它是TCP/IP协议簇的一个子协议，用于在IP主机、路由器之间传递控制消息。控制消息是指网络通不通、主机是否可达、路由是否可用等网络本身的消息</td>
+</tr>
+<tr>
+<td style="text-align:left">网络层</td>
+<td style="text-align:left">IGMP</td>
+<td style="text-align:left">Internet 组管理协议称为IGMP协议（Internet Group Management Protocol），是因特网协议家族中的一个组播协议。该协议运行在主机和组播路由器之间</td>
+</tr>
+<tr>
+<td style="text-align:left">网络层</td>
+<td style="text-align:left">IP</td>
+<td style="text-align:left">互联网协议地址（英语：Internet Protocol Address，又译为网际协议地址），缩写为IP地址（英语：IP Address），是分配给用户上网使用的网际协议（英语：Internet Protocol, IP）的设备的数字标签</td>
+</tr>
+<tr>
+<td style="text-align:left">网络层</td>
+<td style="text-align:left">ARP</td>
+<td style="text-align:left">地址解析协议，即ARP（Address Resolution Protocol），是根据IP地址获取物理地址的一个TCP/IP协议</td>
+</tr>
+<tr>
+<td style="text-align:left">网络层</td>
+<td style="text-align:left">RARP</td>
+<td style="text-align:left">反向地址转换协议（RARP：Reverse Address Resolution Protocol） 反向地址转换协议（RARP）允许局域网的物理机器从网关服务器的 ARP 表或者缓存上请求其 IP 地址</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t63. 网络接口层">3. 网络接口层 <a href="#t63. 网络接口层"> # </a></h2>
+<ul>
+<li>网络接口层是TCP/IP模型的最底层，负责接收从上一层交来的数据报并将数据报通过底层的物理网络发送出去，比较常见的就是设备的驱动程序，此层没有特定的协议</li>
+<li>网络接口层又分为物理层和数据链路层</li>
+</ul>
+<h3 id="t73.1 物理层">3.1 物理层 <a href="#t73.1 物理层"> # </a></h3>
+<ul>
+<li>计算机在传递数据的时候传递的都是0和1的数字，而物理层关心的是用什么信号来表示0和1，是否可以双向通信，最初的连接如何建立以及完成连接如何终止,物理层是为数据传输提供可靠的环境</li>
+<li>尽可能的屏蔽掉物理设备和传输媒介，使数据链路层不考虑这些差异，只考虑本层的协议和服务</li>
+<li>为用户提供在一条物理传输媒体上提供传送和接收比特流的能力</li>
+<li>需要解决物理连接、维护和释放的问题</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/2.phisical.png" alt="物理层"></p>
+<h4 id="t83.1.1 数字信号的编码">3.1.1 数字信号的编码 <a href="#t83.1.1 数字信号的编码"> # </a></h4>
+<ul>
+<li>数字信号的编码：用何种物理信号来表示<code>0</code>和<code>1</code></li>
+</ul>
+<h5 id="t93.1.1.1 非归零编码">3.1.1.1 非归零编码 <a href="#t93.1.1.1 非归零编码"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/1.phisical.png" alt="phisical"></p>
+<ul>
+<li>优点： 编/译码简单。</li>
+<li>缺点： 内部不含时钟信号， 收/发端同步困难。</li>
+<li>用途： 计算机内部， 或低速数据通信。<h5 id="t103.1.1.2 曼彻斯特编码">3.1.1.2 曼彻斯特编码 <a href="#t103.1.1.2 曼彻斯特编码"> # </a></h5>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/2.phisical.png" alt="phisical"></p>
+<ul>
+<li>优点：<ul>
+<li>内部自含时钟， 收/发端同步容易。</li>
+<li>抗干扰能力强。</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>编/译码较复杂。</li>
+<li>占用更多的信道带宽， 在同样的波特率的情况下， 要比非归零编码多占用一倍信道带宽。</li>
+<li>用途： 802.3局域网（以太网）</li>
+</ul>
+</li>
+</ul>
+<h3 id="t113.2 数据链路层">3.2 数据链路层 <a href="#t113.2 数据链路层"> # </a></h3>
+<ul>
+<li>数据链路层是OSI参考模型中的第二层，介乎于物理层和网络层之间</li>
+<li>数据链路层在物理层提供的服务的基础上向网络层提供服务，其最基本的服务是将源自网络层来的数据可靠地传输到相邻节点的目标机网络层</li>
+<li>如何将数据组合成数据块，在数据链路层中称这种数据块为帧<code>frame</code>，帧是数据链路层的传送单位</li>
+<li>如何控制帧在物理信道上的传输，包括如何处理传输差错，如何调节发送速率以使与接收方相匹配</li>
+<li>以及在两个网络实体之间提供数据链路通路的建立、维持和释放的管理</li>
+</ul>
+<h4 id="t123.2.1 以太网">3.2.1 以太网 <a href="#t123.2.1 以太网"> # </a></h4>
+<ul>
+<li>以太网（Ethernet）是一种计算机局域网技术。IEEE组织的IEEE 802.3标准制定了以太网的技术标准，它规定了包括物理层的连线、电子信号和介质访问层协议的内容</li>
+<li>以太网的标准拓扑结构为总线型拓扑</li>
+<li>以太网仍然使用总线型拓扑和CSMA/CD（Carrier Sense Multiple Access/Collision Detection，即载波多重访问/碰撞侦测）的总线技术</li>
+<li>以太网实现了网络上无线电系统多个节点发送信息的想法，每个节点必须获取电缆或者信道的才能传送信息</li>
+<li>每一个节点有全球唯一的48位地址也就是制造商分配给网卡的MAC地址，以保证以太网上所有节点能互相鉴别</li>
+</ul>
+<h4 id="t133.2.2 总线型拓扑">3.2.2 总线型拓扑 <a href="#t133.2.2 总线型拓扑"> # </a></h4>
+<ul>
+<li>总线型拓扑是采用单根传输作为共用的传输介质,将网络中所有的计算机通过相应的硬件接口和电缆直接连接到这根共享的总线上</li>
+<li>使用总线型拓扑结构需解决的是确保端用户使用媒体发送数据时不能出现冲突。</li>
+<li>总线型网络采用<code>载波监听多路访问</code>/<code>冲突检测协议</code>（CSMA/CD)作为控制策略</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/totalline.png" alt="totalline"></p>
+<h5 id="t143.2.2.1 载波监听多路访问">3.2.2.1 载波监听多路访问 <a href="#t143.2.2.1 载波监听多路访问"> # </a></h5>
+<ul>
+<li>全称Carrier Sense Multiple Access (CSMA)，是一种允许多个设备在同一信道发送信号的协议，其中的设备监听其它设备是否忙碌，只有在线路空闲时才发送</li>
+<li>在此种访问方式下，网络中的所有用户共享传输介质，信息通过广播传送到所有端口，网络中的工作站对接收到的信息进行确认，若是发给自己的便接收否则不理</li>
+<li>从发送端情况看，当一个工作站有数据要发送时，他首先监听信道并检测网络上是否有其他的工作站正在发送DATA，如果检测到信道忙，工作站将继续WAIT若发现信道空闲，则开始发送数据，信息发送出去后，发送端还要继续对发送出去的信息进行确认，以了解接收端是否已经正确接收到数据，如果收到则发送结束，否则再次发送</li>
+<li>核心思想<ul>
+<li>先听后讲 信道空闲则发送，信道忙则等待。</li>
+<li>边听边讲 发送信号时不断检测信道是否碰撞。</li>
+<li>碰撞即停 </li>
+<li>退避重传 二进制指数退避重传</li>
+<li>多次碰撞，放弃发送,最多16次</li>
+</ul>
+</li>
+</ul>
+<h5 id="t153.2.2.2 冲突检测">3.2.2.2 冲突检测 <a href="#t153.2.2.2 冲突检测"> # </a></h5>
+<ul>
+<li>冲突检测即发送站点在发送数据时要边发送边监听信道，若监听到信道有干扰信号，则表示产生了冲突，于是就要停止发送数据，计算出退避等待时间，然后使用CSMA方法继续尝试发送</li>
+<li>计算退避等待时间采用的是<code>二进制指数退避算法</code></li>
+</ul>
+<h4 id="t163.2.3 MAC地址">3.2.3 MAC地址 <a href="#t163.2.3 MAC地址"> # </a></h4>
+<ul>
+<li>在通信过程中是用内置在网卡内的地址来标识计算机身份的</li>
+<li>每个网卡都有一个全球唯一的地址来标识自己，不会重复</li>
+<li>MAC地址48位的二进制组成，通常分为6段，用16进制表示</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/8.mac.png" alt="mac"></p>
+<h4 id="t173.2.4 以太网帧格式">3.2.4 以太网帧格式 <a href="#t173.2.4 以太网帧格式"> # </a></h4>
+<ul>
+<li>在以太网链路上的数据包称作以太帧。以太帧起始部分由前导码和帧开始符组成</li>
+<li>后面紧跟着一个以太网报头，以MAC地址说明目的地址和源地址</li>
+<li>帧的中部是该帧负载的包含其他协议报头的数据包(例如IP协议)</li>
+<li>以太帧由一个32位冗余校验码结尾。它用于检验数据传输是否出现损坏</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/802.3frame.png" alt="internetframe"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">前导符(Preamble)</td>
+<td style="text-align:left">由1和0交互构成(10101010…..)，共占7个字节，用于使PLS子层电路与收到的帧达成时钟同步</td>
+</tr>
+<tr>
+<td style="text-align:left">帧起始(Start-of-Frame Delimiter, SFD)</td>
+<td style="text-align:left">为10101011，共占1个字节，表示一个帧的开始。它和前导符共同使接收方能根据1、0交替来迅速实现比特同步，当检测到连续的两位1时，将后续信息交给MAC子层。通常来说，Pre和SFD这两个字段只用于提醒接收端新帧到达，并不计入MAC帧大小，也不算作是MAC帧头的组成部分</td>
+</tr>
+<tr>
+<td style="text-align:left">目的MAC(Destination Address, DA)/源MAC(Source Address, SA)</td>
+<td style="text-align:left">分别用于标识目的MAC地址和源MAC地址，两个字段各占6个字节。它们可以是单播地址也可以是广播地址。当地址的最高位为0时表示单播，最高位为1时为组播，全为1时为广播</td>
+</tr>
+<tr>
+<td style="text-align:left">长度(Length)/类型(Type)</td>
+<td style="text-align:left">这是一个二选一的字段，共占2个字节，对于不同的网络协议，它有不同的含义。但是，作为类型使用时，如上表所示，最小值也总是大于1536（十六进制0x600）；所以不会产生冲突。另外，在IEEE 802.3中，数据字段的长度为38~1500个字节</td>
+</tr>
+<tr>
+<td style="text-align:left">数据(Data)</td>
+<td style="text-align:left">该字段对于不同的以太网帧包含的内容不一，对于较老的以太网标准，它是网络层来的数据报；而较新的标准，则是一个LLC帧的全部内容</td>
+</tr>
+<tr>
+<td style="text-align:left">帧校验序列(FCS)</td>
+<td style="text-align:left">它是一个包含32位CRC校验值的字段，一共占4个字节。由发送端对MAC帧的DA字段到Data字段间（不包含前导符和帧起始）的二进制序列进行计算</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t183.2.5 ARP协议">3.2.5 ARP协议 <a href="#t183.2.5 ARP协议"> # </a></h4>
+<ul>
+<li>地址解析协议，即ARP（Address Resolution Protocol），是根据IP地址获取物理地址的一个TCP/IP协议</li>
+<li>主机发送信息时将包含目标IP地址的ARP请求广播到网络上的所有主机，并接收返回消息，以此确定目标的物理地址；收到返回消息后将该IP地址和物理地址存入本机ARP缓存中并保留一定时间，下次请求时直接查询ARP缓存以节约资源</li>
+<li>地址解析协议是建立在网络中各个主机互相信任的基础上的，网络上的主机可以自主发送ARP应答消息，其他主机收到应答报文时不会检测该报文的真实性就会将其记入本机ARP缓存</li>
+<li>由此攻击者就可以向某一主机发送伪ARP应答报文，使其发送的信息无法到达预期的主机或到达错误的主机，这就构成了一个ARP欺骗</li>
+</ul>
+<h5 id="t193.2.5.1 ARP协议报文">3.2.5.1 ARP协议报文 <a href="#t193.2.5.1 ARP协议报文"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/arppackage.jpg" alt="arppackage"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">硬件类型</td>
+<td style="text-align:left">表示硬件地址的类型，值为1表示以太网地址</td>
+</tr>
+<tr>
+<td style="text-align:left">协议类型</td>
+<td style="text-align:left">表示要映射的协议地址类型。它的值为0x0800表示IP地址类型</td>
+</tr>
+<tr>
+<td style="text-align:left">硬件地址长度和协议长度</td>
+<td style="text-align:left">以字节为单位，对于以太网上的IP地址的ARP请求或应答来说，他们的值分别为6和4</td>
+</tr>
+<tr>
+<td style="text-align:left">操作类型</td>
+<td style="text-align:left">用来表示这个报文的类型，ARP请求为1，ARP响应为2，RARP请求为3，RARP响应为4</td>
+</tr>
+<tr>
+<td style="text-align:left">发送端MAC地址</td>
+<td style="text-align:left">发送方设备的硬件地址</td>
+</tr>
+<tr>
+<td style="text-align:left">发送端IP地址</td>
+<td style="text-align:left">发送方设备的IP地址</td>
+</tr>
+<tr>
+<td style="text-align:left">目标MAC地址</td>
+<td style="text-align:left">接收方设备的硬件地址</td>
+</tr>
+<tr>
+<td style="text-align:left">目标IP地址</td>
+<td style="text-align:left">接收方设备的IP地址</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.zhufengpeixun.cn/arpwireshark.png" alt="arpwireshark"></p>
+<h5 id="t203.2.5.2 ARP地址解析过程">3.2.5.2 ARP地址解析过程 <a href="#t203.2.5.2 ARP地址解析过程"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/arpflow.jpg" alt="arpflow"></p>
+<p>主机A和B在同一个网段，主机A要向主机B发送信息</p>
+<ul>
+<li><ol>
+<li>主机A首先查看自己的ARP表，确定其中是否包含有主机B对应的ARP表项。如果找到了对应的MAC地址，则主机A直接利用ARP表中的MAC地址，对IP数据包进行帧封装，并将数据包发送给主机B。</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>如果主机A在ARP表中找不到对应的MAC地址，则将缓存该数据报文，然后以广播方式发送一个ARP请求报文。ARP请求报文中的发送端IP地址和发送端MAC地址为主机A的IP地址和MAC地址，目标IP地址和目标MAC地址为主机B的IP地址和全0的MAC地址。由于ARP请求报文以广播方式发送，该网段上的所有主机都可以接收到该请求，但只有被请求的主机（即主机B）会对该请求进行处理。</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>主机B比较自己的IP地址和ARP请求报文中的目标IP地址，当两者相同时进行如下处理：将ARP请求报文中的发送端（即主机A）的IP地址和MAC地址存入自己的ARP表中。之后以单播方式发送ARP响应报文给主机A，其中包含了自己的MAC地址。</li>
+</ol>
+</li>
+<li><ol start="4">
+<li>主机A收到ARP响应报文后，将主机B的MAC地址加入到自己的ARP表中以用于后续报文的转发，同时将IP数据包进行封装后发送出去。</li>
+</ol>
+</li>
+</ul>
+<h2 id="t214. 互联网层(网络层)">4. 互联网层(网络层) <a href="#t214. 互联网层(网络层)"> # </a></h2>
+<ul>
+<li>位于传输层和网络接口层之间,用于把数据从源主机经过若干个中间节点传送到目标主机,并向传输层提供最基础的数据传输服务,它要提供路由和选址的工作</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/8.iplayer.png" alt="网络层"></p>
+<h3 id="t224.1 选址">4.1 选址 <a href="#t224.1 选址"> # </a></h3>
+<p>交换机是靠MAC来寻址的，而因为MAC地址是无层次的,所以要靠IP地址来确认计算机的位置,这就是选址</p>
+<p><img src="http://img.zhufengpeixun.cn/8.address.png" alt="网络层"></p>
+<p><img src="https://p.ssl.qhimg.com/t0123c4234759d969dc.jpg" alt="信封"></p>
+<h3 id="t234.2 路由">4.2 路由 <a href="#t234.2 路由"> # </a></h3>
+<p>在能够选择的多条道路之间选择一条最短的路径就是路由的工作</p>
+<p><img src="http://img.zhufengpeixun.cn/8.router.png" alt="网络层"></p>
+<h3 id="t244.3 IP">4.3 IP <a href="#t244.3 IP"> # </a></h3>
+<p>在网络中，每台计算机都有一个唯一的地址，方便别人找到它，这个地址称为IP地址。</p>
+<h4 id="t254.3.1 IP头部">4.3.1 IP头部 <a href="#t254.3.1 IP头部"> # </a></h4>
+<p><img src="http://img.zhufengpeixun.cn/ipheader.png" alt="ipheader"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">版本</td>
+<td style="text-align:left">Version）字段：占4比特。用来表明IP协议实现的版本号，当前一般为IPv4，即0100</td>
+</tr>
+<tr>
+<td style="text-align:left">首部长部</td>
+<td style="text-align:left">报头长度（Internet Header Length，IHL）字段：占4比特。是头部占32比特的数字，包括可选项。普通IP数据报（没有任何选项），该字段的值是5，即160比特=20字节。此字段最大值为60字节</td>
+</tr>
+<tr>
+<td style="text-align:left">优先级与服务类型</td>
+<td style="text-align:left">占8比特。其中前3比特为优先权子字段（Precedence，现已被忽略）。第8比特保留未用。第4至第7比特分别代表延迟、吞吐量、可靠性和花费。当它们取值为1时分别代表要求最小时延、最大吞吐量、最高可靠性和最小费用。这4比特的服务类型中只能置其中1比特为1。可以全为0，若全为0则表示一般服务。服务类型字段声明了数据报被网络系统传输时可以被怎样处理。例如：TELNET协议可能要求有最小的延迟，FTP协议（数据）可能要求有最大吞吐量，SNMP协议可能要求有最高可靠性，NNTP（Network News Transfer Protocol，网络新闻传输协议）可能要求最小费用，而ICMP协议可能无特殊要求（4比特全为0</td>
+</tr>
+<tr>
+<td style="text-align:left">总长度</td>
+<td style="text-align:left">占16比特。指明整个数据报的长度（以字节为单位）。最大长度为65535字节</td>
+</tr>
+<tr>
+<td style="text-align:left">标识符</td>
+<td style="text-align:left">占16比特。用来唯一地标识主机发送的每一份数据报。通常每发一份报文，它的值会加1</td>
+</tr>
+<tr>
+<td style="text-align:left">标志</td>
+<td style="text-align:left">分为3个字段，依次为保留位、不分片位和更多片位</td>
+</tr>
+<tr>
+<td style="text-align:left">标志</td>
+<td style="text-align:left">保留位：一般被置为0</td>
+</tr>
+<tr>
+<td style="text-align:left">标志</td>
+<td style="text-align:left">不分片位：表示该数据报是否被分片，如果被置为1，则不能对数据报进行分片，如果要对其进行分片处理，就应将其置为0</td>
+</tr>
+<tr>
+<td style="text-align:left">标志</td>
+<td style="text-align:left">更多片位：除了最后一个分片，其他每个组成数据报的片都要将该位置设置为1.</td>
+</tr>
+<tr>
+<td style="text-align:left">段偏移量</td>
+<td style="text-align:left">占13比特。如果一份数据报要求分段的话，此字段指明该段偏移距原始数据报开始的位置</td>
+</tr>
+<tr>
+<td style="text-align:left">TTL(Time to Live生存时间)</td>
+<td style="text-align:left">该字段用于表示IP数据包的生命周期，可以防止一个数据包在网络中无限循环地发下去。TTL的意思是一个数据包在被丢弃之前在网络中的最大周转时间。该数据包经过的每一个路由器都会检查该字段中的值，当TTL的值为0时此数据包会被丢弃。TTL对应于一个数据包通过路由器的数目，一个数据包每经过一个路由器，TTL将减去1</td>
+</tr>
+<tr>
+<td style="text-align:left">协议号</td>
+<td style="text-align:left">占8比特。指明IP层所封装的上层协议类型，如ICMP（1）、IGMP（2） 、TCP（6）、UDP（17）等</td>
+</tr>
+<tr>
+<td style="text-align:left">首部校验和</td>
+<td style="text-align:left">检验和是16位的错误检测字段。目的主机和网络中的每个网关都要重新计算报头的校验和，一样表示没有改动过,计算方法是：对头部中每个16比特进行二进制反码求和</td>
+</tr>
+<tr>
+<td style="text-align:left">源IP地址</td>
+<td style="text-align:left">该字段用于表示数据包的源地址，指的是发送该数据包的设备的网络地址</td>
+</tr>
+<tr>
+<td style="text-align:left">目标IP地址</td>
+<td style="text-align:left">该字段用于表示数据包的目标的地址，指的是接收节点的网络地址</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.zhufengpeixun.cn/ipwireshark.png" alt="ipwireshark"></p>
+<h4 id="t264.3.2 IP地址格式">4.3.2 IP地址格式 <a href="#t264.3.2 IP地址格式"> # </a></h4>
+<ul>
+<li>IP地址是一个网络编码，用来确定网络中的一个节点。</li>
+<li>IP地址是由32位二进制(32bit)组成</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/9.ip.png" alt="IP地址"></p>
+<h4 id="t274.3.3 IP地址组成">4.3.3 IP地址组成 <a href="#t274.3.3 IP地址组成"> # </a></h4>
+<ul>
+<li>网络部分(NETWORK)</li>
+<li>主机部分(HOST)</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ippart.png" alt="compose"></p>
+<h4 id="t284.3.4 IP地址表示">4.3.4 IP地址表示 <a href="#t284.3.4 IP地址表示"> # </a></h4>
+<p><img src="http://img.zhufengpeixun.cn/9.ip.png" alt="compose"></p>
+<h4 id="t294.3.5 IP地址的分类">4.3.5 IP地址的分类 <a href="#t294.3.5 IP地址的分类"> # </a></h4>
+<ul>
+<li>IP地址的网络部分是由Internet地址分配机构来统一分配的，这样可以保证IP的唯一性。</li>
+<li>ip地址中全为1的ip即255.255.255.255，它称为限制广播地址，如果将其作为数据包的目标地址可以理解为发送到所有网络的所有主机</li>
+<li>ip地址中全为0的ip即0.0.0.0，它表示启动时的ip地址，其含义就是尚未未分配时的ip地址</li>
+<li>127是用来进行本机测试的，除了127.255.255.255外，其它的127开头的地址都代表本机</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/10.ipclass.png" alt="compose"></p>
+<h4 id="t304.3.6 公有地址和私有地址">4.3.6 公有地址和私有地址 <a href="#t304.3.6 公有地址和私有地址"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">A类私有IP</td>
+<td style="text-align:left">10.0.0.0 ~ 10.255.255.255</td>
+</tr>
+<tr>
+<td style="text-align:left">B类私有IP</td>
+<td style="text-align:left">172.16.0.0 ~ 172.31.255.255</td>
+</tr>
+<tr>
+<td style="text-align:left">C类私有IP</td>
+<td style="text-align:left">192.168.0.0 ~ 192.168.255.255</td>
+</tr>
+</tbody>
+</table>
+<p>其他范围的IP均为公有IP地址</p>
+<h4 id="t314.3.7 子网掩码">4.3.7 子网掩码 <a href="#t314.3.7 子网掩码"> # </a></h4>
+<ul>
+<li>子网掩码(subnet mask)又叫子网络遮罩，它是一种用来指明一个IP地址的哪些位标识的是主机所在的子网，以及哪些位标识的是主机位的掩码。</li>
+<li>子网掩码不能单独存在，它必须结合IP地址一起使用。</li>
+<li>子网掩码只有一个作用，就是将某个IP地址划分成网络地址和主机地址两部分。</li>
+<li>子网掩码也是32个二进制位</li>
+<li>对应IP的网络部分用1表示</li>
+<li>对应IP地址的主机部分用0表示</li>
+<li>IP地址和子网掩码做逻辑与运算得到网络地址<ul>
+<li>0和任何数相与都是0</li>
+<li>1和任何数相与都等于任何数本身</li>
+</ul>
+</li>
+<li>A B C 三类地址都有自己默认的子网掩码<ul>
+<li>A类 255.0.0.0</li>
+<li>B类 255.255.0.0</li>
+<li>C类 255.255.255.0</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/dividesubnet.jpg" alt="dividesubnet"></p>
+<p><img src="http://img.zhufengpeixun.cn/10.mask.png" alt="transfer"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> ip1 = <span class="hljs-string">'192.168.0.1'</span>;
+<span class="hljs-keyword">let</span> ip2 = <span class="hljs-string">'192.168.0.4'</span>;
+<span class="hljs-keyword">let</span> mask = <span class="hljs-string">'255.255.255.0'</span>;
+<span class="hljs-keyword">let</span> ip1s = ip1.split(<span class="hljs-string">'.'</span>).map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>(+item).toString(<span class="hljs-number">2</span>).padStart(<span class="hljs-number">8</span>,<span class="hljs-string">'0'</span>)).join(<span class="hljs-string">''</span>);
+<span class="hljs-keyword">let</span> ip2s = ip2.split(<span class="hljs-string">'.'</span>).map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>(+item).toString(<span class="hljs-number">2</span>).padStart(<span class="hljs-number">8</span>,<span class="hljs-string">'0'</span>)).join(<span class="hljs-string">''</span>);;
+<span class="hljs-keyword">let</span> masks = mask.split(<span class="hljs-string">'.'</span>).map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>(+item).toString(<span class="hljs-number">2</span>).padStart(<span class="hljs-number">8</span>,<span class="hljs-string">'0'</span>)).join(<span class="hljs-string">''</span>);
+
+<span class="hljs-built_in">console</span>.log(ip1s,<span class="hljs-built_in">parseInt</span>(ip1s,<span class="hljs-number">2</span>),<span class="hljs-built_in">parseInt</span>(masks,<span class="hljs-number">2</span>),<span class="hljs-built_in">parseInt</span>(ip1s,<span class="hljs-number">2</span>)&amp;<span class="hljs-built_in">parseInt</span>(masks,<span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log(ip2s,<span class="hljs-built_in">parseInt</span>(ip2s,<span class="hljs-number">2</span>),<span class="hljs-built_in">parseInt</span>(masks,<span class="hljs-number">2</span>),<span class="hljs-built_in">parseInt</span>(ip2s,<span class="hljs-number">2</span>)&amp;<span class="hljs-built_in">parseInt</span>(masks,<span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log((<span class="hljs-built_in">parseInt</span>(ip1s,<span class="hljs-number">2</span>)&amp;<span class="hljs-built_in">parseInt</span>(masks,<span class="hljs-number">2</span>)) === (<span class="hljs-built_in">parseInt</span>(ip2s,<span class="hljs-number">2</span>)&amp;<span class="hljs-built_in">parseInt</span>(masks,<span class="hljs-number">2</span>)));
+</code></pre>
+<h2 id="t325. 传输层">5. 传输层 <a href="#t325. 传输层"> # </a></h2>
+<ul>
+<li>位于应用层和网络接口层之间</li>
+<li>是面向连接的、可靠的的进程到进程通信的协议</li>
+<li>TCP提供全双工服务，即数据可在同一时间双向传播</li>
+<li>TCP将若干个字节构成一个分组，此分组称为报文段(Segment)</li>
+<li>对可靠性要求高的上层协议，实现可靠性的保证,如果数据丢失、损坏的情况下如何保证可靠性,网络层只管传递数据，成功与否并不关心</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/11.transfer.png" alt="transfer"></p>
+<h3 id="t335.1 传输层的功能">5.1 传输层的功能 <a href="#t335.1 传输层的功能"> # </a></h3>
+<ul>
+<li>提供了一种端到端的连接</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/11.connect.png" alt="connect"></p>
+<h3 id="t345.2 协议分类">5.2 协议分类 <a href="#t345.2 协议分类"> # </a></h3>
+<ul>
+<li>TCP(Transimision Control Protocal)<ul>
+<li>传输控制协议</li>
+<li>可靠的、面向连接的协议</li>
+<li>传输效率低</li>
+</ul>
+</li>
+<li>UDP(User Datagram Protocal)<ul>
+<li>用户数据报协议</li>
+<li>不可靠的、无连接的服务</li>
+<li>传输效率高</li>
+</ul>
+</li>
+</ul>
+<h3 id="t355.3 TCP协议">5.3 TCP协议 <a href="#t355.3 TCP协议"> # </a></h3>
+<ul>
+<li>将数据进行分段打包传输</li>
+<li>对每个数据包编号控制顺序</li>
+<li>运输中丢失、重发和丢弃处理</li>
+<li>流量控制避免拥塞</li>
+</ul>
+<h4 id="t365.3.1 TCP数据包封装">5.3.1 TCP数据包封装 <a href="#t365.3.1 TCP数据包封装"> # </a></h4>
+<h5 id="t375.3.1.1 格式">5.3.1.1 格式 <a href="#t375.3.1.1 格式"> # </a></h5>
+<ul>
+<li>源端口号和目标端口号，计算机通过端口号识别访问哪个服务,比如http服务或ftp服务，发送方端口号是进行随机端口，目标端口号决定了接收方哪个程序来接收</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpport.png" alt="connect"></p>
+<h5 id="t385.3.1.2 32位序列号">5.3.1.2 32位序列号 <a href="#t385.3.1.2 32位序列号"> # </a></h5>
+<ul>
+<li>32位序列号 TCP用序列号对数据包进行标记，以便在到达目的地后重新重装，假设当前的序列号为 s，发送数据长度为 l，则下次发送数据时的序列号为 s + l。在建立连接时通常由计算机生成一个随机数作为序列号的初始值</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpsequence.png" alt="connect"></p>
+<h5 id="t395.3.1.3 确认应答号">5.3.1.3 确认应答号 <a href="#t395.3.1.3 确认应答号"> # </a></h5>
+<ul>
+<li>确认应答号 它等于下一次应该接收到的数据的序列号。假设发送端的序列号为 s，发送数据的长度为 l，那么接收端返回的确认应答号也是 s + l。发送端接收到这个确认应答后，可以认为这个位置以前所有的数据都已被正常接收。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpconfirm.png" alt="connect"></p>
+<h5 id="t405.3.1.4 首部长度">5.3.1.4 首部长度 <a href="#t405.3.1.4 首部长度"> # </a></h5>
+<ul>
+<li>首部长度：TCP 首部的长度，单位为 4 字节。如果没有可选字段，那么这里的值就是 5。表示 TCP 首部的长度为 20 字节。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpcontrolpng.png" alt="connect"></p>
+<h5 id="t415.3.1.5 控制位">5.3.1.5 控制位 <a href="#t415.3.1.5 控制位"> # </a></h5>
+<ul>
+<li>控制位 TCP的连接、传输和断开都受这六个控制位的指挥<ul>
+<li>PSH(push急迫位)   缓存区将满，立刻传输速度</li>
+<li>RST(reset重置位)  连接断了重新连接</li>
+<li>URG(urgent紧急位) 紧急信号</li>
+</ul>
+</li>
+<li>紧急指针：尽在 URG(urgent紧急) 控制位为 1 时有效。表示紧急数据的末尾在 TCP 数据部分中的位置。通常在暂时中断通信时使用（比如输入 Ctrl + C）。</li>
+</ul>
+<h6 id="t425.3.1.5.1 SYN">5.3.1.5.1 SYN <a href="#t425.3.1.5.1 SYN"> # </a></h6>
+<ul>
+<li>SYN(synchronous建立联机) 同步序号位 TCP建立连接时要将这个值设为1</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpsyn.png" alt="tcpsyn"></p>
+<h6 id="t435.3.1.5.2 ACK">5.3.1.5.2 ACK <a href="#t435.3.1.5.2 ACK"> # </a></h6>
+<ul>
+<li>ACK(acknowledgement 确认)为1表示确认号</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpack.png" alt="tcpack"></p>
+<h6 id="t445.3.1.5.3 FIN">5.3.1.5.3 FIN <a href="#t445.3.1.5.3 FIN"> # </a></h6>
+<ul>
+<li>FIN发送端完成位，提出断开连接的一方把FIN置为1表示要断开连接</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpfin.png" alt="tcpfin"></p>
+<h5 id="t455.3.1.6 窗口值">5.3.1.6 窗口值 <a href="#t455.3.1.6 窗口值"> # </a></h5>
+<ul>
+<li>窗口值 说明本地可接收数据段的数目，这个值的大小是可变的。当网络通畅时将这个窗口值变大加快传输速度，当网络不稳定时减少这个值可以保证网络数据的可靠传输。它是来在TCP传输中进行流量控制的</li>
+<li>窗口大小：用于表示从应答号开始能够接受多少个 8 位字节。如果窗口大小为 0，可以发送窗口探测。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpwindow.png" alt="tcpwindow"></p>
+<h5 id="t465.3.1.7  差错控制">5.3.1.7  差错控制 <a href="#t465.3.1.7  差错控制"> # </a></h5>
+<ul>
+<li>校验和用来做差错控制，TCP校验和的计算包括TCP首部、数据和其它填充字节。在发送TCP数据段时，由发送端计算校验和，当到达目的地时又进行一次检验和计算。如果两次校验 和一致说明数据是正确的，否则 将认为数据被破坏，接收端将丢弃该数据</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tcpcheck.png" alt="connect"></p>
+<h4 id="t475.3.2 握手和断开">5.3.2 握手和断开 <a href="#t475.3.2 握手和断开"> # </a></h4>
+<ul>
+<li>TCP是面向连接的协议，它在源点和终点之间建立虚拟连接，而不是物理连接</li>
+<li>在数据通信之前，发送端与接收端要先建立连接，等数据发送结束后，双方再断开连接</li>
+<li>TCP连接的每一方都是由一个IP地址和一个端口组成</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/sequencenumber.jpg" alt="sequencenumber"></p>
+<p><img src="http://img.zhufengpeixun.cn/tcpflow.png" alt="tcpflow.png"></p>
+<h5 id="t485.3.2.1 tcp服务器">5.3.2.1 tcp服务器 <a href="#t485.3.2.1 tcp服务器"> # </a></h5>
+<h6 id="t495.3.2.1.1 tcp_server.js">5.3.2.1.1 tcp_server.js <a href="#t495.3.2.1.1 tcp_server.js"> # </a></h6>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">"net"</span>);
+<span class="hljs-keyword">var</span> server = <span class="hljs-keyword">new</span> net.Server();
+server.on(<span class="hljs-string">"connection"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"connected"</span>);
+    socket.on(<span class="hljs-string">'data'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">data</span>)</span>{
+        <span class="hljs-built_in">console</span>.log(data.toString());
+        socket.write(<span class="hljs-string">"server:"</span>+data);
+    })
+    socket.on(<span class="hljs-string">'end'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">data</span>)</span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'end'</span>);
+    })
+    socket.on(<span class="hljs-string">'error'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error</span>)</span>{
+        <span class="hljs-built_in">console</span>.log(error);
+    })
+});
+server.listen(<span class="hljs-number">8000</span>);
+server.on(<span class="hljs-string">"listening"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Created server on http://127.0.0.1:8000/"</span>);
+
+})
+server.on(<span class="hljs-string">"close"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"server closed!"</span>);
+})
+server.on(<span class="hljs-string">"error"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(err);
+})
+</code></pre>
+<h6 id="t505.3.2.1.2 tcp_client.js">5.3.2.1.2 tcp_client.js <a href="#t505.3.2.1.2 tcp_client.js"> # </a></h6>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">"net"</span>);
+<span class="hljs-keyword">var</span> socket = net.Socket();
+socket.connect(<span class="hljs-number">8000</span>, <span class="hljs-string">'127.0.0.1'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"connect the server"</span>);
+    socket.write(<span class="hljs-string">"hello"</span>);
+})
+socket.on(<span class="hljs-string">"data"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(data.toString());
+    socket.destroy();
+})
+socket.on(<span class="hljs-string">"error"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(err);
+})
+socket.on(<span class="hljs-string">"end"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"data end"</span>);
+})
+</code></pre>
+<h5 id="t515.3.2.1 三次握手">5.3.2.1 三次握手 <a href="#t515.3.2.1 三次握手"> # </a></h5>
+<ul>
+<li>第一次握手主机A通过一个标识为SYN标识位的数据段发送给主机B请求连接，通过该数据段告诉主机B希望建立连接，需要B应答，并告诉主机B传输的起始序列号</li>
+<li>第二次握手是主机B用一个确认应答ACK和同步序列号SYNC标志位的数据段来响应主机A，一是发送ACK告诉主机A收到了数据段，二是通知主机A从哪个序列号做标记。</li>
+<li>第三次握手是主机A确认收到了主机B的数据段并可以开始传输实际数据。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/handshake1.png" alt="handshake1">
+<img src="http://img.zhufengpeixun.cn/handshake2.png" alt="handshake2">
+<img src="http://img.zhufengpeixun.cn/handshake3.png" alt="handshake3"></p>
+<h5 id="t525.3.2.2 收发数据">5.3.2.2 收发数据 <a href="#t525.3.2.2 收发数据"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/sendhello.png" alt="sendhello">
+<img src="http://img.zhufengpeixun.cn/ackhello.png" alt="ackhello">
+<img src="http://img.zhufengpeixun.cn/serverhello.png" alt="serverhello">
+<img src="http://img.zhufengpeixun.cn/ackserverhello.png" alt="ackserverhello"></p>
+<h5 id="t535.3.2.3 四次断开">5.3.2.3 四次断开 <a href="#t535.3.2.3 四次断开"> # </a></h5>
+<ul>
+<li>主机A发送FIN控制位发出断开连接的请求</li>
+<li>主机B进行响应，确认收到断开连接请求</li>
+<li>主机B提出反方向的关闭要求</li>
+<li>主机A确认收到的主机B的关闭连接请求</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/goodbye1.png" alt="goodbye1">
+<img src="http://img.zhufengpeixun.cn/goodbye2.png" alt="goodbye2">
+<img src="http://img.zhufengpeixun.cn/goodbye3.png" alt="goodbye3">
+<img src="http://img.zhufengpeixun.cn/goodbye4.png" alt="goodbye4"></p>
+<h4 id="t545.3.3 滑动窗口">5.3.3 滑动窗口 <a href="#t545.3.3 滑动窗口"> # </a></h4>
+<ul>
+<li>滑动窗口（Sliding window）是一种流量控制技术</li>
+<li>早期的网络通信中，通信双方不会考虑网络的拥挤情况直接发送数据。由于大家不知道网络拥塞状况，同时发送数据，导致中间节点阻塞掉包，谁也发不了数据，所以就有了滑动窗口机制来解决此问题</li>
+<li>TCP中采用滑动窗口来进行传输控制，滑动窗口的大小意味着接收方还有多大的缓冲区可以用于接收数据。发送方可以通过滑动窗口的大小来确定应该发送多少字节的数据</li>
+<li>当滑动窗口为0时，发送方一般不能再发送数据报，但有两种情况除外，一种情况是可以发送紧急数据，例如，允许用户终止在远端机上的运行进程。另一种情况是发送方可以发送一个1字节的数据报来通知接收方重新声明它希望接收的下一字节及发送方的滑动窗口大小</li>
+</ul>
+<h5 id="t555.3.3.1 窗口机制">5.3.3.1 窗口机制 <a href="#t555.3.3.1 窗口机制"> # </a></h5>
+<ul>
+<li>滑动窗口协议的基本原理就是在任意时刻，发送方都维持了一个连续的允许发送的帧的序号，称为发送窗口；同时，接收方也维持了一个连续的允许接收的帧的序号，称为接收窗口</li>
+<li>发送窗口和接收窗口的序号的上下界不一定要一样，甚至大小也可以不同</li>
+<li>不同的滑动窗口协议窗口大小一般不同</li>
+<li>发送方窗口内的序列号代表了那些已经被发送，但是还没有被确认的帧，或者是那些可以被发送的帧</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/slidewindow.png" alt="slidewindow"></p>
+<h5 id="t565.3.3.2 拥塞控制">5.3.3.2 拥塞控制 <a href="#t565.3.3.2 拥塞控制"> # </a></h5>
+<ul>
+<li>TCP拥塞控制是传输控制协议（英语：Transmission Control Protocol，缩写TCP）避免网络拥塞的算法，是互联网上主要的一个拥塞控制措施</li>
+<li>TCP使用多种拥塞控制策略来避免雪崩式拥塞。TCP会为每条连接维护一个“拥塞窗口”来限制可能在端对端间传输的未确认分组总数量</li>
+<li>这类似TCP流量控制机制中使用的滑动窗口，是由发送方控制的</li>
+<li>TCP在一个连接初始化或超时后使用一种“慢启动”机制来增加拥塞窗口的大小。它的起始值一般为最大分段大小（Maximum segment size，MSS）的两倍，虽然名为“慢启动”，初始值也相当低，但其增长极快：当每个分段得到确认时，拥塞窗口会增加一个MSS，使得在每次往返时间（round-trip time，RTT）内拥塞窗口能高效地双倍增长</li>
+<li>在流量控制中，接收方通过TCP的“窗口”值（Window Size）来告知发送方，由发送方通过对拥塞窗口和接收窗口的大小比较，来确定任何时刻内需要传输的数据量</li>
+<li>和式增加，积式减少（additive-increase/multiplicative-decrease，AIMD，这里简称“线增积减”）是一种反馈控制算法，其包含了对拥塞窗口线性增加，和当发生拥塞时对窗口积式减少。多个使用AIMD控制的TCP流最终会收敛到对线路的等量竞争使用。</li>
+<li>未确认的数据包刚好等于带宽等于延迟</li>
+<li>当发现丢包的时候立刻减半</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/traffic.png" alt="traffic"></p>
+<h3 id="t575.4 UDP">5.4 UDP <a href="#t575.4 UDP"> # </a></h3>
+<ul>
+<li>UDP是一个无连接、不保证可靠性的传输层协议，也就是说发送端不关心发送的数据是否到达目标主机、数据是否出错等，收到数据的主机也不会告诉 发送方是否收到了数据，它的可靠性由上层协议来保障</li>
+<li>首部结构简单，在数据传输时能实现最小的开销，如果进程想发送很短的报文而对可靠性要求不高可以使用</li>
+</ul>
+<h4 id="t585.4.1 UDP的封装格式">5.4.1 UDP的封装格式 <a href="#t585.4.1 UDP的封装格式"> # </a></h4>
+<h5 id="t595.4.1.1 数据包">5.4.1.1 数据包 <a href="#t595.4.1.1 数据包"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/15.udp.png" alt="connect"></p>
+<h5 id="t605.4.1.2 数据长度">5.4.1.2 数据长度 <a href="#t605.4.1.2 数据长度"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/udplength.png" alt="connect"></p>
+<h5 id="t615.4.1.3 差错控制">5.4.1.3 差错控制 <a href="#t615.4.1.3 差错控制"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/udpcheck.png" alt="connect"></p>
+<h4 id="t625.4.2 UDP的应用">5.4.2 UDP的应用 <a href="#t625.4.2 UDP的应用"> # </a></h4>
+<ul>
+<li>QQ</li>
+<li>视频软件</li>
+<li>TFTP 简单文件传输协议(短信)</li>
+</ul>
+<h4 id="t635.4.3 UDP服务器">5.4.3 UDP服务器 <a href="#t635.4.3 UDP服务器"> # </a></h4>
+<h5 id="t645.4.3.1 点对点">5.4.3.1 点对点 <a href="#t645.4.3.1 点对点"> # </a></h5>
+<h6 id="t655.4.3.1.1 udp_server.js">5.4.3.1.1 udp_server.js <a href="#t655.4.3.1.1 udp_server.js"> # </a></h6>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> dgram = <span class="hljs-built_in">require</span>(<span class="hljs-string">'dgram'</span>);
+<span class="hljs-keyword">var</span> socket = dgram.createSocket(<span class="hljs-string">'udp4'</span>);
+socket.on(<span class="hljs-string">'message'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">msg,rinfo</span>)</span>{
+  <span class="hljs-built_in">console</span>.log(msg.toString());
+  <span class="hljs-built_in">console</span>.log(rinfo);
+   socket.send(msg,<span class="hljs-number">0</span>,msg.length,rinfo.port,rinfo.address);
+});
+socket.bind(<span class="hljs-number">41234</span>,<span class="hljs-string">'localhost'</span>);
+</code></pre>
+<h6 id="t665.4.3.1.2 udp_client.js">5.4.3.1.2 udp_client.js <a href="#t665.4.3.1.2 udp_client.js"> # </a></h6>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> dgram = <span class="hljs-built_in">require</span>(<span class="hljs-string">'dgram'</span>);
+<span class="hljs-keyword">var</span> socket = dgram.createSocket(<span class="hljs-string">'udp4'</span>);
+socket.on(<span class="hljs-string">'message'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">msg,rinfo</span>)</span>{
+    <span class="hljs-built_in">console</span>.log(msg.toString());
+    <span class="hljs-built_in">console</span>.log(rinfo);
+});
+socket.send(<span class="hljs-keyword">new</span> Buffer(<span class="hljs-string">'helloworld'</span>),<span class="hljs-number">0</span>,<span class="hljs-number">5</span>,<span class="hljs-number">41234</span>,<span class="hljs-string">'localhost'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,bytes</span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'发送了个%d字节'</span>,bytes);
+});
+socket.on(<span class="hljs-string">'error'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>)</span>{
+    <span class="hljs-built_in">console</span>.error(err);
+});
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/sendudp.png" alt="sendudp"></p>
+<p><img src="http://img.zhufengpeixun.cn/receiveudp.png" alt="receiveudp"></p>
+<h5 id="t675.4.3.2 广播">5.4.3.2 广播 <a href="#t675.4.3.2 广播"> # </a></h5>
+<ul>
+<li>创建一个UDP服务器并通过该服务器进行数据的广播<h6 id="t685.4.3.2.1 udp_server.js">5.4.3.2.1 udp_server.js <a href="#t685.4.3.2.1 udp_server.js"> # </a></h6>
+<pre><code class="lang-js">let dgram = require('dgram');
+let server = dgram.createSocket('udp4);
+server.on('message',function(msg){
+let buf = new Bufffer('已经接收客户端发送的数据'+msg);
+server.setBroadcast(true);
+server.send(buf,0,buf.length,41235,"192.168.1.255");
+});
+server.bind(41234,'192.168.1.100');
+</code></pre>
+<h6 id="t695.4.3.2.2 udp_client.js">5.4.3.2.2 udp_client.js <a href="#t695.4.3.2.2 udp_client.js"> # </a></h6>
+<pre><code class="lang-js">let dgram = require('dgram');
+let client = dgram.createSocket('udp4);
+client.bind(41235,'192.168.1.102);
+let buf = new Buffer('hello');
+client.send(buf,0,buf.length,41234,'192.168.1.100');
+client.on('message',function(msg,rinfo){
+console.log('received : ',msg);
+});
+</code></pre>
+<h5 id="t705.4.3.3 组播">5.4.3.3 组播 <a href="#t705.4.3.3 组播"> # </a></h5>
+</li>
+<li>所谓的组播，就是将网络中同一业务类型进行逻辑上的分组，从某个socket端口上发送的数据只能被该组中的其他主机所接收，不被组外的任何主机接收。</li>
+<li>实现组播时，并不直接把数据发送给目标地址，而是将数据发送到组播主机，操作系统将把该数据组播给组内的其他所有成员。</li>
+<li>在网络中，使用D类地址作为组播地址。范围是指 224.0.0.0 ~ 239.255.255.255,分为三类<ul>
+<li>局部组播地址: 224.0.0.0 ~ 224.0.0.255 为路由协议和其他用途保留</li>
+<li>预留组播地址: 224.0.1.0 ~ 238.255.255.255 可用于全球范围或网络协议</li>
+<li>管理权限组播地址 ： 239.0.0.0 ～ 239.255.255.255 组织内部使用，不可用于Internet<h6 id="t715.4.3.3.1 udp_server.js">5.4.3.3.1 udp_server.js <a href="#t715.4.3.3.1 udp_server.js"> # </a></h6>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> dgram = <span class="hljs-built_in">require</span>(<span class="hljs-string">'dgram'</span>);
+<span class="hljs-keyword">let</span> server = dgram.createSocket(<span class="hljs-string">'udp4'</span>);
+server.on(<span class="hljs-string">'listening'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+server.MulticastTTL(<span class="hljs-number">128</span>);
+server.setMulticastLoopback(<span class="hljs-literal">true</span>);
+server.addMembership(<span class="hljs-string">'230.185.192.108'</span>);
+});
+setInterval(broadcast,<span class="hljs-number">1000</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">broadcast</span>(<span class="hljs-params"></span>)</span>{
+<span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toLocaleString());
+server.send(buffer,<span class="hljs-number">0</span>,buffer.length,<span class="hljs-number">8080</span>,<span class="hljs-string">"230.185.192.108"</span>);
+}
+</code></pre>
+<h6 id="t725.4.3.3.2 udp_client.js">5.4.3.3.2 udp_client.js <a href="#t725.4.3.3.2 udp_client.js"> # </a></h6>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> dgram = <span class="hljs-built_in">require</span>(<span class="hljs-string">'dgram'</span>);
+<span class="hljs-keyword">let</span> client = dgram.createSocket(<span class="hljs-string">'udp4'</span>);
+client.on(<span class="hljs-string">'listening'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+client.addMembership(<span class="hljs-string">'230.185.192.108'</span>);
+});
+client.on(<span class="hljs-string">'message'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">message,remote</span>)</span>{
+<span class="hljs-built_in">console</span>.log(message.toString());
+});
+client.bind(<span class="hljs-number">8080</span>,<span class="hljs-string">'192.168.1.103'</span>);
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="t735.4.3 DNS服务器">5.4.3 DNS服务器 <a href="#t735.4.3 DNS服务器"> # </a></h4>
+<h6 id="t743.4.3.1 域名">3.4.3.1 域名 <a href="#t743.4.3.1 域名"> # </a></h6>
+<ul>
+<li>域名空间结构</li>
+<li>根域</li>
+<li>顶级域<ul>
+<li>组织域</li>
+<li>国家/地区域名</li>
+</ul>
+</li>
+<li>二级域名</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/arealocal.png" alt="域名"></p>
+<h6 id="t753.4.3.2 DNS服务器">3.4.3.2 DNS服务器 <a href="#t753.4.3.2 DNS服务器"> # </a></h6>
+<p>DNS是Domain Name Service的缩写，DNS服务器进行域名和与之对应的IP地址转换的服务器</p>
+<ul>
+<li>IP地址不易记忆</li>
+<li>早期使用Hosts文件解析域名<ul>
+<li>主要名称重复</li>
+<li>主机维护困难</li>
+</ul>
+</li>
+<li>DNS(Domain Name System 域名系统)<ul>
+<li>分布式</li>
+<li>层次性</li>
+</ul>
+</li>
+</ul>
+<h6 id="t763.4.3.3 查找过程">3.4.3.3 查找过程 <a href="#t763.4.3.3 查找过程"> # </a></h6>
+<p><img src="http://img.zhufengpeixun.cn/dnsquery.jpg" alt="dns"></p>
+<ul>
+<li>客户端向本地域名服务器发出请求，我要访问<a href="http://www.163.com，请告诉我它的IP地址">www.163.com，请告诉我它的IP地址</a></li>
+<li>本地DNS服务器向DNS根服务器发出请求，根DNS服务器会告诉本地服务器(.com)的服务器地址</li>
+<li>本地DNS服务器会向(.com域)发请求，会得到(163.com)的服务器地址</li>
+<li>本地DNS服务器会向(163.com)发请求,会得到(<a href="http://www.163.com)的IP地址1.1.1.1">www.163.com)的IP地址1.1.1.1</a></li>
+<li>本地DNS服务器向客户端回复域名(<a href="http://www.163.com)对应的IP地址是1.1.1.1">www.163.com)对应的IP地址是1.1.1.1</a></li>
+</ul>
+<h4 id="t775.4.4 DHCP服务器">5.4.4 DHCP服务器 <a href="#t775.4.4 DHCP服务器"> # </a></h4>
+<ul>
+<li>保证任何IP地址在同一时刻只能由一台DHCP客户机所使用。</li>
+<li>DHCP应当可以给用户分配永久固定的IP地址。</li>
+<li>DHCP应当可以同用其他方法获得IP地址的主机共存（如手工配置IP地址的主机）</li>
+<li>DHCP服务器应当向现有的BOOTP客户端提供服务。</li>
+</ul>
+<h5 id="t785.4.4.1 工作流程">5.4.4.1 工作流程 <a href="#t785.4.4.1 工作流程"> # </a></h5>
+<ul>
+<li>主机发送<code>DHCPDISCOVER</code>广播包在网络上寻找DHCP服务器；</li>
+<li>DHCP服务器向主机发送<code>DHCPOFFER</code>单播数据包，包含IP地址、MAC地址、域名信息以及地址租期；</li>
+<li>主机发送<code>DHCPREQUEST</code>广播包，正式向服务器请求分配已提供的IP地址；</li>
+<li>DHCP服务器向主机发送DHCPACK单播包，确认主机的请求</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/dhcpserver.jpg" alt="dhcpserver"></p>
+<h5 id="t795.4.4.2 抓包">5.4.4.2 抓包 <a href="#t795.4.4.2 抓包"> # </a></h5>
+<p><img src="http://img.zhufengpeixun.cn/dhcprequest.png" alt="dhcprequest"></p>
+<p><img src="http://img.zhufengpeixun.cn/dhcpack.png" alt="dhcpack"></p>
+<h2 id="t806. 应用层">6. 应用层 <a href="#t806. 应用层"> # </a></h2>
+<h3 id="t816.1 协议">6.1 协议 <a href="#t816.1 协议"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/17.mail.png" alt="connect"></p>
+<h3 id="t826.2 应用层常见协议">6.2 应用层常见协议 <a href="#t826.2 应用层常见协议"> # </a></h3>
+<ul>
+<li>HTTP 超文件传输协议</li>
+<li>FTP 文件传输协议</li>
+<li>SMTP(发送邮件)和POP3(接收邮件)</li>
+</ul>
+<h3 id="t836.3 案例">6.3 案例 <a href="#t836.3 案例"> # </a></h3>
+<p>数据-&gt;传输层(包)-&gt;网络层(段Segment)-&gt;数据链路层(帧)</p>
+<h4 id="t846.3.1 发送方是从高层到低层封装数据">6.3.1 发送方是从高层到低层封装数据 <a href="#t846.3.1 发送方是从高层到低层封装数据"> # </a></h4>
+<ul>
+<li>在应用层要把各式各样的数据如字母、数字、汉字、图片等转换成二进制</li>
+<li>在TCP传输层中，上层的数据被分割成小的数据段，并为每个分段后的数据封装TCP报文头部</li>
+<li>在TCP头部有一个关键的字段信息端口号，它用于标识上层的协议或应用程序，确保上层数据的正常通信</li>
+<li>计算机可以多进程并发运行，例如在发邮件的同时也可以通过浏览器浏览网页，这两种应用通过端口号进行区分</li>
+<li>在网络层，上层数据被封装上亲的报文头部(IP头部)，上层的数据是包括TCP头部的。IP地址包括的最关键字段信息就是IP地址，用于标识网络的逻辑地址。</li>
+<li>数据链路径层，上层数据成一个MAC头部，内部有最关键的是MAC地址。MAC地址就是固化在硬件设备内部的全球唯一的物理地址。</li>
+<li>在物理层，无论在之前哪一层封装的报文头和还是上层数据都是由二进制组成的，物理将这些二进制数字比特流转换成电信号在网络中传输</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/18.send.png" alt="connect"></p>
+<h4 id="t856.3.2 接收方是从低层到高层解封装">6.3.2 接收方是从低层到高层解封装 <a href="#t856.3.2 接收方是从低层到高层解封装"> # </a></h4>
+<ul>
+<li>数据封装完毕传输到接收方后，将数据要进行解封装</li>
+<li>在物理层，先把电信号转成二进制数据，并将数据传送至数据链路层</li>
+<li>在数据链路层，把MAC头部拆掉，并将剩余的数据传送至上一层</li>
+<li>在网络层，数据的IP头部被拆掉，并将剩余的数据送至上一层</li>
+<li>在传输层，把TCP头部拆掉，将真实的数据传送至应用层</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/19.receive.png" alt="connect"></p>
+<h4 id="t866.3.3 真实网络环境">6.3.3 真实网络环境 <a href="#t866.3.3 真实网络环境"> # </a></h4>
+<ul>
+<li>发送方和接收方中间可能会有多个硬件中转设备</li>
+<li>中间可能会增加交换机和路由器</li>
+<li>数据在传输过程中不断地进行封装和解封装的过程，每层设备只能处理哪一层的数据<ul>
+<li>交换机属于数据链路层</li>
+<li>路由器属于网络层</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/reaenv2.png" alt="分层模型"></p>
+<h2 id="t877. 附录">7. 附录 <a href="#t877. 附录"> # </a></h2>
+<h3 id="t887.1 不同层中的称谓：">7.1 不同层中的称谓： <a href="#t887.1 不同层中的称谓："> # </a></h3>
+<ul>
+<li>数据帧（Frame）：是一种信息单位，它的起始点和目的点都是<strong>数据链路层</strong>。</li>
+<li>数据包（Packet）：也是一种信息单位，它的起始和目的地是<strong>网络层</strong>。</li>
+<li>段（Segment）：通常是指起始点和目的地都是<strong>传输层</strong>的信息单元。</li>
+<li>消息（message）：是指起始点和目的地都在网络层以上（经常在<strong>应用层</strong>）的信息单元。</li>
+</ul>
+<h3 id="t897.2 IP头服务类型">7.2 IP头服务类型 <a href="#t897.2 IP头服务类型"> # </a></h3>
+<ul>
+<li>IP首部中的服务类型（TOS）</li>
+<li>TOS包括共8位，包括3 bit的优先权字段（取值可以从000-111所有值），4 bit的TOS子字段和1 bit未用位但必须置0。</li>
+<li>3bit的8个优先级的定义如下：<ul>
+<li>111--Network Control(网络控制）一般保留给网络控制数据使用，如路由。</li>
+<li>110--Internetwork Control(网间控制)</li>
+<li>101--Critic(关键)语音数据使用。</li>
+<li>100--Flash Override(疾速)视频会议和视频流使用。</li>
+<li>011--Flash(闪速)语音控制数据使用。</li>
+<li>010--Immediate(快速)数据业务使用</li>
+<li>001--Priority(优先)数据业务使用</li>
+<li>000--Routine(普通)默认标记值。</li>
+</ul>
+</li>
+<li>4 bit的TOS分别代表：最小时延、最大吞吐量、最高可靠性和最小费用。4 bit中只能置其中1 bit。如果所有4 bit均为0，那么就意味着是一般服务。</li>
+<li>Telnet、Rlogin这两个交互应用要求最小的传输时延，FTP文件传输要求最大吞吐量，最高可靠性是指网络管理（SNMP）和路由选择协议。用户网络新闻要求最小费用</li>
+</ul>
+
+    

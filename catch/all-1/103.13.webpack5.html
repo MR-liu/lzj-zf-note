@@ -1,0 +1,765 @@
+
+        <h2 id="t01. webpack5新特性介绍">1. webpack5新特性介绍 <a href="#t01. webpack5新特性介绍"> # </a></h2>
+<ul>
+<li>启动命令</li>
+<li>持久化缓存</li>
+<li>资源模块</li>
+<li><code>moduleIds</code> &amp; <code>chunkIds</code>的优化</li>
+<li>更智能的<code>tree shaking</code></li>
+<li>nodeJs的<code>polyfill</code>脚本被移除</li>
+<li>模块联邦</li>
+</ul>
+<h2 id="t12.启动命令">2.启动命令 <a href="#t12.启动命令"> # </a></h2>
+<h3 id="t22.1 安装">2.1 安装 <a href="#t22.1 安装"> # </a></h3>
+<pre><code class="lang-js">npm install webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core  @babel/preset-env @babel/preset-react style-loader css-loader --save-dev
+npm install react react-dom --save
+</code></pre>
+<h3 id="t32.2 webpack.config.js">2.2 webpack.config.js <a href="#t32.2 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">module</span>:{
+        <span class="hljs-attr">rules</span>: [
+            {
+                <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+                <span class="hljs-attr">use</span>: [
+                    {
+                        <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>,
+                        <span class="hljs-attr">options</span>: {
+                            <span class="hljs-attr">presets</span>: [
+                                <span class="hljs-string">"@babel/preset-react"</span>
+                            ]
+                        },
+
+                    }
+                ],
+                <span class="hljs-attr">exclude</span>:<span class="hljs-regexp">/node_modules/</span>
+            }
+        ]
+    },
+    <span class="hljs-attr">devServer</span>:{},
+    <span class="hljs-attr">plugins</span>:[
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>:<span class="hljs-string">'./public/index.html'</span>
+        })
+    ]
+}
+</code></pre>
+<h3 id="t42.3 public\index.html">2.3 public\index.html <a href="#t42.3 public\index.html"> # </a></h3>
+<p>public\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>webpack5<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t52.4 src\index.js">2.4 src\index.js <a href="#t52.4 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>,root);
+</code></pre>
+<h3 id="t62.5 package.json">2.5 package.json <a href="#t62.5 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"webpack"</span>,
+    <span class="hljs-attr">"start"</span>: <span class="hljs-string">"webpack serve"</span>
+  }
+}
+</code></pre>
+<h2 id="t73.持久化缓存">3.持久化缓存 <a href="#t73.持久化缓存"> # </a></h2>
+<ul>
+<li>webpack会<a href="https://webpack.docschina.org/configuration/other-options/#cache">缓存</a>生成的webpack模块和chunk,来改善构建速度</li>
+<li>缓存在webpack5中默认开启，缓存默认是在内存里,但可以对<code>cache</code>进行设置</li>
+<li>webpack 追踪了每个模块的依赖，并创建了文件系统快照。此快照会与真实文件系统进行比较，当检测到差异时，将触发对应模块的重新构建</li>
+</ul>
+<h3 id="t83.1 webpack.config.js">3.1 webpack.config.js <a href="#t83.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+module.exports = {
+    mode: 'development',
+<span class="hljs-addition">+   cache: {</span>
+<span class="hljs-addition">+       type: 'filesystem',  //'memory' | 'filesystem'</span>
+<span class="hljs-addition">+       cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack'),</span>
+<span class="hljs-addition">+   },</span>
+    devtool: false,
+    module:{
+        rules: [
+            {
+                test: /\.js$/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                "@babel/preset-react"
+                            ]
+                        },
+
+                    }
+                ],
+                exclude:/node_modules/
+            }
+        ]
+    },
+    devServer:{},
+    plugins:[
+        new HtmlWebpackPlugin({
+            template:'./public/index.html'
+        })
+    ]
+}
+</code></pre>
+<h2 id="t94.资源模块">4.资源模块 <a href="#t94.资源模块"> # </a></h2>
+<ul>
+<li>资源模块是一种模块类型，它允许使用资源文件（字体，图标等）而无需配置额外 loader</li>
+<li><code>raw-loader</code> =&gt; <code>asset/source</code> 导出资源的源代码</li>
+<li><code>file-loader</code> =&gt; <code>asset/resource</code> 发送一个单独的文件并导出 URL</li>
+<li><code>url-loader</code> =&gt; <code>asset/inline</code> 导出一个资源的 data URI</li>
+<li>asset 在导出一个 data URI 和发送一个单独的文件之间自动选择。之前通过使用 <code>url-loader</code>，并且配置资源体积限制实现</li>
+<li><a href="https://webpack.js.org/configuration/module/#rule">Rule.type</a></li>
+<li><a href="https://webpack.js.org/guides/asset-modules/">asset-modules</a></li>
+</ul>
+<h3 id="t104.1 webpack.config.js">4.1 webpack.config.js <a href="#t104.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">module.exports = {
+    module:{
+        rules: [
+            {
+                test: /\.js$/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                "@babel/preset-react"
+                            ]
+                        },
+
+                    }
+                ],
+                exclude:/node_modules/
+            },
+<span class="hljs-addition">+           {</span>
+<span class="hljs-addition">+               test: /\.png$/,</span>
+<span class="hljs-addition">+               type: 'asset/resource'</span>
+<span class="hljs-addition">+           },</span>
+<span class="hljs-addition">+           {</span>
+<span class="hljs-addition">+               test: /\.ico$/,</span>
+<span class="hljs-addition">+               type: 'asset/inline'</span>
+<span class="hljs-addition">+           },</span>
+<span class="hljs-addition">+           {</span>
+<span class="hljs-addition">+               test: /\.txt$/,</span>
+<span class="hljs-addition">+               type: 'asset/source'</span>
+<span class="hljs-addition">+           },</span>
+<span class="hljs-addition">+           {</span>
+<span class="hljs-addition">+               test: /\.jpg$/,</span>
+<span class="hljs-addition">+               type: 'asset',</span>
+<span class="hljs-addition">+               parser: {</span>
+<span class="hljs-addition">+                   dataUrlCondition: {</span>
+<span class="hljs-addition">+                     maxSize: 4 * 1024 // 4kb</span>
+<span class="hljs-addition">+                   }</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           }</span>
+        ]
+    },
+  experiments: {
+    asset: true
+  },
+};
+</code></pre>
+<h3 id="t114.2 src\index.js">4.2 src\index.js <a href="#t114.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+ import png from './assets/logo.png';</span>
+<span class="hljs-addition">+ import ico from './assets/logo.ico';</span>
+<span class="hljs-addition">+ import jpg from './assets/logo.jpg';</span>
+<span class="hljs-addition">+ import txt from './assets/logo.txt';</span>
+<span class="hljs-addition">+ console.log(png,ico,jpg,txt);</span>
+</code></pre>
+<h2 id="t125.URIs">5.URIs <a href="#t125.URIs"> # </a></h2>
+<ul>
+<li><a href="https://webpack.js.org/configuration/experiments/#experiments">experiments</a></li>
+<li>Webpack 5 支持在请求中处理协议</li>
+<li>支持data 支持 Base64 或原始编码,<code>MimeType</code>可以在<code>module.rule</code>中被映射到加载器和模块类型</li>
+</ul>
+<h3 id="t135.1 src\index.js">5.1 src\index.js <a href="#t135.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> data <span class="hljs-keyword">from</span> <span class="hljs-string">"data:text/javascript,export default 'title'"</span>;
+<span class="hljs-built_in">console</span>.log(data);
+</code></pre>
+<h2 id="t146.moduleIds &amp; chunkIds的优化">6.moduleIds &amp; chunkIds的优化 <a href="#t146.moduleIds &amp; chunkIds的优化"> # </a></h2>
+<h3 id="t156.1 概念和选项">6.1 概念和选项 <a href="#t156.1 概念和选项"> # </a></h3>
+<ul>
+<li>module: 每一个文件其实都可以看成一个 module</li>
+<li>chunk: webpack打包最终生成的代码块，代码块会生成文件，一个文件对应一个chunk</li>
+<li>在webpack5之前，没有从entry打包的chunk文件，都会以1、2、3...的文件命名方式输出,删除某些些文件可能会导致缓存失效</li>
+<li>在生产模式下，默认启用这些功能chunkIds: "deterministic", moduleIds: "deterministic"，此算法采用<code>确定性</code>的方式将短数字 ID(3 或 4 个字符)短hash值分配给 modules 和 chunks</li>
+<li>chunkId设置为deterministic，则output中chunkFilename里的[name]会被替换成确定性短数字ID</li>
+<li>虽然chunkId不变(不管值是deterministic | natural | named)，但更改chunk内容，chunkhash还是会改变的</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">可选值</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">natural</td>
+<td style="text-align:left">按使用顺序的数字ID</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td style="text-align:left">named</td>
+<td style="text-align:left">方便调试的高可读性id</td>
+<td style="text-align:left">src_two_js.js</td>
+</tr>
+<tr>
+<td style="text-align:left">deterministic</td>
+<td style="text-align:left">根据模块名称生成简短的hash值</td>
+<td style="text-align:left">915</td>
+</tr>
+<tr>
+<td style="text-align:left">size</td>
+<td style="text-align:left">根据模块大小生成的数字id</td>
+<td style="text-align:left">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t166.2 webpack.config.js">6.2 webpack.config.js <a href="#t166.2 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">const path = require('path');
+module.exports = {
+    mode: 'development',
+    devtool:false,
+<span class="hljs-addition">+   optimization:{</span>
+<span class="hljs-addition">+       moduleIds:'deterministic',</span>
+<span class="hljs-addition">+       chunkIds:'deterministic'</span>
+<span class="hljs-addition">+   }</span>
+}
+</code></pre>
+<h3 id="t176.3 src\index.js">6.3 src\index.js <a href="#t176.3 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>(<span class="hljs-string">'./one'</span>);
+<span class="hljs-keyword">import</span>(<span class="hljs-string">'./two'</span>);
+<span class="hljs-keyword">import</span>(<span class="hljs-string">'./three'</span>);
+</code></pre>
+<h2 id="t187.移除Node.js的polyfill">7.移除Node.js的polyfill <a href="#t187.移除Node.js的polyfill"> # </a></h2>
+<ul>
+<li><code>webpack4</code>带了许多Node.js核心模块的<code>polyfill</code>,一旦模块中使用了任何核心模块(如crypto)，这些模块就会被自动启用</li>
+<li><code>webpack5</code>不再自动引入这些<code>polyfill</code></li>
+</ul>
+<h3 id="t197.1 安装">7.1 安装 <a href="#t197.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm i crypto-js crypto-browserify stream-browserify buffer -D
+</code></pre>
+<h3 id="t207.2 src\index.js">7.2 src\index.js <a href="#t207.2 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> CryptoJS <span class="hljs-keyword">from</span> <span class="hljs-string">'crypto-js'</span>;
+<span class="hljs-built_in">console</span>.log(CryptoJS.MD5(<span class="hljs-string">'zhufeng'</span>).toString());
+</code></pre>
+<h3 id="t217.3 webpack.config.js">7.3 webpack.config.js <a href="#t217.3 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js">    resolve:{
+        <span class="hljs-comment">/* fallback:{ 
+            "crypto": require.resolve("crypto-browserify"),
+            "buffer": require.resolve("buffer"),
+            "stream":require.resolve("stream-browserify")
+        }, */</span>
+        <span class="hljs-attr">fallback</span>:{ 
+            <span class="hljs-string">"crypto"</span>:<span class="hljs-literal">false</span>,
+            <span class="hljs-string">"buffer"</span>: <span class="hljs-literal">false</span>,
+            <span class="hljs-string">"stream"</span>:<span class="hljs-literal">false</span>
+        }
+    },
+</code></pre>
+<h2 id="t228.更强大的tree-shaking">8.更强大的tree-shaking <a href="#t228.更强大的tree-shaking"> # </a></h2>
+<ul>
+<li><a href="https://webpack.js.org/guides/tree-shaking/#root">tree-shaking</a>就在打包的时候剔除没有用到的代码</li>
+<li>webpack4 本身的 tree shaking 比较简单,主要是找一个 <code>import</code> 进来的变量是否在这个模块内出现过</li>
+<li>webpack5可以进行根据作用域之间的关系来进行优化</li>
+<li><a href="https://diverse.space/webpack-deep-scope-demo/">webpack-deep-scope-demo</a></li>
+</ul>
+<h3 id="t238.1 webpack4">8.1 webpack4 <a href="#t238.1 webpack4"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { isNumber, isNull } <span class="hljs-keyword">from</span> <span class="hljs-string">'lodash'</span>;
+
+<span class="hljs-keyword">export</span> isNull(...args) {
+  <span class="hljs-keyword">return</span> isNull(...args);
+}
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/1608975584282" alt="1608975584282"></p>
+<h3 id="t248.2 deep-scope">8.2 deep-scope <a href="#t248.2 deep-scope"> # </a></h3>
+<h4 id="t258.2.1 src\index.js">8.2.1 src\index.js <a href="#t258.2.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {function1} <span class="hljs-keyword">from</span> <span class="hljs-string">'./module1'</span>;
+<span class="hljs-built_in">console</span>.log(function1);
+</code></pre>
+<h4 id="t268.2.2 src\module1.js">8.2.2 src\module1.js <a href="#t268.2.2 src\module1.js"> # </a></h4>
+<p>src\module1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">function1</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'function1'</span>);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">function2</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'function2'</span>);
+}
+</code></pre>
+<h4 id="t278.2.3 src\module2.js">8.2.3 src\module2.js <a href="#t278.2.3 src\module2.js"> # </a></h4>
+<p>src\module2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">function3</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'function3'</span>);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">function4</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'function4'</span>);
+}
+</code></pre>
+<h4 id="t288.2.4 webpack.config.js">8.2.4 webpack.config.js <a href="#t288.2.4 webpack.config.js"> # </a></h4>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">module.exports = {
+<span class="hljs-addition">+   mode: 'development',</span>
+    optimization:{
+<span class="hljs-addition">+       usedExports:true</span>
+    }
+}
+</code></pre>
+<h2 id="t298.3 sideEffects">8.3 sideEffects <a href="#t298.3 sideEffects"> # </a></h2>
+<ul>
+<li>函数副作用指当调用函数时，除了返回函数值之外，还产生了附加的影响,例如修改全局变量</li>
+<li>严格的函数式语言要求函数必须无副作用</li>
+</ul>
+<h3 id="t308.3.1 sideEffects:false">8.3.1 sideEffects:false <a href="#t308.3.1 sideEffects:false"> # </a></h3>
+<h4 id="t318.3.1.1 src\index.js">8.3.1.1 src\index.js <a href="#t318.3.1.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'./title.js'</span>;
+</code></pre>
+<h4 id="t328.3.1.2 src\title.js">8.3.1.2 src\title.js <a href="#t328.3.1.2 src\title.js"> # </a></h4>
+<p>src\title.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">document</span>.title = <span class="hljs-string">"改标题"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTitle</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'getTitle'</span>);
+}
+</code></pre>
+<h4 id="t338.3.1.3 package.json">8.3.1.3 package.json <a href="#t338.3.1.3 package.json"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-json">"sideEffects": false,
+</code></pre>
+<h3 id="t348.3.2 sideEffects:[&quot;*.css&quot;]">8.3.2 sideEffects:["*.css"] <a href="#t348.3.2 sideEffects:[" *.css"]"=""> # </a></h3>
+<h4 id="t358.3.2.1 src\index.css">8.3.2.1 src\index.css <a href="#t358.3.2.1 src\index.css"> # </a></h4>
+<p>src\index.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-tag">body</span>{
+    <span class="hljs-attribute">background-color</span>: green;
+}
+</code></pre>
+<h4 id="t368.3.2.2 src\index.css">8.3.2.2 src\index.css <a href="#t368.3.2.2 src\index.css"> # </a></h4>
+<p>src\index.css</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'./index.css'</span>;
+</code></pre>
+<h4 id="t378.3.2.3 package.json">8.3.2.3 package.json <a href="#t378.3.2.3 package.json"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-json">"sideEffects": ["*.css"],
+</code></pre>
+<h2 id="t389.模块联邦">9.模块联邦 <a href="#t389.模块联邦"> # </a></h2>
+<h3 id="t399.1.动机">9.1.动机 <a href="#t399.1.动机"> # </a></h3>
+<ul>
+<li>Module Federation的动机是为了不同开发小组间共同开发一个或者多个应用</li>
+<li>应用将被划分为更小的应用块，一个应用块，可以是比如头部导航或者侧边栏的前端组件，也可以是数据获取逻辑的逻辑组件</li>
+<li>每个应用块由不同的组开发</li>
+<li>应用或应用块共享其他其他应用块或者库</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/1608392171072" alt="1608392171072"></p>
+<h3 id="t409.2.Module Federation">9.2.Module Federation <a href="#t409.2.Module Federation"> # </a></h3>
+<ul>
+<li>使用Module Federation时，每个应用块都是一个独立的构建，这些构建都将编译为容器</li>
+<li>容器可以被其他应用或者其他容器应用</li>
+<li>一个被引用的容器被称为<code>remote</code>, 引用者被称为<code>host</code>，<code>remote</code>暴露模块给<code>host</code>, <code>host</code>则可以使用这些暴露的模块，这些模块被成为<code>remote</code>模块</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/1608722799323" alt="1608722799323"></p>
+<h3 id="t419.3.实战">9.3.实战 <a href="#t419.3.实战"> # </a></h3>
+<h4 id="t429.3.1 配置参数">9.3.1 配置参数 <a href="#t429.3.1 配置参数"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">string</td>
+<td style="text-align:left">必传值，即输出的模块名，被远程引用时路径为${name}/${expose}</td>
+</tr>
+<tr>
+<td style="text-align:left">library</td>
+<td style="text-align:left">object</td>
+<td style="text-align:left">声明全局变量的方式，name为umd的name</td>
+</tr>
+<tr>
+<td style="text-align:left">filename</td>
+<td style="text-align:left">string</td>
+<td style="text-align:left">构建输出的文件名</td>
+</tr>
+<tr>
+<td style="text-align:left">remotes</td>
+<td style="text-align:left">object</td>
+<td style="text-align:left">远程引用的应用名及其别名的映射，使用时以key值作为name</td>
+</tr>
+<tr>
+<td style="text-align:left">exposes</td>
+<td style="text-align:left">object</td>
+<td style="text-align:left">被远程引用时可暴露的资源路径及其别名</td>
+</tr>
+<tr>
+<td style="text-align:left">shared</td>
+<td style="text-align:left">object</td>
+<td style="text-align:left">与其他应用之间可以共享的第三方依赖，使你的代码中不用重复加载同一份依赖</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t439.3.2 remote">9.3.2 remote <a href="#t439.3.2 remote"> # </a></h4>
+<h5 id="t449.3.2.1 remote\webpack.config.js">9.3.2.1 remote\webpack.config.js <a href="#t449.3.2.1 remote\webpack.config.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">let</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">let</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> ModuleFederationPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/container/ModuleFederationPlugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">publicPath</span>: <span class="hljs-string">"http://localhost:3000/"</span>,
+    },
+    <span class="hljs-attr">devServer</span>: {
+        <span class="hljs-attr">port</span>: <span class="hljs-number">3000</span>
+    },
+    <span class="hljs-attr">module</span>: {
+        <span class="hljs-attr">rules</span>: [
+            {
+                <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>,
+                <span class="hljs-attr">use</span>: {
+                    <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>,
+                    <span class="hljs-attr">options</span>: {
+                        <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-react"</span>]
+                    },
+                },
+                <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>,
+            },
+        ]
+    },
+    <span class="hljs-attr">plugins</span>: [
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>:<span class="hljs-string">'./public/index.html'</span>
+        }),
+        <span class="hljs-keyword">new</span> ModuleFederationPlugin({
+            <span class="hljs-attr">filename</span>: <span class="hljs-string">"remoteEntry.js"</span>,
+            <span class="hljs-attr">name</span>: <span class="hljs-string">"remote"</span>,
+            <span class="hljs-attr">exposes</span>: {
+                <span class="hljs-string">"./NewsList"</span>: <span class="hljs-string">"./src/NewsList"</span>,
+            }
+          })
+    ]
+}
+</code></pre>
+<h5 id="t459.3.2.2 remote\src\index.js">9.3.2.2 remote\src\index.js <a href="#t459.3.2.2 remote\src\index.js"> # </a></h5>
+<p>remote\src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>(<span class="hljs-string">"./bootstrap"</span>);
+</code></pre>
+<h5 id="t469.3.2.3 remote\src\bootstrap.js">9.3.2.3 remote\src\bootstrap.js <a href="#t469.3.2.3 remote\src\bootstrap.js"> # </a></h5>
+<p>remote\src\bootstrap.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">"./App"</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+</code></pre>
+<h5 id="t479.3.2.4 remote\src\App.js">9.3.2.4 remote\src\App.js <a href="#t479.3.2.4 remote\src\App.js"> # </a></h5>
+<p>remote\src\App.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> NewsList <span class="hljs-keyword">from</span> <span class="hljs-string">'./NewsList'</span>;
+<span class="hljs-keyword">const</span> App = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>本地组件NewsList<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">NewsList</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+</code></pre>
+<h5 id="t489.3.2.5 remote\src\NewsList.js">9.3.2.5 remote\src\NewsList.js <a href="#t489.3.2.5 remote\src\NewsList.js"> # </a></h5>
+<p>remote\src\NewsList.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ()=&gt;(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>新闻列表<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+</code></pre>
+<h4 id="t499.3.3 host">9.3.3 host <a href="#t499.3.3 host"> # </a></h4>
+<h5 id="t509.3.3.1 host\webpack.config.js">9.3.3.1 host\webpack.config.js <a href="#t509.3.3.1 host\webpack.config.js"> # </a></h5>
+<p>host\webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">let</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">let</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> ModuleFederationPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/container/ModuleFederationPlugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">publicPath</span>: <span class="hljs-string">"http://localhost:8000/"</span>,
+    },
+    <span class="hljs-attr">devServer</span>: {
+        <span class="hljs-attr">port</span>: <span class="hljs-number">8000</span>
+    },
+    <span class="hljs-attr">module</span>: {
+        <span class="hljs-attr">rules</span>: [
+            {
+                <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>,
+                <span class="hljs-attr">use</span>: {
+                    <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>,
+                    <span class="hljs-attr">options</span>: {
+                        <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-react"</span>]
+                    },
+                },
+                <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>,
+            },
+        ]
+    },
+    <span class="hljs-attr">plugins</span>: [
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>: <span class="hljs-string">'./public/index.html'</span>
+        }),
+        <span class="hljs-keyword">new</span> ModuleFederationPlugin({
+            <span class="hljs-attr">filename</span>: <span class="hljs-string">"remoteEntry.js"</span>,
+            <span class="hljs-attr">name</span>: <span class="hljs-string">"host"</span>,
+            <span class="hljs-attr">remotes</span>: {
+                <span class="hljs-attr">remote</span>: <span class="hljs-string">"remote@http://localhost:3000/remoteEntry.js"</span>
+            }
+        })
+    ]
+}
+</code></pre>
+<h5 id="t519.3.3.2 host\src\index.js">9.3.3.2 host\src\index.js <a href="#t519.3.3.2 host\src\index.js"> # </a></h5>
+<p>host\src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>(<span class="hljs-string">"./bootstrap"</span>);
+</code></pre>
+<h5 id="t529.3.3.3 host\src\bootstrap.js">9.3.3.3 host\src\bootstrap.js <a href="#t529.3.3.3 host\src\bootstrap.js"> # </a></h5>
+<p>host\src\bootstrap.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">"./App"</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+</code></pre>
+<h5 id="t539.3.3.4 host\src\App.js">9.3.3.4 host\src\App.js <a href="#t539.3.3.4 host\src\App.js"> # </a></h5>
+<p>host\src\App.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> Slides <span class="hljs-keyword">from</span> <span class="hljs-string">'./Slides'</span>;
+<span class="hljs-keyword">const</span> RemoteNewsList = React.lazy(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">"remote/NewsList"</span>));
+
+<span class="hljs-keyword">const</span> App = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> &gt;</span>本地组件Slides, 远程组件NewsList<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Slides</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">React.Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">"Loading NewsList"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">RemoteNewsList</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">React.Suspense</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+</code></pre>
+<h5 id="t549.3.3.5 host\src\Slides.js">9.3.3.5 host\src\Slides.js <a href="#t549.3.3.5 host\src\Slides.js"> # </a></h5>
+<p>host\src\Slides.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ()=&gt;(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>轮播图<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+</code></pre>
+<h3 id="t559.4.shared">9.4.shared <a href="#t559.4.shared"> # </a></h3>
+<ul>
+<li><code>shared</code>配置主要是用来避免项目出现多个公共依赖</li>
+</ul>
+<h4 id="t569.4.1 remote\webpack.config.js">9.4.1 remote\webpack.config.js <a href="#t569.4.1 remote\webpack.config.js"> # </a></h4>
+<pre><code class="lang-diff">    plugins: [
+        new HtmlWebpackPlugin({
+            template:'./public/index.html'
+        }),
+        new ModuleFederationPlugin({
+            filename: "remoteEntry.js",
+            name: "remote",
+            exposes: {
+                "./NewsList": "./src/NewsList",
+            },
+<span class="hljs-addition">+            shared:{</span>
+<span class="hljs-addition">+                react: { singleton: true },</span>
+<span class="hljs-addition">+                "react-dom": { singleton: true }</span>
+<span class="hljs-addition">+              }</span>
+          })
+    ]
+</code></pre>
+<h4 id="t579.4.2 host\webpack.config.js">9.4.2 host\webpack.config.js <a href="#t579.4.2 host\webpack.config.js"> # </a></h4>
+<pre><code class="lang-diff">    plugins: [
+        new HtmlWebpackPlugin({
+            template: './public/index.html'
+        }),
+        new ModuleFederationPlugin({
+            filename: "remoteEntry.js",
+            name: "host",
+            remotes: {
+                remote: "remote@http://localhost:3000/remoteEntry.js"
+            },
+<span class="hljs-addition">+           shared:{</span>
+<span class="hljs-addition">+                react: { singleton: true },</span>
+<span class="hljs-addition">+                "react-dom": { singleton: true }</span>
+<span class="hljs-addition">+           }</span>
+        })
+    ]
+</code></pre>
+<h3 id="t589.5.双向依赖">9.5.双向依赖 <a href="#t589.5.双向依赖"> # </a></h3>
+<ul>
+<li>Module Federation 的共享可以是双向的</li>
+</ul>
+<h4 id="t599.5.1 remote\webpack.config.js">9.5.1 remote\webpack.config.js <a href="#t599.5.1 remote\webpack.config.js"> # </a></h4>
+<pre><code class="lang-diff">    plugins: [
+        new HtmlWebpackPlugin({
+            template:'./public/index.html'
+        }),
+        new ModuleFederationPlugin({
+            filename: "remoteEntry.js",
+            name: "remote",
+<span class="hljs-addition">+            remotes: {</span>
+<span class="hljs-addition">+                host: "host@http://localhost:8000/remoteEntry.js"</span>
+<span class="hljs-addition">+            },</span>
+            exposes: {
+                "./NewsList": "./src/NewsList",
+            },
+            shared:{
+                react: { singleton: true },
+                "react-dom": { singleton: true }
+              }
+          })
+    ]
+</code></pre>
+<h4 id="t609.5.2 host\webpack.config.js">9.5.2 host\webpack.config.js <a href="#t609.5.2 host\webpack.config.js"> # </a></h4>
+<pre><code class="lang-diff">    plugins: [
+        new HtmlWebpackPlugin({
+            template: './public/index.html'
+        }),
+        new ModuleFederationPlugin({
+            filename: "remoteEntry.js",
+            name: "host",
+            remotes: {
+                remote: "remote@http://localhost:3000/remoteEntry.js"
+            },
+<span class="hljs-addition">+           exposes: {</span>
+<span class="hljs-addition">+                "./Slides": "./src/Slides",</span>
+<span class="hljs-addition">+           },</span>
+            shared:{
+                react: { singleton: true },
+                "react-dom": { singleton: true }
+              }
+        })
+    ]
+</code></pre>
+<h4 id="t619.5.3 remote\src\App.js">9.5.3 remote\src\App.js <a href="#t619.5.3 remote\src\App.js"> # </a></h4>
+<p>remote\src\App.js</p>
+<pre><code class="lang-diff">import React from "react";
+import NewsList from './NewsList';
+<span class="hljs-addition">+const RemoteSlides = React.lazy(() =&gt; import("host/Slides"));</span>
+const App = () =&gt; (
+  &lt;div&gt;
+<span class="hljs-addition">+    &lt;h2&gt;本地组件NewsList,远程组件Slides&lt;/h2&gt;</span>
+    &lt;NewsList /&gt;
+<span class="hljs-addition">+    &lt;React.Suspense fallback="Loading Slides"&gt;</span>
+<span class="hljs-addition">+      &lt;RemoteSlides /&gt;</span>
+<span class="hljs-addition">+    &lt;/React.Suspense&gt;</span>
+  &lt;/div&gt;
+);
+
+export default App;
+</code></pre>
+<h3 id="t629.6.多个remote">9.6.多个remote <a href="#t629.6.多个remote"> # </a></h3>
+<h4 id="t639.6.1 all\webpack.config.js">9.6.1 all\webpack.config.js <a href="#t639.6.1 all\webpack.config.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">let</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">let</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> ModuleFederationPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/container/ModuleFederationPlugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">publicPath</span>: <span class="hljs-string">"http://localhost:3000/"</span>,
+    },
+    <span class="hljs-attr">devServer</span>: {
+        <span class="hljs-attr">port</span>: <span class="hljs-number">5000</span>
+    },
+    <span class="hljs-attr">module</span>: {
+        <span class="hljs-attr">rules</span>: [
+            {
+                <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>,
+                <span class="hljs-attr">use</span>: {
+                    <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>,
+                    <span class="hljs-attr">options</span>: {
+                        <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-react"</span>]
+                    },
+                },
+                <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>,
+            },
+        ]
+    },
+    <span class="hljs-attr">plugins</span>: [
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>:<span class="hljs-string">'./public/index.html'</span>
+        }),
+        <span class="hljs-keyword">new</span> ModuleFederationPlugin({
+            <span class="hljs-attr">filename</span>: <span class="hljs-string">"remoteEntry.js"</span>,
+            <span class="hljs-attr">name</span>: <span class="hljs-string">"all"</span>,
+            <span class="hljs-attr">remotes</span>: {
+                <span class="hljs-attr">remote</span>: <span class="hljs-string">"remote@http://localhost:3000/remoteEntry.js"</span>,
+                <span class="hljs-attr">host</span>: <span class="hljs-string">"host@http://localhost:8000/remoteEntry.js"</span>,
+            },
+            <span class="hljs-attr">shared</span>:{
+                <span class="hljs-attr">react</span>: { <span class="hljs-attr">singleton</span>: <span class="hljs-literal">true</span> },
+                <span class="hljs-string">"react-dom"</span>: { <span class="hljs-attr">singleton</span>: <span class="hljs-literal">true</span> }
+              }
+          })
+    ]
+}
+</code></pre>
+<h4 id="t649.6.2 remote\src\index.js">9.6.2 remote\src\index.js <a href="#t649.6.2 remote\src\index.js"> # </a></h4>
+<p>remote\src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>(<span class="hljs-string">"./bootstrap"</span>);
+</code></pre>
+<h4 id="t659.6.3 remote\src\bootstrap.js">9.6.3 remote\src\bootstrap.js <a href="#t659.6.3 remote\src\bootstrap.js"> # </a></h4>
+<p>remote\src\bootstrap.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">"./App"</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+</code></pre>
+<h4 id="t669.6.4 remote\src\App.js">9.6.4 remote\src\App.js <a href="#t669.6.4 remote\src\App.js"> # </a></h4>
+<p>remote\src\App.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">const</span> RemoteSlides = React.lazy(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">"host/Slides"</span>));
+<span class="hljs-keyword">const</span> RemoteNewsList = React.lazy(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">"remote/NewsList"</span>));
+<span class="hljs-keyword">const</span> App = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>远程组件Slides,远程组件NewsList<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">React.Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">"Loading Slides"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">RemoteSlides</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">React.Suspense</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">React.Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">"Loading NewsList"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">RemoteNewsList</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">React.Suspense</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+);
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+</code></pre>
+<h2 id="t6711.参考">11.参考 <a href="#t6711.参考"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/changelog-v5/blob/master/README.md">changelog-v5</a></li>
+</ul>
+
+    

@@ -1,0 +1,333 @@
+
+        <h2 id="t01.生成项目">1.生成项目 <a href="#t01.生成项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app zhufengdrag --typescript
+cd zhufengdrag
+cnpm install antd koa  koa-body koa-<span class="hljs-keyword">static</span> -S
+cnpm start
+</code></pre>
+<h2 id="t12.上传组件">2.上传组件 <a href="#t12.上传组件"> # </a></h2>
+<ul>
+<li><a href="https://ant.design/components/upload-cn/">upload-cn</a></li>
+<li><a href="https://ant.design/components/progress-cn/">progress-cn</a></li>
+</ul>
+<h3 id="t22.1 src\index.tsx">2.1 src\index.tsx <a href="#t22.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'antd/dist/antd.css'</span>;
+<span class="hljs-comment">//import Dragger from './Dragger';</span>
+<span class="hljs-keyword">import</span> { Upload, Icon, message } <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">const</span> { Dragger } = Upload;
+<span class="hljs-keyword">const</span> props = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'file'</span>,
+    <span class="hljs-attr">action</span>: <span class="hljs-string">'https://www.mocky.io/v2/5cc8019d300000980a055e76'</span>,
+    onChange(info: any) {
+        <span class="hljs-built_in">console</span>.log(info);
+        <span class="hljs-keyword">const</span> { status } = info.file;
+        <span class="hljs-keyword">if</span> (status === <span class="hljs-string">'done'</span>) {
+            message.success(<span class="hljs-string">`<span class="hljs-subst">${info.file.name}</span> 上传成功!`</span>);
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (status === <span class="hljs-string">'error'</span>) {
+            message.error(<span class="hljs-string">`<span class="hljs-subst">${info.file.name}</span> 上传失败!`</span>);
+        }
+    },
+};
+ReactDOM.render(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Dragger</span> {<span class="hljs-attr">...props</span>}&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Icon</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"inbox"</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Dragger</span>&gt;</span></span>,
+    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>),
+);
+</code></pre>
+<h3 id="t32.2 Dragger\index.tsx">2.2 Dragger\index.tsx <a href="#t32.2 Dragger\index.tsx"> # </a></h3>
+<p>src\Dragger\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+interface Props {
+}
+<span class="hljs-keyword">const</span> Dragger: React.SFC&lt;Props&gt; = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">props: Props</span>): <span class="hljs-title">JSX</span>.<span class="hljs-title">Element</span> </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            Dragger
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Dragger;
+</code></pre>
+<h2 id="t43. 布局上传组件">3. 布局上传组件 <a href="#t43. 布局上传组件"> # </a></h2>
+<h3 id="t53.1 src\Dragger\index.tsx">3.1 src\Dragger\index.tsx <a href="#t53.1 src\Dragger\index.tsx"> # </a></h3>
+<p>Dragger\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./index.css'</span>;
+type Props = React.PropsWithChildren&lt;{
+
+}&gt;
+<span class="hljs-keyword">const</span> Dragger: React.SFC&lt;Props&gt; = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">props: Props</span>): <span class="hljs-title">JSX</span>.<span class="hljs-title">Element</span> </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"dragger-container"</span>&gt;</span>
+            {props.children}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Dragger;
+</code></pre>
+<h3 id="t63.2 src\Dragger\index.css">3.2 src\Dragger\index.css <a href="#t63.2 src\Dragger\index.css"> # </a></h3>
+<p>src\Dragger\index.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-class">.dragger-container</span>{
+    <span class="hljs-attribute">position</span>: relative;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">height</span>:<span class="hljs-number">200px</span>;
+    <span class="hljs-attribute">background</span>: <span class="hljs-number">#FAFAFA</span>;
+    <span class="hljs-attribute">border</span>:<span class="hljs-number">1px</span> dashed <span class="hljs-number">#D9D9D9</span>;
+    <span class="hljs-attribute">border-radius</span>: <span class="hljs-number">4px</span>;
+    <span class="hljs-attribute">cursor</span>: pointer;
+    <span class="hljs-attribute">display</span>: flex;
+    <span class="hljs-attribute">justify-content</span>: center;
+    <span class="hljs-attribute">align-items</span>: center;
+    <span class="hljs-attribute">transition</span>: border-color .<span class="hljs-number">8s</span>;
+}
+<span class="hljs-selector-class">.dragger-container</span><span class="hljs-selector-pseudo">:hover</span>{
+    <span class="hljs-attribute">border-color</span>:<span class="hljs-number">#40A9FF</span>;
+}
+<span class="hljs-selector-class">.dragger-container</span> <span class="hljs-selector-tag">i</span>{
+    <span class="hljs-attribute">font-size</span>:<span class="hljs-number">100px</span>;
+}
+</code></pre>
+<h2 id="t74. 进度条">4. 进度条 <a href="#t74. 进度条"> # </a></h2>
+<h3 id="t84.1 src\index.tsx">4.1 src\index.tsx <a href="#t84.1 src\index.tsx"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'antd/dist/antd.css'</span>;
+<span class="hljs-keyword">import</span> Dragger, { UploadFile, DragProps } <span class="hljs-keyword">from</span> <span class="hljs-string">'./Dragger'</span>;
+<span class="hljs-keyword">import</span> { Upload, Icon, message } <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-comment">//const { Dragger } = Upload;</span>
+<span class="hljs-keyword">const</span> props: DragProps = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'file'</span>,
+    <span class="hljs-comment">//action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',</span>
+    <span class="hljs-attr">action</span>: <span class="hljs-string">'http://localhost:8080/upload'</span>,
+    onUpload(uploadFile: UploadFile) {
+        <span class="hljs-built_in">console</span>.log(uploadFile);
+        <span class="hljs-keyword">if</span> (uploadFile.error) {
+            message.error(<span class="hljs-string">`<span class="hljs-subst">${uploadFile.file.name}</span> 上传失败!`</span>);
+        } <span class="hljs-keyword">else</span> {
+            message.success(<span class="hljs-string">`<span class="hljs-subst">${uploadFile.file.name}</span> 上传成功!`</span>);
+        }
+    },
+};
+ReactDOM.render(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Dragger</span> {<span class="hljs-attr">...props</span>}&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Icon</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"inbox"</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Dragger</span>&gt;</span></span>,
+    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>),
+);
+</code></pre>
+<h3 id="t94.2 Dragger\index.tsx">4.2 Dragger\index.tsx <a href="#t94.2 Dragger\index.tsx"> # </a></h3>
+<ul>
+<li><code>useRef</code> 返回一个可变的 <code>ref</code> 对象，其 <code>.current</code> 属性被初始化为传入的参数<code>(initialValue)</code>返回的 ref 对象在组件的整个生命周期内保持不变</li>
+<li><code>useEffect</code> 就是一个 Effect Hook，给函数组件增加了操作副作用的能力。它跟 class 组件中的 componentDidMount、componentDidUpdate 和 componentWillUnmount 具有相同的用途，只不过被合并成了一个 API</li>
+<li><code>useState</code> 就是一个 Hook，通过在函数组件里调用它来给组件添加一些内部 state,React 会在重复渲染时保留这个 state，useState 会返回一对值：当前状态和一个让你更新它的函数</li>
+</ul>
+<p>拖动目标上触发事件(源元素)</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">事件</th>
+<th style="text-align:left">触发</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ondragstart</td>
+<td style="text-align:left">用户开始拖动元素时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">ondrag</td>
+<td style="text-align:left">元素正在拖动时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">ondragend</td>
+<td style="text-align:left">用户完成元素拖动后触发</td>
+</tr>
+</tbody>
+</table>
+<p>释放目标时触发的事件</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">事件</th>
+<th style="text-align:left">触发</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ondragenter</td>
+<td style="text-align:left">当被鼠标拖动的对象进入其容器范围内时触发此事件</td>
+</tr>
+<tr>
+<td style="text-align:left">ondragover</td>
+<td style="text-align:left">当某被拖动的对象在另一对象容器范围内拖动时触发此事件,如果需要设置允许放置，我们必须阻止对元素的默认处理方式</td>
+</tr>
+<tr>
+<td style="text-align:left">ondragleave</td>
+<td style="text-align:left">当被鼠标拖动的对象离开其容器范围内时触发此事件</td>
+</tr>
+<tr>
+<td style="text-align:left">ondrop</td>
+<td style="text-align:left">在一个拖动过程中，释放鼠标键时触发此事件</td>
+</tr>
+</tbody>
+</table>
+<p>src\Dragger\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, {
+    useRef, MutableRefObject, RefObject, useEffect, useState
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./index.css'</span>;
+<span class="hljs-keyword">import</span> { Progress, Icon } <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">export</span> type DragProps = React.PropsWithChildren&lt;{
+    <span class="hljs-attr">onUpload</span>: any;
+    name: string;
+    action: string
+}&gt;
+<span class="hljs-keyword">export</span> interface UploadFile {
+    <span class="hljs-attr">file</span>: File;
+    percent?: number;
+    url?: string;
+    uploading?: boolean;
+    error?: boolean
+}
+<span class="hljs-keyword">const</span> Dragger: React.SFC&lt;DragProps&gt; = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">props: DragProps</span>): <span class="hljs-title">JSX</span>.<span class="hljs-title">Element</span> </span>{
+    <span class="hljs-keyword">let</span> [uploadFiles, setUploadFiles] = useState&lt;<span class="hljs-built_in">Array</span>&lt;UploadFile&gt;&gt;([]);
+    <span class="hljs-keyword">let</span> uploadContainer: MutableRefObject&lt;HTMLDivElement | <span class="hljs-literal">undefined</span>&gt; = useRef&lt;HTMLDivElement&gt;();
+    <span class="hljs-keyword">const</span> onDragEnter: <span class="hljs-function">(<span class="hljs-params">ev: DragEvent</span>) =&gt;</span> any = (ev: DragEvent): <span class="hljs-function"><span class="hljs-params">any</span> =&gt;</span> {
+        ev.preventDefault();
+        ev.stopPropagation();
+    };
+    <span class="hljs-keyword">const</span> onDragOver = (ev: DragEvent): <span class="hljs-function"><span class="hljs-params">any</span> =&gt;</span> {
+        ev.preventDefault();
+        ev.stopPropagation();
+    };
+    <span class="hljs-keyword">const</span> onDragLeave = (ev: DragEvent): <span class="hljs-function"><span class="hljs-params">any</span> =&gt;</span> {
+        ev.preventDefault();
+        ev.stopPropagation();
+    };
+    <span class="hljs-keyword">const</span> onDrop = (ev: DragEvent): <span class="hljs-function"><span class="hljs-params">any</span> =&gt;</span> {
+        ev.preventDefault();
+        ev.stopPropagation();
+        <span class="hljs-keyword">let</span> transfer: DataTransfer | <span class="hljs-literal">null</span> = ev.dataTransfer;
+        <span class="hljs-keyword">if</span> (transfer &amp;&amp; transfer.files) {
+            upload(transfer.files);
+        }
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">upload</span>(<span class="hljs-params">files: DataTransfer[<span class="hljs-string">'files'</span>]</span>) </span>{
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; files.length; i++) {
+            <span class="hljs-keyword">let</span> file = files[i];
+            <span class="hljs-keyword">let</span> formData = <span class="hljs-keyword">new</span> FormData();
+            formData.append(<span class="hljs-string">'filename'</span>, file.name);
+            formData.append(props.name, file);
+            <span class="hljs-keyword">var</span> xhr: XMLHttpRequest = <span class="hljs-keyword">new</span> XMLHttpRequest();
+            xhr.open(<span class="hljs-string">'POST'</span>, props.action, <span class="hljs-literal">true</span>);
+            xhr.responseType = <span class="hljs-string">'json'</span>;
+            <span class="hljs-keyword">let</span> uploadFile: UploadFile = { file, <span class="hljs-attr">percent</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">uploading</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">false</span> };
+            xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+                <span class="hljs-keyword">if</span> (xhr.readyState == <span class="hljs-number">4</span> &amp;&amp; xhr.status === <span class="hljs-number">200</span>) {
+                    <span class="hljs-keyword">debugger</span>;
+                    uploadFile.url = xhr.response.url;
+                    props.onUpload(uploadFile);
+                }
+            }
+            uploadFiles.push(uploadFile);
+            xhr.onprogress = updateProgress;
+            xhr.upload.onprogress = updateProgress;
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateProgress</span>(<span class="hljs-params">event: ProgressEvent</span>) </span>{
+                <span class="hljs-keyword">if</span> (event.lengthComputable) {
+                    <span class="hljs-keyword">let</span> percent: number = <span class="hljs-built_in">parseInt</span>((event.loaded / event.total * <span class="hljs-number">100</span>).toFixed(<span class="hljs-number">0</span>));
+                    uploadFile.percent = percent;
+                    <span class="hljs-keyword">if</span> (percent &gt;= <span class="hljs-number">100</span>) {
+                        uploadFile.uploading = <span class="hljs-literal">false</span>;
+                    }
+                    setUploadFiles([...uploadFiles]);
+                }
+            }
+            xhr.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+                uploadFile.error = <span class="hljs-literal">true</span>;
+                uploadFile.uploading = <span class="hljs-literal">false</span>;
+                setUploadFiles([...uploadFiles]);
+            }
+            xhr.ontimeout = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+                uploadFile.error = <span class="hljs-literal">true</span>;
+                uploadFile.uploading = <span class="hljs-literal">false</span>;
+                setUploadFiles([...uploadFiles]);
+            }
+            xhr.send(formData);
+        }
+    }
+    useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        uploadContainer.current!.addEventListener(<span class="hljs-string">'dragenter'</span>, onDragEnter);
+        uploadContainer.current!.addEventListener(<span class="hljs-string">'dragover'</span>, onDragOver);
+        uploadContainer.current!.addEventListener(<span class="hljs-string">'drop'</span>, onDrop);
+        uploadContainer.current!.addEventListener(<span class="hljs-string">'dragleave'</span>, onDragLeave);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            uploadContainer.current!.removeEventListener(<span class="hljs-string">'dragenter'</span>, onDragEnter);
+            uploadContainer.current!.removeEventListener(<span class="hljs-string">'dragover'</span>, onDragOver);
+            uploadContainer.current!.removeEventListener(<span class="hljs-string">'drop'</span>, onDrop);
+            uploadContainer.current!.removeEventListener(<span class="hljs-string">'dragleave'</span>, onDragLeave);
+        }
+    })
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"dragger-container"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{uploadContainer</span> <span class="hljs-attr">as</span> <span class="hljs-attr">RefObject</span>&lt;<span class="hljs-attr">HTMLDivElement</span>&gt;</span> | null | undefined}&gt;
+                {props.children}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            {
+                uploadFiles.map((uploadFile: UploadFile, index: number) =&gt; (
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                            {!uploadFile.error &amp;&amp; <span class="hljs-tag">&lt;<span class="hljs-name">Icon</span> <span class="hljs-attr">type</span>=<span class="hljs-string">{uploadFile.uploading</span> ? '<span class="hljs-attr">loading</span>' <span class="hljs-attr">:</span> '<span class="hljs-attr">paper-clip</span>'} /&gt;</span>}
+                            <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">marginLeft:</span> <span class="hljs-attr">10</span> }}&gt;</span>{uploadFile.file.name}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Progress</span> <span class="hljs-attr">status</span>=<span class="hljs-string">{uploadFile.error</span> ? '<span class="hljs-attr">exception</span>' <span class="hljs-attr">:</span> <span class="hljs-attr">undefined</span>} <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">percent</span>=<span class="hljs-string">{uploadFile.percent}</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                ))
+            }
+        <span class="hljs-tag">&lt;/&gt;</span>
+    )
+}
+export default Dragger;
+</span></code></pre>
+<h2 id="t105. 后端接口">5. 后端接口 <a href="#t105. 后端接口"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> koaStatic = <span class="hljs-built_in">require</span>(<span class="hljs-string">'koa-static'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> koaBody = <span class="hljs-built_in">require</span>(<span class="hljs-string">'koa-body'</span>);
+<span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">let</span> Koa = <span class="hljs-built_in">require</span>(<span class="hljs-string">'koa'</span>);
+<span class="hljs-keyword">let</span> app = <span class="hljs-keyword">new</span> Koa();
+app.use(<span class="hljs-keyword">async</span> (ctx, next) =&gt; {
+    ctx.set(<span class="hljs-string">'Access-Control-Allow-Origin'</span>, <span class="hljs-string">'*'</span>);
+    ctx.set(<span class="hljs-string">'Access-Control-Allow-Headers'</span>, <span class="hljs-string">'Content-Type, Accept'</span>);
+    ctx.set(<span class="hljs-string">'Access-Control-Allow-Methods'</span>, <span class="hljs-string">'PUT, POST, GET, DELETE, OPTIONS'</span>);
+    <span class="hljs-keyword">if</span> (ctx.method == <span class="hljs-string">'OPTIONS'</span>) {
+        ctx.body = <span class="hljs-number">200</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">await</span> next();
+    }
+});
+app.use(koaBody({
+    <span class="hljs-attr">formidable</span>: { <span class="hljs-attr">uploadDir</span>: path.resolve(__dirname, <span class="hljs-string">'./uploads'</span>) },
+    <span class="hljs-attr">multipart</span>: <span class="hljs-literal">true</span>
+}));
+
+app.use(koaStatic(
+    path.resolve(__dirname, <span class="hljs-string">'./uploads'</span>)
+));
+app.use(<span class="hljs-keyword">async</span> (ctx, next) =&gt; {
+    <span class="hljs-keyword">if</span> (ctx.url === <span class="hljs-string">'/upload'</span>) {
+        <span class="hljs-keyword">let</span> file = ctx.request.files.file;
+        <span class="hljs-keyword">let</span> filename = path.basename(file.path) + path.extname(file.name);
+        fs.renameSync(file.path, path.join(path.dirname(file.path), filename));
+        ctx.body = { <span class="hljs-attr">url</span>: <span class="hljs-string">"http://localhost:8080/"</span> + filename };
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">await</span> next();
+    }
+});
+
+app.listen(<span class="hljs-number">8080</span>, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'服务器成功在8080端口上启动!'</span>);
+});
+
+</code></pre>
+
+    

@@ -1,0 +1,160 @@
+
+        <h2 id="t01. applyModuleIds">1. applyModuleIds <a href="#t01. applyModuleIds"> # </a></h2>
+<pre><code class="lang-js">    applyModuleIds() {
+        <span class="hljs-keyword">const</span> unusedIds = [];<span class="hljs-comment">//找到当前未使用的 id </span>
+        <span class="hljs-keyword">let</span> nextFreeModuleId = <span class="hljs-number">0</span>;<span class="hljs-comment">//已经使用的最大的 id</span>
+        <span class="hljs-keyword">const</span> usedIds = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.usedModuleIds) {
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> id <span class="hljs-keyword">of</span> <span class="hljs-keyword">this</span>.usedModuleIds) {
+                usedIds.add(id);
+            }
+        }
+
+        <span class="hljs-keyword">const</span> modules1 = <span class="hljs-keyword">this</span>.modules;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> indexModule1 = <span class="hljs-number">0</span>; indexModule1 &lt; modules1.length; indexModule1++) {
+            <span class="hljs-keyword">const</span> module1 = modules1[indexModule1];
+            <span class="hljs-keyword">if</span> (module1.id !== <span class="hljs-literal">null</span>) {
+                usedIds.add(module1.id);
+            }
+        }
+
+        <span class="hljs-keyword">if</span> (usedIds.size &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">let</span> usedIdMax = <span class="hljs-number">-1</span>;
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> usedIdKey <span class="hljs-keyword">of</span> usedIds) {
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> usedIdKey !== <span class="hljs-string">"number"</span>) {
+                    <span class="hljs-keyword">continue</span>;
+                }
+
+                usedIdMax = <span class="hljs-built_in">Math</span>.max(usedIdMax, usedIdKey);
+            }
+
+            <span class="hljs-keyword">let</span> lengthFreeModules = (nextFreeModuleId = usedIdMax + <span class="hljs-number">1</span>);
+
+            <span class="hljs-keyword">while</span> (lengthFreeModules--) {
+                <span class="hljs-keyword">if</span> (!usedIds.has(lengthFreeModules)) {
+                    unusedIds.push(lengthFreeModules);
+                }
+            }
+        }
+
+        <span class="hljs-keyword">const</span> modules2 = <span class="hljs-keyword">this</span>.modules;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> indexModule2 = <span class="hljs-number">0</span>; indexModule2 &lt; modules2.length; indexModule2++) {
+            <span class="hljs-keyword">const</span> module2 = modules2[indexModule2];
+            <span class="hljs-keyword">if</span> (module2.id === <span class="hljs-literal">null</span>) {
+                <span class="hljs-keyword">if</span> (unusedIds.length &gt; <span class="hljs-number">0</span>) {
+                    module2.id = unusedIds.pop();
+                } <span class="hljs-keyword">else</span> {
+                    module2.id = nextFreeModuleId++;
+                }
+            }
+        }
+    }
+</code></pre>
+<h2 id="t12. applyChunkIds">2. applyChunkIds <a href="#t12. applyChunkIds"> # </a></h2>
+<pre><code class="lang-js">    applyChunkIds() {
+        <span class="hljs-comment">/** <span class="hljs-doctag">@type <span class="hljs-type">{Set&lt;number&gt;}</span> </span>*/</span>
+        <span class="hljs-keyword">const</span> usedIds = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+
+        <span class="hljs-comment">// Get used ids from usedChunkIds property (i. e. from records)</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.usedChunkIds) {
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> id <span class="hljs-keyword">of</span> <span class="hljs-keyword">this</span>.usedChunkIds) {
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> id !== <span class="hljs-string">"number"</span>) {
+                    <span class="hljs-keyword">continue</span>;
+                }
+
+                usedIds.add(id);
+            }
+        }
+
+        <span class="hljs-comment">// Get used ids from existing chunks</span>
+        <span class="hljs-keyword">const</span> chunks = <span class="hljs-keyword">this</span>.chunks;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> indexChunk = <span class="hljs-number">0</span>; indexChunk &lt; chunks.length; indexChunk++) {
+            <span class="hljs-keyword">const</span> chunk = chunks[indexChunk];
+            <span class="hljs-keyword">const</span> usedIdValue = chunk.id;
+
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> usedIdValue !== <span class="hljs-string">"number"</span>) {
+                <span class="hljs-keyword">continue</span>;
+            }
+
+            usedIds.add(usedIdValue);
+        }
+
+        <span class="hljs-comment">// Calculate maximum assigned chunk id</span>
+        <span class="hljs-keyword">let</span> nextFreeChunkId = <span class="hljs-number">-1</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> id <span class="hljs-keyword">of</span> usedIds) {
+            nextFreeChunkId = <span class="hljs-built_in">Math</span>.max(nextFreeChunkId, id);
+        }
+        nextFreeChunkId++;
+
+        <span class="hljs-comment">// Determine free chunk ids from 0 to maximum</span>
+        <span class="hljs-comment">/** @type {number[]} */</span>
+        <span class="hljs-keyword">const</span> unusedIds = [];
+        <span class="hljs-keyword">if</span> (nextFreeChunkId &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">let</span> index = nextFreeChunkId;
+            <span class="hljs-keyword">while</span> (index--) {
+                <span class="hljs-keyword">if</span> (!usedIds.has(index)) {
+                    unusedIds.push(index);
+                }
+            }
+        }
+
+        <span class="hljs-comment">// Assign ids to chunk which has no id</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> indexChunk = <span class="hljs-number">0</span>; indexChunk &lt; chunks.length; indexChunk++) {
+            <span class="hljs-keyword">const</span> chunk = chunks[indexChunk];
+            <span class="hljs-keyword">if</span> (chunk.id === <span class="hljs-literal">null</span>) {
+                <span class="hljs-keyword">if</span> (unusedIds.length &gt; <span class="hljs-number">0</span>) {
+                    chunk.id = unusedIds.pop();
+                } <span class="hljs-keyword">else</span> {
+                    chunk.id = nextFreeChunkId++;
+                }
+            }
+            <span class="hljs-keyword">if</span> (!chunk.ids) {
+                chunk.ids = [chunk.id];
+            }
+        }
+    }
+</code></pre>
+<h2 id="t23. hash">3. hash <a href="#t23. hash"> # </a></h2>
+<h3 id="t33.1 module hash">3.1 module hash <a href="#t33.1 module hash"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/modulehash.jpg" alt="modulehash"></p>
+<p>Module.js</p>
+<pre><code class="lang-js">    updateHash(hash) {
+        hash.update(<span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-keyword">this</span>.id}</span>`</span>);
+        hash.update(<span class="hljs-built_in">JSON</span>.stringify(<span class="hljs-keyword">this</span>.usedExports));
+        <span class="hljs-keyword">super</span>.updateHash(hash);
+    }
+</code></pre>
+<h3 id="t43.2 chunk hash">3.2 chunk hash <a href="#t43.2 chunk hash"> # </a></h3>
+<p>Chunk.js</p>
+<pre><code class="lang-js">    updateHash(hash) {
+        hash.update(<span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-keyword">this</span>.id}</span> `</span>);
+        hash.update(<span class="hljs-keyword">this</span>.ids ? <span class="hljs-keyword">this</span>.ids.join(<span class="hljs-string">","</span>) : <span class="hljs-string">""</span>);
+        hash.update(<span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-keyword">this</span>.name || <span class="hljs-string">""</span>}</span> `</span>);
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> <span class="hljs-keyword">this</span>._modules) {
+            hash.update(m.hash);
+        }
+    }
+</code></pre>
+<h2 id="t54. createChunkAssets">4. createChunkAssets <a href="#t54. createChunkAssets"> # </a></h2>
+<ul>
+<li><a href="JavascriptModulesPlugin">JavascriptModulesPlugin</a></li>
+<li><a href="MainTemplate.js">MainTemplate.js</a></li>
+<li><p><a href="JsonpMainTemplatePlugin.js">JsonpMainTemplatePlugin.js</a></p>
+</li>
+<li><p>hash 值生成之后，会调用 <code>createChunkAssets</code> 方法来决定最终输出到每个 chunk 当中对应的文本内容</p>
+</li>
+<li><p>获取对应的渲染模板</p>
+</li>
+<li>然后通过 getRenderManifest 获取到 render 需要的内容</li>
+<li>执行 <code>render()</code> 得到最终的代码</li>
+<li>获取文件路径，保存到 <code>assets</code> 中</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/emitfiles.jpg" alt="emitfiles"></p>
+<h2 id="t64.hash">4.hash <a href="#t64.hash"> # </a></h2>
+<ul>
+<li>hash 每次编译会生成一个hash,代表这次编译 代码: <a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1985">https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1985</a></li>
+<li>chunkhash 每个chunk代码块对应的哈希值，各个chunk之间独立 代码: <a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1976">https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1976</a></li>
+<li>contenthash 文件内容级别的哈希值,文件内容变了，那么hash值才改变 代码: <a href="https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1979">https://github.com/webpack/webpack/blob/c9d4ff7b054fc581c96ce0e53432d44f9dd8ca72/lib/Compilation.js#L1979</a></li>
+</ul>
+
+    

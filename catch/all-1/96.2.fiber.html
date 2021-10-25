@@ -1,0 +1,533 @@
+
+        <h2 id="t01. 屏幕刷新率">1. 屏幕刷新率 <a href="#t01. 屏幕刷新率"> # </a></h2>
+<ul>
+<li>目前大多数设备的屏幕刷新率为 60 次/秒</li>
+<li>浏览器渲染动画或页面的每一帧的速率也需要跟设备屏幕的刷新率保持一致</li>
+<li>页面是一帧一帧绘制出来的，当每秒绘制的帧数（FPS）达到 60 时，页面是流畅的,小于这个值时，用户会感觉到卡顿</li>
+<li>每个帧的预算时间是16.66 毫秒 (1秒/60)</li>
+<li>1s 60帧，所以每一帧分到的时间是 1000/60 ≈ 16 ms。所以我们书写代码时力求不让一帧的工作量超过 16ms</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/autogivefood.gif" alt="autogivefood"></p>
+<h2 id="t12. 帧">2. 帧 <a href="#t12. 帧"> # </a></h2>
+<ul>
+<li>每个帧的开头包括样式计算、布局和绘制</li>
+<li><p>JavaScript执行 Javascript引擎和页面渲染引擎在同一个渲染线程,GUI渲染和Javascript执行两者是互斥的</p>
+</li>
+<li><p>如果某个任务执行时间过长，浏览器会推迟渲染</p>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/lifeofframe.jpg" alt="lifeofframe"></p>
+<h3 id="t22.1 rAF">2.1 rAF <a href="#t22.1 rAF"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame">requestAnimationFrame</a>回调函数会在绘制之前执行</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>RAF<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"background: lightblue;width: 0;height: 20px;"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>开始<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-comment">/**
+         * requestAnimationFrame(callback) 由浏览器专门为动画提供的API
+         * cancelAnimationFrame(返回值) 清除动画
+         * &lt;16.7 丢帧
+         * &gt;16.7 跳跃 卡顿
+         */</span>
+        <span class="hljs-keyword">const</span> div = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'div'</span>);
+        <span class="hljs-keyword">const</span> button = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'button'</span>);
+        <span class="hljs-keyword">let</span> start;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">progress</span>(<span class="hljs-params"></span>) </span>{
+            div.style.width = div.offsetWidth + <span class="hljs-number">1</span> + <span class="hljs-string">'px'</span>;
+            div.innerHTML = (div.offsetWidth) + <span class="hljs-string">'%'</span>;
+            <span class="hljs-keyword">if</span> (div.offsetWidth &lt; <span class="hljs-number">100</span>) {
+                <span class="hljs-keyword">let</span> current = <span class="hljs-built_in">Date</span>.now();
+                <span class="hljs-built_in">console</span>.log(current - start);
+                start = current;
+                timer = requestAnimationFrame(progress);
+            }
+        }
+        button.onclick = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            div.style.width = <span class="hljs-number">0</span>;
+            start = <span class="hljs-built_in">Date</span>.now();
+            requestAnimationFrame(progress);
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t32.2 requestIdleCallback">2.2 requestIdleCallback <a href="#t32.2 requestIdleCallback"> # </a></h3>
+<ul>
+<li>我们希望快速响应用户，让用户觉得够快，不能阻塞用户的交互</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback">requestIdleCallback</a>使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应</li>
+<li>正常帧任务完成后没超过<code>16 ms</code>,说明时间有富余，此时就会执行 <code>requestIdleCallback</code> 里注册的任务</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/cooperativescheduling2.jpg" alt="cooperativescheduling2"></p>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.requestIdleCallback(
+  callback: <span class="hljs-function">(<span class="hljs-params">deaLine: IdleDeadline</span>) =&gt;</span> <span class="hljs-keyword">void</span>,
+  option?: {<span class="hljs-attr">timeout</span>: number}
+  )
+
+interface IdleDeadline {
+  <span class="hljs-attr">didTimeout</span>: boolean <span class="hljs-comment">// 表示任务执行是否超过约定时间</span>
+  timeRemaining(): DOMHighResTimeStamp <span class="hljs-comment">// 任务可供执行的剩余时间</span>
+}
+</code></pre>
+<ul>
+<li>callback：回调即空闲时需要执行的任务，该回调函数接收一个IdleDeadline对象作为入参。其中IdleDeadline对象包含：<ul>
+<li>didTimeout，布尔值，表示任务是否超时，结合 timeRemaining 使用</li>
+<li>timeRemaining()，表示当前帧剩余的时间，也可理解为留给任务的时间还有多少</li>
+</ul>
+</li>
+<li>options：目前 options 只有一个参数<ul>
+<li>timeout。表示超过这个时间后，如果任务还没执行，则强制执行，不必等待空闲</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sleep</span>(<span class="hljs-params">d</span>) </span>{
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> t = <span class="hljs-built_in">Date</span>.now(); <span class="hljs-built_in">Date</span>.now() - t &lt;= d;);
+        }
+        <span class="hljs-keyword">const</span> works = [
+            <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第1个任务开始"</span>);
+                sleep(<span class="hljs-number">0</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第1个任务结束"</span>);
+            },
+            () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第2个任务开始"</span>);
+                sleep(<span class="hljs-number">0</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第2个任务结束"</span>);
+            },
+            () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第3个任务开始"</span>);
+                sleep(<span class="hljs-number">0</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第3个任务结束"</span>);
+            },
+        ];
+
+        requestIdleCallback(workLoop, { <span class="hljs-attr">timeout</span>: <span class="hljs-number">1000</span> });
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">workLoop</span>(<span class="hljs-params">deadline</span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'本帧剩余时间'</span>, <span class="hljs-built_in">parseInt</span>(deadline.timeRemaining()));
+            <span class="hljs-keyword">while</span> ((deadline.timeRemaining() &gt; <span class="hljs-number">1</span> || deadline.didTimeout) &amp;&amp; works.length &gt; <span class="hljs-number">0</span>) {
+                performUnitOfWork();
+            }
+
+            <span class="hljs-keyword">if</span> (works.length &gt; <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`只剩下<span class="hljs-subst">${<span class="hljs-built_in">parseInt</span>(deadline.timeRemaining())}</span>ms,时间片到了等待下次空闲时间的调度`</span>);
+                requestIdleCallback(workLoop);
+            }
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">performUnitOfWork</span>(<span class="hljs-params"></span>) </span>{
+            works.shift()();
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h3 id="t42.3 MessageChannel">2.3 MessageChannel <a href="#t42.3 MessageChannel"> # </a></h3>
+<ul>
+<li>目前 <code>requestIdleCallback</code> 目前只有Chrome支持</li>
+<li>所以目前 React利用 <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/MessageChannel">MessageChannel</a>模拟了requestIdleCallback，将回调延迟到绘制操作之后执行</li>
+<li>MessageChannel API允许我们创建一个新的消息通道，并通过它的两个MessagePort属性发送数据</li>
+<li>MessageChannel创建了一个通信的管道，这个管道有两个端口，每个端口都可以通过postMessage发送数据，而一个端口只要绑定了onmessage回调方法，就可以接收从另一个端口传过来的数据</li>
+<li>MessageChannel是一个宏任务</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/phones.png" alt="phones"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> channel = <span class="hljs-keyword">new</span> MessageChannel();
+<span class="hljs-comment">//channel.port1</span>
+<span class="hljs-comment">//channel.port2</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> channel = <span class="hljs-keyword">new</span> MessageChannel();
+<span class="hljs-keyword">var</span> port1 = channel.port1;
+<span class="hljs-keyword">var</span> port2 = channel.port2;
+port1.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"port1收到来自port2的数据："</span> + event.data);
+}
+port2.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"port2收到来自port1的数据："</span> + event.data);
+}
+port1.postMessage(<span class="hljs-string">"发送给port2"</span>);
+port2.postMessage(<span class="hljs-string">"发送给port1"</span>);
+</code></pre>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Document<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">const</span> channel = <span class="hljs-keyword">new</span> MessageChannel()
+        <span class="hljs-keyword">let</span> pendingCallback;
+        <span class="hljs-keyword">let</span> startTime;
+        <span class="hljs-keyword">let</span> timeoutTime;
+        <span class="hljs-keyword">let</span> perFrameTime = (<span class="hljs-number">1000</span> / <span class="hljs-number">60</span>);
+        <span class="hljs-keyword">let</span> timeRemaining = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> perFrameTime - (<span class="hljs-built_in">Date</span>.now() - startTime);
+        channel.port2.onmessage = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-keyword">if</span> (pendingCallback) {
+                pendingCallback({ <span class="hljs-attr">didTimeout</span>: <span class="hljs-built_in">Date</span>.now() &gt; timeoutTime, timeRemaining });
+            }
+        }
+        <span class="hljs-built_in">window</span>.requestIdleCallback = <span class="hljs-function">(<span class="hljs-params">callback, options</span>) =&gt;</span> {
+            timeoutTime = <span class="hljs-built_in">Date</span>.now() + options.timeout;
+            requestAnimationFrame(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                startTime = <span class="hljs-built_in">Date</span>.now();
+                pendingCallback = callback;
+                channel.port1.postMessage(<span class="hljs-string">'hello'</span>);
+            })
+            <span class="hljs-comment">/* startTime = Date.now();
+            setTimeout(() =&gt; {
+                callback({ didTimeout: Date.now() &gt; timeoutTime, timeRemaining });
+            }); */</span>
+        }
+
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sleep</span>(<span class="hljs-params">d</span>) </span>{
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> t = <span class="hljs-built_in">Date</span>.now(); <span class="hljs-built_in">Date</span>.now() - t &lt;= d;);
+        }
+        <span class="hljs-keyword">const</span> works = [
+            <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第1个任务开始"</span>);
+                sleep(<span class="hljs-number">30</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第1个任务结束"</span>);
+            },
+            () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第2个任务开始"</span>);
+                sleep(<span class="hljs-number">30</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第2个任务结束"</span>);
+            },
+            () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第3个任务开始"</span>);
+                sleep(<span class="hljs-number">30</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第3个任务结束"</span>);
+            },
+        ];
+
+        requestIdleCallback(workLoop, { <span class="hljs-attr">timeout</span>: <span class="hljs-number">60</span> * <span class="hljs-number">1000</span> });
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">workLoop</span>(<span class="hljs-params">deadline</span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'本帧剩余时间'</span>, <span class="hljs-built_in">parseInt</span>(deadline.timeRemaining()));
+            <span class="hljs-keyword">while</span> ((deadline.timeRemaining() &gt; <span class="hljs-number">1</span> || deadline.didTimeout) &amp;&amp; works.length &gt; <span class="hljs-number">0</span>) {
+                performUnitOfWork();
+            }
+            <span class="hljs-keyword">if</span> (works.length &gt; <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`只剩下<span class="hljs-subst">${<span class="hljs-built_in">parseInt</span>(deadline.timeRemaining())}</span>ms,时间片到了等待下次空闲时间的调度`</span>);
+                requestIdleCallback(workLoop, { <span class="hljs-attr">timeout</span>: <span class="hljs-number">60</span> * <span class="hljs-number">1000</span> });
+            }
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">performUnitOfWork</span>(<span class="hljs-params"></span>) </span>{
+            works.shift()();
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h2 id="t53. 单链表">3. 单链表 <a href="#t53. 单链表"> # </a></h2>
+<ul>
+<li>单链表是一种链式存取的数据结构</li>
+<li>链表中的数据是以节点来表示的，每个节点的构成：元素 + 指针(指示后继元素存储位置)，元素就是存储数据的存储单元，指针就是连接每个节点的地址</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/trainlist.jpg" alt="trainlist"></p>
+<p><img src="http://img.zhufengpeixun.cn/singlelink2.jpg" alt="singlelink2"></p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Update</span> </span>{
+    <span class="hljs-keyword">constructor</span>(payload) {
+        <span class="hljs-keyword">this</span>.payload = payload;
+        <span class="hljs-keyword">this</span>.nextUpdate = <span class="hljs-literal">null</span>;
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UpdateQueue</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>.baseState = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">this</span>.firstUpdate = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">this</span>.lastUpdate = <span class="hljs-literal">null</span>;
+    }
+    clear() {
+        <span class="hljs-keyword">this</span>.firstUpdate = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">this</span>.lastUpdate = <span class="hljs-literal">null</span>;
+    }
+    enqueueUpdate(update) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.firstUpdate === <span class="hljs-literal">null</span>) {
+            <span class="hljs-keyword">this</span>.firstUpdate = <span class="hljs-keyword">this</span>.lastUpdate = update;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">this</span>.lastUpdate.nextUpdate = update;
+            <span class="hljs-keyword">this</span>.lastUpdate = update;
+        }
+    }
+    forceUpdate() {
+        <span class="hljs-keyword">let</span> currentState = <span class="hljs-keyword">this</span>.baseState || {};
+        <span class="hljs-keyword">let</span> currentUpdate = <span class="hljs-keyword">this</span>.firstUpdate;
+        <span class="hljs-keyword">while</span> (currentUpdate) {
+            <span class="hljs-keyword">let</span> nexState = <span class="hljs-keyword">typeof</span> currentUpdate.payload == <span class="hljs-string">'function'</span> ? currentUpdate.payload(currentState) : currentUpdate.payload;
+            currentState = { ...currentState, ...nexState };
+            currentUpdate = currentUpdate.nextUpdate;
+        }
+        <span class="hljs-keyword">this</span>.firstUpdate = <span class="hljs-keyword">this</span>.lastUpdate = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">this</span>.baseState = currentState;
+        <span class="hljs-keyword">return</span> currentState;
+    }
+}
+
+
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> UpdateQueue();
+queue.enqueueUpdate(<span class="hljs-keyword">new</span> Update({ <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> }));
+queue.enqueueUpdate(<span class="hljs-keyword">new</span> Update({ <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> }));
+queue.enqueueUpdate(<span class="hljs-keyword">new</span> Update(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({ <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> })));
+queue.enqueueUpdate(<span class="hljs-keyword">new</span> Update(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> ({ <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> })));
+queue.forceUpdate();
+<span class="hljs-built_in">console</span>.log(queue.baseState);
+</code></pre>
+<h2 id="t64.Fiber历史">4.Fiber历史 <a href="#t64.Fiber历史"> # </a></h2>
+<h3 id="t74.1 Fiber之前的协调">4.1 Fiber之前的协调 <a href="#t74.1 Fiber之前的协调"> # </a></h3>
+<ul>
+<li>React 会递归比对VirtualDOM树，找出需要变动的节点，然后同步更新它们。这个过程 React 称为Reconcilation(协调)</li>
+<li>在<code>Reconcilation</code>期间，React 会一直占用着浏览器资源，一则会导致用户触发的事件得不到响应, 二则会导致掉帧，用户可能会感觉到卡顿</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> root = {
+    <span class="hljs-attr">key</span>: <span class="hljs-string">'A1'</span>,
+    <span class="hljs-attr">children</span>: [
+        {
+            <span class="hljs-attr">key</span>: <span class="hljs-string">'B1'</span>,
+            <span class="hljs-attr">children</span>: [
+                {
+                    <span class="hljs-attr">key</span>: <span class="hljs-string">'C1'</span>,
+                    <span class="hljs-attr">children</span>: []
+                },
+                {
+                    <span class="hljs-attr">key</span>: <span class="hljs-string">'C2'</span>,
+                    <span class="hljs-attr">children</span>: []
+                }
+            ]
+        },
+        {
+            <span class="hljs-attr">key</span>: <span class="hljs-string">'B2'</span>,
+            <span class="hljs-attr">children</span>: []
+        }
+    ]
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">walk</span>(<span class="hljs-params">element</span>) </span>{
+    doWork(element);
+    element.children.forEach(walk);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doWork</span>(<span class="hljs-params">element</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(element.key);
+}
+walk(root);
+</code></pre>
+<h3 id="t84.2 Fiber是什么">4.2 Fiber是什么 <a href="#t84.2 Fiber是什么"> # </a></h3>
+<ul>
+<li>我们可以通过某些调度策略合理分配CPU资源，从而提高用户的响应速度</li>
+<li>通过Fiber架构，让自己的Reconcilation过程变成可被中断。 <code>适时</code>地让出CPU执行权，除了可以让浏览器及时地响应用户的交互</li>
+</ul>
+<h4 id="t94.2.1 Fiber是一个执行单元">4.2.1 Fiber是一个执行单元 <a href="#t94.2.1 Fiber是一个执行单元"> # </a></h4>
+<ul>
+<li>Fiber是一个执行单元,每次执行完一个执行单元, React 就会检查现在还剩多少时间，如果没有时间就将控制权让出去</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/fiberflow.jpg" alt="fiberflow"></p>
+<h4 id="t104.2.2 Fiber是一种数据结构">4.2.2 Fiber是一种数据结构 <a href="#t104.2.2 Fiber是一种数据结构"> # </a></h4>
+<ul>
+<li>React目前的做法是使用链表, 每个 VirtualDOM 节点内部表示为一个<code>Fiber</code></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/fiberconstructor.jpg" alt="fiberconstructor"></p>
+<pre><code class="lang-js">type Fiber = {
+  <span class="hljs-comment">//类型  </span>
+  <span class="hljs-attr">type</span>: any,
+  <span class="hljs-comment">//父节点</span>
+  <span class="hljs-attr">return</span>: Fiber,
+  <span class="hljs-comment">// 指向第一个子节点</span>
+  <span class="hljs-attr">child</span>: Fiber,
+  <span class="hljs-comment">// 指向下一个弟弟</span>
+  <span class="hljs-attr">sibling</span>: Fiber
+}
+</code></pre>
+<h2 id="t115.Fiber执行阶段">5.Fiber执行阶段 <a href="#t115.Fiber执行阶段"> # </a></h2>
+<ul>
+<li>每次渲染有两个阶段：Reconciliation(协调\render阶段)和Commit(提交阶段)</li>
+<li>协调阶段: 可以认为是 Diff 阶段, 这个阶段可以被中断, 这个阶段会找出所有节点变更，例如节点新增、删除、属性变更等等, 这些变更React 称之为副作用(Effect)</li>
+<li>提交阶段: 将上一个阶段计算出来的需要处理的副作用(Effects)一次性执行了。这个阶段必须同步执行，不能被打断</li>
+</ul>
+<h3 id="t125.1 render阶段">5.1 render阶段 <a href="#t125.1 render阶段"> # </a></h3>
+<ul>
+<li>render阶段会构建fiber树</li>
+</ul>
+<h4 id="t135.1.1 element.js">5.1.1 element.js <a href="#t135.1.1 element.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> A1 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'A1'</span> };
+<span class="hljs-keyword">let</span> B1 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'B1'</span>, <span class="hljs-attr">return</span>: A1 };
+<span class="hljs-keyword">let</span> B2 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'B2'</span>, <span class="hljs-attr">return</span>: A1 };
+<span class="hljs-keyword">let</span> C1 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'C1'</span>, <span class="hljs-attr">return</span>: B1 };
+<span class="hljs-keyword">let</span> C2 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'C2'</span>, <span class="hljs-attr">return</span>: B1 };
+A1.child = B1;
+B1.sibling = B2;
+B1.child = C1;
+C1.sibling = C2;
+<span class="hljs-built_in">module</span>.exports = A1;
+</code></pre>
+<h4 id="t145.1.2 render.js">5.1.2 render.js <a href="#t145.1.2 render.js"> # </a></h4>
+<ul>
+<li>从顶点开始遍历</li>
+<li>如果有第一个儿子，先遍历第一个儿子</li>
+<li>如果没有第一个儿子，标志着此节点遍历完成</li>
+<li>如果有弟弟遍历弟弟</li>
+<li>如果有没有下一个弟弟，返回父节点标识完成父节点遍历，如果有叔叔遍历叔叔</li>
+<li>没有父节点遍历结束</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/fiberconstructortranverse3.jpg" alt="fiberconstructortranverse3"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> rootFiber = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./element'</span>);
+<span class="hljs-comment">//下一个工作单元</span>
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+<span class="hljs-comment">//render工作循环</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">workLoop</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">while</span> (nextUnitOfWork) {
+        <span class="hljs-comment">//执行一个任务并返回下一个任务</span>
+        nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    }
+    <span class="hljs-comment">//render阶段结束</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) </span>{
+    beginWork(fiber);
+    <span class="hljs-keyword">if</span> (fiber.child) {<span class="hljs-comment">//如果子节点就返回第一个子节点</span>
+        <span class="hljs-keyword">return</span> fiber.child;
+    }
+    <span class="hljs-keyword">while</span> (fiber) {<span class="hljs-comment">//如果没有子节点说明当前节点已经完成了渲染工作</span>
+        completeUnitOfWork(fiber);<span class="hljs-comment">//可以结束此fiber的渲染了 </span>
+        <span class="hljs-keyword">if</span> (fiber.sibling) {<span class="hljs-comment">//如果它有弟弟就返回弟弟</span>
+            <span class="hljs-keyword">return</span> fiber.sibling;
+        }
+        fiber = fiber.return;<span class="hljs-comment">//如果没有弟弟让爸爸完成，然后找叔叔</span>
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beginWork</span>(<span class="hljs-params">fiber</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'beginWork'</span>, fiber.key);
+    <span class="hljs-comment">//fiber.stateNode = document.createElement(fiber.type);</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">completeUnitOfWork</span>(<span class="hljs-params">fiber</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'completeUnitOfWork'</span>, fiber.key);
+}
+nextUnitOfWork = rootFiber;
+workLoop();
+</code></pre>
+<ul>
+<li>先儿子，后弟弟，再叔叔,辈份越小越优先</li>
+<li>什么时候一个节点遍历完成? 没有子节点，或者所有子节点都遍历完成了</li>
+<li>没爹了就表示全部遍历完成了</li>
+</ul>
+<h3 id="t155.2 commit阶段">5.2 commit阶段 <a href="#t155.2 commit阶段"> # </a></h3>
+<ul>
+<li>类比Git分支功能,从旧树中fork出来一份，在新分支进行添加、删除和更新操作，经过测试后进行提交</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/fibercommit.jpg" alt="fibercommit"></p>
+<p><img src="http://img.zhufengpeixun.cn/fibereffectlist4.jpg" alt="fibereffectlist4"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> container = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+<span class="hljs-keyword">let</span> C1 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'C1'</span>, <span class="hljs-attr">props</span>: { <span class="hljs-attr">id</span>: <span class="hljs-string">'C1'</span>, <span class="hljs-attr">children</span>: [] } };
+<span class="hljs-keyword">let</span> C2 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'C2'</span>, <span class="hljs-attr">props</span>: { <span class="hljs-attr">id</span>: <span class="hljs-string">'C2'</span>, <span class="hljs-attr">children</span>: [] } };
+<span class="hljs-keyword">let</span> B1 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'B1'</span>, <span class="hljs-attr">props</span>: { <span class="hljs-attr">id</span>: <span class="hljs-string">'B1'</span>, <span class="hljs-attr">children</span>: [C1, C2] } };
+<span class="hljs-keyword">let</span> B2 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'B2'</span>, <span class="hljs-attr">props</span>: { <span class="hljs-attr">id</span>: <span class="hljs-string">'B2'</span>, <span class="hljs-attr">children</span>: [] } };
+<span class="hljs-keyword">let</span> A1 = { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'A1'</span>, <span class="hljs-attr">props</span>: { <span class="hljs-attr">id</span>: <span class="hljs-string">'A1'</span>, <span class="hljs-attr">children</span>: [B1, B2] } };
+
+
+<span class="hljs-keyword">let</span> nextUnitOfWork = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> workInProgressRoot = <span class="hljs-literal">null</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">workLoop</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">while</span> (nextUnitOfWork) {
+        nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    }
+    <span class="hljs-keyword">if</span> (!nextUnitOfWork) { <span class="hljs-comment">//render阶段结束</span>
+        commitRoot();
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">commitRoot</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> fiber = workInProgressRoot.firstEffect;
+    <span class="hljs-keyword">while</span> (fiber) {
+        <span class="hljs-built_in">console</span>.log(fiber.key); <span class="hljs-comment">//C1 C2 B1 B2 A1</span>
+        commitWork(fiber);
+        fiber = fiber.nextEffect;
+    }
+    workInProgressRoot = <span class="hljs-literal">null</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">commitWork</span>(<span class="hljs-params">currentFiber</span>) </span>{
+    currentFiber.return.stateNode.appendChild(currentFiber.stateNode);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">performUnitOfWork</span>(<span class="hljs-params">fiber</span>) </span>{
+    beginWork(fiber);
+    <span class="hljs-keyword">if</span> (fiber.child) {
+        <span class="hljs-keyword">return</span> fiber.child;
+    }
+    <span class="hljs-keyword">while</span> (fiber) {
+        completeUnitOfWork(fiber);
+        <span class="hljs-keyword">if</span> (fiber.sibling) {
+            <span class="hljs-keyword">return</span> fiber.sibling;
+        }
+        fiber = fiber.return;
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">beginWork</span>(<span class="hljs-params">currentFiber</span>) </span>{
+    <span class="hljs-keyword">if</span> (!currentFiber.stateNode) {
+        currentFiber.stateNode = <span class="hljs-built_in">document</span>.createElement(currentFiber.type);<span class="hljs-comment">//创建真实DOM</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> key <span class="hljs-keyword">in</span> currentFiber.props) {<span class="hljs-comment">//循环属性赋赋值给真实DOM</span>
+            <span class="hljs-keyword">if</span> (key !== <span class="hljs-string">'children'</span> &amp;&amp; key !== <span class="hljs-string">'key'</span>)
+                currentFiber.stateNode.setAttribute(key, currentFiber.props[key]);
+        }
+    }
+    <span class="hljs-keyword">let</span> previousFiber;
+    currentFiber.props.children.forEach(<span class="hljs-function">(<span class="hljs-params">child, index</span>) =&gt;</span> {
+        <span class="hljs-keyword">let</span> childFiber = {
+            <span class="hljs-attr">tag</span>: <span class="hljs-string">'HOST'</span>,
+            <span class="hljs-attr">type</span>: child.type,
+            <span class="hljs-attr">key</span>: child.key,
+            <span class="hljs-attr">props</span>: child.props,
+            <span class="hljs-attr">return</span>: currentFiber,
+            <span class="hljs-attr">effectTag</span>: <span class="hljs-string">'PLACEMENT'</span>,
+            <span class="hljs-attr">nextEffect</span>: <span class="hljs-literal">null</span>
+        }
+        <span class="hljs-keyword">if</span> (index === <span class="hljs-number">0</span>) {
+            currentFiber.child = childFiber;
+        } <span class="hljs-keyword">else</span> {
+            previousFiber.sibling = childFiber;
+        }
+        previousFiber = childFiber;
+    });
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">completeUnitOfWork</span>(<span class="hljs-params">currentFiber</span>) </span>{
+    <span class="hljs-keyword">const</span> returnFiber = currentFiber.return;
+    <span class="hljs-keyword">if</span> (returnFiber) {
+        <span class="hljs-keyword">if</span> (!returnFiber.firstEffect) {
+            returnFiber.firstEffect = currentFiber.firstEffect;
+        }
+        <span class="hljs-keyword">if</span> (currentFiber.lastEffect) {
+            <span class="hljs-keyword">if</span> (returnFiber.lastEffect) {
+                returnFiber.lastEffect.nextEffect = currentFiber.firstEffect;
+            }
+            returnFiber.lastEffect = currentFiber.lastEffect;
+        }
+
+        <span class="hljs-keyword">if</span> (currentFiber.effectTag) {
+            <span class="hljs-keyword">if</span> (returnFiber.lastEffect) {
+                returnFiber.lastEffect.nextEffect = currentFiber;
+            } <span class="hljs-keyword">else</span> {
+                returnFiber.firstEffect = currentFiber;
+            }
+            returnFiber.lastEffect = currentFiber;
+        }
+    }
+}
+<span class="hljs-built_in">console</span>.log(container);
+
+workInProgressRoot = {
+    <span class="hljs-attr">key</span>: <span class="hljs-string">'ROOT'</span>,
+    <span class="hljs-attr">stateNode</span>: container,
+    <span class="hljs-attr">props</span>: { <span class="hljs-attr">children</span>: [A1] }
+};
+nextUnitOfWork = workInProgressRoot;<span class="hljs-comment">//从RootFiber开始，到RootFiber结束</span>
+workLoop();
+</code></pre>
+
+    

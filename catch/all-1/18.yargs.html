@@ -1,0 +1,162 @@
+
+        <h2 id="t01. yargs">1. yargs <a href="#t01. yargs"> # </a></h2>
+<ul>
+<li><a href="http://yargs.js.org/">yargs</a>模块能够解决如何处理命令行参数。</li>
+</ul>
+<h2 id="t11. 可执行脚本">1. 可执行脚本 <a href="#t11. 可执行脚本"> # </a></h2>
+<p>使用Javascript语言编写一个可执行脚本</p>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>);
+</code></pre>
+<p>然后修改权限</p>
+<pre><code class="lang-javascript">chmod <span class="hljs-number">755</span> hello
+</code></pre>
+<p>执行脚本</p>
+<pre><code class="lang-javascript">./hello
+hello
+</code></pre>
+<p>如果想把路径去掉可以把hello的路径加入环境变量PATH。但是，另一种更好的做法时在当前目录下创建一个package.json</p>
+<pre><code class="lang-javascript">{
+    <span class="hljs-attr">name</span>:<span class="hljs-string">'hello'</span>,
+    <span class="hljs-string">"bin"</span>:{
+        <span class="hljs-string">"hello"</span>:<span class="hljs-string">"hello"</span>
+    }
+}
+</code></pre>
+<p>然后npm link</p>
+<pre><code class="lang-javascript">npm link
+</code></pre>
+<p>在执行hello就不用输入路径了</p>
+<pre><code class="lang-javascript">hello
+</code></pre>
+<h2 id="t22. 命令行参数的原始写法">2. 命令行参数的原始写法 <a href="#t22. 命令行参数的原始写法"> # </a></h2>
+<p> 命令行参数可以用系统变量<code>process.env</code>获取</p>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello '</span>,process.argv[<span class="hljs-number">2</span>]);
+</code></pre>
+<pre><code>hello zfpx
+
+process.env = ['node','hello','zfpx']
+</code></pre><h2 id="t33. 新建进程">3. 新建进程 <a href="#t33. 新建进程"> # </a></h2>
+<p>脚本可以通过<code>child_process</code>模块新建子进程，从而执行<code>linux</code>命令</p>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> name = process.argv[<span class="hljs-number">2</span>];
+<span class="hljs-keyword">let</span> {exec} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'child_process'</span>);
+<span class="hljs-keyword">let</span> child  = exec(<span class="hljs-string">'echo hello '</span>+name,(err,stdout,stderr)=&gt;{
+    <span class="hljs-keyword">if</span>(err) <span class="hljs-keyword">throw</span> err;
+    <span class="hljs-built_in">console</span>.info(stdout);
+});
+</code></pre>
+<pre><code class="lang-javascript">hello zfpx
+</code></pre>
+<h2 id="t44. yargs">4. yargs <a href="#t44. yargs"> # </a></h2>
+<p>yargs模块能够解决如何处理命令行参数。</p>
+<h3 id="t54.1 安装">4.1 安装 <a href="#t54.1 安装"> # </a></h3>
+<pre><code class="lang-javascript">npm install yargs --save
+</code></pre>
+<h3 id="t64.2 读取命令行参数">4.2 读取命令行参数 <a href="#t64.2 读取命令行参数"> # </a></h3>
+<p>yargs模块提供了argv对象，用来读取命令行参数</p>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>).argv;
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello '</span>,argv.name);
+</code></pre>
+<pre><code class="lang-javascript">hello --name=zfpx
+hello --name zfpx
+</code></pre>
+<blockquote>
+<p>process.argv</p>
+<pre><code>[ '/usr/local/bin/node', '/usr/local/bin/hello4', '--name=zfpx' ]
+</code></pre></blockquote>
+<blockquote>
+<p>argv</p>
+<pre><code>{
+  name: 'zfpx',
+}
+</code></pre></blockquote>
+<h3 id="t74.3 还可以指定别名">4.3 还可以指定别名 <a href="#t74.3 还可以指定别名"> # </a></h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>)
+.alias(<span class="hljs-string">'n'</span>,<span class="hljs-string">'name'</span>)
+.argv
+</code></pre>
+<pre><code class="lang-javascript">hello -n zfpx
+hello --name zfpx
+</code></pre>
+<h3 id="t84.4 下划线属性">4.4 下划线属性 <a href="#t84.4 下划线属性"> # </a></h3>
+<p>argv对象有一个下划线属性，可以获取非连词线开头的参数</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>).argv
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello '</span>,argv.n);
+<span class="hljs-built_in">console</span>.log(argv._);
+</code></pre>
+<pre><code class="lang-javascript">hello A -n zfpx B C
+hello zfpx [<span class="hljs-string">'A'</span>,<span class="hljs-string">'B'</span>,<span class="hljs-string">'C'</span>]
+</code></pre>
+<h3 id="t94.5 命令行参数的配置">4.5 命令行参数的配置 <a href="#t94.5 命令行参数的配置"> # </a></h3>
+<ul>
+<li>demand 是否必选</li>
+<li>default 默认值</li>
+<li>describe 提示</li>
+</ul>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>)
+  .demand([<span class="hljs-string">'n'</span>])
+  .default({<span class="hljs-attr">n</span>:<span class="hljs-string">'zfpx'</span>})
+  .describe({<span class="hljs-attr">n</span>:<span class="hljs-string">"你的名字"</span>})
+  .argv;
+ <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello '</span>,argv.n); 
+</code></pre>
+<p>这个代表n不能省略，默认值为zfpx,并给出提示</p>
+<p>option方法允许将所有的配置写入配置对象</p>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>)
+.option(<span class="hljs-string">'n'</span>,{
+    <span class="hljs-attr">alias</span>:<span class="hljs-string">'name'</span>,
+    <span class="hljs-attr">demand</span>:<span class="hljs-literal">true</span>,
+    <span class="hljs-attr">default</span>:<span class="hljs-string">'zfpx'</span>,
+    <span class="hljs-attr">describe</span>:<span class="hljs-string">'请输入你的名字'</span>,
+    <span class="hljs-attr">type</span>:<span class="hljs-string">'string'</span>,
+    <span class="hljs-attr">boolean</span>:<span class="hljs-literal">true</span>
+}).argv
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>,argv.n);
+</code></pre>
+<p>有时候，某些参数不需要，只起到开关作用。可以用boolean指定这些参数返回布尔值</p>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>)
+    .boolean([<span class="hljs-string">'private'</span>])
+    .argv
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>,argv.n);    
+</code></pre>
+<p>参数private总是返回一个布尔值</p>
+<pre><code class="lang-javascript">hello 
+<span class="hljs-literal">false</span>
+hello -private
+<span class="hljs-literal">true</span>
+hello -private zfpx   
+<span class="hljs-literal">true</span>
+</code></pre>
+<h3 id="t104.6 帮助信息">4.6 帮助信息 <a href="#t104.6 帮助信息"> # </a></h3>
+<p>yargs模块提供以下方法，生成帮助信息</p>
+<ul>
+<li>usage 用法格式</li>
+<li>example 提供例子</li>
+<li>help 显示帮助信息</li>
+<li>epilog 出现在帮助信息的结尾</li>
+</ul>
+<pre><code class="lang-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'argv'</span>)
+  .option(<span class="hljs-string">'n'</span>,{
+      <span class="hljs-attr">alias</span>:<span class="hljs-string">'name'</span>,
+      <span class="hljs-attr">demand</span>:<span class="hljs-literal">true</span>,
+      <span class="hljs-attr">default</span>:<span class="hljs-string">'tom'</span>,
+      <span class="hljs-attr">describe</span>:<span class="hljs-string">'你的名字'</span>,
+      <span class="hljs-attr">type</span>:<span class="hljs-string">'string'</span>
+  })
+  .usage(<span class="hljs-string">'Usage: hello [options]'</span>)
+  .example(<span class="hljs-string">'hello -n zfpx'</span>,<span class="hljs-string">'say hello to zfpx'</span>)
+  .help(<span class="hljs-string">'h'</span>)
+  .alias(<span class="hljs-string">'h'</span>,<span class="hljs-string">'help'</span>)
+  .epilog(<span class="hljs-string">'copyright 2018'</span>)
+  .argv
+
+</code></pre>
+
+    

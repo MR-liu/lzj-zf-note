@@ -1,0 +1,791 @@
+
+        <h2 id="t01. css-loader">1. css-loader <a href="#t01. css-loader"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/css-loader">css-loader</a>可以把@import and url()翻译成import/require(),然后可以解析处理它们</li>
+</ul>
+<h3 id="t11.1 安装">1.1 安装 <a href="#t11.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm i webpack webpack-cli webpack-dev-server html-webpack-plugin css-loader css-selector-tokenizer file-loader less less-loader postcss style-loader to-string-loader -D
+</code></pre>
+<h2 id="t22. 使用CSS">2. 使用CSS <a href="#t22. 使用CSS"> # </a></h2>
+<h3 id="t32.1 webpack.config.js">2.1 webpack.config.js <a href="#t32.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">module</span>:{
+        <span class="hljs-attr">rules</span>:[
+            {
+                <span class="hljs-attr">test</span>:<span class="hljs-regexp">/\.css$/</span>,
+                <span class="hljs-attr">use</span>:[
+                    <span class="hljs-string">"to-string-loader"</span>,
+                    {
+                        <span class="hljs-attr">loader</span>:<span class="hljs-string">'css-loader'</span>,
+                        <span class="hljs-attr">options</span>:{
+                            <span class="hljs-attr">url</span>:<span class="hljs-literal">false</span>,
+                            <span class="hljs-attr">import</span>:<span class="hljs-literal">false</span>,
+                            <span class="hljs-attr">esModule</span>: <span class="hljs-literal">false</span>
+                        }
+                    }
+                ],
+                <span class="hljs-attr">include</span>:path.resolve(<span class="hljs-string">'src'</span>)
+            }
+        ]
+    },
+    <span class="hljs-attr">plugins</span>:[
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({<span class="hljs-attr">template</span>:<span class="hljs-string">'./src/index.html'</span>}),
+    ]
+}
+</code></pre>
+<h3 id="t42.2 src\index.js">2.2 src\index.js <a href="#t42.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> css = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./global.css"</span>);
+<span class="hljs-built_in">console</span>.log(css);
+</code></pre>
+<h3 id="t52.3 src\global.css">2.3 src\global.css <a href="#t52.3 src\global.css"> # </a></h3>
+<p>src\global.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">background-color</span>: green;
+}
+</code></pre>
+<h3 id="t62.4 dist\main.js">2.4 dist\main.js <a href="#t62.4 dist\main.js"> # </a></h3>
+<p>dist\main.js</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = {
+    <span class="hljs-string">"css-loader/dist/cjs.js!./src/global.css"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+      <span class="hljs-keyword">var</span> ___CSS_LOADER_API_IMPORT___ = <span class="hljs-built_in">require</span>(<span class="hljs-string">"css-loader/dist/runtime/api.js"</span>);
+      <span class="hljs-keyword">var</span> ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">i</span>) </span>{
+        <span class="hljs-keyword">return</span> i[<span class="hljs-number">1</span>];
+      });
+      ___CSS_LOADER_EXPORT___.push([
+        <span class="hljs-built_in">module</span>.id,
+        <span class="hljs-string">"body {\r\n    background-color: green;\r\n  }"</span>,
+        <span class="hljs-string">""</span>,
+      ]);
+      <span class="hljs-built_in">module</span>.exports = ___CSS_LOADER_EXPORT___;
+    },
+    <span class="hljs-string">"css-loader/dist/runtime/api.js"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span></span>) =&gt;</span> {
+      <span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> list = [];
+        list.toString = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toString</span>(<span class="hljs-params"></span>) </span>{
+          <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.join(<span class="hljs-string">""</span>);
+        };
+        <span class="hljs-keyword">return</span> list;
+      };
+    },
+    <span class="hljs-string">"./src/global.css"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+      <span class="hljs-keyword">var</span> result = <span class="hljs-built_in">require</span>(<span class="hljs-string">"css-loader/dist/cjs.js!./src/global.css"</span>);
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> result === <span class="hljs-string">"string"</span>) {
+        <span class="hljs-built_in">module</span>.exports = result;
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">module</span>.exports = result.toString();
+      }
+    },
+  };
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = (cache[moduleId] = {
+      <span class="hljs-attr">id</span>: moduleId,
+      <span class="hljs-attr">exports</span>: {},
+    });
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  (<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> css = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/global.css"</span>);
+    <span class="hljs-built_in">console</span>.log(css, css.toString());
+  })();
+})();
+
+</code></pre>
+<h3 id="t72.5 实现main.js">2.5 实现main.js <a href="#t72.5 实现main.js"> # </a></h3>
+<h4 id="t82.5.1 第1版">2.5.1 第1版 <a href="#t82.5.1 第1版"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = {
+    <span class="hljs-string">"./src/global.css"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+      <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">"body {\r\n    background-color: green;\r\n  }"</span>;
+    },
+  };
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = (cache[moduleId] = {
+      <span class="hljs-attr">id</span>: moduleId,
+      <span class="hljs-attr">exports</span>: {},
+    });
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  (<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> css = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/global.css"</span>);
+    <span class="hljs-built_in">console</span>.log(css);
+  })();
+})();
+
+</code></pre>
+<h4 id="t92.5.2 第2版">2.5.2 第2版 <a href="#t92.5.2 第2版"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = {
+    <span class="hljs-string">"./src/global.css"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {<span class="hljs-keyword">debugger</span>
+      <span class="hljs-keyword">var</span> list = [];
+      list.push([
+        <span class="hljs-built_in">module</span>.id,
+        <span class="hljs-string">"body {\r\n    background-color: green;\r\n  }"</span>,
+        <span class="hljs-string">""</span>,
+      ]);
+      <span class="hljs-keyword">let</span> cssWithMappingToString = <span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">let</span> css =  list.map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>cssWithMappingToString(item)).join(<span class="hljs-string">""</span>);
+      <span class="hljs-built_in">module</span>.exports = css;
+    },
+  };
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = (cache[moduleId] = {
+      <span class="hljs-attr">id</span>: moduleId,
+      <span class="hljs-attr">exports</span>: {},
+    });
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  (<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> css = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/global.css"</span>);
+    <span class="hljs-built_in">console</span>.log(css);
+  })();
+})();
+</code></pre>
+<h4 id="t102.5.3 第3版">2.5.3 第3版 <a href="#t102.5.3 第3版"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = {
+    <span class="hljs-string">"css-loader.js!./src/global.css"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+      <span class="hljs-keyword">var</span> api = <span class="hljs-built_in">require</span>(<span class="hljs-string">"api.js"</span>);
+      <span class="hljs-keyword">var</span> EXPORT = api(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
+        <span class="hljs-keyword">return</span> item[<span class="hljs-number">1</span>];
+      });
+      EXPORT.push([
+        <span class="hljs-built_in">module</span>.id,
+        <span class="hljs-string">"body {\r\n    background-color: green;\r\n}"</span>
+      ]);
+      <span class="hljs-built_in">module</span>.exports = EXPORT;
+    },
+    <span class="hljs-string">"api.js"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span></span>) =&gt;</span> {
+      <span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">cssWithMappingToString</span>) </span>{
+        <span class="hljs-keyword">var</span> list = [];
+        list.toString = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toString</span>(<span class="hljs-params"></span>) </span>{
+          <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
+            <span class="hljs-keyword">var</span> content = cssWithMappingToString(item);
+            <span class="hljs-keyword">return</span> content;
+          }).join(<span class="hljs-string">""</span>);
+        };
+        <span class="hljs-keyword">return</span> list;
+      };
+    },
+    <span class="hljs-string">"./src/global.css"</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+      <span class="hljs-keyword">var</span> result = <span class="hljs-built_in">require</span>(<span class="hljs-string">"css-loader.js!./src/global.css"</span>);
+      <span class="hljs-built_in">module</span>.exports = result.toString();
+    },
+  };
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = (cache[moduleId] = {
+      <span class="hljs-attr">id</span>: moduleId,
+      <span class="hljs-attr">exports</span>: {},
+    });
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  (<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> css = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/global.css"</span>);
+    <span class="hljs-built_in">console</span>.log(css);
+  })();
+})();
+</code></pre>
+<h2 id="t113. @import">3. @import <a href="#t113. @import"> # </a></h2>
+<h3 id="t123.1 src\index.js">3.1 src\index.js <a href="#t123.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">//const css = require("./index.css");</span>
+<span class="hljs-keyword">const</span> css = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./index.less"</span>);
+<span class="hljs-built_in">console</span>.log(css);
+</code></pre>
+<h3 id="t133.2 src\index.css">3.2 src\index.css <a href="#t133.2 src\index.css"> # </a></h3>
+<p>src\index.css</p>
+<pre><code class="lang-css"><span class="hljs-keyword">@import</span> <span class="hljs-string">"./global.css"</span>;
+<span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">color</span>: red;
+}
+</code></pre>
+<h3 id="t143.3 src\global.css">3.3 src\global.css <a href="#t143.3 src\global.css"> # </a></h3>
+<p>src\global.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">background-color</span>: green;
+}
+</code></pre>
+<h3 id="t153.4 src\index.less">3.4 src\index.less <a href="#t153.4 src\index.less"> # </a></h3>
+<p>src\index.less</p>
+<pre><code class="lang-less"><span class="hljs-keyword">@import</span> <span class="hljs-string">"./global.less"</span>;
+<span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">color</span>: red;
+}
+</code></pre>
+<h3 id="t163.5 src\global.less">3.5 src\global.less <a href="#t163.5 src\global.less"> # </a></h3>
+<p>src\global.less</p>
+<pre><code class="lang-less"><span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">background-color</span>: green;
+}
+</code></pre>
+<h3 id="t173.6 webpack.config.js">3.6 webpack.config.js <a href="#t173.6 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">module.exports = {
+<span class="hljs-addition">+    resolveLoader:{</span>
+<span class="hljs-addition">+        alias:{</span>
+<span class="hljs-addition">+            'css-loader':path.resolve(__dirname,'loaders','css-loader.js')</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    module:{</span>
+<span class="hljs-addition">+        rules:[</span>
+<span class="hljs-addition">+            {</span>
+<span class="hljs-addition">+                test:/\.css$/,</span>
+<span class="hljs-addition">+                use:[</span>
+<span class="hljs-addition">+                    "to-string-loader",</span>
+<span class="hljs-addition">+                    {</span>
+<span class="hljs-addition">+                        loader:'css-loader',</span>
+<span class="hljs-addition">+                        options:{</span>
+<span class="hljs-addition">+                            url:false,</span>
+<span class="hljs-addition">+                            import:true,</span>
+<span class="hljs-addition">+                            esModule: false</span>
+<span class="hljs-addition">+                        }</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                ],</span>
+<span class="hljs-addition">+                include:path.resolve('src')</span>
+<span class="hljs-addition">+            },</span>
+<span class="hljs-addition">+            {</span>
+<span class="hljs-addition">+                test:/\.less$/,</span>
+<span class="hljs-addition">+                use:[</span>
+<span class="hljs-addition">+                    "to-string-loader",</span>
+<span class="hljs-addition">+                    {</span>
+<span class="hljs-addition">+                        loader:'css-loader',</span>
+<span class="hljs-addition">+                        options:{</span>
+<span class="hljs-addition">+                            import:true,</span>
+<span class="hljs-addition">+                            url:false,</span>
+<span class="hljs-addition">+                            esModule: false,</span>
+<span class="hljs-addition">+                            importLoaders:1</span>
+<span class="hljs-addition">+                        }</span>
+<span class="hljs-addition">+                    },</span>
+<span class="hljs-addition">+                    {</span>
+<span class="hljs-addition">+                        loader:'less-loader'</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                ],</span>
+<span class="hljs-addition">+                include:path.resolve('src')</span>
+<span class="hljs-addition">+            },</span>
+<span class="hljs-addition">+        ]</span>
+<span class="hljs-addition">+    }</span>
+}
+</code></pre>
+<h3 id="t183.7 dist\main.js">3.7 dist\main.js <a href="#t183.7 dist\main.js"> # </a></h3>
+<p>dist\main.js</p>
+<pre><code class="lang-diff">(() =&gt; {
+  var modules = {
+    "css-loader.js!./src/global.css": (module, exports, require) =&gt; {
+      var api = require("api.js");
+      var EXPORT = api(function (i) {
+        return i[1];
+      });
+      EXPORT.push([
+        module.id,
+        "body {\r\n    background-color: green;\r\n}\r\n",
+        "",
+      ]);
+      module.exports = EXPORT;
+    },
+    "css-loader.js!./src/index.css": (module, exports, require) =&gt; {
+      var api = require("api.js");
+<span class="hljs-addition">+     var GLOBAL_CSS = require("css-loader.js!./src/global.css");</span>
+      var EXPORT = api(function (item) {
+        return item[1];
+      });
+<span class="hljs-addition">+     EXPORT.i(GLOBAL_CSS);</span>
+      EXPORT.push([
+        module.id,
+        "body {\r\n    color: red;\r\n}",
+        "",
+      ]);
+      module.exports = EXPORT;
+    },
+    "api.js": (module) =&gt; {
+      module.exports = function (cssWithMappingToString) {
+        var list = [];
+        list.toString = function toString() {
+          return this.map(function (item) {
+            var content = cssWithMappingToString(item);
+            return content;
+          }).join("");
+        };
+<span class="hljs-addition">+        list.i = function (modules) {</span>
+<span class="hljs-addition">+          for (var i = 0; i &lt; modules.length; i++) {</span>
+<span class="hljs-addition">+            list.push(modules[i]);</span>
+<span class="hljs-addition">+          }</span>
+<span class="hljs-addition">+        };</span>
+        return list;
+      };
+    },
+    "./src/index.css": (module, exports, require) =&gt; {
+      var result = require("css-loader.js!./src/index.css");
+      module.exports = result.toString();
+    },
+  };
+  var cache = {};
+  function require(moduleId) {
+    if (cache[moduleId]) {
+      return cache[moduleId].exports;
+    }
+    var module = (cache[moduleId] = {
+      id: moduleId,
+      exports: {},
+    });
+    modules[moduleId](module, module.exports, require);
+    return module.exports;
+  }
+  (() =&gt; {
+    const index = require("./src/index.css");
+    console.log(index);
+  })();
+})();
+</code></pre>
+<h3 id="t193.8 loaders\to-string-loader.js">3.8 loaders\to-string-loader.js <a href="#t193.8 loaders\to-string-loader.js"> # </a></h3>
+<p>loaders\to-string-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> loaderUtils = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{}
+<span class="hljs-built_in">module</span>.exports.pitch = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">remainingRequest</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`
+        var result = require(<span class="hljs-subst">${loaderUtils.stringifyRequest(<span class="hljs-keyword">this</span>, <span class="hljs-string">"!!"</span> + remainingRequest)}</span>);
+        if (result &amp;&amp; result.__esModule) {
+            result = result.default;
+        }
+        if (typeof result === "string") {
+            module.exports = result;
+        } else {
+            module.exports = result.toString();
+        }
+    `</span>;
+};
+</code></pre>
+<h3 id="t203.9 loaders\css-loader.js">3.9 loaders\css-loader.js <a href="#t203.9 loaders\css-loader.js"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/loader-utils">loader-utils stringifyRequest</a></li>
+</ul>
+<p>loaders\css-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> postcss = <span class="hljs-built_in">require</span>(<span class="hljs-string">"postcss"</span>);
+<span class="hljs-keyword">var</span> loaderUtils = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-keyword">var</span> Tokenizer = <span class="hljs-built_in">require</span>(<span class="hljs-string">"css-selector-tokenizer"</span>);
+<span class="hljs-keyword">const</span> { getOptions } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-keyword">const</span> cssLoader = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">inputSource</span>) </span>{
+  <span class="hljs-keyword">let</span> loaderOptions = getOptions(<span class="hljs-keyword">this</span>) || {};
+  <span class="hljs-keyword">const</span> cssPlugin = <span class="hljs-function">(<span class="hljs-params">options</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">root</span>) =&gt;</span> {
+      root.walkAtRules(<span class="hljs-regexp">/^import$/i</span>, (rule) =&gt; {
+        rule.remove();
+        options.imports.push(rule.params.slice(<span class="hljs-number">1</span>, <span class="hljs-number">-1</span>));
+      });
+    };
+  };
+
+  <span class="hljs-keyword">let</span> callback = <span class="hljs-keyword">this</span>.async();
+  <span class="hljs-keyword">let</span> options = { <span class="hljs-attr">imports</span>: [] };
+  <span class="hljs-keyword">let</span> pipeline = postcss([cssPlugin(options)]);
+  pipeline.process(inputSource).then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    <span class="hljs-keyword">let</span> { loaders, loaderIndex } = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">let</span> {importLoaders=<span class="hljs-number">0</span>} = loaderOptions;
+    <span class="hljs-keyword">const</span> loadersRequest = loaders
+    .slice(
+      loaderIndex,
+      loaderIndex + <span class="hljs-number">1</span> + (<span class="hljs-keyword">typeof</span> importLoaders !== <span class="hljs-string">"number"</span> ? <span class="hljs-number">0</span> : importLoaders)
+    )
+    .map(<span class="hljs-function">(<span class="hljs-params">x</span>) =&gt;</span> x.request)
+    .join(<span class="hljs-string">"!"</span>);
+    <span class="hljs-keyword">let</span> importCss = options.imports
+      .map(<span class="hljs-function">(<span class="hljs-params">url</span>) =&gt;</span><span class="hljs-string">`list.push(...require(`</span>+loaderUtils.stringifyRequest(<span class="hljs-keyword">this</span>, <span class="hljs-string">`-!<span class="hljs-subst">${loadersRequest}</span>!<span class="hljs-subst">${url}</span>`</span>)+<span class="hljs-string">`));`</span>).join(<span class="hljs-string">"\r\n"</span>);
+    <span class="hljs-keyword">let</span> script = <span class="hljs-string">`
+      var list = [];
+      list.toString = function () {return this.join('')}
+      <span class="hljs-subst">${importCss}</span>
+      list.push(\`<span class="hljs-subst">${result.css}</span>\`);
+      module.exports = list;
+    `</span>;     
+    callback(<span class="hljs-literal">null</span>, script);
+  });
+};
+
+<span class="hljs-built_in">module</span>.exports = cssLoader;
+</code></pre>
+<h2 id="t214.@url">4.@url <a href="#t214.@url"> # </a></h2>
+<h3 id="t224.1 webpack.config.js">4.1 webpack.config.js <a href="#t224.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">module.exports = {
+    mode:'development',
+    devtool:false,
+    resolveLoader:{
+        alias:{
+            'css-loader':path.resolve(__dirname,'loaders','css-loader.js')
+        },
+         modules:[path.resolve(__dirname,'loaders'),'node_modules']
+    },
+    module:{
+        rules:[
+            {
+                test:/\.css$/,
+                use:[
+                    "to-string-loader",
+                    {
+                        loader:'css-loader',
+                        options:{
+                            url:true,
+                            import:true,
+                            esModule: false
+                        }
+                    },
+                    "logger1-loader",
+                    "logger2-loader"
+                ],
+                include:path.resolve('src')
+            },
+            {
+                test:/\.less$/,
+                use:[
+                    "to-string-loader",
+                    {
+                        loader:'css-loader',
+                        options:{
+                            import:true,
+<span class="hljs-addition">+                            url:true,</span>
+                            esModule: false,
+                            importLoaders:1
+                        }
+                    },
+                    {
+                        loader:'less-loader'
+                    }
+                ],
+                include:path.resolve('src')
+            },
+<span class="hljs-addition">+            {</span>
+<span class="hljs-addition">+                 test:/\.jpg/,</span>
+<span class="hljs-addition">+                 use:[{</span>
+<span class="hljs-addition">+                     loader:'file-loader',</span>
+<span class="hljs-addition">+                     options:{</span>
+<span class="hljs-addition">+                         esModule:false</span>
+<span class="hljs-addition">+                     }</span>
+<span class="hljs-addition">+                 }]</span>
+<span class="hljs-addition">+             }</span>
+        ]
+    },
+    plugins:[
+        new HtmlWebpackPlugin({template:'./src/index.html'}),
+    ]
+}
+</code></pre>
+<h3 id="t234.2 src\index.css">4.2 src\index.css <a href="#t234.2 src\index.css"> # </a></h3>
+<p>src\index.css</p>
+<pre><code class="lang-diff">body {
+    color: red;
+}
+<span class="hljs-addition">+#root{</span>
+<span class="hljs-addition">+    background-image: url(./images/kf.jpg);</span>
+<span class="hljs-addition">+    width:100px;</span>
+<span class="hljs-addition">+    height:100px;</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t244.3 dist\main.js">4.3 dist\main.js <a href="#t244.3 dist\main.js"> # </a></h3>
+<p>dist\main.js</p>
+<pre><code class="lang-diff">(() =&gt; {
+  var modules = {
+    "css-loader.js!./src/index.css": (module, exports, require) =&gt; {
+      var api = require("api.js");
+      var EXPORT = api(function (i) {
+        return i[1];
+      });
+      EXPORT.push([
+        module.id,
+<span class="hljs-addition">+        "body {\r\ncolor: red;\r\n}\r\n#root{\r\nbackground-image: url(" +require("./src/images/kf.jpg") +");\r\nwidth:100px;\r\n    height:100px;\r\n}"</span>
+      ]);
+      module.exports = EXPORT;
+    },
+    "api.js": (module) =&gt; {
+      module.exports = function (cssWithMappingToString) {
+        var list = [];
+        list.toString = function toString() {
+          return this.map(function (item) {
+            var content = cssWithMappingToString(item);
+            return content;
+          }).join("");
+        };
+        list.i = function (modules) {
+          for (var i = 0; i &lt; modules.length; i++) {
+            list.push(modules[i]);
+          }
+        };
+        return list;
+      };
+    },
+    "./src/images/kf.jpg": (module, exports, require) =&gt; {
+      module.exports = require.p + "4a783413fe7beffd284711d5fdfd1549.jpg";
+    },
+    "./src/index.css": (module, exports, require) =&gt; {
+      var result = require("css-loader.js!./src/index.css");
+      module.exports = result.toString();
+    },
+  };
+  var cache = {};
+  function require(moduleId) {
+    if (cache[moduleId]) {
+      return cache[moduleId].exports;
+    }
+    var module = (cache[moduleId] = {
+      id: moduleId,
+      exports: {},
+    });
+    modules[moduleId](module, module.exports, require);
+    return module.exports;
+  }
+  require.p="";
+  const index = require("./src/index.css");
+  console.log(index);
+})();
+</code></pre>
+<h3 id="t254.4 loaders\css-loader.js">4.4 loaders\css-loader.js <a href="#t254.4 loaders\css-loader.js"> # </a></h3>
+<p>loaders\css-loader.js</p>
+<pre><code class="lang-diff">var postcss = require("postcss");
+var loaderUtils = require("loader-utils");
+var Tokenizer = require("css-selector-tokenizer");
+const { getOptions } = require("loader-utils");
+const cssLoader = function (inputSource) {
+  let loaderOptions = getOptions(this) || {};
+  const cssPlugin = (options) =&gt; {
+    return (root) =&gt; {
+      root.walkAtRules(/^import$/i, (rule) =&gt; {
+        rule.remove();
+        options.imports.push(rule.params.slice(1, -1));
+      });
+<span class="hljs-addition">+      root.walkDecls((decl) =&gt; {</span>
+<span class="hljs-addition">+          var values = Tokenizer.parseValues(decl.value);</span>
+<span class="hljs-addition">+          values.nodes.forEach(function (value) {</span>
+<span class="hljs-addition">+            value.nodes.forEach((item) =&gt; {</span>
+<span class="hljs-addition">+              if (item.type === "url") {</span>
+<span class="hljs-addition">+               let url = loaderUtils.stringifyRequest(this, item.url);</span>
+<span class="hljs-addition">+               item.stringType = "'";</span>
+<span class="hljs-addition">+               item.url ="`+require("+url+")+`";</span>
+<span class="hljs-addition">+              }</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+          });</span>
+<span class="hljs-addition">+          let value = Tokenizer.stringifyValues(values);</span>
+<span class="hljs-addition">+          decl.value = value;</span>
+<span class="hljs-addition">+      });</span>
+    };
+  };
+
+  let callback = this.async();
+  let options = { imports: [] };
+  let pipeline = postcss([cssPlugin(options)]);
+  pipeline.process(inputSource).then((result) =&gt; {
+    let { loaders, loaderIndex } = this;
+    let {importLoaders=0} = loaderOptions;
+    const loadersRequest = loaders
+    .slice(
+      loaderIndex,
+      loaderIndex + 1 + (typeof importLoaders !== "number" ? 0 : importLoaders)
+    )
+    .map((x) =&gt; x.request)
+    .join("!");
+    let importCss = options.imports
+      .map((url) =&gt;`list.push(...require(`+loaderUtils.stringifyRequest(this, `-!${loadersRequest}!${url}`)+`));`).join("\r\n");
+    let script = `
+      var list = [];
+      list.toString = function () {return this.join('')}
+      ${importCss}
+      list.push(\`${result.css}\`);
+      module.exports = list;
+    `;     
+    callback(null, script);
+  });
+};
+
+module.exports = cssLoader;
+</code></pre>
+<h2 id="t265.style-loader">5.style-loader <a href="#t265.style-loader"> # </a></h2>
+<h3 id="t275.1 webpack.config.js">5.1 webpack.config.js <a href="#t275.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+module.exports = {
+    mode:'development',
+    devtool:false,
+    resolveLoader:{
+        alias:{
+            'css-loader':path.resolve(__dirname,'loaders','css-loader.js'),
+<span class="hljs-addition">+            'style-loader':path.resolve(__dirname,'loaders','style-loader.js')</span>
+        }
+    },
+    module:{
+        rules:[
+            {
+                test:/\.css$/,
+                use:[
+<span class="hljs-addition">+                    "style-loader",</span>
+                    {
+                        loader:'css-loader',
+                        options:{
+                            url:true,
+                            import:true,
+                            esModule: false
+                        }
+                    }
+                ],
+                include:path.resolve('src')
+            },
+            {
+                test:/\.less$/,
+                use:[
+<span class="hljs-addition">+                    "style-loader",</span>
+                    {
+                        loader:'css-loader',
+                        options:{
+                            import:true,
+                            url:true,
+                            esModule: false,
+                            importLoaders:1
+                        }
+                    },
+                    {
+                        loader:'less-loader'
+                    }
+                ],
+                include:path.resolve('src')
+            },
+            {
+                 test:/\.jpg/,
+                 use:[{
+                     loader:'file-loader',
+                     options:{
+                         esModule:false
+                     }
+                 }]
+             }
+        ]
+    },
+    plugins:[
+        new HtmlWebpackPlugin({template:'./src/index.html'}),
+    ]
+}
+</code></pre>
+<h3 id="t285.2 style-loader.js">5.2 style-loader.js <a href="#t285.2 style-loader.js"> # </a></h3>
+<p>loaders\style-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> loaderUtils = <span class="hljs-built_in">require</span>(<span class="hljs-string">"loader-utils"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>) </span>{}
+
+loader.pitch = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">remainingRequest, previousRequest, data</span>) </span>{<span class="hljs-keyword">let</span> style = <span class="hljs-string">`
+    var style = document.createElement("style");
+    style.innerHTML = require(<span class="hljs-subst">${loaderUtils.stringifyRequest(
+      <span class="hljs-keyword">this</span>,
+      <span class="hljs-string">"!!"</span> + remainingRequest
+    )}</span>);
+    document.head.appendChild(style);
+ `</span>;
+  <span class="hljs-keyword">return</span> style;
+};
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h3 id="t295.3 src\index.html">5.3 src\index.html <a href="#t295.3 src\index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;css-loader&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+<span class="hljs-addition">+    &lt;div id="root"&gt;root&lt;/div&gt;</span>
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="t307. PostCSS">7. PostCSS <a href="#t307. PostCSS"> # </a></h2>
+<ul>
+<li><a href="https://www.postcss.com.cn/">PostCSS</a>是一个用 JavaScript 工具和插件转换 CSS 代码的工具</li>
+<li><a href="http://api.postcss.org">PostCSS Api</a></li>
+<li><a href="https://astexplorer.net/#/2uBU1BLuJ1">Astexplorer</a></li>
+</ul>
+<h3 id="t317.1 类型">7.1 类型 <a href="#t317.1 类型"> # </a></h3>
+<ul>
+<li>CSS AST主要有3种父类型<ul>
+<li><code>AtRule</code> @xxx的这种类型，如@screen</li>
+<li><code>Comment</code> 注释</li>
+<li><code>Rule</code> 普通的css规则</li>
+</ul>
+</li>
+<li>子类型<ul>
+<li><code>decl</code> 指的是每条具体的css规则</li>
+<li><code>rule</code> 作用于某个选择器上的css规则集合</li>
+</ul>
+</li>
+</ul>
+<h3 id="t327.2 AST节点">7.2 AST节点 <a href="#t327.2 AST节点"> # </a></h3>
+<ul>
+<li>nodes: CSS规则的节点信息集合<ul>
+<li>decl: 每条css规则的节点信息</li>
+<li>prop: 样式名,如width</li>
+<li>value: 样式值,如10px</li>
+</ul>
+</li>
+<li>type: 类型</li>
+<li>source: 包括start和end的位置信息，start和end里都有line和column表示行和列</li>
+<li>selector: type为rule时的选择器</li>
+<li>name: type为atRule时@紧接rule名，譬如@import 'xxx.css'中的import</li>
+<li>params: type为atRule时@紧接rule名后的值，譬如@import 'xxx.css'中的xxx.css</li>
+<li>text: type为comment时的注释内容</li>
+</ul>
+<h3 id="t337.3 操作">7.3 操作 <a href="#t337.3 操作"> # </a></h3>
+<ul>
+<li>walk: 遍历所有节点信息，无论是atRule、rule、comment的父类型，还是rule、 decl的子类型<ul>
+<li>walkAtRules：遍历所有的AtRules</li>
+<li>walkComments 遍历所有的Comments</li>
+<li>walkDecls 遍历所有的Decls </li>
+<li>walkRules 遍历所有的Rules</li>
+</ul>
+</li>
+<li>postCss给出了很多<a href="[AtRule](http://api.postcss.org/AtRule.html">操作CSS</a>)的方法<ul>
+<li>postcss插件如同babel插件一样，有固定的格式</li>
+<li>注册个插件名，并获取插件配置参数<code>opts</code></li>
+<li>返回值是个函数，这个函数主体是你的处理逻辑,第一个参数是AST的根节点</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> postcss = <span class="hljs-built_in">require</span>(<span class="hljs-string">"postcss"</span>);
+<span class="hljs-keyword">const</span> cssPlugin = <span class="hljs-function">(<span class="hljs-params">options</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">root,result</span>) =&gt;</span> {
+      root.walkAtRules();<span class="hljs-comment">//遍历所有的＠Rule @import</span>
+      root.walkDecls(<span class="hljs-function">(<span class="hljs-params">decl</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span>(decl.value.endsWith(<span class="hljs-string">'px'</span>)){
+            decl.value=<span class="hljs-built_in">parseFloat</span>(decl.value)/<span class="hljs-number">75</span>+<span class="hljs-string">'rem'</span>;
+        }
+      });
+    };
+  };
+<span class="hljs-keyword">let</span> options = {};
+<span class="hljs-keyword">let</span> pipeline = postcss([cssPlugin(options)]);
+<span class="hljs-keyword">let</span> inputSource = <span class="hljs-string">`
+#root{
+    width:750px;
+}`</span>;
+pipeline.process(inputSource).then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(result.css);
+})
+</code></pre>
+
+    

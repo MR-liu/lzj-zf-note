@@ -1,0 +1,689 @@
+
+        <h2 id="t01. 创建项目">1. 创建项目 <a href="#t01. 创建项目"> # </a></h2>
+<ul>
+<li>monoRepo 是将所有的模块统一的放在一个主干分支之中管理</li>
+<li>multiRepo 将项目分化成为多个模块，并针对每一个模块单独的开辟一个Repo来进行管理</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/1278ae09f1de08186e9e70fe3bb1c4d1" alt="1278ae09f1de08186e9e70fe3bb1c4d1"></p>
+<h3 id="t11.1 Lerna">1.1 Lerna <a href="#t11.1 Lerna"> # </a></h3>
+<ul>
+<li>Lerna是一个管理多个 npm 模块的工具,优化维护多包的工作流，解决多个包互相依赖，且发布需要手动维护多个包的问题</li>
+</ul>
+<h4 id="t21.1.1 安装">1.1.1 安装 <a href="#t21.1.1 安装"> # </a></h4>
+<pre><code class="lang-js">npm i lerna -g
+</code></pre>
+<h4 id="t31.1.2 初始化">1.1.2 初始化 <a href="#t31.1.2 初始化"> # </a></h4>
+<pre><code class="lang-js">lerna init
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">命令</th>
+<th style="text-align:left">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">lerna bootstrap</td>
+<td style="text-align:left">安装依赖</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna clean</td>
+<td style="text-align:left">删除各个包下的node_modules</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna init</td>
+<td style="text-align:left">创建新的lerna库</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna list</td>
+<td style="text-align:left">查看本地包列表</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna changed</td>
+<td style="text-align:left">显示自上次release tag以来有修改的包， 选项通 list</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna diff</td>
+<td style="text-align:left">显示自上次release tag以来有修改的包的差异， 执行 git diff</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna exec</td>
+<td style="text-align:left">在每个包目录下执行任意命令</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna run</td>
+<td style="text-align:left">执行每个包package.json中的脚本命令</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna add</td>
+<td style="text-align:left">添加一个包的版本为各个包的依赖</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna import</td>
+<td style="text-align:left">引入package</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna link</td>
+<td style="text-align:left">链接互相引用的库</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna create</td>
+<td style="text-align:left">新建package</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna publish</td>
+<td style="text-align:left">发布</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t41.1.3 文件">1.1.3 文件 <a href="#t41.1.3 文件"> # </a></h4>
+<h5 id="t51.1.3.1 package.json">1.1.3.1 package.json <a href="#t51.1.3.1 package.json"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"root"</span>,
+  <span class="hljs-attr">"private"</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"lerna"</span>: <span class="hljs-string">"^4.0.0"</span>
+  }
+}
+</code></pre>
+<h5 id="t61.1.3.2 lerna.json">1.1.3.2 lerna.json <a href="#t61.1.3.2 lerna.json"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"packages"</span>: [
+    <span class="hljs-string">"packages/*"</span>
+  ],
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>
+}
+</code></pre>
+<h5 id="t71.1.3.3 .gitignore">1.1.3.3 .gitignore <a href="#t71.1.3.3 .gitignore"> # </a></h5>
+<pre><code class="lang-yaml"><span class="hljs-string">node_modules</span>
+<span class="hljs-string">.DS_Store</span>
+<span class="hljs-string">design</span>
+<span class="hljs-string">*.log</span>
+<span class="hljs-string">packages/test</span>
+<span class="hljs-string">dist</span>
+<span class="hljs-string">temp</span>
+<span class="hljs-string">.vuerc</span>
+<span class="hljs-string">.version</span>
+<span class="hljs-string">.versions</span>
+<span class="hljs-string">.changelog</span>
+</code></pre>
+<h4 id="t81.1.4 yarn workspace">1.1.4 yarn workspace <a href="#t81.1.4 yarn workspace"> # </a></h4>
+<ul>
+<li>yarn workspace允许我们使用 monorepo 的形式来管理项目</li>
+<li>在安装 node_modules 的时候它不会安装到每个子项目的 node_modules 里面，而是直接安装到根目录下面，这样每个子项目都可以读取到根目录的 node_modules</li>
+<li>整个项目只有根目录下面会有一份 yarn.lock 文件。子项目也会被 link 到 node_modules 里面，这样就允许我们就可以直接用 import 导入对应的项目</li>
+<li>yarn.lock文件是自动生成的,也完全Yarn来处理.yarn.lock锁定你安装的每个依赖项的版本，这可以确保你不会意外获得不良依赖</li>
+</ul>
+<h6 id="t91.1.4.1 package.json">1.1.4.1 package.json <a href="#t91.1.4.1 package.json"> # </a></h6>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+  "name": "root",
+  "private": true,
+<span class="hljs-addition">+  "workspaces": [</span>
+<span class="hljs-addition">+    "packages/*"</span>
+<span class="hljs-addition">+  ],</span>
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
+</code></pre>
+<h6 id="t101.1.4.2 lerna.json">1.1.4.2 lerna.json <a href="#t101.1.4.2 lerna.json"> # </a></h6>
+<p>lerna.json</p>
+<pre><code class="lang-diff">{
+  "packages": [
+    "packages/*"
+  ],
+  "version": "1.0.0",
+<span class="hljs-addition">+ "useWorkspaces": true,</span>
+<span class="hljs-addition">+ "npmClient": "yarn"</span>
+}
+</code></pre>
+<h6 id="t111.1.4.3 添加依赖">1.1.4.3 添加依赖 <a href="#t111.1.4.3 添加依赖"> # </a></h6>
+<ul>
+<li><a href="https://classic.yarnpkg.com/en/docs/cli">yarnpkg</a></li>
+<li><a href="https://github.com/lerna/lerna#readme">lerna</a></li>
+</ul>
+<p>设置加速镜像</p>
+<pre><code class="lang-js">yarn config <span class="hljs-keyword">set</span> registry http://registry.npm.taobao.org
+ npm config <span class="hljs-keyword">set</span> registry https://registry.npm.taobao.org
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">作用</th>
+<th style="text-align:left">命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">查看工作空间信息</td>
+<td style="text-align:left">yarn workspaces info</td>
+</tr>
+<tr>
+<td style="text-align:left">给根空间添加依赖</td>
+<td style="text-align:left">yarn add chalk cross-spawn fs-extra --ignore-workspace-root-check</td>
+</tr>
+<tr>
+<td style="text-align:left">给某个项目添加依赖</td>
+<td style="text-align:left">yarn workspace create-react-app3 add commander</td>
+</tr>
+<tr>
+<td style="text-align:left">删除所有的 node_modules</td>
+<td style="text-align:left">lerna clean 等于 yarn workspaces run clean</td>
+</tr>
+<tr>
+<td style="text-align:left">安装和link</td>
+<td style="text-align:left">yarn install 等于 lerna bootstrap --npm-client yarn --use-workspaces</td>
+</tr>
+<tr>
+<td style="text-align:left">重新获取所有的 node_modules</td>
+<td style="text-align:left">yarn install --force</td>
+</tr>
+<tr>
+<td style="text-align:left">查看缓存目录</td>
+<td style="text-align:left">yarn cache dir</td>
+</tr>
+<tr>
+<td style="text-align:left">清除本地缓存</td>
+<td style="text-align:left">yarn cache clean</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t121.1.5 创建子项目">1.1.5 创建子项目 <a href="#t121.1.5 创建子项目"> # </a></h4>
+<pre><code class="lang-js">lerna create vite-cli
+lerna create  vite-project
+</code></pre>
+<h5 id="t131.1.5.1 vite-cli">1.1.5.1 vite-cli <a href="#t131.1.5.1 vite-cli"> # </a></h5>
+<h6 id="t141.1.5.1.1 package.json">1.1.5.1.1 package.json <a href="#t141.1.5.1.1 package.json"> # </a></h6>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"vite-cli"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>,
+  <span class="hljs-attr">"bin"</span>:{
+    <span class="hljs-attr">"vite-cli"</span>:<span class="hljs-string">"./bin/vite.js"</span>
+  },
+  <span class="hljs-attr">"scripts"</span>: {}
+}
+</code></pre>
+<h6 id="t151.1.5.1.2 vite.js">1.1.5.1.2 vite.js <a href="#t151.1.5.1.2 vite.js"> # </a></h6>
+<p>packages\vite-cli\bin\vite.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'../lib/cli'</span>)
+}
+start()
+</code></pre>
+<h6 id="t161.1.5.1.3 cli.js">1.1.5.1.3 cli.js <a href="#t161.1.5.1.3 cli.js"> # </a></h6>
+<p>packages\vite-cli\lib\cli.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">'vite'</span>);
+</code></pre>
+<h5 id="t171.1.5.2 vite-project">1.1.5.2 vite-project <a href="#t171.1.5.2 vite-project"> # </a></h5>
+<h6 id="t181.1.5.2.1 package.json">1.1.5.2.1 package.json <a href="#t181.1.5.2.1 package.json"> # </a></h6>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"vite-project"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>,
+  <span class="hljs-attr">"scripts"</span>: {}
+}
+</code></pre>
+<h4 id="t191.1.6 创建软链接">1.1.6 创建软链接 <a href="#t191.1.6 创建软链接"> # </a></h4>
+<pre><code class="lang-sh">yarn
+<span class="hljs-built_in">cd</span> packages/vite-cli
+npm link
+npm root -g
+vite-cli
+</code></pre>
+<h3 id="t201.2 安装依赖">1.2 安装依赖 <a href="#t201.2 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cd packages/vite-project
+yarn workspace vite-project add vite
+
+cd packages/vite-cli
+yarn workspace vite-cli add   es-<span class="hljs-built_in">module</span>-lexer koa koa-<span class="hljs-keyword">static</span> magic-string
+</code></pre>
+<h2 id="t212. 启动并调试">2. 启动并调试 <a href="#t212. 启动并调试"> # </a></h2>
+<h3 id="t222.1 package.json">2.1 package.json <a href="#t222.1 package.json"> # </a></h3>
+<p>packages\vite-project\package.json</p>
+<pre><code class="lang-diff">{
+  "name": "vite-project",
+  "version": "0.0.0",
+<span class="hljs-addition">+ "scripts": {</span>
+<span class="hljs-addition">+   "dev":"vite"</span>
+<span class="hljs-addition">+ },</span>
+  "dependencies": {
+    "vite": "^2.4.1"
+  }
+}
+</code></pre>
+<h3 id="t232.2 index.html">2.2 index.html <a href="#t232.2 index.html"> # </a></h3>
+<p>packages\vite-project\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Vite App<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"app"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/src/main.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t242.3 src\main.js">2.3 src\main.js <a href="#t242.3 src\main.js"> # </a></h3>
+<p>packages\vite-project\src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">'main.js'</span>);
+</code></pre>
+<h3 id="t252.4 launch.json">2.4 launch.json <a href="#t252.4 launch.json"> # </a></h3>
+<p>.vscode\launch.json</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.2.0"</span>,
+    <span class="hljs-attr">"configurations"</span>: [
+        {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"node"</span>,
+            <span class="hljs-attr">"request"</span>: <span class="hljs-string">"launch"</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"vue-cli"</span>,
+            <span class="hljs-attr">"cwd"</span>:<span class="hljs-string">"${workspaceFolder}/packages/vite-project"</span>,
+            <span class="hljs-attr">"runtimeExecutable"</span>: <span class="hljs-string">"npm"</span>,
+            <span class="hljs-attr">"runtimeArgs"</span>: [
+                <span class="hljs-string">"run"</span>,
+                <span class="hljs-string">"dev"</span>
+            ],
+            <span class="hljs-attr">"port"</span>:<span class="hljs-number">9229</span>,
+            <span class="hljs-attr">"autoAttachChildProcesses"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"stopOnEntry"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"skipFiles"</span>: [
+                <span class="hljs-string">"&lt;node_internals&gt;/**"</span>
+            ]
+        }
+    ]
+}
+</code></pre>
+<h2 id="t263. 实现静态服务">3. 实现静态服务 <a href="#t263. 实现静态服务"> # </a></h2>
+<h3 id="t273.1 serverPluginServeStatic.js">3.1 serverPluginServeStatic.js <a href="#t273.1 serverPluginServeStatic.js"> # </a></h3>
+<p>packages\vite-cli\lib\serverPluginServeStatic.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">serveStaticPlugin</span>(<span class="hljs-params">{ app, root }</span>) </span>{
+    <span class="hljs-comment">// 以当前根目录作为静态目录</span>
+    app.use(<span class="hljs-built_in">require</span>(<span class="hljs-string">'koa-static'</span>)(root));
+    <span class="hljs-comment">// 以public目录作为根目录</span>
+    app.use(<span class="hljs-built_in">require</span>(<span class="hljs-string">'koa-static'</span>)(path.join(root, <span class="hljs-string">'public'</span>)))
+}
+exports.serveStaticPlugin = serveStaticPlugin;
+</code></pre>
+<h3 id="t283.2 cli.js">3.2 cli.js <a href="#t283.2 cli.js"> # </a></h3>
+<p>packages\vite-cli\lib\cli.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Koa = <span class="hljs-built_in">require</span>(<span class="hljs-string">'koa'</span>);
+<span class="hljs-keyword">const</span> {serveStaticPlugin} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./serverPluginServeStatic'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createServer</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> app = <span class="hljs-keyword">new</span> Koa();
+    <span class="hljs-keyword">const</span> root = process.cwd();
+    <span class="hljs-comment">// 构建上下文对象</span>
+    <span class="hljs-keyword">const</span> context = {
+        app,
+        root
+    }
+    app.use(<span class="hljs-function">(<span class="hljs-params">ctx, next</span>) =&gt;</span> {
+        <span class="hljs-comment">// 扩展ctx属性</span>
+        <span class="hljs-built_in">Object</span>.assign(ctx, context);
+        <span class="hljs-keyword">return</span> next();
+    });
+    <span class="hljs-keyword">const</span> resolvedPlugins = [
+        serveStaticPlugin
+    ];
+    <span class="hljs-comment">// 依次注册所有插件</span>
+    resolvedPlugins.forEach(<span class="hljs-function"><span class="hljs-params">plugin</span> =&gt;</span> plugin(context));
+    <span class="hljs-keyword">return</span> app;
+}
+createServer().listen(<span class="hljs-number">4000</span>);
+</code></pre>
+<h2 id="t294.重写导入路径">4.重写导入路径 <a href="#t294.重写导入路径"> # </a></h2>
+<ul>
+<li>Vue单文件组件(SFC)规范 vue文件用于表示一个单一组件，其内使用类html语法，顶级标签有template,script,style和自定义的标签</li>
+</ul>
+<h3 id="t304.1 安装">4.1 安装 <a href="#t304.1 安装"> # </a></h3>
+<pre><code class="lang-js">yarn workspace vite-project add  vue@<span class="hljs-number">3</span>  @vitejs/plugin-vue @vue/compiler-sfc
+node ./node_modules/esbuild/install.js
+</code></pre>
+<h3 id="t314.2 nodemon.json">4.2 nodemon.json <a href="#t314.2 nodemon.json"> # </a></h3>
+<p>packages\vite-project\nodemon.json</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"watch"</span>:[<span class="hljs-string">"../vite-cli"</span>]
+}
+</code></pre>
+<pre><code class="lang-js">nodemon ../vite-cli/bin/vite.js
+</code></pre>
+<h3 id="t324.3 vite.config.js">4.3 vite.config.js <a href="#t324.3 vite.config.js"> # </a></h3>
+<p>packages\vite-project\vite.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">"vite"</span>;
+<span class="hljs-keyword">import</span> vue <span class="hljs-keyword">from</span> <span class="hljs-string">"@vitejs/plugin-vue"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> defineConfig({
+  <span class="hljs-attr">plugins</span>: [vue({})],
+});
+</code></pre>
+<h3 id="t334.4 main.js">4.4 main.js <a href="#t334.4 main.js"> # </a></h3>
+<p>packages\vite-project\src\main.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import {createApp} from 'vue';</span>
+<span class="hljs-addition">+console.log(createApp);</span>
+</code></pre>
+<h3 id="t344.5 cli.js">4.5 cli.js <a href="#t344.5 cli.js"> # </a></h3>
+<p>packages\vite-cli\lib\cli.js</p>
+<pre><code class="lang-diff">const Koa = require('koa');
+const {serveStaticPlugin} = require('./serverPluginServeStatic');
+<span class="hljs-addition">+const {moduleRewritePlugin} = require('./serverPluginModuleRewrite');</span>
+function createServer() {
+    const app = new Koa();
+    const root = process.cwd();
+    // 构建上下文对象
+    const context = {
+        app,
+        root
+    }
+    app.use((ctx, next) =&gt; {
+        // 扩展ctx属性
+        Object.assign(ctx, context);
+        return next();
+    });
+    const resolvedPlugins = [
+<span class="hljs-addition">+       moduleRewritePlugin,</span>
+        serveStaticPlugin
+    ];
+    // 依次注册所有插件
+    resolvedPlugins.forEach(plugin =&gt; plugin(context));
+    return app;
+}
+createServer().listen(4000,()=&gt;{
+<span class="hljs-addition">+   console.log(`dev server running at:  http://localhost:4000/`);</span>
+});
+</code></pre>
+<h3 id="t354.6 serverPluginModuleRewrite.js">4.6 serverPluginModuleRewrite.js <a href="#t354.6 serverPluginModuleRewrite.js"> # </a></h3>
+<p>packages\vite-cli\lib\serverPluginModuleRewrite.js</p>
+<p><code>magic-string</code>是一个操作字符串和生成source-map的工具</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> MagicString = <span class="hljs-built_in">require</span>(<span class="hljs-string">'magic-string'</span>);
+<span class="hljs-keyword">var</span> magicString = <span class="hljs-keyword">new</span> MagicString(<span class="hljs-string">'export var name = "zhufeng"'</span>);
+<span class="hljs-comment">//返回magicString的克隆，删除原始字符串开头和结尾字符之前的所有内容</span>
+<span class="hljs-built_in">console</span>.log(magicString.snip(<span class="hljs-number">0</span>, <span class="hljs-number">6</span>).toString());
+<span class="hljs-comment">//从开始到结束删除字符(原始字符串,而不是生成的字符串)</span>
+<span class="hljs-built_in">console</span>.log(magicString.remove(<span class="hljs-number">0</span>,<span class="hljs-number">7</span>).toString());
+<span class="hljs-comment">//使用MagicString.Bundle可以联合多个源代码</span>
+<span class="hljs-keyword">let</span> bundleString = <span class="hljs-keyword">new</span> MagicString.Bundle();
+bundleString.addSource({
+  <span class="hljs-attr">content</span>: <span class="hljs-string">'var a = 1;'</span>,
+  <span class="hljs-attr">separator</span>: <span class="hljs-string">'\n'</span>
+})
+bundleString.addSource({
+  <span class="hljs-attr">content</span>: <span class="hljs-string">'var b = 2;'</span>,
+  <span class="hljs-attr">separator</span>: <span class="hljs-string">'\n'</span>
+})
+<span class="hljs-built_in">console</span>.log(bundleString.toString());
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { readBody } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./utils"</span>);
+<span class="hljs-keyword">const</span> { parse } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'es-module-lexer'</span>);
+<span class="hljs-keyword">const</span> MagicString = <span class="hljs-built_in">require</span>(<span class="hljs-string">'magic-string'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rewriteImports</span>(<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">let</span> imports = parse(source)[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">const</span> magicString = <span class="hljs-keyword">new</span> MagicString(source);
+    <span class="hljs-keyword">if</span> (imports.length) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; imports.length; i++) {
+            <span class="hljs-keyword">const</span> { s, e } = imports[i];
+            <span class="hljs-keyword">let</span> id = source.substring(s, e);<span class="hljs-comment">//vue</span>
+            <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/^[^\/\.]/</span>.test(id)) {
+                id = <span class="hljs-string">`/@modules/<span class="hljs-subst">${id}</span>`</span>;<span class="hljs-comment">// /node_modules/.vite/vue.js?v=14157793</span>
+                magicString.overwrite(s, e, id);
+            }
+        }
+    }
+    <span class="hljs-keyword">return</span> magicString.toString();
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">moduleRewritePlugin</span>(<span class="hljs-params">{ app, root }</span>) </span>{
+    app.use(<span class="hljs-keyword">async</span> (ctx, next) =&gt; {
+        <span class="hljs-keyword">await</span> next();
+        <span class="hljs-built_in">console</span>.log(ctx.body);
+        <span class="hljs-comment">// 对类型是js的文件进行拦截</span>
+        <span class="hljs-keyword">if</span> (ctx.body &amp;&amp; ctx.response.is(<span class="hljs-string">'js'</span>)) {
+            <span class="hljs-comment">// 读取文件中的内容</span>
+            <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> readBody(ctx.body);
+            <span class="hljs-comment">// 重写import中无法识别的路径</span>
+            <span class="hljs-keyword">const</span> result = rewriteImports(content);
+            ctx.body = result;
+        }
+    });
+}
+exports.moduleRewritePlugin = moduleRewritePlugin;
+</code></pre>
+<h3 id="t364.7 utils.js">4.7 utils.js <a href="#t364.7 utils.js"> # </a></h3>
+<p>packages\vite-cli\lib\utils.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { Readable } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'stream'</span>)
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readBody</span>(<span class="hljs-params">stream</span>) </span>{
+    <span class="hljs-keyword">if</span> (stream <span class="hljs-keyword">instanceof</span> Readable) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> buffers = [];
+            stream
+                .on(<span class="hljs-string">'data'</span>, (chunk) =&gt; buffers.push(chunk))
+                .on(<span class="hljs-string">'end'</span>, () =&gt; resolve(Buffer.concat(buffers).toString()));
+        })
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">return</span> stream.toString()
+    }
+}
+exports.readBody = readBody
+</code></pre>
+<h2 id="t375.解析/@modules文件">5.解析/@modules文件 <a href="#t375.解析/@modules文件"> # </a></h2>
+<h3 id="t385.1 serverPluginModuleResolve.js">5.1 serverPluginModuleResolve.js <a href="#t385.1 serverPluginModuleResolve.js"> # </a></h3>
+<p>packages\vite-cli\lib\serverPluginModuleResolve.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>).promises;
+<span class="hljs-keyword">const</span> moduleRE = <span class="hljs-regexp">/^\/@modules\//</span>;
+<span class="hljs-keyword">const</span> { resolveVue } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./utils'</span>)
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">moduleResolvePlugin</span>(<span class="hljs-params">{ app, root }</span>) </span>{
+    <span class="hljs-keyword">const</span> vueResolved = resolveVue(root)
+    app.use(<span class="hljs-keyword">async</span> (ctx, next) =&gt; {
+        <span class="hljs-comment">// 对 /@modules 开头的路径进行映射</span>
+        <span class="hljs-keyword">if</span> (!moduleRE.test(ctx.path)) {
+            <span class="hljs-keyword">return</span> next();
+        }
+        <span class="hljs-comment">// 去掉 /@modules/路径</span>
+        <span class="hljs-keyword">const</span> id = ctx.path.replace(moduleRE, <span class="hljs-string">''</span>);
+        ctx.type = <span class="hljs-string">'js'</span>;
+        <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> fs.readFile(vueResolved[id], <span class="hljs-string">'utf8'</span>);
+        ctx.body = content
+    });
+}
+exports.moduleResolvePlugin = moduleResolvePlugin;
+</code></pre>
+<h3 id="t395.2 serverPluginHtml.js">5.2 serverPluginHtml.js <a href="#t395.2 serverPluginHtml.js"> # </a></h3>
+<p>packages\vite-cli\lib\serverPluginHtml.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { readBody } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./utils"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">htmlRewritePlugin</span>(<span class="hljs-params">{root,app}</span>)</span>{
+    <span class="hljs-keyword">const</span> devInjection = <span class="hljs-string">`
+    &lt;script&gt;
+        window.process = {env:{NODE_ENV:'development'}}
+    &lt;/script&gt;
+    `</span>
+    app.use(<span class="hljs-keyword">async</span>(ctx,next)=&gt;{
+        <span class="hljs-keyword">await</span> next();
+        <span class="hljs-keyword">if</span>(ctx.response.is(<span class="hljs-string">'html'</span>)){
+            <span class="hljs-keyword">const</span> html = <span class="hljs-keyword">await</span> readBody(ctx.body);
+            ctx.body = html.replace(<span class="hljs-regexp">/&lt;head&gt;/</span>,<span class="hljs-string">`$&amp;<span class="hljs-subst">${devInjection}</span>`</span>)
+        }
+    })
+}
+exports.htmlRewritePlugin = htmlRewritePlugin
+</code></pre>
+<h3 id="t405.3 utils.js">5.3 utils.js <a href="#t405.3 utils.js"> # </a></h3>
+<p>packages\vite-cli\lib\utils.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { Readable } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'stream'</span>)
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readBody</span>(<span class="hljs-params">stream</span>) </span>{
+    <span class="hljs-keyword">if</span> (stream <span class="hljs-keyword">instanceof</span> Readable) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> buffers = [];
+            stream
+                .on(<span class="hljs-string">'data'</span>, (chunk) =&gt; buffers.push(chunk))
+                .on(<span class="hljs-string">'end'</span>, () =&gt; resolve(Buffer.concat(buffers).toString()));
+        })
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> stream.toString()
+    }
+}
+exports.readBody = readBody
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">resolveVue</span>(<span class="hljs-params">root</span>) </span>{
+    <span class="hljs-keyword">const</span> compilerPkgPath = path.resolve(root, <span class="hljs-string">'../../node_modules'</span>, <span class="hljs-string">'@vue/compiler-sfc/package.json'</span>);
+    <span class="hljs-keyword">const</span> compilerPkg = <span class="hljs-built_in">require</span>(compilerPkgPath);
+    <span class="hljs-comment">// 编译模块的路径  node中编译</span>
+    <span class="hljs-keyword">const</span> compilerPath = path.join(path.dirname(compilerPkgPath), compilerPkg.main);
+    <span class="hljs-keyword">const</span> resolvePath = <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> path.resolve(root, <span class="hljs-string">'../../node_modules'</span>, <span class="hljs-string">`@vue/<span class="hljs-subst">${name}</span>/dist/<span class="hljs-subst">${name}</span>.esm-bundler.js`</span>);
+    <span class="hljs-comment">// dom运行</span>
+    <span class="hljs-keyword">const</span> runtimeDomPath = resolvePath(<span class="hljs-string">'runtime-dom'</span>)
+    <span class="hljs-comment">// 核心运行</span>
+    <span class="hljs-keyword">const</span> runtimeCorePath = resolvePath(<span class="hljs-string">'runtime-core'</span>)
+    <span class="hljs-comment">// 响应式模块</span>
+    <span class="hljs-keyword">const</span> reactivityPath = resolvePath(<span class="hljs-string">'reactivity'</span>)
+    <span class="hljs-comment">// 共享模块</span>
+    <span class="hljs-keyword">const</span> sharedPath = resolvePath(<span class="hljs-string">'shared'</span>)
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">vue</span>: runtimeDomPath,
+        <span class="hljs-string">'@vue/runtime-dom'</span>: runtimeDomPath,
+        <span class="hljs-string">'@vue/runtime-core'</span>: runtimeCorePath,
+        <span class="hljs-string">'@vue/reactivity'</span>: reactivityPath,
+        <span class="hljs-string">'@vue/shared'</span>: sharedPath,
+        <span class="hljs-attr">compiler</span>: compilerPath,
+    }
+}
+exports.resolveVue=resolveVue;
+</code></pre>
+<h3 id="t415.4 cli.js">5.4 cli.js <a href="#t415.4 cli.js"> # </a></h3>
+<p>packages\vite-cli\lib\cli.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Koa = <span class="hljs-built_in">require</span>(<span class="hljs-string">'koa'</span>);
+<span class="hljs-keyword">const</span> {serveStaticPlugin} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./serverPluginServeStatic'</span>);
+<span class="hljs-keyword">const</span> {moduleRewritePlugin} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./serverPluginModuleRewrite'</span>);
+<span class="hljs-keyword">const</span> {moduleResolvePlugin} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./serverPluginModuleResolve'</span>);
+<span class="hljs-keyword">const</span> {htmlRewritePlugin} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./serverPluginHtml'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createServer</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> app = <span class="hljs-keyword">new</span> Koa();
+    <span class="hljs-keyword">const</span> root = process.cwd();
+    <span class="hljs-comment">// 构建上下文对象</span>
+    <span class="hljs-keyword">const</span> context = {
+        app,
+        root
+    }
+    app.use(<span class="hljs-function">(<span class="hljs-params">ctx, next</span>) =&gt;</span> {
+        <span class="hljs-comment">// 扩展ctx属性</span>
+        <span class="hljs-built_in">Object</span>.assign(ctx, context);
+        <span class="hljs-keyword">return</span> next();
+    });
+    <span class="hljs-keyword">const</span> resolvedPlugins = [
+        htmlRewritePlugin,
+        moduleRewritePlugin,
+        moduleResolvePlugin,
+        serveStaticPlugin
+    ];
+    <span class="hljs-comment">// 依次注册所有插件</span>
+    resolvedPlugins.forEach(<span class="hljs-function"><span class="hljs-params">plugin</span> =&gt;</span> plugin(context));
+    <span class="hljs-keyword">return</span> app;
+}
+createServer().listen(<span class="hljs-number">4000</span>,()=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`dev server running at:  http://localhost:4000/`</span>);
+});
+</code></pre>
+<h2 id="t426.编译vue模板">6.编译vue模板 <a href="#t426.编译vue模板"> # </a></h2>
+<h3 id="t436.1 main.js">6.1 main.js <a href="#t436.1 main.js"> # </a></h3>
+<p>packages\vite-project\src\main.js</p>
+<pre><code class="lang-diff">import {createApp} from 'vue';
+<span class="hljs-addition">+import App from './App.vue';</span>
+<span class="hljs-addition">+createApp(App).mount("#app");</span>
+</code></pre>
+<h3 id="t446.2 App.vue">6.2 App.vue <a href="#t446.2 App.vue"> # </a></h3>
+<p>packages\vite-project\src\App.vue</p>
+<pre><code class="lang-js">&lt;template&gt;
+    &lt;h1&gt;App&lt;/h1&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    name:'App'
+}
+&lt;/script&gt;
+</code></pre>
+<h3 id="t456.3 serverPluginVue.js">6.3 serverPluginVue.js <a href="#t456.3 serverPluginVue.js"> # </a></h3>
+<p>packages\vite-cli\lib\serverPluginVue.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>).promises;
+<span class="hljs-keyword">const</span> { resolveVue } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./utils'</span>);
+<span class="hljs-keyword">const</span> defaultExportRE = <span class="hljs-regexp">/((?:^|\n|;)\s*)export default/</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">serverPluginVue</span>(<span class="hljs-params">{ app, root }</span>) </span>{
+    app.use(<span class="hljs-keyword">async</span> (ctx, next) =&gt; {
+        <span class="hljs-keyword">if</span> (!ctx.path.endsWith(<span class="hljs-string">'.vue'</span>)) {
+            <span class="hljs-keyword">return</span> next();
+        }
+        <span class="hljs-comment">// vue文件处理</span>
+        <span class="hljs-keyword">const</span> filePath = path.join(root, ctx.path);
+        <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> fs.readFile(filePath, <span class="hljs-string">'utf8'</span>);
+        <span class="hljs-comment">// 获取文件内容</span>
+        <span class="hljs-keyword">let</span> { parse, compileTemplate } = <span class="hljs-built_in">require</span>(resolveVue(root).compiler);
+        <span class="hljs-keyword">let</span> { descriptor } = parse(content); <span class="hljs-comment">// 解析文件内容</span>
+        <span class="hljs-keyword">if</span> (!ctx.query.type) {
+            <span class="hljs-keyword">let</span> code = <span class="hljs-string">``</span>;
+            <span class="hljs-keyword">if</span> (descriptor.script) {
+                <span class="hljs-keyword">let</span> content = descriptor.script.content;
+                <span class="hljs-keyword">let</span> replaced = content.replace(defaultExportRE, <span class="hljs-string">'$1const __script ='</span>);
+                code += replaced;
+            }
+            <span class="hljs-keyword">if</span> (descriptor.template) {
+                <span class="hljs-keyword">const</span> templateRequest = ctx.path + <span class="hljs-string">`?type=template`</span>
+                code += <span class="hljs-string">`\nimport { render as __render } from <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(
+                    templateRequest
+                )}</span>`</span>;
+                code += <span class="hljs-string">`\n__script.render = __render`</span>
+            }
+            ctx.type = <span class="hljs-string">'js'</span>
+            <span class="hljs-keyword">if</span> (descriptor.script)
+            code += <span class="hljs-string">`\nexport default __script`</span>;
+            ctx.body = code;
+        }
+        <span class="hljs-keyword">if</span> (ctx.query.type == <span class="hljs-string">'template'</span>) {
+            ctx.type = <span class="hljs-string">'js'</span>;
+            <span class="hljs-keyword">let</span> content = descriptor.template.content;
+            <span class="hljs-keyword">const</span> { code } = compileTemplate({ <span class="hljs-attr">source</span>: content });
+            ctx.body = code;
+        }
+    })
+}
+exports.serverPluginVue = serverPluginVue;
+</code></pre>
+<h3 id="t466.4 cli.js">6.4 cli.js <a href="#t466.4 cli.js"> # </a></h3>
+<p>packages\vite-cli\lib\cli.js</p>
+<pre><code class="lang-diff">const Koa = require('koa');
+const {serveStaticPlugin} = require('./serverPluginServeStatic');
+const {moduleRewritePlugin} = require('./serverPluginModuleRewrite');
+const {moduleResolvePlugin} = require('./serverPluginModuleResolve');
+const {htmlRewritePlugin} = require('./serverPluginHtml');
+<span class="hljs-addition">+const {serverPluginVue} = require('./serverPluginVue')</span>
+function createServer() {
+    const app = new Koa();
+    const root = process.cwd();
+    // 构建上下文对象
+    const context = {
+        app,
+        root
+    }
+    app.use((ctx, next) =&gt; {
+        // 扩展ctx属性
+        Object.assign(ctx, context);
+        return next();
+    });
+    const resolvedPlugins = [
+        htmlRewritePlugin,
+        moduleRewritePlugin,
+        moduleResolvePlugin,
+<span class="hljs-addition">+       serverPluginVue,</span>
+        serveStaticPlugin
+    ];
+    // 依次注册所有插件
+    resolvedPlugins.forEach(plugin =&gt; plugin(context));
+    return app;
+}
+createServer().listen(4000,()=&gt;{
+    console.log(`dev server running at:  http://localhost:4000/`);
+});
+</code></pre>
+
+    

@@ -1,0 +1,697 @@
+
+        <h2 id="t00.HTTPS简介">0.HTTPS简介 <a href="#t00.HTTPS简介"> # </a></h2>
+<h3 id="t10.1. SSL和TLS">0.1. SSL和TLS <a href="#t10.1. SSL和TLS"> # </a></h3>
+<ul>
+<li>传输层安全性协议(Transport Layer Security，缩写TLS），及其前身安全套接层(Secure Sockets Layer,缩写SSL）是一种安全协议，目的是为互联网通信，提供安全及数据完整性保障</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/https_http.png" alt="https_http"></p>
+<h3 id="t20.2. HTTPS">0.2. HTTPS <a href="#t20.2. HTTPS"> # </a></h3>
+<ul>
+<li>HTTPS 协议的主要功能基本都依赖于 TLS/SSL 协议，TLS/SSL 的功能实现主要依赖于三类基本算法<ul>
+<li>散列函数 散列函数验证信息的完整性</li>
+<li>对称加密 对称加密算法采用协商的密钥对数据加密</li>
+<li>非对称加密 非对称加密实现身份认证和密钥协商</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/tls_ssl.png" alt="tls_ssl"></p>
+<h2 id="t31. 加密">1. 加密 <a href="#t31. 加密"> # </a></h2>
+<ul>
+<li>加密就是研究如何安全通信的</li>
+<li>保证数据在传输过程中不会被窃听</li>
+<li><a href="https://nodejs.org/dist/latest-v13.x/docs/api/crypto.html">crypto</a></li>
+</ul>
+<h3 id="t41.1 对称加密">1.1 对称加密 <a href="#t41.1 对称加密"> # </a></h3>
+<ul>
+<li>对称加密是最快速、最简单的一种加密方式,加密(encryption)与解密(decryption)用的是同样的密钥(secret key)</li>
+<li>主流的有<code>AES</code>和<code>DES</code></li>
+</ul>
+<h4 id="t51.1.1 描述">1.1.1 描述 <a href="#t51.1.1 描述"> # </a></h4>
+<h4 id="t61.1.2 简单实现">1.1.2 简单实现 <a href="#t61.1.2 简单实现"> # </a></h4>
+<ul>
+<li>消息 <code>abc</code></li>
+<li>密钥 3</li>
+<li>密文 def</li>
+<li></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/kaisamima.png" style="width:60%"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> secretKey = <span class="hljs-number">3</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">encrypt</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">let</span> buffer = Buffer.from(str);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; buffer.length; i++) {
+        buffer[i] = buffer[i] + secretKey;
+    }
+    <span class="hljs-keyword">return</span> buffer.toString();
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decrypt</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">let</span> buffer = Buffer.from(str);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; buffer.length; i++) {
+        buffer[i] = buffer[i] - secretKey;
+    }
+    <span class="hljs-keyword">return</span> buffer.toString();
+}
+<span class="hljs-keyword">let</span> message = <span class="hljs-string">'abc'</span>;
+<span class="hljs-keyword">let</span> secret = encrypt(message);
+<span class="hljs-built_in">console</span>.log(secret);
+<span class="hljs-keyword">let</span> value = decrypt(secret);
+<span class="hljs-built_in">console</span>.log(value);
+</code></pre>
+<h4 id="t71.1.3 AES">1.1.3 AES <a href="#t71.1.3 AES"> # </a></h4>
+<ul>
+<li><a href="https://nodejs.org/api/crypto.html#crypto_crypto_createcipheriv_algorithm_key_iv_options">crypto.html</a><ul>
+<li>algorithm用于指定加密算法，如aes-128-ecb、aes-128-cbc等</li>
+<li>key是用于加密的密钥</li>
+<li>iv参数用于指定加密时所用的向量</li>
+</ul>
+</li>
+<li>如果加密算法是128，则对应的密钥是16位，加密算法是256，则对应的密钥是32位</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/Symmetric_encryption.jpg" style="width:60%"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> crypto = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">encrypt</span>(<span class="hljs-params">data, key, iv</span>) </span>{
+    <span class="hljs-keyword">let</span> decipher = crypto.createCipheriv(<span class="hljs-string">'aes-128-cbc'</span>, key, iv);
+    decipher.update(data);
+    <span class="hljs-keyword">return</span> decipher.final(<span class="hljs-string">'hex'</span>);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decrypt</span>(<span class="hljs-params">data, key, iv</span>) </span>{
+    <span class="hljs-keyword">let</span> decipher = crypto.createDecipheriv(<span class="hljs-string">'aes-128-cbc'</span>, key, iv);
+    decipher.update(data, <span class="hljs-string">'hex'</span>);
+    <span class="hljs-keyword">return</span> decipher.final(<span class="hljs-string">'utf8'</span>);
+}
+
+<span class="hljs-keyword">let</span> key = <span class="hljs-string">'1234567890123456'</span>;
+<span class="hljs-keyword">let</span> iv = <span class="hljs-string">'1234567890123456'</span>;
+<span class="hljs-keyword">let</span> data = <span class="hljs-string">"hello"</span>;
+<span class="hljs-keyword">let</span> encrypted = encrypt(data, key, iv);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"数据加密后:"</span>, encrypted);
+<span class="hljs-keyword">let</span> decrypted = decrypt(encrypted, key, iv);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"数据解密后:"</span>, decrypted);
+</code></pre>
+<h3 id="t81.2 非对称加密">1.2 非对称加密 <a href="#t81.2 非对称加密"> # </a></h3>
+<ul>
+<li>互联网上没有办法安全的交换密钥</li>
+</ul>
+<h4 id="t91.2.1 单向函数">1.2.1 单向函数 <a href="#t91.2.1 单向函数"> # </a></h4>
+<ul>
+<li>单向函数顺向计算起来非常的容易，但求逆却非常的困难。也就是说，已知x，我们很容易计算出f(x)。但已知f(x)，却很难计算出x</li>
+<li>整数分解又称素因数分解,是将一个正整数写成几个约数的乘积</li>
+<li>给出<code>45</code>这个数，它可以分解成 <code>9×5</code>,这样的分解结果应该是独一无二的</li>
+</ul>
+<h4 id="t101.2.2 RSA加密算法">1.2.2 RSA加密算法 <a href="#t101.2.2 RSA加密算法"> # </a></h4>
+<p><img src="http://img.zhufengpeixun.cn/RSA.jpg" style="width:60%"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> p = <span class="hljs-number">3</span>, q = <span class="hljs-number">11</span>;<span class="hljs-comment">//计算完立刻销毁</span>
+<span class="hljs-keyword">let</span> N = p * q;
+<span class="hljs-keyword">let</span> fN = (p - <span class="hljs-number">1</span>) * (q - <span class="hljs-number">1</span>);<span class="hljs-comment">//欧拉函数</span>
+<span class="hljs-keyword">let</span> e = <span class="hljs-number">7</span>;
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> d = <span class="hljs-number">1</span>; e * d % fN !== <span class="hljs-number">1</span>; d++) {<span class="hljs-comment">//拓展欧几里得算法</span>
+    d++;
+}
+<span class="hljs-comment">//d=3</span>
+<span class="hljs-keyword">let</span> publicKey = { e, N };
+<span class="hljs-keyword">let</span> privateKey = { d, N };
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">encrypt</span>(<span class="hljs-params">data</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.pow(data, publicKey.e) % publicKey.N;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decrypt</span>(<span class="hljs-params">data</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.pow(data, privateKey.d) % privateKey.N;
+}
+<span class="hljs-keyword">let</span> data = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> secret = encrypt(data);
+<span class="hljs-built_in">console</span>.log(secret);<span class="hljs-comment">//14</span>
+
+<span class="hljs-keyword">let</span> _data = decrypt(secret);
+<span class="hljs-built_in">console</span>.log(_data);<span class="hljs-comment">//5</span>
+<span class="hljs-comment">// 1024位二进制数分解</span>
+<span class="hljs-comment">/**
+公开 N e c
+私密 d
+e * d % fN == 1
+(p - 1) * (q - 1)
+N = p * q
+*/</span>
+</code></pre>
+<h4 id="t111.2.3 RSA加密">1.2.3 RSA加密 <a href="#t111.2.3 RSA加密"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { generateKeyPairSync, privateEncrypt, publicDecrypt } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">let</span> rsa = generateKeyPairSync(<span class="hljs-string">'rsa'</span>, {
+    <span class="hljs-attr">modulusLength</span>: <span class="hljs-number">1024</span>,
+    <span class="hljs-attr">publicKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'spki'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>
+    },
+    <span class="hljs-attr">privateKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'pkcs8'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>,
+        <span class="hljs-attr">cipher</span>: <span class="hljs-string">'aes-256-cbc'</span>,
+        <span class="hljs-attr">passphrase</span>: <span class="hljs-string">'server_passphrase'</span>
+    }
+});
+<span class="hljs-keyword">let</span> message = <span class="hljs-string">'hello'</span>;
+<span class="hljs-keyword">let</span> enc_by_prv = privateEncrypt({
+    <span class="hljs-attr">key</span>: rsa.privateKey, <span class="hljs-attr">passphrase</span>: <span class="hljs-string">'server_passphrase'</span>
+}, Buffer.from(message, <span class="hljs-string">'utf8'</span>));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'encrypted by private key: '</span> + enc_by_prv.toString(<span class="hljs-string">'hex'</span>));
+
+
+<span class="hljs-keyword">let</span> dec_by_pub = publicDecrypt(rsa.publicKey, enc_by_prv);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'decrypted by public key: '</span> + dec_by_pub.toString(<span class="hljs-string">'utf8'</span>));
+</code></pre>
+<h3 id="t121.3 哈希">1.3 哈希 <a href="#t121.3 哈希"> # </a></h3>
+<ul>
+<li>hash 切碎的食物</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/hashfood.jpg" style="width:60%"></p>
+<h4 id="t131.3.1 哈希函数">1.3.1 哈希函数 <a href="#t131.3.1 哈希函数"> # </a></h4>
+<ul>
+<li>哈希函数的作用是给一个任意长度的数据生成出一个固定长度的数据</li>
+<li>安全性 可以从给定的数据X计算出哈希值Y，但不能从哈希值Y计算机数据X</li>
+<li>独一无二 不同的数据一定会产出不同的哈希值</li>
+<li>长度固定 不管输入多大的数据,输出长度都是固定的</li>
+</ul>
+<h4 id="t141.3.2 哈希碰撞">1.3.2 哈希碰撞 <a href="#t141.3.2 哈希碰撞"> # </a></h4>
+<ul>
+<li>所谓哈希(hash),就是将不同的输入映射成独一无二的、固定长度的值（又称"哈希值"）。它是最常见的软件运算之一</li>
+<li>如果不同的输入得到了同一个哈希值,就发生了哈希碰撞(collision)</li>
+<li>防止哈希碰撞的最有效方法，就是扩大哈希值的取值空间</li>
+<li>16个二进制位的哈希值，产生碰撞的可能性是 65536 分之一。也就是说，如果有65537个用户，就一定会产生碰撞。哈希值的长度扩大到32个二进制位，碰撞的可能性就会下降到 <code>4,294,967,296</code> 分之一</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, <span class="hljs-number">16</span>));<span class="hljs-comment">//65536</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>));<span class="hljs-comment">//42亿</span>
+</code></pre>
+<h4 id="t151.3.3 哈希分类">1.3.3 哈希分类 <a href="#t151.3.3 哈希分类"> # </a></h4>
+<ul>
+<li>哈希还可以叫摘要(digest)、校验值(chunkSum)和指纹(fingerPrint)</li>
+<li>如果两段数据完全一样,就可以证明数据是一样的</li>
+<li>哈希有二种<ul>
+<li>普通哈希用来做完整性校验，流行的是MD5</li>
+<li>加密哈希用来做加密,目前最流行的加密算法是 SHA256( Secure Hash Algorithm) 系列</li>
+</ul>
+</li>
+</ul>
+<h4 id="t161.3.4 hash使用">1.3.4 hash使用 <a href="#t161.3.4 hash使用"> # </a></h4>
+<h5 id="t171.3.4.1 简单哈希">1.3.4.1 简单哈希 <a href="#t171.3.4.1 简单哈希"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hash</span>(<span class="hljs-params">input</span>) </span>{
+    <span class="hljs-keyword">return</span> input % <span class="hljs-number">1024</span>;
+}
+<span class="hljs-keyword">let</span> r1 = hash(<span class="hljs-number">100</span>);
+<span class="hljs-keyword">let</span> r2 = hash(<span class="hljs-number">1124</span>);
+<span class="hljs-built_in">console</span>.log(r1, r2);
+</code></pre>
+<h5 id="t181.3.4.2 md5">1.3.4.2 md5 <a href="#t181.3.4.2 md5"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> crypto = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">var</span> content = <span class="hljs-string">'123456'</span>;
+<span class="hljs-keyword">var</span> result = crypto.createHash(<span class="hljs-string">'md5'</span>).update(content).digest(<span class="hljs-string">"hex"</span>)
+<span class="hljs-built_in">console</span>.log(result);<span class="hljs-comment">//32位十六进制 = 128位二进制</span>
+</code></pre>
+<h5 id="t191.3.4.3 sha256">1.3.4.3 sha256 <a href="#t191.3.4.3 sha256"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> salt = <span class="hljs-string">'123456'</span>;
+<span class="hljs-keyword">const</span> sha256 = <span class="hljs-function"><span class="hljs-params">str</span> =&gt;</span> crypto.createHmac(<span class="hljs-string">'sha256'</span>, salt)
+    .update(str, <span class="hljs-string">'utf8'</span>)
+    .digest(<span class="hljs-string">'hex'</span>)
+
+<span class="hljs-keyword">let</span> ret = sha256(content);
+<span class="hljs-built_in">console</span>.log(ret);<span class="hljs-comment">//64位十六进制 = 256位二进制</span>
+</code></pre>
+<h3 id="t201.4 数字签名">1.4 数字签名 <a href="#t201.4 数字签名"> # </a></h3>
+<ul>
+<li>数字签名的基本原理是用私钥去签名，而用公钥去验证签名</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/number_sign2.jpg" style="width:60%"></p>
+<p><img src="http://img.zhufengpeixun.cn/verify3.png" style="width:60%"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { generateKeyPairSync, createSign, createVerify } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">let</span> passphrase = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">let</span> rsa = generateKeyPairSync(<span class="hljs-string">'rsa'</span>, {
+    <span class="hljs-attr">modulusLength</span>: <span class="hljs-number">1024</span>,
+    <span class="hljs-attr">publicKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'spki'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>
+    },
+    <span class="hljs-attr">privateKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'pkcs8'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>,
+        <span class="hljs-attr">cipher</span>: <span class="hljs-string">'aes-256-cbc'</span>,
+        passphrase
+    }
+});
+<span class="hljs-keyword">let</span> content = <span class="hljs-string">'hello'</span>;
+<span class="hljs-keyword">const</span> sign = getSign(content, rsa.privateKey, passphrase);
+<span class="hljs-keyword">let</span> serverCertIsValid = verifySign(content, sign, rsa.publicKey);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'serverCertIsValid'</span>, serverCertIsValid);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSign</span>(<span class="hljs-params">content, privateKey, passphrase</span>) </span>{
+    <span class="hljs-keyword">var</span> sign = createSign(<span class="hljs-string">'RSA-SHA256'</span>);
+    sign.update(content);
+    <span class="hljs-keyword">return</span> sign.sign({ <span class="hljs-attr">key</span>: privateKey, <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>, passphrase }, <span class="hljs-string">'hex'</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">verifySign</span>(<span class="hljs-params">content, sign, publicKey</span>) </span>{
+    <span class="hljs-keyword">var</span> verify = createVerify(<span class="hljs-string">'RSA-SHA256'</span>);
+    verify.update(content);
+    <span class="hljs-keyword">return</span> verify.verify(publicKey, sign, <span class="hljs-string">'hex'</span>);
+}
+</code></pre>
+<h3 id="t211.5 数字证书">1.5 数字证书 <a href="#t211.5 数字证书"> # </a></h3>
+<ul>
+<li>数字证书是一个由可信的第三方发出的，用来证明所有人身份以及所有人拥有某个公钥的电子文件</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/certification3.jpg" style="width:60%"></p>
+<h4 id="t221.5.1 数字证书原理">1.5.1 数字证书原理 <a href="#t221.5.1 数字证书原理"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { generateKeyPairSync, createSign, createVerify, createHash } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">let</span> passphrase = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">let</span> rsa = generateKeyPairSync(<span class="hljs-string">'rsa'</span>, {
+    <span class="hljs-attr">modulusLength</span>: <span class="hljs-number">1024</span>,
+    <span class="hljs-attr">publicKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'spki'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>
+    },
+    <span class="hljs-attr">privateKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'pkcs8'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>,
+        <span class="hljs-attr">cipher</span>: <span class="hljs-string">'aes-256-cbc'</span>,
+        passphrase
+    }
+});
+<span class="hljs-keyword">const</span> info = {
+    <span class="hljs-attr">domain</span>: <span class="hljs-string">"http://127.0.0.1:8080"</span>,
+    <span class="hljs-attr">publicKey</span>: rsa.publicKey
+};
+<span class="hljs-keyword">const</span> hash = createHash(<span class="hljs-string">'sha256'</span>).update(<span class="hljs-built_in">JSON</span>.stringify(info)).digest(<span class="hljs-string">'hex'</span>);
+<span class="hljs-keyword">const</span> sign = getSign(hash, rsa.privateKey, passphrase);
+<span class="hljs-keyword">const</span> cert = { info, sign };
+
+<span class="hljs-keyword">let</span> certIsValid = verifySign(hash, cert.sign, rsa.publicKey);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'certIsValid'</span>, certIsValid);
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSign</span>(<span class="hljs-params">content, privateKey, passphrase</span>) </span>{
+    <span class="hljs-keyword">var</span> sign = createSign(<span class="hljs-string">'RSA-SHA256'</span>);
+    sign.update(content);
+    <span class="hljs-keyword">return</span> sign.sign({ <span class="hljs-attr">key</span>: privateKey, <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>, passphrase }, <span class="hljs-string">'hex'</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">verifySign</span>(<span class="hljs-params">content, sign, publicKey</span>) </span>{
+    <span class="hljs-keyword">var</span> verify = createVerify(<span class="hljs-string">'RSA-SHA256'</span>);
+    verify.update(content);
+    <span class="hljs-keyword">return</span> verify.verify(publicKey, sign, <span class="hljs-string">'hex'</span>);
+}
+</code></pre>
+<h3 id="t231.6 Diffie-Hellman算法">1.6 Diffie-Hellman算法 <a href="#t231.6 Diffie-Hellman算法"> # </a></h3>
+<ul>
+<li>Diffie-Hellman算法是一种密钥交换协议，它可以让双方在不泄漏密钥的情况下协商出一个密钥来</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/premastersecret.jpg" style="width:60%"></p>
+<h4 id="t241.6.1 Diffie-Hellman实现">1.6.1 Diffie-Hellman实现 <a href="#t241.6.1 Diffie-Hellman实现"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> N = <span class="hljs-number">23</span>;
+<span class="hljs-keyword">let</span> p = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> secret1 = <span class="hljs-number">6</span>;<span class="hljs-comment">//这是密钥</span>
+<span class="hljs-keyword">let</span> A = <span class="hljs-built_in">Math</span>.pow(p, secret1) % N;<span class="hljs-comment">//8</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'p='</span>, p, <span class="hljs-string">'N='</span>, N, <span class="hljs-string">'A='</span>, A);
+
+<span class="hljs-keyword">let</span> secret2 = <span class="hljs-number">15</span>;
+<span class="hljs-keyword">let</span> B = <span class="hljs-built_in">Math</span>.pow(p, secret2) % N;<span class="hljs-comment">//19</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'p='</span>, p, <span class="hljs-string">'N='</span>, N, <span class="hljs-string">'B='</span>, B);
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Math</span>.pow(B, secret1) % N);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Math</span>.pow(A, secret2) % N);
+</code></pre>
+<h4 id="t251.6.2 Diffie-Hellman算法">1.6.2 Diffie-Hellman算法 <a href="#t251.6.2 Diffie-Hellman算法"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { createDiffieHellman } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+
+<span class="hljs-keyword">var</span> client = createDiffieHellman(<span class="hljs-number">512</span>);
+<span class="hljs-keyword">var</span> client_keys = client.generateKeys();
+
+<span class="hljs-keyword">var</span> prime = client.getPrime();
+<span class="hljs-keyword">var</span> generator = client.getGenerator();
+
+<span class="hljs-keyword">var</span> server = createDiffieHellman(prime, generator);
+<span class="hljs-keyword">var</span> server_keys = server.generateKeys();
+
+<span class="hljs-keyword">var</span> client_secret = client.computeSecret(server_keys);
+<span class="hljs-keyword">var</span> server_secret = server.computeSecret(client_keys);
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'client_secret: '</span> + client_secret.toString(<span class="hljs-string">'hex'</span>));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'server_secret: '</span> + server_secret.toString(<span class="hljs-string">'hex'</span>));
+</code></pre>
+<h3 id="t261.7 ECC">1.7 ECC <a href="#t261.7 ECC"> # </a></h3>
+<ul>
+<li>椭圆曲线加密算法(ECC) 是基于椭圆曲线数学的一种公钥加密的算法</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ecc.png" style="width:60%"></p>
+<h4 id="t271.7.1 ECC原理">1.7.1 ECC原理 <a href="#t271.7.1 ECC原理"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> G = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">let</span> a = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> A = G * a;
+<span class="hljs-keyword">let</span> b = <span class="hljs-number">7</span>;
+<span class="hljs-keyword">let</span> B = G * b;
+<span class="hljs-built_in">console</span>.log(a * B);
+<span class="hljs-built_in">console</span>.log(b * A);
+</code></pre>
+<h4 id="t281.7.2 ECC使用">1.7.2 ECC使用 <a href="#t281.7.2 ECC使用"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { createECDH } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">const</span> clientDH = createECDH(<span class="hljs-string">'secp521r1'</span>);
+<span class="hljs-keyword">const</span> clientDHParams = clientDH.generateKeys();
+
+<span class="hljs-keyword">const</span> serverDH = createECDH(<span class="hljs-string">'secp521r1'</span>);
+<span class="hljs-keyword">const</span> serverDHParams = serverDH.generateKeys();
+
+<span class="hljs-keyword">const</span> clientKey = clientDH.computeSecret(serverDHParams);
+<span class="hljs-keyword">const</span> serverKey = serverDH.computeSecret(clientDHParams);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'clientKey'</span>, clientKey.toString(<span class="hljs-string">'hex'</span>));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'serverKey'</span>, serverKey.toString(<span class="hljs-string">'hex'</span>));
+</code></pre>
+<h2 id="t292. UDP服务器">2. UDP服务器 <a href="#t292. UDP服务器"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/wiresharkhttp.png" alt="wiresharkhttp"></p>
+<p><img src="http://img.zhufengpeixun.cn/httpsoverflow.jpg" style="width:80%"></p>
+<p><img src="http://img.zhufengpeixun.cn/premasterkeymasterkey.png" style="width:80%"></p>
+<p>wireshark</p>
+<pre><code>tls and (ip.src == 47.111.100.159 or ip.dst == 47.111.100.159)
+</code></pre><h3 id="t302.1 createCA.js">2.1 createCA.js <a href="#t302.1 createCA.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> ca_passphrase = <span class="hljs-string">'ca'</span>;
+<span class="hljs-keyword">let</span> CA = generateKeyPairSync(<span class="hljs-string">'rsa'</span>, {
+    <span class="hljs-attr">modulusLength</span>: <span class="hljs-number">1024</span>,
+    <span class="hljs-attr">publicKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'spki'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>
+    },
+    <span class="hljs-attr">privateKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'pkcs8'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>,
+        <span class="hljs-attr">cipher</span>: <span class="hljs-string">'aes-256-cbc'</span>,
+        <span class="hljs-attr">passphrase</span>: ca_passphrase
+    }
+});
+<span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+fs.writeFileSync(path.resolve(__dirname, <span class="hljs-string">'CA.publicKey'</span>), CA.publicKey);
+fs.writeFileSync(path.resolve(__dirname, <span class="hljs-string">'CA.privateKey'</span>), CA.privateKey);
+</code></pre>
+<h3 id="t312.2 ca.js">2.2 ca.js <a href="#t312.2 ca.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { createHash } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">const</span> { getSign } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./utils'</span>);
+<span class="hljs-keyword">const</span> ca_passphrase = <span class="hljs-string">'ca'</span>;
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> cAPrivateKey = fs.readFileSync(path.resolve(__dirname, <span class="hljs-string">'CA.privateKey'</span>), <span class="hljs-string">'utf8'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">requestCert</span>(<span class="hljs-params">info</span>) </span>{
+    <span class="hljs-keyword">const</span> infoHash = createHash(<span class="hljs-string">'sha256'</span>).update(<span class="hljs-built_in">JSON</span>.stringify(info)).digest(<span class="hljs-string">'hex'</span>);
+    <span class="hljs-keyword">const</span> sign = getSign(infoHash, cAPrivateKey, ca_passphrase);
+    <span class="hljs-keyword">return</span> { info, sign };
+}
+exports.requestCert = requestCert;
+</code></pre>
+<h3 id="t322.3 utils.js">2.3 utils.js <a href="#t322.3 utils.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { createCipheriv, createDecipheriv, createSign, createVerify } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">encrypt</span>(<span class="hljs-params">data, key</span>) </span>{
+    <span class="hljs-keyword">let</span> decipher = createCipheriv(<span class="hljs-string">'aes-256-cbc'</span>, key, <span class="hljs-string">'1234567890123456'</span>);
+    decipher.update(data);
+    <span class="hljs-keyword">return</span> decipher.final(<span class="hljs-string">'hex'</span>);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decrypt</span>(<span class="hljs-params">data, key</span>) </span>{
+    <span class="hljs-keyword">let</span> decipher = createDecipheriv(<span class="hljs-string">'aes-256-cbc'</span>, key, <span class="hljs-string">'1234567890123456'</span>);
+    decipher.update(data, <span class="hljs-string">'hex'</span>);
+    <span class="hljs-keyword">return</span> decipher.final(<span class="hljs-string">'utf8'</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSign</span>(<span class="hljs-params">content, privateKey, passphrase</span>) </span>{
+    <span class="hljs-keyword">var</span> sign = createSign(<span class="hljs-string">'RSA-SHA256'</span>);
+    sign.update(content);
+    <span class="hljs-keyword">return</span> sign.sign({ <span class="hljs-attr">key</span>: privateKey, <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>, passphrase }, <span class="hljs-string">'hex'</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">verifySign</span>(<span class="hljs-params">content, sign, publicKey</span>) </span>{
+    <span class="hljs-keyword">var</span> verify = createVerify(<span class="hljs-string">'RSA-SHA256'</span>);
+    verify.update(content);
+    <span class="hljs-keyword">return</span> verify.verify(publicKey, sign, <span class="hljs-string">'hex'</span>);
+}
+<span class="hljs-built_in">module</span>.exports = {
+    encrypt, decrypt, getSign, verifySign
+}
+</code></pre>
+<h3 id="t332.4  udp_server.js">2.4  udp_server.js <a href="#t332.4  udp_server.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> dgram = <span class="hljs-built_in">require</span>(<span class="hljs-string">'dgram'</span>)
+<span class="hljs-keyword">const</span> udp_server = dgram.createSocket(<span class="hljs-string">'udp4'</span>)
+<span class="hljs-keyword">const</span> protocol = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./protocol'</span>);
+<span class="hljs-keyword">const</span> { generateKeyPairSync, randomBytes, createHash, createECDH } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">const</span> server_passphrase = <span class="hljs-string">'server'</span>;
+<span class="hljs-keyword">const</span> { getSign, decrypt, encrypt } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./utils'</span>);
+<span class="hljs-keyword">const</span> { requestCert } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./ca'</span>);
+
+<span class="hljs-keyword">let</span> serverRSA = generateKeyPairSync(<span class="hljs-string">'rsa'</span>, {
+    <span class="hljs-attr">modulusLength</span>: <span class="hljs-number">1024</span>,
+    <span class="hljs-attr">publicKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'spki'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>
+    },
+    <span class="hljs-attr">privateKeyEncoding</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'pkcs8'</span>,
+        <span class="hljs-attr">format</span>: <span class="hljs-string">'pem'</span>,
+        <span class="hljs-attr">cipher</span>: <span class="hljs-string">'aes-256-cbc'</span>,
+        <span class="hljs-attr">passphrase</span>: server_passphrase
+    }
+});
+<span class="hljs-keyword">let</span> serverRandom = randomBytes(<span class="hljs-number">8</span>).toString(<span class="hljs-string">'hex'</span>);
+<span class="hljs-keyword">const</span> serverInfo = {
+    <span class="hljs-attr">domain</span>: <span class="hljs-string">"http://127.0.0.1:20000"</span>,
+    <span class="hljs-attr">publicKey</span>: serverRSA.publicKey
+};
+<span class="hljs-keyword">let</span> serverCert = requestCert(serverInfo);
+<span class="hljs-keyword">let</span> clientRandom;
+<span class="hljs-keyword">const</span> serverDH = createECDH(<span class="hljs-string">'secp521r1'</span>);
+<span class="hljs-keyword">const</span> ecDHServerParams = serverDH.generateKeys().toString(<span class="hljs-string">'hex'</span>);
+<span class="hljs-keyword">const</span> ecDHServerParamsSign = getSign(ecDHServerParams, serverRSA.privateKey, server_passphrase);
+<span class="hljs-keyword">let</span> masterKey;
+<span class="hljs-keyword">let</span> sessionKey;
+udp_server.on(<span class="hljs-string">'listening'</span>, () =&gt; {
+    <span class="hljs-keyword">const</span> address = udp_server.address();
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`client running <span class="hljs-subst">${address.address}</span>: <span class="hljs-subst">${address.port}</span>`</span>)
+})
+udp_server.on(<span class="hljs-string">'message'</span>, (data, remote) =&gt; {
+    <span class="hljs-keyword">let</span> message = <span class="hljs-built_in">JSON</span>.parse(data);
+    <span class="hljs-keyword">switch</span> (message.type) {
+        <span class="hljs-keyword">case</span> protocol.ClientHello:
+            <span class="hljs-comment">//2.在服务器生成随机数，通过ServerHello发送给客户端</span>
+            clientRandom = message.clientRandom;
+            udp_server.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.ServerHello,
+                serverRandom,<span class="hljs-comment">//服务器端随机数</span>
+                <span class="hljs-attr">cipherSuite</span>: <span class="hljs-string">'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA'</span><span class="hljs-comment">//约定的加密套件</span>
+            }), remote.port, remote.address);
+            <span class="hljs-comment">//3.Certificate 服务器把包含自己公钥的证书发送给客户端进行验证</span>
+            udp_server.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.Certificate,
+                serverCert,<span class="hljs-comment">//服务器公钥证书</span>
+            }), remote.port, remote.address);
+            <span class="hljs-comment">//4.ServerKeyExchange 服务器端生成DH参数，并用服务器私钥进行签名发给客户端</span>
+            udp_server.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.ServerKeyExchange,
+                ecDHServerParams,
+                ecDHServerParamsSign
+            }), remote.port, remote.address);
+            <span class="hljs-comment">//5.Server Hello Done 服务器发送完成</span>
+            udp_server.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.ServerHelloDone
+            }), remote.port, remote.address);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.ClientKeyExchange:
+            <span class="hljs-comment">//6.ClientKeyExchange 服务器收到客户端DH参数后加上服务器DH参数生成pre-master-key</span>
+            <span class="hljs-comment">//再由pre-master-key生成masterKey和sessionKey</span>
+            <span class="hljs-keyword">let</span> { ecDHClientParams } = message;
+            preMasterKey = serverDH.computeSecret(Buffer.from(ecDHClientParams, <span class="hljs-string">'hex'</span>)).toString(<span class="hljs-string">'hex'</span>);
+            masterKey = createHash(<span class="hljs-string">'md5'</span>).update(preMasterKey + clientRandom + serverRandom).digest(<span class="hljs-string">'hex'</span>);
+            sessionKey = createHash(<span class="hljs-string">'md5'</span>).update(masterKey + clientRandom + serverRandom).digest(<span class="hljs-string">'hex'</span>);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.ChangeCipherSpec:
+            <span class="hljs-comment">//9.服务器通知客户端服务器也已经准备好切换加密套件了</span>
+            udp_server.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.ChangeCipherSpec
+            }), remote.port, remote.address);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.EncryptedHandshakeMessage:
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"服务器收到解密后的数据:"</span>, decrypt(message.data, sessionKey));
+            <span class="hljs-comment">//10.服务器收到客户端的加密数据后向客户端回复加密数据</span>
+            udp_server.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.EncryptedHandshakeMessage,
+                <span class="hljs-attr">data</span>: encrypt(<span class="hljs-string">"i am server"</span>, sessionKey)
+            }), remote.port, remote.address);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">break</span>;
+    }
+
+})
+udp_server.on(<span class="hljs-string">'error'</span>, (error) =&gt; {
+    <span class="hljs-built_in">console</span>.log(error);
+});
+udp_server.bind(<span class="hljs-number">20000</span>, <span class="hljs-string">'127.0.0.1'</span>);
+</code></pre>
+<h3 id="t342.5  udp_client.js">2.5  udp_client.js <a href="#t342.5  udp_client.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> dgram = <span class="hljs-built_in">require</span>(<span class="hljs-string">'dgram'</span>)
+<span class="hljs-keyword">const</span> udp_client = dgram.createSocket(<span class="hljs-string">'udp4'</span>)
+<span class="hljs-keyword">const</span> { randomBytes, createHash, createECDH } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">const</span> { verifySign, encrypt, decrypt } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./utils'</span>);
+<span class="hljs-keyword">const</span> url = <span class="hljs-built_in">require</span>(<span class="hljs-string">'url'</span>);
+<span class="hljs-keyword">const</span> protocol = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./protocol'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> cAPublicKey = fs.readFileSync(path.resolve(__dirname, <span class="hljs-string">'CA.publicKey'</span>), <span class="hljs-string">'utf8'</span>);
+<span class="hljs-keyword">const</span> clientRandom = randomBytes(<span class="hljs-number">8</span>).toString(<span class="hljs-string">'hex'</span>);
+<span class="hljs-keyword">let</span> serverRandom;
+<span class="hljs-keyword">let</span> serverPublicKey;
+<span class="hljs-keyword">let</span> ecDHServerParams;
+<span class="hljs-keyword">let</span> clientDH = createECDH(<span class="hljs-string">'secp521r1'</span>);
+<span class="hljs-keyword">let</span> ecDHClientParams = clientDH.generateKeys();
+<span class="hljs-keyword">let</span> masterKey;
+<span class="hljs-keyword">let</span> sessionKey;
+udp_client.on(<span class="hljs-string">'listening'</span>, () =&gt; {
+    <span class="hljs-keyword">const</span> address = udp_client.address();
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`client running <span class="hljs-subst">${address.address}</span>: <span class="hljs-subst">${address.port}</span>`</span>)
+})
+udp_client.on(<span class="hljs-string">'message'</span>, (data, remote) =&gt; {
+    <span class="hljs-keyword">let</span> message = <span class="hljs-built_in">JSON</span>.parse(data.toString(<span class="hljs-string">'utf8'</span>));
+    <span class="hljs-keyword">switch</span> (message.type) {
+        <span class="hljs-keyword">case</span> protocol.ServerHello:
+            serverRandom = message.serverRandom;
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.Certificate:
+            <span class="hljs-comment">//3.Certificate 客户收到服务器证书后会用CA的公钥进行验证证书是否合法</span>
+            <span class="hljs-keyword">let</span> { serverCert } = message;
+            <span class="hljs-keyword">let</span> { info, sign } = serverCert;
+            serverPublicKey = info.publicKey;
+            <span class="hljs-keyword">const</span> serverInfoHash = createHash(<span class="hljs-string">'sha256'</span>).update(<span class="hljs-built_in">JSON</span>.stringify(info)).digest(<span class="hljs-string">'hex'</span>);
+            <span class="hljs-keyword">let</span> serverCertIsValid = verifySign(serverInfoHash, sign, cAPublicKey);
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'验证服务器端证书是否正确?'</span>, serverCertIsValid);
+            <span class="hljs-keyword">let</span> urlObj = url.parse(info.domain);
+            <span class="hljs-keyword">let</span> serverDomainIsValid = urlObj.hostname === remote.address &amp;&amp; urlObj.port == remote.port;
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'验证服务器端域名正确?'</span>, serverDomainIsValid);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.ServerKeyExchange:
+            <span class="hljs-comment">//4.ServerKeyExchange 客户端收到服务器的DH参数和参数签名后会用服务器的公钥进行签名，验证服务器拥有私钥</span>
+            ecDHServerParams = message.ecDHServerParams;
+            ecDHServerParamsSign = message.ecDHServerParamsSign;
+            <span class="hljs-keyword">let</span> serverDHParamIsValid = verifySign(ecDHServerParams, ecDHServerParamsSign, serverPublicKey);
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'验证服务器端证书DH参数是否正确?'</span>, serverDHParamIsValid);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.ServerHelloDone:
+            <span class="hljs-comment">//6.ClientKeyExchange 客户端生成DH参数并且发给服务器</span>
+            udp_client.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.ClientKeyExchange,
+                ecDHClientParams
+            }), remote.port, remote.address);
+            <span class="hljs-comment">//6.ClientKeyExchange 服务器收到客户端DH参数后加上服务器DH参数生成pre-master-key</span>
+            <span class="hljs-comment">//再由pre-master-key生成masterKey和sessionKey</span>
+            preMasterKey = clientDH.computeSecret(Buffer.from(ecDHServerParams, <span class="hljs-string">'hex'</span>)).toString(<span class="hljs-string">'hex'</span>);
+            masterKey = createHash(<span class="hljs-string">'md5'</span>).update(preMasterKey + clientRandom + serverRandom).digest(<span class="hljs-string">'hex'</span>);
+            sessionKey = createHash(<span class="hljs-string">'md5'</span>).update(masterKey + clientRandom + serverRandom).digest(<span class="hljs-string">'hex'</span>);
+            <span class="hljs-comment">//7.Change Cipher Spec 通知服务器客户端已经准备好切换成加密通信了</span>
+            udp_client.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.ChangeCipherSpec
+            }), remote.port, remote.address);
+            <span class="hljs-comment">//8.加密握手信息并传送给服务器端</span>
+            udp_client.send(<span class="hljs-built_in">JSON</span>.stringify({
+                <span class="hljs-attr">type</span>: protocol.EncryptedHandshakeMessage,
+                <span class="hljs-attr">data</span>: encrypt(<span class="hljs-string">"i am client"</span>, sessionKey)
+            }), remote.port, remote.address);
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> protocol.EncryptedHandshakeMessage:
+            <span class="hljs-comment">//10.客户端你好到服务器的加密握手数据</span>
+            <span class="hljs-comment">//这个报文的目的就是告诉对端自己在整个握手过程中收到了什么数据，发送了什么数据。来保证中间没人篡改报文</span>
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"客户端收到解密后的数据:"</span>, decrypt(message.data, sessionKey));
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">break</span>;
+    }
+})
+udp_client.on(<span class="hljs-string">'error'</span>, (error) =&gt; {
+    <span class="hljs-built_in">console</span>.log(error);
+});
+<span class="hljs-comment">//1.ClientHello 客户端向服务器发送客户端随机数，服务器需要保存在服务器端</span>
+udp_client.send(<span class="hljs-built_in">JSON</span>.stringify({
+    <span class="hljs-attr">type</span>: protocol.ClientHello,
+    clientRandom
+}), <span class="hljs-number">20000</span>, <span class="hljs-string">'127.0.0.1'</span>);
+</code></pre>
+<h2 id="t353. 数字证书实战">3. 数字证书实战 <a href="#t353. 数字证书实战"> # </a></h2>
+<ul>
+<li><a href="https://www.openssl.org/source/">OpenSSL</a></li>
+<li><a href="http://slproweb.com/products/Win32OpenSSL.html">WinOpenSSL</a></li>
+<li>安装后要添加环境变量 <code>C:\Program Files\OpenSSL-Win64\bin</code></li>
+</ul>
+<h3 id="t363.1 自建CA">3.1 自建CA <a href="#t363.1 自建CA"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">// 1.生成CA私匙</span>
+openssl genrsa -des3 -out ca.private.pem <span class="hljs-number">1024</span>
+<span class="hljs-comment">// 2.生成CA证书请求</span>
+openssl req -<span class="hljs-keyword">new</span> -key ca.private.pem -out ca.csr
+<span class="hljs-comment">// 3.生成CA根证书</span>
+openssl x509 -req -<span class="hljs-keyword">in</span> ca.csr -extensions v3_ca -signkey ca.private.pem -out ca.crt
+</code></pre>
+<h3 id="t373.2 生成服务器CA证书">3.2 生成服务器CA证书 <a href="#t373.2 生成服务器CA证书"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">// 1.生成server私匙</span>
+openssl genrsa -out server.private.pem <span class="hljs-number">1024</span>
+<span class="hljs-comment">// 2.生成server证书请求</span>
+openssl req -<span class="hljs-keyword">new</span> -key server.private.pem -out server.csr
+<span class="hljs-comment">// 3.生成server证书</span>
+openssl x509 -days <span class="hljs-number">365</span> -req -<span class="hljs-keyword">in</span> server.csr -extensions  v3_req -CAkey  ca.private.pem -CA ca.crt -CAcreateserial -out server.crt  -extfile openssl.cnf
+</code></pre>
+<p>openssl.cnf</p>
+<pre><code>[req]  
+    distinguished_name = req_distinguished_name  
+    req_extensions = v3_req  
+    [req_distinguished_name]  
+    countryName = CN 
+    countryName_default = CN  
+    stateOrProvinceName = Beijing  
+    stateOrProvinceName_default = Beijing  
+    localityName = Beijing 
+    localityName_default = Beijing
+    organizationalUnitName  = HD
+    organizationalUnitName_default  = HD
+    commonName = localhost  
+    commonName_max  = 64  
+
+    [ v3_req ]  
+    # Extensions to add to a certificate request  
+    basicConstraints = CA:FALSE  
+    keyUsage = nonRepudiation, digitalSignature, keyEncipherment  
+    subjectAltName = @alt_names  
+
+    [alt_names]  
+    #注意这个IP.1的设置，IP地址需要和你的服务器的监听地址一样 DNS为server网址，可设置多个ip和dns
+    IP.1 = 127.0.0.1
+    DNS.1 = localhost
+</code></pre><h3 id="t383.3 服务端">3.3 服务端 <a href="#t383.3 服务端"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> https = <span class="hljs-built_in">require</span>(<span class="hljs-string">'https'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+
+<span class="hljs-keyword">const</span> options = {
+    <span class="hljs-attr">key</span>: fs.readFileSync(path.resolve(__dirname, <span class="hljs-string">'ssl/server.private.pem'</span>)),
+    <span class="hljs-attr">cert</span>: fs.readFileSync(path.resolve(__dirname, <span class="hljs-string">'ssl/server.crt'</span>))
+};
+
+
+https.createServer(options, (req, res) =&gt; {
+    res.end(<span class="hljs-string">'hello world\n'</span>);
+}).listen(<span class="hljs-number">9000</span>);
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"server https is running 9000"</span>);
+</code></pre>
+<h3 id="t393.4 客户端">3.4 客户端 <a href="#t393.4 客户端"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> https = <span class="hljs-built_in">require</span>(<span class="hljs-string">'https'</span>);
+<span class="hljs-keyword">const</span> options = {
+    <span class="hljs-attr">hostname</span>: <span class="hljs-string">'127.0.0.1'</span>,
+    <span class="hljs-attr">port</span>: <span class="hljs-number">9000</span>,
+    <span class="hljs-attr">path</span>: <span class="hljs-string">'/'</span>,
+    <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+    <span class="hljs-attr">requestCert</span>: <span class="hljs-literal">true</span>,  <span class="hljs-comment">//请求客户端证书</span>
+    <span class="hljs-attr">rejectUnauthorized</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">//不拒绝不受信任的证书</span>
+};
+
+<span class="hljs-keyword">const</span> req = https.request(options, (res) =&gt; {
+    <span class="hljs-keyword">let</span> buffers = [];
+    res.on(<span class="hljs-string">'data'</span>, (chunk) =&gt; {
+        buffers.push(chunk);
+    });
+    res.on(<span class="hljs-string">'end'</span>, () =&gt; {
+        <span class="hljs-built_in">console</span>.log(buffers.toString());
+    });
+});
+req.end();
+</code></pre>
+
+    

@@ -1,0 +1,914 @@
+
+        <h2 id="t01. redux-saga">1. redux-saga <a href="#t01. redux-saga"> # </a></h2>
+<ul>
+<li><a href="https://redux-saga-in-chinese.js.org/">redux-saga</a> 是一个 redux 的中间件，而中间件的作用是为 redux 提供额外的功能。</li>
+<li>在 reducers 中的所有操作都是同步的并且是纯粹的，即 reducer 都是纯函数，纯函数是指一个函数的返回结果只依赖于它的参数，并且在执行过程中不会对外部产生副作用，即给它传什么，就吐出什么。</li>
+<li>但是在实际的应用开发中，我们希望做一些异步的（如Ajax请求）且不纯粹的操作（如改变外部的状态），这些在函数式编程范式中被称为“副作用”。</li>
+</ul>
+<blockquote>
+<p>redux-saga 就是用来处理上述副作用（异步任务）的一个中间件。它是一个接收事件，并可能触发新事件的过程管理者，为你的应用管理复杂的流程。</p>
+</blockquote>
+<h2 id="t12. redux-saga工作原理">2. redux-saga工作原理 <a href="#t12. redux-saga工作原理"> # </a></h2>
+<ul>
+<li>sages 采用 Generator 函数来 yield Effects（包含指令的文本对象）</li>
+<li>Generator 函数的作用是可以暂停执行，再次执行的时候从上次暂停的地方继续执行</li>
+<li>Effect 是一个简单的对象，该对象包含了一些给 middleware 解释执行的信息。</li>
+<li>你可以通过使用 effects API 如 fork，call，take，put，cancel 等来创建 Effect。 </li>
+</ul>
+<h2 id="t23. redux-saga分类">3. redux-saga分类 <a href="#t23. redux-saga分类"> # </a></h2>
+<ul>
+<li>worker saga 做左右的工作，如调用API，进行异步请求，获取异步封装结果</li>
+<li>watcher saga 监听被dispatch的actions,当接受到action或者知道其被触发时，调用worker执行任务</li>
+<li>root saga  立即启动saga的唯一入口</li>
+</ul>
+<h2 id="t34. 计数器">4. 计数器 <a href="#t34. 计数器"> # </a></h2>
+<h3 id="t44.1 index.js">4.1 index.js <a href="#t44.1 index.js"> # </a></h3>
+<p>src/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Counter <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Counter'</span>;
+<span class="hljs-keyword">import</span> {Provider} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> store <span class="hljs-keyword">from</span> <span class="hljs-string">'./store'</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">Counter</span>/&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>,<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+</code></pre>
+<h3 id="t54.2 sagas.js">4.2 sagas.js <a href="#t54.2 sagas.js"> # </a></h3>
+<p>src\store\sagas.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {put,take} <span class="hljs-keyword">from</span> <span class="hljs-string">'redux-saga/effects'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'./action-types'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>* <span class="hljs-title">rootSaga</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">3</span>;i++){
+        <span class="hljs-keyword">yield</span> take(types.ASYNC_ADD);
+        <span class="hljs-keyword">yield</span> put({<span class="hljs-attr">type</span>:types.ADD});
+    }
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'已经达到最大值'</span>);
+}
+</code></pre>
+<h3 id="t64.3 Counter.js">4.3 Counter.js <a href="#t64.3 Counter.js"> # </a></h3>
+<p>src/components/Counter.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{Component} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> actions <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/actions'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.props.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.props.add}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+      )
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state,
+    actions
+)(Counter);
+</code></pre>
+<h3 id="t74.4 index.js">4.4 index.js <a href="#t74.4 index.js"> # </a></h3>
+<p>src/store/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {createStore, applyMiddleware} <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">import</span> reducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducer'</span>;
+<span class="hljs-keyword">import</span> createSagaMiddleware <span class="hljs-keyword">from</span> <span class="hljs-string">'redux-saga'</span>;
+<span class="hljs-keyword">import</span> rootSaga <span class="hljs-keyword">from</span> <span class="hljs-string">'./sagas'</span>;
+<span class="hljs-keyword">let</span> sagaMiddleware=createSagaMiddleware();
+<span class="hljs-keyword">let</span> store=applyMiddleware(sagaMiddleware)(createStore)(reducer);
+sagaMiddleware.run(rootSaga);
+<span class="hljs-built_in">window</span>.store=store;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h3 id="t84.5 actions.js">4.5 actions.js <a href="#t84.5 actions.js"> # </a></h3>
+<p>src/store/actions.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'./action-types'</span>;
+<span class="hljs-keyword">const</span> actions = {
+    add() {
+        <span class="hljs-keyword">return</span> {<span class="hljs-attr">type</span>:types.ASYNC_ADD}
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span>  actions
+</code></pre>
+<h3 id="t94.6 action-types.js">4.6 action-types.js <a href="#t94.6 action-types.js"> # </a></h3>
+<p>src/store/action-types.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ASYNC_ADD=<span class="hljs-string">'ASYNC_ADD'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ADD=<span class="hljs-string">'ADD'</span>;
+</code></pre>
+<h3 id="t104.7 reducer.js">4.7 reducer.js <a href="#t104.7 reducer.js"> # </a></h3>
+<p>src/store/reducer.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'./action-types'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reducer</span>(<span class="hljs-params">state={number:<span class="hljs-number">0</span>},action</span>) </span>{
+    <span class="hljs-keyword">switch</span>(action.type){
+        <span class="hljs-keyword">case</span> types.ADD:
+            <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>: state.number+<span class="hljs-number">1</span>};
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+</code></pre>
+<h2 id="t115. 实现take">5. 实现take <a href="#t115. 实现take"> # </a></h2>
+<ul>
+<li><a href="https://github.com/redux-saga/redux-saga/blob/master/packages/core/src/internal/runSaga.js">runSaga.js</a></li>
+</ul>
+<h3 id="t125.1 effectTypes.js">5.1 effectTypes.js <a href="#t125.1 effectTypes.js"> # </a></h3>
+<p>src\redux-saga\effectTypes.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> TAKE = <span class="hljs-string">'TAKE'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> PUT = <span class="hljs-string">'PUT'</span>;
+</code></pre>
+<h3 id="t135.2 effects.js">5.2 effects.js <a href="#t135.2 effects.js"> # </a></h3>
+<p>src\redux-saga\effects.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> effectTypes <span class="hljs-keyword">from</span> <span class="hljs-string">'./effectTypes'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">take</span>(<span class="hljs-params">actionType</span>) </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: effectTypes.TAKE, actionType}
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">put</span>(<span class="hljs-params">action</span>) </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: effectTypes.PUT, action }
+}
+
+</code></pre>
+<h3 id="t145.2 channel.js">5.2 channel.js <a href="#t145.2 channel.js"> # </a></h3>
+<p>src\redux-saga\channel.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stdChannel</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> currentTakers = [];
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">take</span>(<span class="hljs-params">actionType,taker</span>) </span>{
+        taker.actionType = actionType;
+        taker.cancel = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            currentTakers = currentTakers.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item !== taker);
+        }
+        currentTakers.push(taker);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">put</span>(<span class="hljs-params">action</span>) </span>{
+        currentTakers.forEach(<span class="hljs-function"><span class="hljs-params">taker</span> =&gt;</span> {
+            <span class="hljs-keyword">if</span> (taker.actionType === action.type) {
+                taker.cancel();
+                taker(action);
+            }
+        });
+    }
+
+    <span class="hljs-keyword">return</span> { take, put };
+}
+</code></pre>
+<h3 id="t155.3 runSaga.js">5.3 runSaga.js <a href="#t155.3 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> effectTypes <span class="hljs-keyword">from</span> <span class="hljs-string">'./effectTypes'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">runSaga</span>(<span class="hljs-params">env, saga</span>) </span>{
+    <span class="hljs-keyword">let</span> { channel, dispatch } = env;
+    <span class="hljs-keyword">let</span> it = saga();
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span>(<span class="hljs-params">value</span>) </span>{
+        <span class="hljs-keyword">let</span> {<span class="hljs-attr">value</span>:effect,done} = it.next(value);
+        <span class="hljs-keyword">if</span> (!done) {
+            <span class="hljs-keyword">switch</span> (effect.type) {
+                <span class="hljs-keyword">case</span> effectTypes.TAKE:
+                    channel.take(effect.actionType,next);
+                    <span class="hljs-keyword">break</span>;
+                <span class="hljs-keyword">case</span> effectTypes.PUT:
+                    dispatch(effect.action);
+                    next();
+                    <span class="hljs-keyword">break</span>;
+                <span class="hljs-keyword">default</span>:
+                    <span class="hljs-keyword">break</span>;
+            }
+        }
+    }
+    next();
+}
+</code></pre>
+<h3 id="t165.4 index.js">5.4 index.js <a href="#t165.4 index.js"> # </a></h3>
+<p>redux-saga/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> stdChannel <span class="hljs-keyword">from</span> <span class="hljs-string">'./channel'</span>;
+<span class="hljs-keyword">import</span> runSaga <span class="hljs-keyword">from</span> <span class="hljs-string">'./runSaga'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createSagaMiddleware</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> channel = stdChannel();
+    <span class="hljs-keyword">let</span> boundRunSaga;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sagaMiddleware</span>(<span class="hljs-params">{getState,dispatch}</span>) </span>{
+        boundRunSaga=runSaga.bind(<span class="hljs-literal">null</span>,{channel,dispatch,getState});
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">next</span>) </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">action</span>) </span>{
+                <span class="hljs-keyword">const</span> result = next(action);
+                channel.put(action);
+                <span class="hljs-keyword">return</span> result;
+            }
+        }
+    }
+    sagaMiddleware.run = <span class="hljs-function">(<span class="hljs-params">saga</span>)=&gt;</span>boundRunSaga(saga);
+    <span class="hljs-keyword">return</span> sagaMiddleware;
+}
+</code></pre>
+<h2 id="t176.支持产出iterator">6.支持产出iterator <a href="#t176.支持产出iterator"> # </a></h2>
+<h3 id="t186.1 sagas.js">6.1 sagas.js <a href="#t186.1 sagas.js"> # </a></h3>
+<pre><code class="lang-diff">import { put, take } from '../redux-saga/effects';
+import * as types from './action-types';
+<span class="hljs-addition">+export function* add() {</span>
+<span class="hljs-addition">+    yield put({ type: types.ADD });</span>
+<span class="hljs-addition">+}</span>
+export default function* rootSaga() {
+    for (let i = 0; i &lt; 3; i++) {
+        yield take(types.ASYNC_ADD);
+<span class="hljs-addition">+        yield add();</span>
+    }
+    console.log('已经达到最大值');
+}
+</code></pre>
+<h3 id="t196.2 runSaga.js">6.2 runSaga.js <a href="#t196.2 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export default function runSaga(env, saga) {
+    let { channel, dispatch } = env;
+<span class="hljs-addition">+    let it = typeof saga == 'function' ? saga() : saga;</span>
+    function next(value) {
+        let { value: effect, done } = it.next(value);
+        if (!done) {
+<span class="hljs-addition">+            if (typeof effect[Symbol.iterator] == 'function') {</span>
+<span class="hljs-addition">+                runSaga(env,effect);</span>
+<span class="hljs-addition">+                next();</span>
+<span class="hljs-addition">+            } else {</span>
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+    next();
+}
+</code></pre>
+<h2 id="t207. 支持takeEvery">7. 支持takeEvery <a href="#t207. 支持takeEvery"> # </a></h2>
+<ul>
+<li>一个 task 就像是一个在后台运行的进程，在基于redux-saga的应用程序中，可以同时运行多个task</li>
+<li>通过 fork 函数来创建 task</li>
+</ul>
+<h3 id="t217.1 sagas.js">7.1 sagas.js <a href="#t217.1 sagas.js"> # </a></h3>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { put, takeEvery } from '../redux-saga/effects';</span>
+import * as actionTypes from './action-types';
+export function* add() {
+    yield put({ type: actionTypes.ADD });
+}
+export default function* rootSaga() {
+<span class="hljs-addition">+    yield takeEvery(actionTypes.ASYNC_ADD,add);</span>
+}
+</code></pre>
+<h3 id="t227.2 effectTypes.js">7.2 effectTypes.js <a href="#t227.2 effectTypes.js"> # </a></h3>
+<p>src\redux-saga\effectTypes.js</p>
+<pre><code class="lang-diff">export const TAKE = 'TAKE';
+export const PUT = 'PUT';
+<span class="hljs-addition">+export const FORK = 'FORK';</span>
+</code></pre>
+<h3 id="t237.3 effects.js">7.3 effects.js <a href="#t237.3 effects.js"> # </a></h3>
+<p>src\redux-saga\effects.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export function take(actionType) {
+    return { type: effectTypes.TAKE, actionType }
+}
+
+export function put(action) {
+    return { type: effectTypes.PUT, action }
+}
+
+<span class="hljs-addition">+export function fork(saga) {</span>
+<span class="hljs-addition">+    return { type: effectTypes.FORK, saga };</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export function takeEvery(pattern, saga) {</span>
+<span class="hljs-addition">+    function* takeEveryHelper() {</span>
+<span class="hljs-addition">+        while (true) {</span>
+<span class="hljs-addition">+            yield take(pattern);</span>
+<span class="hljs-addition">+            yield fork(saga);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return fork(takeEveryHelper);</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t247.4 runSaga.js">7.4 runSaga.js <a href="#t247.4 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export default function runSaga(env, saga) {
+    let { channel, dispatch } = env;
+    let it = typeof saga == 'function' ? saga() : saga;
+    function next(value) {
+        let { value: effect, done } = it.next(value);
+        if (!done) {
+            if (typeof effect[Symbol.iterator] == 'function') {
+                runSaga(env,effect);
+                next();
+            } else {
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+<span class="hljs-addition">+                    case effectTypes.FORK:</span>
+<span class="hljs-addition">+                        runSaga(env,effect.saga);</span>
+<span class="hljs-addition">+                        next();</span>
+<span class="hljs-addition">+                        break;</span>
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+    next();
+}
+</code></pre>
+<h2 id="t258. 支持promise">8. 支持promise <a href="#t258. 支持promise"> # </a></h2>
+<h3 id="t268.1 sagas.js">8.1 sagas.js <a href="#t268.1 sagas.js"> # </a></h3>
+<pre><code class="lang-diff">import { put, takeEvery } from '../redux-saga/effects';
+import * as actionTypes from './action-types';
+<span class="hljs-addition">+const delay = ms =&gt; new Promise((resolve, reject) =&gt; {</span>
+<span class="hljs-addition">+    setTimeout(() =&gt; {</span>
+<span class="hljs-addition">+        resolve();</span>
+<span class="hljs-addition">+    }, ms);</span>
+<span class="hljs-addition">+});</span>
+export function* add() {
+<span class="hljs-addition">+    yield delay(1000);</span>
+    yield put({ type: actionTypes.ADD });
+}
+export default function* rootSaga() {
+    yield takeEvery(actionTypes.ASYNC_ADD, add);
+}
+</code></pre>
+<h3 id="t278.2 redux-saga/index.js">8.2 redux-saga/index.js <a href="#t278.2 redux-saga/index.js"> # </a></h3>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export default function runSaga(env, saga) {
+    let { channel, dispatch } = env;
+    let it = typeof saga == 'function' ? saga() : saga;
+    function next(value) {
+        let { value: effect, done } = it.next(value);
+        if (!done) {
+            if (typeof effect[Symbol.iterator] == 'function') {
+                runSaga(env,effect);
+                next();
+<span class="hljs-addition">+            }else if(effect.then){</span>
+<span class="hljs-addition">+                effect.then(next);</span>
+<span class="hljs-addition">+            } else {</span>
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+                    case effectTypes.FORK:
+                        runSaga(env,effect.saga);
+                        next();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+    next();
+}
+</code></pre>
+<h2 id="t289. 支持 call">9. 支持 call <a href="#t289. 支持 call"> # </a></h2>
+<h3 id="t299.1 sagas.js">9.1 sagas.js <a href="#t299.1 sagas.js"> # </a></h3>
+<p>src\store\sagas.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { put, takeEvery,call } from '../redux-saga/effects';</span>
+import * as actionTypes from './action-types';
+const delay = ms =&gt; new Promise((resolve, reject) =&gt; {
+    setTimeout(() =&gt; {
+        resolve();
+    }, ms);
+});
+export function* add() {
+<span class="hljs-addition">+    yield call(delay,1000);</span>
+    yield put({ type: actionTypes.ADD });
+}
+export default function* rootSaga() {
+    yield takeEvery(actionTypes.ASYNC_ADD, add);
+}
+</code></pre>
+<h3 id="t309.2 effectTypes.js">9.2 effectTypes.js <a href="#t309.2 effectTypes.js"> # </a></h3>
+<p>src\redux-saga\effectTypes.js</p>
+<pre><code class="lang-diff">export const TAKE = 'TAKE';
+export const PUT = 'PUT';
+export const FORK = 'FORK';
+<span class="hljs-addition">+export const CALL = 'CALL';</span>
+</code></pre>
+<h3 id="t319.3 effects.js">9.3 effects.js <a href="#t319.3 effects.js"> # </a></h3>
+<p>src\redux-saga\effects.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export function take(actionType) {
+    return { type: effectTypes.TAKE, actionType }
+}
+
+export function put(action) {
+    return { type: effectTypes.PUT, action }
+}
+
+export function fork(saga) {
+    return { type: effectTypes.FORK, saga };
+}
+
+export function takeEvery(pattern, saga) {
+    function* takeEveryHelper() {
+        while (true) {
+            yield take(pattern);
+            yield fork(saga);
+        }
+    }
+    return fork(takeEveryHelper);
+}
+<span class="hljs-addition">+export function call(fn, ...args) {</span>
+<span class="hljs-addition">+    return { type: effectTypes.CALL, fn, args };</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t329.4 runSaga.js">9.4 runSaga.js <a href="#t329.4 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export default function runSaga(env, saga) {
+    let { channel, dispatch } = env;
+    let it = typeof saga == 'function' ? saga() : saga;
+    function next(value) {
+        let { value: effect, done } = it.next(value);
+        if (!done) {
+            if (typeof effect[Symbol.iterator] == 'function') {
+                runSaga(env,effect);
+                next();
+            }else if(effect.then){
+                effect.then(next);
+            } else {
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+                    case effectTypes.FORK:
+                        runSaga(env,effect.saga);
+                        next();
+                        break;
+<span class="hljs-addition">+                    case effectTypes.CALL:</span>
+<span class="hljs-addition">+                        effect.fn(...effect.args).then(next);</span>
+<span class="hljs-addition">+                        break;</span>
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+    next();
+}
+</code></pre>
+<h2 id="t3310. 支持 cps">10. 支持 cps <a href="#t3310. 支持 cps"> # </a></h2>
+<h3 id="t3410.1 sagas.js">10.1 sagas.js <a href="#t3410.1 sagas.js"> # </a></h3>
+<p>src\store\sagas.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { put, takeEvery,call,cps} from '../redux-saga/effects';</span>
+import * as actionTypes from './action-types';
+<span class="hljs-addition">+const delay = (ms,callback)=&gt;{</span>
+<span class="hljs-addition">+    setTimeout(() =&gt; {</span>
+<span class="hljs-addition">+        callback(null,'ok');</span>
+<span class="hljs-addition">+    },ms);</span>
+<span class="hljs-addition">+}</span>
+export function* add() {
+<span class="hljs-addition">+    let data = yield cps(delay,1000);</span>
+<span class="hljs-addition">+    console.log(data);</span>
+    yield put({ type: actionTypes.ADD });
+}
+export default function* rootSaga() {
+    yield takeEvery(actionTypes.ASYNC_ADD, add);
+}
+</code></pre>
+<h3 id="t3510.2 effectTypes.js">10.2 effectTypes.js <a href="#t3510.2 effectTypes.js"> # </a></h3>
+<p>src\redux-saga\effectTypes.js</p>
+<pre><code class="lang-diff">export const TAKE = 'TAKE';
+export const PUT = 'PUT';
+export const FORK = 'FORK';
+export const CALL = 'CALL';
+<span class="hljs-addition">+export const CPS = 'CPS';</span>
+</code></pre>
+<h3 id="t3610.3 effects.js">10.3 effects.js <a href="#t3610.3 effects.js"> # </a></h3>
+<p>src\redux-saga\effects.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export function take(actionType) {
+    return { type: effectTypes.TAKE, actionType }
+}
+
+export function put(action) {
+    return { type: effectTypes.PUT, action }
+}
+
+export function fork(saga) {
+    return { type: effectTypes.FORK, saga };
+}
+
+export function takeEvery(pattern, saga) {
+    function* takeEveryHelper() {
+        while (true) {
+            yield take(pattern);
+            yield fork(saga);
+        }
+    }
+    return fork(takeEveryHelper);
+}
+export function call(fn, ...args) {
+    return { type: effectTypes.CALL, fn, args };
+}
+<span class="hljs-addition">+export function cps(fn, ...args) {</span>
+<span class="hljs-addition">+    return { type: effectTypes.CPS, fn, args };</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t3710.4 runSaga.js">10.4 runSaga.js <a href="#t3710.4 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export default function runSaga(env, saga) {
+    let { channel, dispatch } = env;
+    let it = typeof saga == 'function' ? saga() : saga;
+<span class="hljs-addition">+    function next(value,isErr) {</span>
+<span class="hljs-addition">+        let result;</span>
+<span class="hljs-addition">+        if (isErr) {</span>
+<span class="hljs-addition">+            result = it.throw(value);</span>
+<span class="hljs-addition">+          } else {</span>
+<span class="hljs-addition">+            result = it.next(value);</span>
+<span class="hljs-addition">+          }</span>
+<span class="hljs-addition">+        let { value: effect, done } = result;</span>
+        if (!done) {
+            if (typeof effect[Symbol.iterator] == 'function') {
+                runSaga(env,effect);
+                next();
+            }else if(effect.then){
+                effect.then(next);
+            } else {
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+                    case effectTypes.FORK:
+                        runSaga(env,effect.saga);
+                        next();
+                        break;
+                    case effectTypes.CALL:
+                        effect.fn(...effect.args).then(next);
+                        break;
+<span class="hljs-addition">+                    case effectTypes.CPS:</span>
+<span class="hljs-addition">+                        effect.fn(...effect.args,(err,data)=&gt;{</span>
+<span class="hljs-addition">+                            if(err){</span>
+<span class="hljs-addition">+                                next(err,true);</span>
+<span class="hljs-addition">+                            }else{</span>
+<span class="hljs-addition">+                                next(data);</span>
+<span class="hljs-addition">+                            }</span>
+<span class="hljs-addition">+                        });</span>
+<span class="hljs-addition">+                        break;    </span>
+                    default:
+                        break;
+                }
+            }
+
+        }
+    }
+    next();
+}
+</code></pre>
+<h2 id="t3812. 支持all">12. 支持all <a href="#t3812. 支持all"> # </a></h2>
+<h3 id="t3912.1 saga">12.1 saga <a href="#t3912.1 saga"> # </a></h3>
+<p>src\store\sagas.js</p>
+<pre><code class="lang-diff">import { put, takeEvery, call, cps, take,all } from '../redux-saga/effects';
+import * as actionTypes from './action-types';
+<span class="hljs-addition">+export function* add1() {</span>
+<span class="hljs-addition">+    for (let i = 0; i &lt; 3; i++) {</span>
+<span class="hljs-addition">+        yield take(actionTypes.ASYNC_ADD);</span>
+<span class="hljs-addition">+        yield put({ type: actionTypes.ADD });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return 'add1';</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export function* add2() {</span>
+<span class="hljs-addition">+    for (let i = 0; i &lt; 3; i++) {</span>
+<span class="hljs-addition">+        yield take(actionTypes.ASYNC_ADD);</span>
+<span class="hljs-addition">+        yield put({ type: actionTypes.ADD });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return 'add2';</span>
+<span class="hljs-addition">+}</span>
+export default function* rootSaga() {
+<span class="hljs-addition">+    let result = yield all([add1(), add2()]);</span>
+<span class="hljs-addition">+    console.log('done', result);</span>
+}
+</code></pre>
+<h3 id="t4012.2 effectTypes.js">12.2 effectTypes.js <a href="#t4012.2 effectTypes.js"> # </a></h3>
+<p>src\redux-saga\effectTypes.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> TAKE = <span class="hljs-string">'TAKE'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> PUT = <span class="hljs-string">'PUT'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> FORK = <span class="hljs-string">'FORK'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CALL = <span class="hljs-string">'CALL'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CPS = <span class="hljs-string">'CPS'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ALL = <span class="hljs-string">'ALL'</span>;
+</code></pre>
+<h3 id="t4112.3 effects.js">12.3 effects.js <a href="#t4112.3 effects.js"> # </a></h3>
+<p>src\redux-saga\effects.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export function take(actionType) {
+    return { type: effectTypes.TAKE, actionType }
+}
+
+export function put(action) {
+    return { type: effectTypes.PUT, action }
+}
+
+export function fork(saga) {
+    return { type: effectTypes.FORK, saga };
+}
+
+export function takeEvery(pattern, saga) {
+    function* takeEveryHelper() {
+        while (true) {
+            yield take(pattern);
+            yield fork(saga);
+        }
+    }
+    return fork(takeEveryHelper);
+}
+export function call(fn, ...args) {
+    return { type: effectTypes.CALL, fn, args };
+}
+export function cps(fn, ...args) {
+    return { type: effectTypes.CPS, fn, args };
+}
+<span class="hljs-addition">+export function all(effects) {</span>
+<span class="hljs-addition">+    return { type: effectTypes.ALL, effects };</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t4212.4 runSaga.js">12.4 runSaga.js <a href="#t4212.4 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+<span class="hljs-addition">+export default function runSaga(env, saga,callback) {</span>
+    let { channel, dispatch } = env;
+    let it = typeof saga == 'function' ? saga() : saga;
+    function next(value, isErr) {
+        let result;
+        if (isErr) {
+            result = it.throw(value);
+        } else {
+            result = it.next(value);
+        }
+        let { value: effect, done } = result;
+        if (!done) {
+            if (typeof effect[Symbol.iterator] == 'function') {
+                runSaga(env, effect);
+                next();
+            } else if (effect.then) {
+                effect.then(next);
+            } else {
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+                    case effectTypes.FORK:
+                        runSaga(env, effect.saga);
+                        next();
+                        break;
+                    case effectTypes.CALL:
+                        effect.fn(...effect.args).then(next);
+                        break;
+                    case effectTypes.CPS:
+                        effect.fn(...effect.args, (err, data) =&gt; {
+                            if (err) {
+                                next(err, true);
+                            } else {
+                                next(data);
+                            }
+                        });
+                        break;
+<span class="hljs-addition">+                    case effectTypes.ALL:</span>
+<span class="hljs-addition">+                        let effects=effect.effects;</span>
+<span class="hljs-addition">+                        let result = [];</span>
+<span class="hljs-addition">+                        let complete=0;</span>
+<span class="hljs-addition">+                        effects.forEach((effect,index)=&gt;runSaga(env,effect,(res)=&gt;{</span>
+<span class="hljs-addition">+                            result[index]=res;</span>
+<span class="hljs-addition">+                            if(++complete === effects.length)</span>
+<span class="hljs-addition">+                                next(result);</span>
+<span class="hljs-addition">+                        }));</span>
+<span class="hljs-addition">+                        break;</span>
+                    default:
+                        break;
+                }
+            }
+        } else {
+<span class="hljs-addition">+            callback &amp;&amp; callback(effect);</span>
+        }
+    }
+    next();
+}
+</code></pre>
+<h2 id="t4313. 取消任务">13. 取消任务 <a href="#t4313. 取消任务"> # </a></h2>
+<h3 id="t4413.1 sagas.js">13.1 sagas.js <a href="#t4413.1 sagas.js"> # </a></h3>
+<p>src\store\sagas.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { put, takeEvery, call, cps, all, take, cancel, fork, delay } from '../redux-saga/effects';</span>
+<span class="hljs-addition">+import * as actionTypes from './action-types';</span>
+<span class="hljs-addition">+export function* add() {</span>
+<span class="hljs-addition">+    while (true) {</span>
+<span class="hljs-addition">+        yield delay(1000);</span>
+<span class="hljs-addition">+        yield put({ type: actionTypes.ADD });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export function* addWatcher() {</span>
+<span class="hljs-addition">+    const task = yield fork(add);</span>
+<span class="hljs-addition">+    console.log(task);</span>
+<span class="hljs-addition">+    yield take(actionTypes.STOP_ADD);</span>
+<span class="hljs-addition">+    yield cancel(task);</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export default function* rootSaga() {</span>
+<span class="hljs-addition">+    yield addWatcher();</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t4513.2 effectTypes.js">13.2 effectTypes.js <a href="#t4513.2 effectTypes.js"> # </a></h3>
+<p>src\redux-saga\effectTypes.js</p>
+<pre><code class="lang-diff">export const TAKE = 'TAKE';
+export const PUT = 'PUT';
+export const FORK = 'FORK';
+export const CALL = 'CALL';
+export const CPS = 'CPS';
+export const ALL = 'ALL';
+<span class="hljs-addition">+export const CANCEL = 'CANCEL';</span>
+</code></pre>
+<h3 id="t4613.3 effects.js">13.3 effects.js <a href="#t4613.3 effects.js"> # </a></h3>
+<p>src\redux-saga\effects.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes'
+export function take(actionType) {
+    return { type: effectTypes.TAKE, actionType }
+}
+
+export function put(action) {
+    return { type: effectTypes.PUT, action }
+}
+
+export function fork(saga) {
+    return { type: effectTypes.FORK, saga };
+}
+
+export function takeEvery(pattern, saga) {
+    function* takeEveryHelper() {
+        while (true) {
+            yield take(pattern);
+            yield fork(saga);
+        }
+    }
+    return fork(takeEveryHelper);
+}
+export function call(fn, ...args) {
+    return { type: effectTypes.CALL, fn, args };
+}
+export function cps(fn, ...args) {
+    return { type: effectTypes.CPS, fn, args };
+}
+export function all(effects) {
+    return { type: effectTypes.ALL, effects };
+}
+<span class="hljs-addition">+export function cancel(task) {</span>
+<span class="hljs-addition">+    return { type: effectTypes.CANCEL, task };</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export default function delayP(ms, val = true) {</span>
+<span class="hljs-addition">+    const promise = new Promise(resolve =&gt; {</span>
+<span class="hljs-addition">+        setTimeout(resolve, ms, val);</span>
+<span class="hljs-addition">+    })</span>
+<span class="hljs-addition">+    return promise</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export const delay = call.bind(null, delayP);</span>
+</code></pre>
+<h3 id="t4713.4 symbols.js">13.4 symbols.js <a href="#t4713.4 symbols.js"> # </a></h3>
+<p>src\redux-saga\symbols.js</p>
+<pre><code class="lang-diff">export const  TASK_CANCEL = Symbol('TASK_CANCEL');
+</code></pre>
+<h3 id="t4813.5 runSaga.js">13.5 runSaga.js <a href="#t4813.5 runSaga.js"> # </a></h3>
+<p>src\redux-saga\runSaga.js</p>
+<pre><code class="lang-diff">import * as effectTypes from './effectTypes';
+<span class="hljs-addition">+import {TASK_CANCEL} from './symbols';</span>
+export default function runSaga(env, saga,callback) {
+<span class="hljs-addition">+    let task = {cancel:()=&gt;next(TASK_CANCEL)};</span>
+    let { channel, dispatch } = env;
+    let it = typeof saga == 'function' ? saga() : saga;
+    function next(value, isErr) {
+        let result;
+        if (isErr) {
+            result = it.throw(value);
+<span class="hljs-addition">+        }else if(value === TASK_CANCEL){</span>
+<span class="hljs-addition">+            result = it.return(value);</span>
+        } else {
+            result = it.next(value);
+        }
+        let { value: effect, done } = result;
+        if (!done) {
+            if (typeof effect[Symbol.iterator] == 'function') {
+                runSaga(env, effect);
+                next();
+            } else if (effect.then) {
+                effect.then(next);
+            } else {
+                switch (effect.type) {
+                    case effectTypes.TAKE:
+                        channel.take(effect.actionType, next);
+                        break;
+                    case effectTypes.PUT:
+                        dispatch(effect.action);
+                        next();
+                        break;
+                    case effectTypes.FORK:
+<span class="hljs-addition">+                        let forkTask = runSaga(env, effect.saga);</span>
+<span class="hljs-addition">+                        next(forkTask);</span>
+                        break;
+                    case effectTypes.CALL:
+                        effect.fn(...effect.args).then(next);
+                        break;
+                    case effectTypes.CPS:
+                        effect.fn(...effect.args, (err, data) =&gt; {
+                            if (err) {
+                                next(err, true);
+                            } else {
+                                next(data);
+                            }
+                        });
+                        break;
+                    case effectTypes.ALL:
+                        let effects=effect.effects;
+                        let result = [];
+                        let complete=0;
+                        effects.forEach((effect,index)=&gt;runSaga(env,effect,(res)=&gt;{
+                            result[index]=res;
+                            if(++complete <span class="hljs-comment">=== effects.length)</span>
+                                next(result);
+                        }));
+                        break;
+<span class="hljs-addition">+                    case effectTypes.CANCEL:</span>
+<span class="hljs-addition">+                        effect.task.cancel();</span>
+<span class="hljs-addition">+                        next();</span>
+<span class="hljs-addition">+                        break;    </span>
+                    default:
+                        break;
+                }
+            }
+        } else {
+            callback &amp;&amp; callback(effect);
+        }
+    }
+    next();
+<span class="hljs-addition">+    return task;</span>
+}
+</code></pre>
+<h3 id="t4913.6 action-types.js">13.6 action-types.js <a href="#t4913.6 action-types.js"> # </a></h3>
+<p>src\store\action-types.js</p>
+<pre><code class="lang-diff">export const ASYNC_ADD='ASYNC_ADD';
+export const ADD='ADD';
+<span class="hljs-addition">+export const STOP_ADD='STOP_ADD';</span>
+</code></pre>
+<h3 id="t5013.7 Counter.js">13.7 Counter.js <a href="#t5013.7 Counter.js"> # </a></h3>
+<p>src\components\Counter.js</p>
+<pre><code class="lang-diff">import React,{Component} from 'react'
+import {connect} from 'react-redux';
+import actions from '../store/actions';
+class Counter extends Component{
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;p&gt;{this.props.number}&lt;/p&gt;
+<span class="hljs-addition">+                &lt;button onClick={this.props.stop}&gt;stop&lt;/button&gt;</span>
+            &lt;/div&gt;
+      )
+  }
+}
+export default connect(
+    state =&gt; state,
+    actions
+)(Counter);
+</code></pre>
+<h3 id="t5113.8 actions.js">13.8 actions.js <a href="#t5113.8 actions.js"> # </a></h3>
+<p>src\store\actions.js</p>
+<pre><code class="lang-diff">import * as actionTypes from './action-types';
+const actions = {
+    add() {
+        return { type: actionTypes.ASYNC_ADD }
+    },
+<span class="hljs-addition">+    stop() {</span>
+<span class="hljs-addition">+        return { type: actionTypes.STOP_ADD }</span>
+<span class="hljs-addition">+    }</span>
+}
+export default actions
+</code></pre>
+
+    

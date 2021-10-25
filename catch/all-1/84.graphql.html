@@ -1,0 +1,1025 @@
+
+        <h2 id="t01.什么是GraphQL">1.什么是GraphQL <a href="#t01.什么是GraphQL"> # </a></h2>
+<ul>
+<li><a href="https://graphql.cn/">graphql</a> 既是一种用于 API 的查询语言也是一个满足你数据查询的运行时</li>
+<li><code>GraphQL</code> 对你的 API 中的数据提供了一套易于理解的完整描述，使得客户端能够准确地获得它需要的数据，而且没有任何冗余</li>
+<li>请求你所要的数据不多不少</li>
+<li>只用一个请求获取多个资源</li>
+</ul>
+<h2 id="t12.创建后端项目">2.创建后端项目 <a href="#t12.创建后端项目"> # </a></h2>
+<pre><code class="lang-js">mkdir server
+cd server 
+cnpm init -y
+cnpm i express graphql express-graphql mongoose  cors --save
+</code></pre>
+<h2 id="t23. 实现商品分类接口">3. 实现商品分类接口 <a href="#t23. 实现商品分类接口"> # </a></h2>
+<h3 id="t33.1 server.js">3.1 server.js <a href="#t33.1 server.js"> # </a></h3>
+<p>server.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> graphqlHTTP = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express-graphql'</span>);
+<span class="hljs-keyword">const</span> schema = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./schema'</span>);
+<span class="hljs-keyword">const</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cors'</span>);
+<span class="hljs-keyword">const</span> app = express();
+app.use(cors({
+    <span class="hljs-attr">origin</span>: <span class="hljs-string">'http://localhost:3000'</span>,
+    <span class="hljs-attr">methods</span>: <span class="hljs-string">"GET,PUT,POST,OPTIONS"</span>
+}));
+app.use(<span class="hljs-string">'/graphql'</span>, graphqlHTTP({
+    schema,
+    <span class="hljs-attr">graphiql</span>: <span class="hljs-literal">true</span>
+}));
+app.listen(<span class="hljs-number">4000</span>, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'server started on 4000'</span>);
+});
+</code></pre>
+<h3 id="t43.2 schema.js">3.2 schema.js <a href="#t43.2 schema.js"> # </a></h3>
+<ul>
+<li>定义用户自定义类型,类型的每个字段都必须是已定义的且最终都是 GraphQL 中定义的类型。</li>
+<li>定义根类型,每种根类型中包含了准备暴露给服务调用方的用户自定义类型</li>
+<li>定义 Schema,每一个 Schema 中允许出现三种根类型：query，mutation，subscription，其中至少要有 query</li>
+</ul>
+<p>schema.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> graphql = <span class="hljs-built_in">require</span>(<span class="hljs-string">'graphql'</span>);
+<span class="hljs-keyword">const</span> { GraphQLObjectType,
+    GraphQLString,
+    GraphQLInt,
+    GraphQLSchema,
+    GraphQLList,
+    GraphQLNonNull
+} = graphql;
+<span class="hljs-keyword">const</span> categories = [
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">'1'</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'图书'</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">'2'</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'数码'</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-string">'3'</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'食品'</span> }
+]
+
+<span class="hljs-keyword">const</span> Category = <span class="hljs-keyword">new</span> GraphQLObjectType({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Category'</span>,
+    <span class="hljs-attr">fields</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+        {
+            <span class="hljs-attr">id</span>: { <span class="hljs-attr">type</span>: GraphQLString },
+            <span class="hljs-attr">name</span>: { <span class="hljs-attr">type</span>: GraphQLString },
+        }
+    )
+});
+
+<span class="hljs-keyword">const</span> RootQuery = <span class="hljs-keyword">new</span> GraphQLObjectType({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'RootQuery'</span>,
+    <span class="hljs-attr">fields</span>: {
+        <span class="hljs-attr">getCategory</span>: {
+            <span class="hljs-attr">type</span>: Category,
+            <span class="hljs-attr">args</span>: {
+                <span class="hljs-attr">id</span>: {
+                    <span class="hljs-attr">type</span>: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                <span class="hljs-keyword">return</span> categories.find(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.id === args.id);
+            }
+        }
+    }
+});
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-keyword">new</span> GraphQLSchema({
+    <span class="hljs-attr">query</span>: RootQuery
+})
+</code></pre>
+<h3 id="t53.3 GraphiQL">3.3 GraphiQL <a href="#t53.3 GraphiQL"> # </a></h3>
+<ul>
+<li><a href="https://github.com/graphql/graphiql">GraphiQL</a>is an in-browser tool for writing, validating, and testing GraphQL queries.</li>
+<li><p><a href="http://localhost:4000/graphql">浏览器访问</a></p>
+</li>
+<li><p>每次调用 <code>GraphQL</code> 服务,需要明确指定调用 <code>Schema</code> 中的哪个根类型(默认是 <code>query</code>)</p>
+</li>
+<li>然后指定这个根类型下的哪几个字段（每个字段对应一个用户自定义类型），然后指定这些字段中的那些子字段的哪几个。一直到所有的字段都没有子字段为止</li>
+<li>Schema 明确了服务端有哪些字段(用户自定义类型)可以用，每个字段的类型和子字段</li>
+<li>每次查询时，服务器就会根据 <code>Schema</code> 验证并执行查询</li>
+</ul>
+<pre><code class="lang-js">     {
+       field(arg: <span class="hljs-string">"value"</span>) {
+         subField
+       }
+     }
+</code></pre>
+<pre><code class="lang-js">query{
+  getCategory(id: <span class="hljs-string">"1"</span>) {
+    id
+    name
+  }
+}
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/getCategory.png" alt="getCategory"></p>
+<p><img src="http://img.zhufengpeixun.cn/getCategories.png" alt="getCategories"></p>
+<h2 id="t64. 实现商品接口">4. 实现商品接口 <a href="#t64. 实现商品接口"> # </a></h2>
+<h3 id="t74.1 schema.js">4.1 schema.js <a href="#t74.1 schema.js"> # </a></h3>
+<p>schema.js</p>
+<pre><code class="lang-diff">const graphql = require('graphql');
+const { GraphQLObjectType,
+    GraphQLString,
+    GraphQLSchema,
+    GraphQLList,
+} = graphql;
+const categories = [
+    { id: '1', name: '图书' },
+    { id: '2', name: '数码' },
+    { id: '3', name: '食品' }
+]
+<span class="hljs-addition">+const products = [</span>
+<span class="hljs-addition">+    { id: '1', name: '红楼梦', category: '1' },</span>
+<span class="hljs-addition">+    { id: '2', name: '西游记', category: '1' },</span>
+<span class="hljs-addition">+    { id: '3', name: '水浒传', category: '1' },</span>
+<span class="hljs-addition">+    { id: '4', name: '三国演义', category: '1' },</span>
+<span class="hljs-addition">+    { id: '2', name: 'iPhone', category: '2' },</span>
+<span class="hljs-addition">+    { id: '3', name: '', category: '3' }</span>
+<span class="hljs-addition">+]</span>
+//定义用户自定义类型
+//类型的每个字段都必须是已定义的且最终都是 GraphQL 中定义的类型。
+const Category = new GraphQLObjectType({
+    name: 'Category',
+    fields: () =&gt; (
+        {
+            id: { type: GraphQLString },
+            name: { type: GraphQLString },
+<span class="hljs-addition">+            products: {</span>
+<span class="hljs-addition">+                type: new GraphQLList(Product),</span>
+<span class="hljs-addition">+                resolve(parent) {</span>
+<span class="hljs-addition">+                    return products.filter(item =&gt; item.category === parent.id);</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+        }
+    )
+});
+<span class="hljs-addition">+const Product = new GraphQLObjectType({</span>
+<span class="hljs-addition">+    name: 'Product',</span>
+<span class="hljs-addition">+    fields: () =&gt; (</span>
+<span class="hljs-addition">+        {</span>
+<span class="hljs-addition">+            id: { type: GraphQLString },</span>
+<span class="hljs-addition">+            name: { type: GraphQLString },</span>
+<span class="hljs-addition">+            category: {</span>
+<span class="hljs-addition">+                type: Category,</span>
+<span class="hljs-addition">+                resolve(parent) {</span>
+<span class="hljs-addition">+                    return categories.find(item =&gt; item.id === parent.category);</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    )</span>
+<span class="hljs-addition">+});</span>
+
+const RootQuery = new GraphQLObjectType({
+    name: 'RootQuery',
+    fields: {
+        getCategory: {
+            type: Category,
+            args: {
+                id: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                return categories.find(item =&gt; item.id <span class="hljs-comment">=== args.id);</span>
+            }
+        },
+        getCategories: {
+            type: new GraphQLList(Category),
+            args: {
+
+            },
+            resolve(parent, args) {
+                return categories;
+            }
+        },
+<span class="hljs-addition">+        getProduct: {</span>
+<span class="hljs-addition">+            type: Product,</span>
+<span class="hljs-addition">+            args: {</span>
+<span class="hljs-addition">+                id: {</span>
+<span class="hljs-addition">+                    type: GraphQLString</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            },</span>
+<span class="hljs-addition">+            resolve(parent, args) {</span>
+<span class="hljs-addition">+                return products.find(item =&gt; item.id === args.id);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        },</span>
+<span class="hljs-addition">+        getProducts: {</span>
+<span class="hljs-addition">+            type: new GraphQLList(Product),</span>
+<span class="hljs-addition">+            args: {},</span>
+<span class="hljs-addition">+            resolve(parent, args) {</span>
+<span class="hljs-addition">+                return categories;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+    }
+});
+//定义 Schema,每一个 Schema 中允许出现三种根类型：query，mutation，subscription，其中至少要有 query
+module.exports = new GraphQLSchema({
+    query: RootQuery
+})
+</code></pre>
+<h2 id="t85. 添加商品">5. 添加商品 <a href="#t85. 添加商品"> # </a></h2>
+<h3 id="t95.1 schema.js">5.1 schema.js <a href="#t95.1 schema.js"> # </a></h3>
+<p>schema.js</p>
+<pre><code class="lang-diff">const graphql = require('graphql');
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLSchema,
+    GraphQLList,
+    GraphQLNonNull
+} = graphql;
+const categories = [
+    { id: '1', name: '图书' },
+    { id: '2', name: '数码' },
+    { id: '3', name: '食品' }
+]
+<span class="hljs-addition">+const products = [</span>
+<span class="hljs-addition">+    { id: '1', name: '红楼梦', category: '1' },</span>
+<span class="hljs-addition">+    { id: '2', name: '西游记', category: '1' },</span>
+<span class="hljs-addition">+    { id: '3', name: '水浒传', category: '1' },</span>
+<span class="hljs-addition">+    { id: '4', name: '三国演义', category: '1' },</span>
+<span class="hljs-addition">+    { id: '2', name: 'iPhone', category: '2' },</span>
+<span class="hljs-addition">+    { id: '3', name: '', category: '3' }</span>
+<span class="hljs-addition">+]</span>
+//定义用户自定义类型
+//类型的每个字段都必须是已定义的且最终都是 GraphQL 中定义的类型。
+const Category = new GraphQLObjectType({
+    name: 'Category',
+    fields: () =&gt; (+
+        {
+            id: { type: GraphQLString },
+            name: { type: GraphQLString },
+            products: {
+                type: new GraphQLList(Product),
+                resolve(parent) {
+                    return products.filter(item =&gt; item.category <span class="hljs-comment">=== parent.id);</span>
+                }
+            }
+        }
+    )
+});
+<span class="hljs-addition">+const Product = new GraphQLObjectType({</span>
+<span class="hljs-addition">+    name: 'Product',</span>
+<span class="hljs-addition">+    fields: () =&gt; (</span>
+<span class="hljs-addition">+        {</span>
+<span class="hljs-addition">+            id: { type: GraphQLString },</span>
+<span class="hljs-addition">+            name: { type: GraphQLString },</span>
+<span class="hljs-addition">+            category: {</span>
+<span class="hljs-addition">+                type: Category,</span>
+<span class="hljs-addition">+                resolve(parent) {</span>
+<span class="hljs-addition">+                    return categories.find(item =&gt; item.id === parent.category);</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    )</span>
+<span class="hljs-addition">+});</span>
+
+const RootQuery = new GraphQLObjectType({
+    name: 'RootQuery',
+    fields: {
+        getCategory: {
+            type: Category,
+            args: {
+                id: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                return categories.find(item =&gt; item.id <span class="hljs-comment">=== args.id);</span>
+            }
+        },
+        getCategories: {
+            type: new GraphQLList(Category),
+            args: {
+
+            },
+            resolve(parent, args) {
+                return categories;
+            }
+        },
+        getProduct: {
+            type: Product,
+            args: {
+                id: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                return products.find(item =&gt; item.id <span class="hljs-comment">=== args.id);</span>
+            }
+        },
+        getProducts: {
+            type: new GraphQLList(Product),
+            args: {
+
+            },
+            resolve(parent, args) {
+                return categories;
+            }
+        }
+    }
+});
+<span class="hljs-addition">+const RootMutation = new GraphQLObjectType({</span>
+<span class="hljs-addition">+    name: 'RootMutation',</span>
+<span class="hljs-addition">+    fields: {</span>
+<span class="hljs-addition">+        addCategory: {</span>
+<span class="hljs-addition">+            type: Category,</span>
+<span class="hljs-addition">+            args: {</span>
+<span class="hljs-addition">+                name: { type: new GraphQLNonNull(GraphQLString) }</span>
+<span class="hljs-addition">+            },</span>
+<span class="hljs-addition">+            resolve(parent, args) {</span>
+<span class="hljs-addition">+                args.id = categories.length + 1 + '';</span>
+<span class="hljs-addition">+                categories.push(args);</span>
+<span class="hljs-addition">+                return args;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        },</span>
+<span class="hljs-addition">+        addProduct: {</span>
+<span class="hljs-addition">+            type: Product,</span>
+<span class="hljs-addition">+            args: {</span>
+<span class="hljs-addition">+                name: { type: new GraphQLNonNull(GraphQLString) },</span>
+<span class="hljs-addition">+                category: { type: new GraphQLNonNull(GraphQLString) }</span>
+<span class="hljs-addition">+            },</span>
+<span class="hljs-addition">+            resolve(parent, args) {</span>
+<span class="hljs-addition">+                args.id = products.length + 1 + '';</span>
+<span class="hljs-addition">+                products.push(args);</span>
+<span class="hljs-addition">+                return args;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+    }
+});
+//定义 Schema,每一个 Schema 中允许出现三种根类型：query，mutation，subscription，其中至少要有 query
+module.exports = new GraphQLSchema({
+    query: RootQuery,
+<span class="hljs-addition">+    mutation: RootMutation</span>
+})
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/addProduct.png" alt="addProduct"></p>
+<h2 id="t106. 使用mongodb数据库">6. 使用mongodb数据库 <a href="#t106. 使用mongodb数据库"> # </a></h2>
+<h3 id="t116.1 model.js">6.1 model.js <a href="#t116.1 model.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> ObjectId = mongoose.Schema.Types.ObjectId;
+<span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+<span class="hljs-keyword">const</span> conn = mongoose.createConnection(<span class="hljs-string">`mongodb://localhost/graphql`</span>, {
+    <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span>
+});
+conn.on(<span class="hljs-string">'open'</span>, () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'数据库连接成功'</span>));
+conn.on(<span class="hljs-string">'error'</span>, (error) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'数据库连接失败'</span>, error));
+
+<span class="hljs-keyword">const</span> CategorySchema = <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">name</span>: <span class="hljs-built_in">String</span>
+});
+<span class="hljs-keyword">const</span> CategoryModel = conn.model(<span class="hljs-string">'Category'</span>, CategorySchema);
+<span class="hljs-keyword">const</span> ProductSchema = <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">name</span>: <span class="hljs-built_in">String</span>,
+    <span class="hljs-attr">category</span>: {
+        <span class="hljs-attr">type</span>: ObjectId,
+        <span class="hljs-attr">ref</span>: <span class="hljs-string">'Category'</span>
+    }
+});
+<span class="hljs-keyword">const</span> ProductModel = conn.model(<span class="hljs-string">'Product'</span>, ProductSchema);
+<span class="hljs-built_in">module</span>.exports = {
+    CategoryModel,
+    ProductModel
+}
+</code></pre>
+<h3 id="t126.2 schema.js">6.2 schema.js <a href="#t126.2 schema.js"> # </a></h3>
+<p>schema.js</p>
+<pre><code class="lang-diff">const graphql = require('graphql');
+<span class="hljs-addition">+const { CategoryModel, ProductModel } = require('./model');</span>
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLSchema,
+    GraphQLList,
+    GraphQLNonNull
+} = graphql;
+const categories = [
+    { id: '1', name: '图书' },
+    { id: '2', name: '数码' },
+    { id: '3', name: '食品' }
+]
+const products = [
+    { id: '1', name: '红楼梦', category: '1' },
+    { id: '2', name: '西游记', category: '1' },
+    { id: '3', name: '水浒传', category: '1' },
+    { id: '4', name: '三国演义', category: '1' },
+    { id: '2', name: 'iPhone', category: '2' },
+    { id: '3', name: '', category: '3' }
+]
+//定义用户自定义类型
+//类型的每个字段都必须是已定义的且最终都是 GraphQL 中定义的类型。
+const Category = new GraphQLObjectType({
+    name: 'Category',
+    fields: () =&gt; (
+        {
+            id: { type: GraphQLString },
+            name: { type: GraphQLString },
+            products: {
+                type: new GraphQLList(Product),
+                resolve(parent) {
+                    //return products.filter(item =&gt; item.category <span class="hljs-comment">=== parent.id);</span>
+<span class="hljs-addition">+                    return ProductModel.find({ category: parent.id });</span>
+                }
+            }
+        }
+    )
+});
+const Product = new GraphQLObjectType({
+    name: 'Product',
+    fields: () =&gt; (
+        {
+            id: { type: GraphQLString },
+            name: { type: GraphQLString },
+            category: {
+                type: Category,
+                resolve(parent) {
+                    //return categories.find(item =&gt; item.id <span class="hljs-comment">=== parent.category);</span>
+<span class="hljs-addition">+                    return CategoryModel.findById(parent.category);</span>
+                }
+            }
+        }
+    )
+});
+
+const RootQuery = new GraphQLObjectType({
+    name: 'RootQuery',
+    fields: {
+        getCategory: {
+            type: Category,
+            args: {
+                id: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                //return categories.find(item =&gt; item.id <span class="hljs-comment">=== args.id);</span>
+<span class="hljs-addition">+                return CategoryModel.findById(args.id);</span>
+            }
+        },
+        getCategories: {
+            type: new GraphQLList(Category),
+            args: {},
+            resolve(parent, args) {
+                //return categories;
+<span class="hljs-addition">+                return CategoryModel.find();</span>
+            }
+        },
+        getProduct: {
+            type: Product,
+            args: {
+                id: { type: GraphQLString }
+            },
+            resolve(parent, args) {
+                //return products.find(item =&gt; item.id <span class="hljs-comment">=== args.id);</span>
+<span class="hljs-addition">+                return ProductModel.findById(args.id);</span>
+            }
+        },
+        getProducts: {
+            type: new GraphQLList(Product),
+            args: {
+
+            },
+            resolve(parent, args) {
+                //return categories;
+<span class="hljs-addition">+                return ProductModel.find();</span>
+            }
+        }
+    }
+});
+const RootMutation = new GraphQLObjectType({
+    name: 'RootMutation',
+    fields: {
+        addCategory: {
+            type: Category,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) }
+            },
+            resolve(parent, args) {
+                /*
+                  args.id = categories.length + 1 + '';
+                  categories.push(args);
+                  return args;
+                */
+<span class="hljs-addition">+                return CategoryModel.create(args);</span>
+            }
+        },
+        addProduct: {
+            type: Product,
+            args: {
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                category: { type: new GraphQLNonNull(GraphQLString) }
+            },
+            resolve(parent, args) {
+                /* args.id = products.length + 1 + '';
+                products.push(args);
+                return args; */
+<span class="hljs-addition">+                return ProductModel.create(args);</span>
+            }
+        }
+    }
+});
+//定义 Schema,每一个 Schema 中允许出现三种根类型：query，mutation，subscription，其中至少要有 query
+module.exports = new GraphQLSchema({
+    query: RootQuery,
+    mutation: RootMutation
+})
+</code></pre>
+<h3 id="t136.3 操作步骤">6.3 操作步骤 <a href="#t136.3 操作步骤"> # </a></h3>
+<pre><code class="lang-js">mutation{
+  addCategory(name:<span class="hljs-string">"书籍"</span>){
+    id,
+    name
+  }
+}
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addCategory"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb188fe2d74a3543392ab"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"书籍"</span>
+    }
+  }
+}
+mutation{
+  addCategory(name:<span class="hljs-string">"数码产品"</span>){
+    id,
+    name
+  }
+}
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addCategory"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb1bdfe2d74a3543392ad"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"数码产品"</span>
+    }
+  }
+}
+mutation{
+  addCategory(name:<span class="hljs-string">"食品"</span>){
+    id,
+    name
+  }
+}
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addCategory"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb1c5fe2d74a3543392ae"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"食品"</span>
+    }
+  }
+}
+
+
+{
+  getCategories {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"getCategories"</span>: [
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb188fe2d74a3543392ab"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"书籍"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb1bdfe2d74a3543392ad"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"数码产品"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb1c5fe2d74a3543392ae"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"食品"</span>
+      }
+    ]
+  }
+}
+
+
+mutation {
+  addProduct(name: <span class="hljs-string">"西游记"</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">"5dcfb188fe2d74a3543392ab"</span>) {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addProduct"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb341b2f03ea4906dd913"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"西游记"</span>
+    }
+  }
+}
+
+mutation {
+  addProduct(name: <span class="hljs-string">"红楼梦"</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">"5dcfb188fe2d74a3543392ab"</span>) {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addProduct"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb354b2f03ea4906dd914"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"红楼梦"</span>
+    }
+  }
+}
+
+mutation {
+  addProduct(name: <span class="hljs-string">"水浒传"</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">"5dcfb188fe2d74a3543392ab"</span>) {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addProduct"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb36cb2f03ea4906dd915"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"水浒传"</span>
+    }
+  }
+}
+
+mutation {
+  addProduct(name: <span class="hljs-string">"三国演义"</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">"5dcfb188fe2d74a3543392ab"</span>) {
+    id
+    name
+  }
+}
+
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addProduct"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb37bb2f03ea4906dd916"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"三国演义"</span>
+    }
+  }
+}
+
+mutation {
+  addProduct(name: <span class="hljs-string">"iPhone"</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">"5dcfb1bdfe2d74a3543392ad"</span>) {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addProduct"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb393b2f03ea4906dd917"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"iPhone"</span>
+    }
+  }
+}
+
+
+mutation {
+  addProduct(name: <span class="hljs-string">"面包"</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">"5dcfb1c5fe2d74a3543392ae"</span>) {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"addProduct"</span>: {
+      <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb3a7b2f03ea4906dd918"</span>,
+      <span class="hljs-string">"name"</span>: <span class="hljs-string">"面包"</span>
+    }
+  }
+}
+
+
+{
+  getProducts {
+    id
+    name
+  }
+}
+
+{
+  <span class="hljs-string">"data"</span>: {
+    <span class="hljs-string">"getProducts"</span>: [
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb341b2f03ea4906dd913"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"西游记"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb354b2f03ea4906dd914"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"红楼梦"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb36cb2f03ea4906dd915"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"水浒传"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb37bb2f03ea4906dd916"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"三国演义"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb393b2f03ea4906dd917"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"iPhone"</span>
+      },
+      {
+        <span class="hljs-string">"id"</span>: <span class="hljs-string">"5dcfb3a7b2f03ea4906dd918"</span>,
+        <span class="hljs-string">"name"</span>: <span class="hljs-string">"面包"</span>
+      }
+    ]
+  }
+}
+</code></pre>
+<h2 id="t141.生成项目">1.生成项目 <a href="#t141.生成项目"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/graphqlfront.png" alt="graphqlfront"></p>
+<pre><code class="lang-js">create-react-app client --typescript
+cd client
+cnpm start
+</code></pre>
+<h2 id="t152.安装依赖">2.安装依赖 <a href="#t152.安装依赖"> # </a></h2>
+<ul>
+<li><a href="https://www.apollographql.com/docs/react/get-started/">get-started</a></li>
+</ul>
+<pre><code class="lang-js">cnpm install apollo-boost @apollo/react-hooks graphql --save
+cnpm i bootstrap@<span class="hljs-number">3</span> --save
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">模块名</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">apollo-boost</td>
+<td style="text-align:left">Package containing everything you need to set up Apollo Client</td>
+</tr>
+<tr>
+<td style="text-align:left">@apollo/react-hooks</td>
+<td style="text-align:left">React hooks based view layer integration</td>
+</tr>
+<tr>
+<td style="text-align:left">graphql</td>
+<td style="text-align:left">Also parses your GraphQL queries</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t163.连接接口">3.连接接口 <a href="#t163.连接接口"> # </a></h2>
+<h3 id="t173.1 src\index.tsx">3.1 src\index.tsx <a href="#t173.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> ApolloClient <span class="hljs-keyword">from</span> <span class="hljs-string">'apollo-boost'</span>;
+<span class="hljs-keyword">import</span> { gql } <span class="hljs-keyword">from</span> <span class="hljs-string">"apollo-boost"</span>;
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> ApolloClient({
+    <span class="hljs-attr">uri</span>: <span class="hljs-string">'http://localhost:4000/graphql'</span>,
+});
+
+client.query({
+    <span class="hljs-attr">query</span>: gql<span class="hljs-string">`
+      query{
+        getCategories {
+          id
+          name
+        }
+      }
+    `</span>
+}).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(result));
+</code></pre>
+<h2 id="t184.实现前台功能">4.实现前台功能 <a href="#t184.实现前台功能"> # </a></h2>
+<h3 id="t194.1 src\App.tsx">4.1 src\App.tsx <a href="#t194.1 src\App.tsx"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> ApolloClient <span class="hljs-keyword">from</span> <span class="hljs-string">'apollo-boost'</span>;
+<span class="hljs-keyword">import</span> { ApolloProvider } <span class="hljs-keyword">from</span> <span class="hljs-string">'@apollo/react-hooks'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'bootstrap/dist/css/bootstrap.css'</span>;
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App'</span>;
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> ApolloClient({ <span class="hljs-attr">uri</span>: <span class="hljs-string">'http://localhost:4000/graphql'</span> });
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ApolloProvider</span> <span class="hljs-attr">client</span>=<span class="hljs-string">{client}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ApolloProvider</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t204.2 src\App.tsx">4.2 src\App.tsx <a href="#t204.2 src\App.tsx"> # </a></h3>
+<p>src\App.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { CATEGORIES_PRODUCTS } <span class="hljs-keyword">from</span> <span class="hljs-string">'./query'</span>;
+<span class="hljs-keyword">import</span> { useQuery } <span class="hljs-keyword">from</span> <span class="hljs-string">'@apollo/react-hooks'</span>;
+<span class="hljs-keyword">import</span> AddProduct <span class="hljs-keyword">from</span> <span class="hljs-string">'./AddProduct'</span>;
+<span class="hljs-keyword">import</span> ProductList <span class="hljs-keyword">from</span> <span class="hljs-string">'./ProductList'</span>;
+<span class="hljs-keyword">import</span> ProductDetail <span class="hljs-keyword">from</span> <span class="hljs-string">'./ProductDetail'</span>;
+<span class="hljs-keyword">import</span> { Product } <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> [product, setProduct] = useState&lt;Product&gt;();
+    <span class="hljs-keyword">const</span> { loading, error, data } = useQuery(CATEGORIES_PRODUCTS);
+    <span class="hljs-keyword">if</span> (loading) {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>加载中...<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    }
+    <span class="hljs-keyword">if</span> (error) {
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>加载错误<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    }
+    <span class="hljs-keyword">let</span> { getCategories, getProducts } = data;
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"container"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"row"</span> &gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"col-md-6"</span> &gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"panel panel-default"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">padding:</span> <span class="hljs-attr">20</span> }}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"panel-header"</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">AddProduct</span> <span class="hljs-attr">getCategories</span>=<span class="hljs-string">{getCategories}</span> /&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"text-center"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">height:</span> '<span class="hljs-attr">400px</span>', <span class="hljs-attr">overflow:</span> '<span class="hljs-attr">scroll</span>' }}&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">ProductList</span> <span class="hljs-attr">getProducts</span>=<span class="hljs-string">{getProducts}</span> <span class="hljs-attr">setProduct</span>=<span class="hljs-string">{setProduct}</span> /&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"col-md-6"</span> &gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"panel panel-default"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">padding:</span> <span class="hljs-attr">20</span> }}&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"text-center"</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">ProductDetail</span> <span class="hljs-attr">product</span>=<span class="hljs-string">{product}</span> /&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+</code></pre>
+<h3 id="t214.3 src\types.tsx">4.3 src\types.tsx <a href="#t214.3 src\types.tsx"> # </a></h3>
+<p>src\types.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> interface Category {
+    id?: string;
+    name?: string;
+}
+<span class="hljs-keyword">export</span> interface Product {
+    id?: string;
+    name?: string;
+    categoryId?: string;
+    category?: Category;
+}
+</code></pre>
+<h3 id="t224.4 src\query.tsx">4.4 src\query.tsx <a href="#t224.4 src\query.tsx"> # </a></h3>
+<p>src\query.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { gql } <span class="hljs-keyword">from</span> <span class="hljs-string">'apollo-boost'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CATEGORIES_PRODUCTS = gql<span class="hljs-string">`
+query{
+    getCategories {
+      id,
+      name,
+      products{
+        id,
+        name,
+      }
+    }
+    getProducts {
+      id
+      name,
+      category{
+        id,
+        name,
+        products{
+          id,
+          name,
+        }
+      }
+    }
+}
+`</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CATEGORIES = gql<span class="hljs-string">`
+query{
+    getCategories {
+      id
+      name
+    }
+}
+`</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> PRODUCTS = gql<span class="hljs-string">`
+query{
+    getProducts {
+      id
+      name,
+      category{
+        id,
+        name
+      }
+    }
+}
+`</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ADD_PRODUCT = gql<span class="hljs-string">`
+mutation($name:String!,$categoryId: String!){
+  addProduct(name: $name,category:$categoryId) {
+    id,
+    name,
+    category{
+      id,
+      name
+    }
+  }
+}
+`</span>;
+
+</code></pre>
+<h3 id="t234.5 src\AddProduct.tsx">4.5 src\AddProduct.tsx <a href="#t234.5 src\AddProduct.tsx"> # </a></h3>
+<p>src\AddProduct.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { Category, Product } <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+<span class="hljs-keyword">import</span> { PRODUCTS, ADD_PRODUCT } <span class="hljs-keyword">from</span> <span class="hljs-string">'./query'</span>;
+<span class="hljs-keyword">import</span> { useMutation } <span class="hljs-keyword">from</span> <span class="hljs-string">'@apollo/react-hooks'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">AddProduct</span>(<span class="hljs-params">props: any</span>) </span>{
+    <span class="hljs-keyword">const</span> [product, setProduct] = useState&lt;Product&gt;({ <span class="hljs-attr">name</span>: <span class="hljs-string">''</span>, <span class="hljs-attr">categoryId</span>: props.getCategories[<span class="hljs-number">0</span>].id });
+    <span class="hljs-keyword">const</span> [addProduct] = useMutation(ADD_PRODUCT);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handleSubmit</span>(<span class="hljs-params">event: React.FormEvent&lt;HTMLFormElement&gt;</span>) </span>{
+        event.preventDefault();
+        addProduct({ <span class="hljs-attr">variables</span>: product, <span class="hljs-attr">refetchQueries</span>: [{ <span class="hljs-attr">query</span>: PRODUCTS }] });
+    }
+    <span class="hljs-keyword">return</span> (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;div className="form-group"&gt;
+                &lt;label htmlFor="product_name"&gt;商品名称&lt;/label&gt;
+                &lt;input onChange={(event: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; setProduct({ ...product, name: event.target.value })}
+                    className="form-control" id="product_name" placeholder="商品名称" /&gt;
+            &lt;/div&gt;
+            &lt;div className="form-group"&gt;
+                &lt;label htmlFor="categoryId"&gt;商品分类&lt;/label&gt;
+                &lt;select onChange={(event: React.ChangeEvent&lt;HTMLSelectElement&gt;) =&gt; setProduct({ ...product, categoryId: event.target.value })}
+                    className="form-control" id="categoryId"&gt;
+                    &lt;option&gt;请选择分类&lt;/option&gt;
+                    {
+                        props.getCategories.map((category: Category) =&gt; {
+                            return (
+                                &lt;option key={category.id} value={category.id}&gt;{category.name}&lt;/option&gt;
+                            )
+                        })
+                    }
+                &lt;/select&gt;
+            &lt;/div&gt;
+            &lt;div className="form-group"&gt;
+                &lt;input className="btn btn-primary" type="submit" /&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    )
+}
+export default AddProduct;
+</code></pre>
+<h3 id="t244.6 ProductList.tsx">4.6 ProductList.tsx <a href="#t244.6 ProductList.tsx"> # </a></h3>
+<p>src\ProductList.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { Product } <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ProductList</span>(<span class="hljs-params">props: any</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"table table-striped"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">caption</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"text-center"</span>&gt;</span>产品列表<span class="hljs-tag">&lt;/<span class="hljs-name">caption</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"active"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>名称<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>分类<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tbody</span>&gt;</span>
+                {
+                    props.getProducts.map((product: Product, index: number) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{product.id}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> props.setProduct(product)}&gt;
+                            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{product.name}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{product.category!.name}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+                    ))
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">tbody</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ProductList;
+</code></pre>
+<h3 id="t254.7 ProductDetail.tsx">4.7 ProductDetail.tsx <a href="#t254.7 ProductDetail.tsx"> # </a></h3>
+<p>src\ProductDetail.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { Product } <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ProductDetail</span>(<span class="hljs-params">props: any</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(props.product);
+
+    <span class="hljs-keyword">if</span> (!props.product)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>
+                ID:{props.product.id}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>
+                名称:{props.product.name}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>
+                分类:{props.product.category.name}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>
+                此分类下所有产品:
+                <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group"</span>&gt;</span>
+                    {
+                        props.product.category.products.map((product: Product, index: number) =&gt; (
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{product.id}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>{product.name}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                        ))
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ProductDetail;
+</code></pre>
+
+    

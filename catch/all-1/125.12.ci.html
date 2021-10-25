@@ -1,0 +1,244 @@
+
+        <h2 id="t01.CICD">1.CICD <a href="#t01.CICD"> # </a></h2>
+<ul>
+<li>CI 的意思是 持续构建 。负责拉取代码库中的代码后，执行用户预置定义好的操作脚本，通过一系列编译操作构建出一个 制品 ，并将制品推送至到制品库里面。常用工具有 Gitlab CI，Github CI，Jenkins 等。这个环节不参与部署，只负责构建代码，然后保存构建物。构建物被称为 制品，保存制品的地方被称为 <code>制品库</code></li>
+<li>CD 则有2层含义： 持续部署（Continuous Deployment） 和 持续交付（Continuous Delivery） 。 持续交付 的概念是：将制品库的制品拿出后，部署在测试环境 / 交付给客户提前测试。 持续部署 则是将制品部署在生产环境。</li>
+</ul>
+<h2 id="t12. 服务器">2. 服务器 <a href="#t12. 服务器"> # </a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">配置</th>
+<th style="text-align:left">技术栈</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">标签</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">2核4G</td>
+<td style="text-align:left">Jenkins + Nexus + Docker</td>
+<td style="text-align:left">Cloud</td>
+<td style="text-align:left">构建机</td>
+</tr>
+<tr>
+<td style="text-align:left">2核4G</td>
+<td style="text-align:left">Docker + Kubernetes</td>
+<td style="text-align:left">Cloud</td>
+<td style="text-align:left">kubernetes Master</td>
+</tr>
+<tr>
+<td style="text-align:left">1核1G</td>
+<td style="text-align:left">Docker + Kubernetes</td>
+<td style="text-align:left">Cloud</td>
+<td style="text-align:left">kubernetes Node</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t23. 构建机CI">3. 构建机CI <a href="#t23. 构建机CI"> # </a></h2>
+<p><img src="https://img.zhufengpeixun.com/0cafb0ad2ba216ef1c566ea98ce8cb30" alt="0cafb0ad2ba216ef1c566ea98ce8cb30"></p>
+<h3 id="t33.1 安装docker">3.1 安装docker <a href="#t33.1 安装docker"> # </a></h3>
+<pre><code class="lang-js">yum install -y yum-utils device-mapper-persistent-data lvm2
+sudo yum-config-manager --add-repo http:<span class="hljs-comment">//mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span>
+yum install docker-ce -y
+systemctl start docker
+systemctl enable docker
+</code></pre>
+<p>配置阿里云镜像源</p>
+<pre><code class="lang-js">sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json &lt;&lt;-'EOF'
+{
+  "registry-mirrors": ["https://fwvjnv59.mirror.aliyuncs.com"]
+}
+EOF
+# 重载所有修改过的配置文件
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+</code></pre>
+<h3 id="t43.2 安装 git">3.2 安装 git <a href="#t43.2 安装 git"> # </a></h3>
+<pre><code class="lang-js">yum install git -y
+</code></pre>
+<h3 id="t53.3 安装 Jenkins">3.3 安装 Jenkins <a href="#t53.3 安装 Jenkins"> # </a></h3>
+<ul>
+<li>Jenkins 是一个基于 Java 语言开发的持续构建工具平台，主要用于持续、自动的构建/测试你的软件和项目。它可以执行你预先设定好的设置和构建脚本，也可以和 Git 代码库做集成，实现自动触发和定时触发构建</li>
+</ul>
+<h4 id="t63.3.1 安装java">3.3.1 安装java <a href="#t63.3.1 安装java"> # </a></h4>
+<pre><code class="lang-js">yum install -y java
+</code></pre>
+<h4 id="t73.3.2 安装jenkins">3.3.2 安装jenkins <a href="#t73.3.2 安装jenkins"> # </a></h4>
+<pre><code class="lang-js">sudo wget -O /etc/yum.repos.d/jenkins.repo https:<span class="hljs-comment">//img.zhufengpeixun.com/jenkins.repo</span>
+sudo rpm --<span class="hljs-keyword">import</span> https:<span class="hljs-comment">//img.zhufengpeixun.com/jenkins.io.key</span>
+yum install jenkins -y
+</code></pre>
+<h4 id="t83.2.3 启动 Jenkins">3.2.3 启动 Jenkins <a href="#t83.2.3 启动 Jenkins"> # </a></h4>
+<pre><code class="lang-js"> systemctl start jenkins.service
+</code></pre>
+<h4 id="t93.3.4  开放端口">3.3.4  开放端口 <a href="#t93.3.4  开放端口"> # </a></h4>
+<pre><code class="lang-js">firewall-cmd --zone=public --add-port=<span class="hljs-number">8080</span>/tcp --permanent
+firewall-cmd --zone=public --add-port=<span class="hljs-number">50000</span>/tcp --permanent
+systemctl reload firewalld
+</code></pre>
+<h4 id="t103.3.5 打开浏览器访问">3.3.5 打开浏览器访问 <a href="#t103.3.5 打开浏览器访问"> # </a></h4>
+<pre><code class="lang-js">http:<span class="hljs-comment">//8.136.218.128:8080/</span>
+</code></pre>
+<h4 id="t113.3.6 查看密码">3.3.6 查看密码 <a href="#t113.3.6 查看密码"> # </a></h4>
+<pre><code class="lang-js">cat /<span class="hljs-keyword">var</span>/lib/jenkins/secrets/initialAdminPassword
+</code></pre>
+<h4 id="t123.3.7 修改插件镜像">3.3.7 修改插件镜像 <a href="#t123.3.7 修改插件镜像"> # </a></h4>
+<pre><code class="lang-js">sed -i <span class="hljs-string">'s/http:\/\/updates.jenkins-ci.org\/download/https:\/\/mirrors.tuna.tsinghua.edu.cn\/jenkins/g'</span> /<span class="hljs-keyword">var</span>/lib/jenkins/updates/<span class="hljs-keyword">default</span>.json &amp;&amp; sed -i <span class="hljs-string">'s/http:\/\/www.google.com/https:\/\/www.baidu.com/g'</span> /<span class="hljs-keyword">var</span>/lib/jenkins/updates/<span class="hljs-keyword">default</span>.json
+</code></pre>
+<h4 id="t133.3.8 添加到docker用户组里">3.3.8 添加到docker用户组里 <a href="#t133.3.8 添加到docker用户组里"> # </a></h4>
+<pre><code class="lang-js">sudo gpasswd -a jenkins docker  #将当前用户添加至docker用户组
+newgrp docker                 #更新docker用户组
+</code></pre>
+<h4 id="t143.3.9 新建任务">3.3.9 新建任务 <a href="#t143.3.9 新建任务"> # </a></h4>
+<ul>
+<li><a href="http://8.136.218.128:8080/view/all/newJob">http://8.136.218.128:8080/view/all/newJob</a></li>
+<li>新建任务=&gt;构建一个自由风格的软件项目=&gt;配置&gt;增加构建步骤</li>
+</ul>
+<pre><code class="lang-js">docker -v
+docker pull node:latest
+</code></pre>
+<h3 id="t153.3 安装Nodejs">3.3 安装Nodejs <a href="#t153.3 安装Nodejs"> # </a></h3>
+<ul>
+<li>系统管理 =&gt; 插件管理 =&gt; 可选插件 =》 安装NodeJS插件</li>
+<li>全局工具配置 =&gt; NodeJS =&gt; 新增NodeJS</li>
+<li>任务的配置=&gt;构建环境=&gt;选中 <code>Provide Node &amp; npm bin/ folder to PATH</code></li>
+</ul>
+<p>默认会拉取这个地址的安装包，但有可能会失败,失败之后可以重复，这个只需要执行一次就可以了</p>
+<pre><code class="lang-js">Unpacking https:<span class="hljs-comment">//nodejs.org/dist/v15.11.0/node-v15.11.0-linux-x64.tar.gz to /var/lib/jenkins/tools/jenkins.plugins.nodejs.tools.NodeJSInstallation/nodejs15.11.0 on Jenkins</span>
+</code></pre>
+<h3 id="t163.4 集成 Git 仓库">3.4 集成 Git 仓库 <a href="#t163.4 集成 Git 仓库"> # </a></h3>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/reactproject">项目仓库</a></li>
+</ul>
+<h4 id="t173.4.1 生成公钥私钥">3.4.1 生成公钥私钥 <a href="#t173.4.1 生成公钥私钥"> # </a></h4>
+<pre><code class="lang-js">ssh-keygen -t rsa -C <span class="hljs-string">"zhufengnodejs@126.com"</span>
+</code></pre>
+<h4 id="t183.4.2 Gitee 配置公钥">3.4.2 Gitee 配置公钥 <a href="#t183.4.2 Gitee 配置公钥"> # </a></h4>
+<ul>
+<li>设置=&gt;安全设置 =&gt; SSH公钥</li>
+</ul>
+<pre><code class="lang-js">cat ~<span class="hljs-regexp">/.ssh/i</span>d_rsa.pub 
+</code></pre>
+<h4 id="t193.4.3 在Jenkins 配置私钥">3.4.3 在Jenkins 配置私钥 <a href="#t193.4.3 在Jenkins 配置私钥"> # </a></h4>
+<ul>
+<li>在 Jenkins 中，私钥/密码 等认证信息都是以 凭证 的方式管理的</li>
+<li>一定要确保先安装git <code>yum install git -y</code></li>
+<li>配置 =&gt; 源码管理 =&gt; Git =&gt; Repositories</li>
+<li>Credentials =&gt; 添加 =&gt; SSH Username with private key <ul>
+<li>Username <a href="mailto:zhufengnodejs@126.com">zhufengnodejs@126.com</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="t203.5 构建镜像">3.5 构建镜像 <a href="#t203.5 构建镜像"> # </a></h3>
+<h4 id="t213.5.1 编写 Dockerfile">3.5.1 编写 Dockerfile <a href="#t213.5.1 编写 Dockerfile"> # </a></h4>
+<p>Dockerfile</p>
+<pre><code class="lang-js">FROM nginx:<span class="hljs-number">1.15</span>
+COPY build /etc/nginx/html
+COPY conf /etc/nginx/
+WORKDIR /etc/nginx/html
+</code></pre>
+<p>conf\site</p>
+<pre><code class="lang-js">server {
+    listen       <span class="hljs-number">80</span>;
+    server_name  _;
+    root         /etc/nginx/html;
+}
+</code></pre>
+<h4 id="t223.5.2 Jenkins配置脚本">3.5.2 Jenkins配置脚本 <a href="#t223.5.2 Jenkins配置脚本"> # </a></h4>
+<ul>
+<li>构建 =&gt; 执行Shell </li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-meta">#!/bin/sh</span>
+
+npm install --registry=https:<span class="hljs-comment">//registry.npm.taobao.org</span>
+npm run build
+docker build -t react-project .
+</code></pre>
+<h4 id="t233.5.3 执行任务">3.5.3 执行任务 <a href="#t233.5.3 执行任务"> # </a></h4>
+<h3 id="t243.6 上传私有镜像库">3.6 上传私有镜像库 <a href="#t243.6 上传私有镜像库"> # </a></h3>
+<ul>
+<li>镜像库就是集中存放镜像的一个文件服务</li>
+<li>镜像库在 CI/CD 中，又称 制品库</li>
+<li>构建后的产物称为制品，制品则要放到制品库做中转和版本管理</li>
+<li>常用平台有Nexus、Jfrog和Harbor或其他对象存储平台</li>
+</ul>
+<h4 id="t253.6.1 部署 Nexus 服务">3.6.1 部署 Nexus 服务 <a href="#t253.6.1 部署 Nexus 服务"> # </a></h4>
+<ul>
+<li>nexus-3.29.0-02 是nexus主程序文件夹</li>
+<li>sonatype-work 则是数据文件</li>
+</ul>
+<pre><code class="lang-js">cd /usr/local
+wget https:<span class="hljs-comment">//dependency-fe.oss-cn-beijing.aliyuncs.com/nexus-3.29.0-02-unix.tar.gz</span>
+tar -zxvf ./nexus<span class="hljs-number">-3.29</span><span class="hljs-number">.0</span><span class="hljs-number">-02</span>-unix.tar.gz
+cd nexus<span class="hljs-number">-3.29</span><span class="hljs-number">.0</span><span class="hljs-number">-02</span>/bin
+./nexus start
+
+firewall-cmd --zone=public --add-port=<span class="hljs-number">8081</span>/tcp --permanent
+firewall-cmd --zone=public --add-port=<span class="hljs-number">8082</span>/tcp --permanent
+
+<span class="hljs-attr">http</span>:<span class="hljs-comment">//8.136.218.128:8081/</span>
+</code></pre>
+<blockquote>
+<p>nexus 还支持停止，重启等命令。可以在 bin 目录下执行 ./nexus help 查看更多命令</p>
+</blockquote>
+<h4 id="t263.6.2 配置 Nexus">3.6.2 配置 Nexus <a href="#t263.6.2 配置 Nexus"> # </a></h4>
+<ul>
+<li>可以使用admin用户登录Nexus</li>
+<li>注意请立即更改密码 </li>
+<li>Enable anonymous access</li>
+</ul>
+<pre><code class="lang-js">cat /root/sonatype-work/nexus3/admin.password 
+</code></pre>
+<h4 id="t273.6.3 创建Docker私服">3.6.3 创建Docker私服 <a href="#t273.6.3 创建Docker私服"> # </a></h4>
+<ul>
+<li><p>登录 =&gt; 齿轮图标 =&gt; Repositories =&gt; Create repository =&gt; docker(hosted) =&gt; HTTP(8082)</p>
+</li>
+<li><p>proxy: 此类型制品库原则上只下载，不允许用户推送</p>
+</li>
+<li>hosted：此类型制品库和 proxy 相反，原则上 只允许用户推送，不允许缓存。这里只存放自己的私有镜像或制品</li>
+<li>group：此类型制品库可以将以上两种类型的制品库组合起来</li>
+</ul>
+<h4 id="t283.6.4 添加访问权限">3.6.4 添加访问权限 <a href="#t283.6.4 添加访问权限"> # </a></h4>
+<ul>
+<li>齿轮图标 =&gt; Realms =&gt;  Docker Bearer Token Realm =&gt; 添加到右边的 Active =&gt;保存</li>
+<li>copy <a href="http://118.190.142.109:8081/repository/dockcer-repository/">http://118.190.142.109:8081/repository/dockcer-repository/</a></li>
+</ul>
+<h4 id="t293.6.5 登录制品库">3.6.5 登录制品库 <a href="#t293.6.5 登录制品库"> # </a></h4>
+<p>vi /etc/docker/daemon.json</p>
+<pre><code class="lang-js">{
+  <span class="hljs-string">"insecure-registries"</span> : [
+    <span class="hljs-string">"8.136.218.128:8082"</span>
+  ],
+  <span class="hljs-string">"registry-mirrors"</span>: [<span class="hljs-string">"https://fwvjnv59.mirror.aliyuncs.com"</span>]
+}
+</code></pre>
+<pre><code class="lang-js">systemctl restart docker
+docker login <span class="hljs-number">8.136</span><span class="hljs-number">.218</span><span class="hljs-number">.128</span>:<span class="hljs-number">8082</span> <span class="hljs-comment">//注意此处要和insecure-registries里的地址一致</span>
+<span class="hljs-attr">Username</span>: admin
+<span class="hljs-attr">Password</span>: <span class="hljs-number">123456</span>
+</code></pre>
+<h4 id="t303.6.6 推送镜像到制品库">3.6.6 推送镜像到制品库 <a href="#t303.6.6 推送镜像到制品库"> # </a></h4>
+<ul>
+<li>设置界面 =&gt; 构建环境 =&gt; 勾选 Use secret text(s) or file(s) =&gt; 新增选择 =&gt; Username and password (separated)<ul>
+<li>DOCKER_LOGIN_USERNAME</li>
+<li>DOCKER_LOGIN_PASSWORD</li>
+</ul>
+</li>
+<li>接着在下面指定凭据=&gt;添加jenkins=&gt;选择类型<code>Username with password</code>,输入用户名和密码然后点添加确定</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-meta">#!/bin/sh -l</span>
+
+npm install --registry=https:<span class="hljs-comment">//registry.npm.taobao.org</span>
+npm run build
+docker build -t <span class="hljs-number">8.136</span><span class="hljs-number">.218</span><span class="hljs-number">.128</span>:<span class="hljs-number">8082</span>/react-project .
+docker login -u $DOCKER_LOGIN_USERNAME -p $DOCKER_LOGIN_PASSWORD <span class="hljs-number">8.136</span><span class="hljs-number">.218</span><span class="hljs-number">.128</span>:<span class="hljs-number">8082</span>
+docker push <span class="hljs-number">8.136</span><span class="hljs-number">.218</span><span class="hljs-number">.128</span>:<span class="hljs-number">8082</span>/react-project
+</code></pre>
+<ul>
+<li>然后就可以查看镜像了,注意端口是8081</li>
+<li><a href="http://8.136.218.128:8081/#browse/browse:docker-repository">http://8.136.218.128:8081/#browse/browse:docker-repository</a></li>
+</ul>
+
+    

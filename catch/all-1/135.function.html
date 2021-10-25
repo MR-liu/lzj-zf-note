@@ -1,0 +1,708 @@
+
+        <h2 id="t01.函数式编程优势">1.函数式编程优势 <a href="#t01.函数式编程优势"> # </a></h2>
+<ul>
+<li>更少的时间</li>
+<li>更少的BUG</li>
+<li>更好的测试性</li>
+<li>更方便调试</li>
+<li>适合并发执行</li>
+<li>更高的复用性</li>
+<li>支持tree-shaking</li>
+<li>React和Vue3大量使用函数式编程</li>
+</ul>
+<h2 id="t12.什么是函数式编程">2.什么是函数式编程 <a href="#t12.什么是函数式编程"> # </a></h2>
+<ul>
+<li>函数式编程是一种编程范式</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//面向过程</span>
+<span class="hljs-keyword">let</span> a=<span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> b=<span class="hljs-number">2</span>;
+<span class="hljs-keyword">let</span> result = a+b;
+
+
+<span class="hljs-comment">//面向对象</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Sum</span></span>{
+    add(a,b){
+        <span class="hljs-keyword">return</span> a+b;
+    }
+}
+<span class="hljs-keyword">let</span> sum = <span class="hljs-keyword">new</span> Sum();
+sum.add(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>);
+
+<span class="hljs-comment">//函数式编程,这里的函数指的是一种映射关系  y=f(x)</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a,b</span>)</span>{
+    <span class="hljs-keyword">return</span> a+b;
+}
+add(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>);
+</code></pre>
+<h2 id="t23.First-class Function(头等函数)">3.First-class Function(头等函数) <a href="#t23.First-class Function(头等函数)"> # </a></h2>
+<ul>
+<li>函数是<a href="https://developer.mozilla.org/zh-CN/docs/Glossary/First-class_Function">头等函数</a><ul>
+<li>函数可以赋值给变量</li>
+<li>函数可以作为参数</li>
+<li>函数可以作为返回值</li>
+</ul>
+</li>
+<li>作为参数和返回值的函数被称为高阶函数，高阶函数是函数式编程的基础</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a,b</span>)</span>{
+    <span class="hljs-keyword">return</span> a+b;
+}
+<span class="hljs-comment">//1.函数可以赋值给变量</span>
+<span class="hljs-keyword">let</span> add1 = add;
+
+<span class="hljs-comment">//2.函数可以作为参数</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">exec</span>(<span class="hljs-params">fn,a,b</span>)</span>{
+    fn(a,b);
+}
+
+<span class="hljs-comment">//3.函数可以作为返回值</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">exec</span>(<span class="hljs-params">fn</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">a,b</span>)</span>{
+        <span class="hljs-keyword">return</span> fn(a,b);
+    }
+}
+</code></pre>
+<h2 id="t34.闭包(closure)">4.闭包(closure) <a href="#t34.闭包(closure)"> # </a></h2>
+<ul>
+<li>一个函数和对其周围状态的引用捆绑在一起,这样的组合就是<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Closures">闭包</a></li>
+<li>闭包让你可以在一个内层函数中访问到其外层函数的作用域的变量</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> name = <span class="hljs-string">"hello"</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">showName</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">debugger</span>
+        <span class="hljs-built_in">console</span>.log(name);
+    }
+    <span class="hljs-keyword">return</span> showName;
+}
+<span class="hljs-keyword">let</span> showName = init();
+showName();
+</code></pre>
+<p><img src="https://upload-markdown-images.oss-cn-beijing.aliyuncs.com/20210731161528_1627719351356.png" alt="20210731161528_1627719351356"></p>
+<h2 id="t45. 纯函数">5. 纯函数 <a href="#t45. 纯函数"> # </a></h2>
+<h3 id="t55.1  什么是纯函数">5.1  什么是纯函数 <a href="#t55.1  什么是纯函数"> # </a></h3>
+<ul>
+<li>函数的返回结果只依赖于它的参数，相同的输入始终得到相同的输出</li>
+<li>函数执行过程里面没有副作用(一个函数执行过程对产生了外部可观察的变化那么就可以说这个函数是有副作用)</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a,b</span>)</span>{
+    <span class="hljs-keyword">return</span> a+b;
+}
+
+<span class="hljs-keyword">let</span> c = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> d =<span class="hljs-number">2</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">a,b</span>)</span>{
+    d++;<span class="hljs-comment">//修改了外部变量</span>
+    <span class="hljs-keyword">return</span> a+b+c;<span class="hljs-comment">//计算结果依赖外部变量</span>
+}
+add2();
+<span class="hljs-built_in">console</span>.log(d);
+</code></pre>
+<h3 id="t65.2 优点">5.2 优点 <a href="#t65.2 优点"> # </a></h3>
+<h4 id="t75.2.1 可缓存">5.2.1 可缓存 <a href="#t75.2.1 可缓存"> # </a></h4>
+<ul>
+<li><a href="https://www.lodashjs.com/docs/lodash.memoize">lodash.memoize</a></li>
+<li>创建一个会缓存 func 结果的函数。 如果提供了 resolver ，就用 resolver 的返回值作为 key 缓存函数的结果。 默认情况下用第一个参数作为缓存的 key。 func 在调用时 this 会绑定在缓存函数上</li>
+</ul>
+<pre><code class="lang-js">cnpm i lodash -S
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-keyword">const</span> add = <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'add'</span>);
+    <span class="hljs-keyword">return</span> a + b;
+}
+<span class="hljs-keyword">const</span> resolver = <span class="hljs-function">(<span class="hljs-params">...args</span>)=&gt;</span><span class="hljs-built_in">JSON</span>.stringify(args)
+
+<span class="hljs-keyword">var</span> memoize = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">func,resolver</span>) </span>{
+    <span class="hljs-keyword">let</span> cache = {};
+    <span class="hljs-keyword">let</span> memoized =  <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> key = resolver?resolver(...args):<span class="hljs-built_in">JSON</span>.stringify(args);
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> cache[key] !== <span class="hljs-string">'undefined'</span>) {
+            <span class="hljs-keyword">return</span> cache[key];
+        } <span class="hljs-keyword">else</span> {
+            cache[key] = func(...args);
+            <span class="hljs-keyword">return</span> cache[key];
+        }
+    }
+    memoized.cache = cache;
+    <span class="hljs-keyword">return</span> memoized;
+};
+
+<span class="hljs-comment">//let memoizedAdd = _.memoize(add,resolver);</span>
+<span class="hljs-keyword">let</span> memoizedAdd = memoize(add,resolver);
+<span class="hljs-built_in">console</span>.log(memoizedAdd(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log(memoizedAdd(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log(memoizedAdd.cache);
+<span class="hljs-built_in">module</span>.exports = memoizedAdd;
+</code></pre>
+<h4 id="t85.2.2 可测试">5.2.2 可测试 <a href="#t85.2.2 可测试"> # </a></h4>
+<ul>
+<li><a href="https://www.jestjs.cn/">jestjs</a></li>
+</ul>
+<pre><code class="lang-js">cnpm install jest --save-dev
+</code></pre>
+<p>5.test.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> sum = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./5.js'</span>);
+test(<span class="hljs-string">'adds 1 + 2 to equal 3'</span>, () =&gt; {
+  expect(sum(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).toBe(<span class="hljs-number">3</span>);
+  expect(sum(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).toBe(<span class="hljs-number">3</span>);
+});
+</code></pre>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"test"</span>: <span class="hljs-string">"jest"</span>
+  }
+}
+</code></pre>
+<h2 id="t96. 柯里化">6. 柯里化 <a href="#t96. 柯里化"> # </a></h2>
+<ul>
+<li><a href="https://www.lodashjs.com/docs/lodash.curry">lodash.curry</a>创建一个函数，该函数接收 func 的参数，要么调用func返回的结果，如果 func 所需参数已经提供，则直接返回 func 所执行的结果。或返回一个函数，接受余下的func 参数的函数，可以使用 func.length 强制需要累积的参数个数</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a, b, c</span>) </span>{
+    <span class="hljs-keyword">return</span> a + b + c;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">curry</span>(<span class="hljs-params">func</span>) </span>{
+    <span class="hljs-keyword">let</span> curried = <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span>(args.length &lt; func.length){
+            <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">...rest</span>)=&gt;</span>curried(...args,...rest);
+        }
+        <span class="hljs-keyword">return</span> func(...args);
+    }
+    <span class="hljs-keyword">return</span> curried;
+}
+<span class="hljs-keyword">let</span> curriedAdd = curry(add);
+<span class="hljs-built_in">console</span>.log(curriedAdd(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>));
+<span class="hljs-built_in">console</span>.log(curriedAdd(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>));
+<span class="hljs-built_in">console</span>.log(curriedAdd(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>)(<span class="hljs-number">3</span>));
+</code></pre>
+<h2 id="t107. 组合">7. 组合 <a href="#t107. 组合"> # </a></h2>
+<ul>
+<li><a href="https://www.lodashjs.com/docs/lodash.flow">flow</a>创建一个函数,每一个连续调用，传入的参数都是前一个函数返回的结果</li>
+<li><a href="https://www.lodashjs.com/docs/lodash.flowRight">flowRight</a>类似<code>flow</code>，除了它调用函数的顺序是从右往左的。</li>
+<li><a href="https://github.com/reduxjs/redux/blob/master/src/compose.ts">redux compose</a></li>
+<li><a href="https://www.lodashjs.com/">lodashjs</a>是一个一致性、模块化、高性能的 JavaScript 实用工具库</li>
+<li><a href="https://github.com/lodash/lodash/tree/4.17.15-npm/fp">lodash/fp</a>中的函数数据放在后后</li>
+<li><a href="https://ramdajs.com/docs/">ramdajs</a></li>
+</ul>
+<p><img src="https://upload-markdown-images.oss-cn-beijing.aliyuncs.com/compose_1627620541868.jpg" alt="compose_1627620541868"></p>
+<p>手工组合</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add1</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">1</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">2</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add3</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">3</span>;
+}
+<span class="hljs-comment">//手工组合</span>
+<span class="hljs-built_in">console</span>.log(add3(add2(add1(<span class="hljs-string">'hello'</span>))));
+</code></pre>
+<p>flow</p>
+<pre><code class="lang-js"><span class="hljs-comment">//let {flow} = require('lodash');</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add1</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">1</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">2</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add3</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">3</span>;
+}
+<span class="hljs-comment">//手工组合</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">flow</span>(<span class="hljs-params">...fns</span>) </span>{
+    <span class="hljs-keyword">if</span> (fns.length == <span class="hljs-number">0</span>)
+        <span class="hljs-keyword">return</span> fns[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">return</span> fns.reduceRight(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> a(b(...args)));
+}
+<span class="hljs-keyword">let</span> flowed = flow(add3, add2, add1);
+<span class="hljs-built_in">console</span>.log(flowed(<span class="hljs-string">'zhufeng'</span>));
+</code></pre>
+<p>flowRight</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {flowRight} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add1</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">1</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">2</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add3</span>(<span class="hljs-params">str</span>) </span>{
+    <span class="hljs-keyword">return</span> str + <span class="hljs-number">3</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">flowRight</span>(<span class="hljs-params">...fns</span>) </span>{
+    <span class="hljs-keyword">if</span> (fns.length == <span class="hljs-number">0</span>)
+        <span class="hljs-keyword">return</span> fns[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">return</span> fns.reduce(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> a(b(...args)));
+}
+<span class="hljs-keyword">let</span> flowed = flowRight(add3, add2, add1);
+<span class="hljs-built_in">console</span>.log(flowed(<span class="hljs-string">'zhufeng'</span>));
+</code></pre>
+<p>//带参数的函数组合</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {split,toUpper,join} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-keyword">let</span> str = <span class="hljs-string">'click button'</span>;<span class="hljs-comment">//CLICK_BUTTON</span>
+
+<span class="hljs-keyword">let</span> r1 = split(str,<span class="hljs-string">' '</span>);
+<span class="hljs-built_in">console</span>.log(r1);<span class="hljs-comment">//[ 'click', 'button' ]</span>
+<span class="hljs-keyword">let</span> r2 = toUpper(r1);
+<span class="hljs-built_in">console</span>.log(r2);<span class="hljs-comment">//CLICK,BUTTON</span>
+<span class="hljs-keyword">let</span> r3 = split(r2,<span class="hljs-string">','</span>);
+<span class="hljs-built_in">console</span>.log(r3);<span class="hljs-comment">//[ 'CLICK', 'BUTTON' ]</span>
+<span class="hljs-keyword">let</span> r4 = join(r3,<span class="hljs-string">'_'</span>);
+<span class="hljs-built_in">console</span>.log(r4);<span class="hljs-comment">//CLICK_BUTTON</span>
+</code></pre>
+<p>数据先放</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {split,toUpper,join,flowRight} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-keyword">let</span> str = <span class="hljs-string">'click button'</span>;<span class="hljs-comment">//CLICK_BUTTON</span>
+<span class="hljs-comment">//loadsh数据放前面</span>
+<span class="hljs-keyword">const</span> func = flowRight(join(<span class="hljs-string">'_'</span>),split(<span class="hljs-string">','</span>), toUpper, split(<span class="hljs-string">' '</span>));
+<span class="hljs-built_in">console</span>.log(func(str));
+</code></pre>
+<p>数据后放</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {split,toUpper,join,flowRight} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash/fp'</span>);
+<span class="hljs-keyword">let</span> str = <span class="hljs-string">'click button'</span>;<span class="hljs-comment">//CLICK_BUTTON</span>
+<span class="hljs-comment">//fp数据放后</span>
+<span class="hljs-keyword">const</span> func = flowRight(join(<span class="hljs-string">'_'</span>),split(<span class="hljs-string">','</span>), toUpper, split(<span class="hljs-string">' '</span>));
+<span class="hljs-built_in">console</span>.log(func(str));
+</code></pre>
+<p>过程跟踪</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {split,toUpper,join,flowRight} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash/fp'</span>);
+<span class="hljs-keyword">let</span> str = <span class="hljs-string">'click button'</span>;<span class="hljs-comment">//CLICK_BUTTON</span>
+<span class="hljs-keyword">const</span> logger = <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(name, value);
+    <span class="hljs-keyword">return</span> value;
+}
+<span class="hljs-keyword">const</span> func = flowRight(join(<span class="hljs-string">'_'</span>),logger(<span class="hljs-string">'afterSplit'</span>),split(<span class="hljs-string">','</span>),logger(<span class="hljs-string">'afterToUpper'</span>), toUpper, split(<span class="hljs-string">' '</span>));
+<span class="hljs-built_in">console</span>.log(func(str));
+</code></pre>
+<h2 id="t118. Pointfree">8. Pointfree <a href="#t118. Pointfree"> # </a></h2>
+<ul>
+<li>把数据处理的过程先定义成一种与参数无关的合成运算就叫<code>Pointfree</code></li>
+<li>先想怎么花钱</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { compose } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"lodash/fp"</span>);
+<span class="hljs-keyword">let</span> num = <span class="hljs-number">1</span>;
+<span class="hljs-comment">//Pointed</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">calcu</span>(<span class="hljs-params">num</span>)</span>{
+    <span class="hljs-keyword">return</span> num+<span class="hljs-number">1</span>+<span class="hljs-number">2</span>+<span class="hljs-number">3</span>;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add1</span>(<span class="hljs-params">num</span>)</span>{
+    <span class="hljs-keyword">return</span> num+<span class="hljs-number">1</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">num</span>)</span>{
+    <span class="hljs-keyword">return</span> num+<span class="hljs-number">2</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add3</span>(<span class="hljs-params">num</span>)</span>{
+    <span class="hljs-keyword">return</span> num+<span class="hljs-number">3</span>
+}
+<span class="hljs-comment">//Pointfree</span>
+<span class="hljs-keyword">let</span> fn = compose(add3,add2,add1);
+<span class="hljs-built_in">console</span>.log(fn(<span class="hljs-number">1</span>));
+</code></pre>
+<h2 id="t129. 函子">9. 函子 <a href="#t129. 函子"> # </a></h2>
+<ul>
+<li>可以用来管理值和值的变化过程</li>
+<li>把异常和异步操作等副作用控制在可控的范围之内</li>
+</ul>
+<h3 id="t139.1 Context">9.1 Context <a href="#t139.1 Context"> # </a></h3>
+<ul>
+<li>如果一个对象内部持有一个值那么它就可以称为容器(Container)</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Container</span></span>{
+    <span class="hljs-keyword">constructor</span>(value){
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+}
+</code></pre>
+<h3 id="t149.2 Pointed Container">9.2 Pointed Container <a href="#t149.2 Pointed Container"> # </a></h3>
+<ul>
+<li>如果它有<code>of</code>方法可称为有指向的容器</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PointedContainer</span></span>{
+    <span class="hljs-keyword">constructor</span>(value){
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span> (value){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> PointedContainer(value);
+    }
+}
+</code></pre>
+<h3 id="t159.3 Functor">9.3 Functor <a href="#t159.3 Functor"> # </a></h3>
+<ul>
+<li>如果它有<code>map</code>方法可称为Functor(函子)</li>
+<li>函子一会有一个静态的<code>of</code>方法，用来生成实例</li>
+<li>函子内部会保存一个值<code>value</code></li>
+<li>函子提供<code>map</code>方法，接入各种运算函数，从而引发值的变化</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Functor</span></span>{
+    <span class="hljs-keyword">constructor</span>(value){
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span> (value){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Functor(value);
+    }
+    map(fn){
+        <span class="hljs-keyword">return</span>  <span class="hljs-keyword">new</span> Functor(fn(<span class="hljs-keyword">this</span>.value));
+    }
+}
+
+<span class="hljs-keyword">let</span> result = Functor.of(<span class="hljs-string">'a'</span>)
+.map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">1</span>)
+.map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">2</span>)
+.map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">3</span>);
+<span class="hljs-built_in">console</span>.log(result.value);
+</code></pre>
+<h3 id="t169.4 Maybe">9.4 Maybe <a href="#t169.4 Maybe"> # </a></h3>
+<ul>
+<li>容器内部的值可能是一个空值,而外部函数未必有处理空值的机制，如果传入空值，很可能就会出错</li>
+<li><code>Maybe</code>函子可以过滤空值,能过滤空值的函子被称为Maybe函子</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Maybe</span>  </span>{
+    <span class="hljs-keyword">constructor</span>(value){
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span> (value){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Maybe(value);
+    }
+    map(fn){
+        <span class="hljs-keyword">return</span>  <span class="hljs-keyword">this</span>.value?<span class="hljs-keyword">new</span> Maybe(fn(<span class="hljs-keyword">this</span>.value)):<span class="hljs-keyword">this</span>;
+    }
+}
+Maybe.of(<span class="hljs-literal">null</span>).map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x.toString())
+</code></pre>
+<h3 id="t179.5 Either">9.5 Either <a href="#t179.5 Either"> # </a></h3>
+<ul>
+<li>Either 函子内部有两个值: 左值Left)和右值(Right),右值是正常情况下使用的值，左值是右值不存在时使用的默认值</li>
+<li>常用来设置默认值和处理异常</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Either</span></span>{
+    <span class="hljs-keyword">constructor</span>(left, right) {
+        <span class="hljs-keyword">this</span>.left = left;
+        <span class="hljs-keyword">this</span>.right = right;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span> = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">left, right</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Either(left, right);
+    };
+    map(fn) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.right ?
+            Either.of(<span class="hljs-keyword">this</span>.left, fn(<span class="hljs-keyword">this</span>.right)) :
+            Either.of(fn(<span class="hljs-keyword">this</span>.left), <span class="hljs-keyword">this</span>.right);
+    }
+    <span class="hljs-keyword">get</span> value(){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.right||<span class="hljs-keyword">this</span>.left;
+    }
+}
+<span class="hljs-comment">//处理默认值</span>
+<span class="hljs-keyword">let</span> user = {<span class="hljs-attr">gender</span>:<span class="hljs-literal">null</span>};
+<span class="hljs-keyword">let</span> result = Either.of(<span class="hljs-string">'男'</span>,user.gender)
+.map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x.toUpperCase())
+<span class="hljs-built_in">console</span>.log(result.value);
+
+<span class="hljs-comment">//处理异常</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">parse</span>(<span class="hljs-params">str</span>)</span>{
+    <span class="hljs-keyword">try</span>{
+        <span class="hljs-keyword">return</span> Either.of(<span class="hljs-literal">null</span>,{<span class="hljs-attr">data</span>:<span class="hljs-built_in">JSON</span>.parse(str)});
+    }<span class="hljs-keyword">catch</span>(error){
+        <span class="hljs-keyword">return</span> Either.of({<span class="hljs-attr">error</span>:error.message},<span class="hljs-literal">null</span>);
+    }
+}
+<span class="hljs-built_in">console</span>.log(parse(<span class="hljs-string">"{}"</span>).value);
+<span class="hljs-built_in">console</span>.log(parse(<span class="hljs-string">"{x}"</span>).value);
+</code></pre>
+<h3 id="t189.6 ap">9.6 ap <a href="#t189.6 ap"> # </a></h3>
+<ul>
+<li>ap(applicative)的函子拥有ap方法</li>
+<li>ap方法可以让一个函子内的函数使用另一个函子的值进行计算</li>
+<li>ap方法的参数不是函数，而是另一个函子</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Ap</span></span>{
+    <span class="hljs-keyword">constructor</span>(value){
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span> (value){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Ap(value);
+    }
+    map(fn){
+        <span class="hljs-keyword">return</span>  <span class="hljs-keyword">new</span> Ap(fn(<span class="hljs-keyword">this</span>.value));
+    }
+    ap(functor) {
+        <span class="hljs-keyword">return</span> Ap.of(<span class="hljs-keyword">this</span>.value(functor.value));
+    }
+}
+
+<span class="hljs-keyword">const</span> A = Ap.of(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">1</span>);
+<span class="hljs-keyword">const</span> B = Ap.of(<span class="hljs-number">1</span>)
+<span class="hljs-keyword">let</span> result = A.ap(B);
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+<h3 id="t199.7 Monad 函子">9.7 Monad 函子 <a href="#t199.7 Monad 函子"> # </a></h3>
+<ul>
+<li>函子的值也可以是函子，这样会出现多层函子嵌套的情况</li>
+<li>Monad(单子[不可分割的实体]) 函子的作用是，总是返回一个单层的函子</li>
+<li>它有一个<code>flatMap</code>方法，与<code>map</code>方法作用相同，唯一的区别是如果生成了一个嵌套函子，它会取出后者内部的值，保证返回的永远是一个单层的容器，不会出现嵌套的情况</li>
+</ul>
+<p>函子嵌套</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Functor</span> </span>{
+    <span class="hljs-keyword">constructor</span>(value) {
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span>(value) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Functor(value);
+    }
+    map(fn) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Functor(fn(<span class="hljs-keyword">this</span>.value));
+    }
+}
+
+<span class="hljs-keyword">let</span> result = Functor.of(<span class="hljs-string">'a'</span>)
+   .map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>Functor.of(x+<span class="hljs-number">1</span>))
+   .map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>Functor.of(x.value+<span class="hljs-number">2</span>))
+   .map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>Functor.of(x.value+<span class="hljs-number">3</span>))
+<span class="hljs-built_in">console</span>.log(result.value.value);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> r1 = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>].map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>[item+<span class="hljs-number">1</span>]);
+<span class="hljs-built_in">console</span>.log(r1);<span class="hljs-comment">//[ [ 1, 1 ], [ 2, 2 ], [ 3, 3 ] ]</span>
+<span class="hljs-built_in">console</span>.log(r1[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]);
+<span class="hljs-keyword">let</span> r2 = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>].flatMap(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>[item+<span class="hljs-number">1</span>]);
+<span class="hljs-built_in">console</span>.log(r2);
+<span class="hljs-built_in">console</span>.log(r2[<span class="hljs-number">0</span>]);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Monad</span> </span>{
+    <span class="hljs-keyword">constructor</span>(value) {
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">of</span>(value) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Monad(value);<span class="hljs-comment">//a</span>
+    }
+    map(fn) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Monad(fn(<span class="hljs-keyword">this</span>.value));
+    }
+    join() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.value;
+    }
+    flatMap(fn){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.map(fn).join();
+    }
+}
+
+<span class="hljs-comment">/* let result = Monad.of('a')
+   .flatMap(x=&gt;{
+       let r = Monad.of(x+1);
+       r.name = 'x1';
+       return r;
+   })//new Monad('a1')); 返回的Monad.value=Monad.of(x+1),后面用的是Monad.of(x+1)
+console.log(result); */</span>
+
+<span class="hljs-keyword">let</span> result = Monad.of(<span class="hljs-string">'a'</span>)
+   .flatMap(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>Monad.of(x+<span class="hljs-number">1</span>))
+   .flatMap(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>Monad.of(x+<span class="hljs-number">2</span>))
+   .flatMap(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>Monad.of(x+<span class="hljs-number">3</span>))
+<span class="hljs-built_in">console</span>.log(result.value);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-comment">//flatMap() 方法首先使用映射函数映射每个元素，然后将结果压缩成一个新数组</span>
+<span class="hljs-keyword">let</span> r1 = <span class="hljs-built_in">Array</span>.of(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>).map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">1</span>);
+<span class="hljs-built_in">console</span>.log(r1);
+<span class="hljs-keyword">let</span> r2 = <span class="hljs-built_in">Array</span>.of(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>).map(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>[x+<span class="hljs-number">1</span>]);
+<span class="hljs-built_in">console</span>.log(r2);
+<span class="hljs-keyword">let</span> r3 = <span class="hljs-built_in">Array</span>.of(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>).flatMap(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>[x+<span class="hljs-number">1</span>]);
+<span class="hljs-built_in">console</span>.log(r3);
+</code></pre>
+<h3 id="t209.8 IO函子与副作用">9.8 IO函子与副作用 <a href="#t209.8 IO函子与副作用"> # </a></h3>
+<ul>
+<li>副作用就是程序和外部世界的交互，比如读取文件或调用接口</li>
+<li>由于外部世界不可控，包含副作用的逻辑往往不要预测</li>
+<li>函数式编程提倡把副作用分离出来，让没有副作用的纯逻辑们放在一起远离包含副作用的逻辑，这时就需要<code>IO Monad</code></li>
+<li>IO 就是 Input/Output，副作用无非是对外部世界的 Input(读)和 Output(写)</li>
+<li>IO 函子通过推迟执行的方式来实现对副作用的管理和隔离</li>
+</ul>
+<p>过程调用</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { compose } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"lodash/fp"</span>);
+<span class="hljs-keyword">let</span> localStorage = {
+    getItem(key){
+        <span class="hljs-keyword">if</span>(key === <span class="hljs-string">'data'</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`{"code":0,"userId":"1"}`</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key === <span class="hljs-string">"1"</span>){
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`{"id":1,"name":"zhangsan","age":18}`</span>;
+        }
+    }
+}
+ <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">printUsers</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> response = localStorage.getItem(<span class="hljs-string">'data'</span>);
+    <span class="hljs-keyword">const</span> data = <span class="hljs-built_in">JSON</span>.parse(response);
+    <span class="hljs-keyword">const</span> users = data.userId;
+    <span class="hljs-keyword">const</span> user = localStorage.getItem(data.userId);
+    <span class="hljs-built_in">console</span>.log(user);<span class="hljs-comment">//输出副作用</span>
+}
+printUsers();
+</code></pre>
+<p>IO函子</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { compose } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"lodash/fp"</span>);
+<span class="hljs-keyword">let</span> localStorage = {
+    getItem(key){
+        <span class="hljs-keyword">if</span>(key === <span class="hljs-string">'data'</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`{"code":0,"userId":"1"}`</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key === <span class="hljs-string">"1"</span>){
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`{"id":1,"name":"zhangsan","age":18}`</span>;
+        }
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IO</span> </span>{
+    <span class="hljs-keyword">constructor</span>(value) {
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    map(fn) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> IO(compose(fn, <span class="hljs-keyword">this</span>.value));
+    }
+    join() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.value();
+    }
+    start(callback) {
+        callback(<span class="hljs-keyword">this</span>.value());
+    }
+}
+<span class="hljs-keyword">const</span> readByKey = <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> <span class="hljs-keyword">new</span> IO(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> localStorage.getItem(key));
+<span class="hljs-keyword">const</span> parseJSON = <span class="hljs-function"><span class="hljs-params">string</span> =&gt;</span> <span class="hljs-built_in">JSON</span>.parse(string);
+<span class="hljs-keyword">const</span> writeToConsole = <span class="hljs-built_in">console</span>.log;
+readByKey(<span class="hljs-string">'data'</span>)
+    .map(parseJSON)
+    .start(writeToConsole);
+</code></pre>
+<p>链式调用</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { compose } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"lodash/fp"</span>);
+<span class="hljs-keyword">let</span> localStorage = {
+    getItem(key){
+        <span class="hljs-keyword">if</span>(key === <span class="hljs-string">'data'</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`{"code":0,"userId":"1"}`</span>;
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(key === <span class="hljs-string">"1"</span>){
+            <span class="hljs-keyword">return</span> <span class="hljs-string">`{"id":1,"name":"zhangsan","age":18}`</span>;
+        }
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">IO</span> </span>{
+    <span class="hljs-keyword">constructor</span>(value) {
+        <span class="hljs-keyword">this</span>.value = value;
+    }
+    map(fn) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> IO(compose(fn, <span class="hljs-keyword">this</span>.value));
+    }
+    flatMap(fn) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> IO(compose(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x.value(), fn, <span class="hljs-keyword">this</span>.value));
+    }
+    start(callback) {
+        callback(<span class="hljs-keyword">this</span>.value());
+    }
+}
+<span class="hljs-keyword">const</span> readByKey = <span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> <span class="hljs-keyword">new</span> IO(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> localStorage.getItem(key));
+<span class="hljs-keyword">const</span> parseJSON = <span class="hljs-function"><span class="hljs-params">string</span> =&gt;</span>  <span class="hljs-built_in">JSON</span>.parse(string)
+<span class="hljs-keyword">const</span> writeToConsole = <span class="hljs-built_in">console</span>.log;
+<span class="hljs-keyword">let</span> ret = readByKey(<span class="hljs-string">'data'</span>)
+    .map(parseJSON)
+    .map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item.userId)
+    .flatMap(readByKey)
+    .map(parseJSON)
+    .start(writeToConsole);;
+</code></pre>
+<h3 id="t219.9 task函子">9.9 task函子 <a href="#t219.9 task函子"> # </a></h3>
+<ul>
+<li>Task 函子通过类似 Promise 的 resolve 的风格来声明一个异步流程</li>
+<li>FP 中除了容器（Container），也可以用上下文（Context）来称呼包裹了一个值的结构</li>
+<li>Promise的任务是立刻执行的，而Task是在调用的时候才开始执行</li>
+</ul>
+<p>异步执行任务</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Task = <span class="hljs-function"><span class="hljs-params">execute</span> =&gt;</span> ({
+    execute
+});
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params">url</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve({ <span class="hljs-string">"code"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"userId"</span>: <span class="hljs-string">"1"</span> });
+}
+<span class="hljs-keyword">const</span> request = <span class="hljs-function"><span class="hljs-params">url</span> =&gt;</span> Task(<span class="hljs-function">(<span class="hljs-params">resolve,reject</span>) =&gt;</span> <span class="hljs-keyword">get</span>(url).then(resolve,reject));
+request('data')
+    .execute(user =&gt; console.log(user),error =&gt; console.error(error));
+</code></pre>
+<p>实现map</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Task = <span class="hljs-function"><span class="hljs-params">execute</span> =&gt;</span> ({
+    execute,
+    <span class="hljs-attr">map</span>: <span class="hljs-function"><span class="hljs-params">fn</span> =&gt;</span> Task(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> execute(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> resolve(fn(x))))
+});
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params">url</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve({ <span class="hljs-string">"code"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"userId"</span>: <span class="hljs-string">"1"</span> });
+}
+<span class="hljs-keyword">const</span> request = <span class="hljs-function"><span class="hljs-params">url</span> =&gt;</span> Task(<span class="hljs-function">(<span class="hljs-params">resolve,reject</span>) =&gt;</span> <span class="hljs-keyword">get</span>(url).then(resolve,reject));
+request('data')
+    .map(x =&gt; x.userId)
+    .execute(user =&gt; console.log(user),error =&gt; console.error(error));
+
+</code></pre>
+<p>实现 flatMap</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Task = <span class="hljs-function"><span class="hljs-params">execute</span> =&gt;</span> ({
+    <span class="hljs-attr">map</span>: <span class="hljs-function"><span class="hljs-params">fn</span> =&gt;</span> Task(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> execute(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> resolve(fn(x)))),
+    <span class="hljs-attr">flatMap</span>: <span class="hljs-function"><span class="hljs-params">fn</span> =&gt;</span> Task(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> execute(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> fn(x).execute(resolve))),
+    execute
+});
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span>(<span class="hljs-params">url</span>) </span>{
+    <span class="hljs-keyword">if</span> (url === <span class="hljs-string">'data'</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve({ <span class="hljs-string">"code"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"userId"</span>: <span class="hljs-string">"1"</span> });
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (url === <span class="hljs-string">"1"</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve({ <span class="hljs-string">"id"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"name"</span>: <span class="hljs-string">"zhangsan"</span>, <span class="hljs-string">"age"</span>: <span class="hljs-number">18</span> });
+    }
+}
+<span class="hljs-keyword">const</span> request = <span class="hljs-function"><span class="hljs-params">url</span> =&gt;</span> Task(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> <span class="hljs-keyword">get</span>(url).then(resolve));
+request('data')
+    .map(x =&gt; x.userId)
+    .flatMap(request)
+    .map(x =&gt; x.name)
+    .execute(user =&gt; console.log(user));
+</code></pre>
+<h2 id="t2210.实际应用">10.实际应用 <a href="#t2210.实际应用"> # </a></h2>
+<h3 id="t2310.1 react">10.1 react <a href="#t2310.1 react"> # </a></h3>
+<ul>
+<li><a href="https://react.docschina.org/docs/components-and-props.html">components</a></li>
+<li><a href="https://redux.js.org/api/compose">redux compose</a></li>
+</ul>
+<h3 id="t2410.2 vue">10.2 vue <a href="#t2410.2 vue"> # </a></h3>
+<ul>
+<li><a href="https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md">function-api</a></li>
+<li>vue2是将mounted，data，computed，watch之类的方法作为一个对象的属性进行导出。</li>
+<li>vue3新增了一个名为setup的入口函数，value, computed, watch, onMounted等方法都需要从外部import</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>count is {{ count }}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>plusOne is {{ plusOne }}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> @<span class="hljs-attr">click</span>=<span class="hljs-string">"increment"</span>&gt;</span>count++<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">import</span> { value, computed, watch, onMounted } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  setup() {
+    <span class="hljs-comment">// reactive state</span>
+    <span class="hljs-keyword">const</span> count = value(<span class="hljs-number">0</span>)
+    <span class="hljs-comment">// computed state</span>
+    <span class="hljs-keyword">const</span> plusOne = computed(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> count.value + <span class="hljs-number">1</span>)
+    <span class="hljs-comment">// method</span>
+    <span class="hljs-keyword">const</span> increment = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { count.value++ }
+    <span class="hljs-comment">// watch</span>
+    watch(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> count.value * <span class="hljs-number">2</span>, val =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`count * 2 is <span class="hljs-subst">${val}</span>`</span>)
+    })
+    <span class="hljs-comment">// lifecycle</span>
+    onMounted(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`mounted`</span>)
+    })
+    <span class="hljs-comment">// expose bindings on render context</span>
+    <span class="hljs-keyword">return</span> {
+      count,
+      plusOne,
+      increment
+    }
+  }
+}
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+
+    

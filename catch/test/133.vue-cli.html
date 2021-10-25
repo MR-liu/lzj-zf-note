@@ -1,0 +1,1660 @@
+
+        <h2 id="t01.准备工作">1.准备工作 <a href="#t01.准备工作"> # </a></h2>
+<h3 id="t11.1 monorepo">1.1 monorepo <a href="#t11.1 monorepo"> # </a></h3>
+<ul>
+<li>monoRepo： 是将所有的模块统一的放在一个主干分支之中管理。</li>
+<li>multiRepo： 将项目分化成为多个模块，并针对每一个模块单独的开辟一个Repo来进行管理。</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/1278ae09f1de08186e9e70fe3bb1c4d1" alt="1278ae09f1de08186e9e70fe3bb1c4d1"></p>
+<h3 id="t21.2 Lerna">1.2 Lerna <a href="#t21.2 Lerna"> # </a></h3>
+<ul>
+<li>Lerna是一个管理多个 npm 模块的工具,优化维护多包的工作流，解决多个包互相依赖，且发布需要手动维护多个包的问题</li>
+</ul>
+<h4 id="t31.2.1 安装">1.2.1 安装 <a href="#t31.2.1 安装"> # </a></h4>
+<pre><code class="lang-js">npm i lerna -g
+</code></pre>
+<h4 id="t41.2.2 初始化">1.2.2 初始化 <a href="#t41.2.2 初始化"> # </a></h4>
+<pre><code class="lang-js">lerna init
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">命令</th>
+<th style="text-align:left">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">lerna bootstrap</td>
+<td style="text-align:left">安装依赖</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna clean</td>
+<td style="text-align:left">删除各个包下的node_modules</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna init</td>
+<td style="text-align:left">创建新的lerna库</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna list</td>
+<td style="text-align:left">查看本地包列表</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna changed</td>
+<td style="text-align:left">显示自上次release tag以来有修改的包， 选项通 list</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna diff</td>
+<td style="text-align:left">显示自上次release tag以来有修改的包的差异， 执行 git diff</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna exec</td>
+<td style="text-align:left">在每个包目录下执行任意命令</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna run</td>
+<td style="text-align:left">执行每个包package.json中的脚本命令</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna add</td>
+<td style="text-align:left">添加一个包的版本为各个包的依赖</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna import</td>
+<td style="text-align:left">引入package</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna link</td>
+<td style="text-align:left">链接互相引用的库</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna create</td>
+<td style="text-align:left">新建package</td>
+</tr>
+<tr>
+<td style="text-align:left">lerna publish</td>
+<td style="text-align:left">发布</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t51.2.3 文件">1.2.3 文件 <a href="#t51.2.3 文件"> # </a></h4>
+<h5 id="t61.2.3.1 package.json">1.2.3.1 package.json <a href="#t61.2.3.1 package.json"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"root"</span>,
+  <span class="hljs-attr">"private"</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"lerna"</span>: <span class="hljs-string">"^4.0.0"</span>
+  }
+}
+</code></pre>
+<h5 id="t71.2.3.2 lerna.json">1.2.3.2 lerna.json <a href="#t71.2.3.2 lerna.json"> # </a></h5>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"packages"</span>: [
+    <span class="hljs-string">"packages/*"</span>
+  ],
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>
+}
+</code></pre>
+<h5 id="t81.2.3.3 .gitignore">1.2.3.3 .gitignore <a href="#t81.2.3.3 .gitignore"> # </a></h5>
+<pre><code class="lang-yaml"><span class="hljs-string">node_modules</span>
+<span class="hljs-string">.DS_Store</span>
+<span class="hljs-string">design</span>
+<span class="hljs-string">*.log</span>
+<span class="hljs-string">packages/test</span>
+<span class="hljs-string">dist</span>
+<span class="hljs-string">temp</span>
+<span class="hljs-string">.vuerc</span>
+<span class="hljs-string">.version</span>
+<span class="hljs-string">.versions</span>
+<span class="hljs-string">.changelog</span>
+</code></pre>
+<h4 id="t91.2.4 yarn workspace">1.2.4 yarn workspace <a href="#t91.2.4 yarn workspace"> # </a></h4>
+<ul>
+<li>yarn workspace允许我们使用 monorepo 的形式来管理项目</li>
+<li>在安装 node_modules 的时候它不会安装到每个子项目的 node_modules 里面，而是直接安装到根目录下面，这样每个子项目都可以读取到根目录的 node_modules</li>
+<li>整个项目只有根目录下面会有一份 yarn.lock 文件。子项目也会被 link 到 node_modules 里面，这样就允许我们就可以直接用 import 导入对应的项目</li>
+<li>yarn.lock文件是自动生成的,也完全Yarn来处理.yarn.lock锁定你安装的每个依赖项的版本，这可以确保你不会意外获得不良依赖</li>
+</ul>
+<h6 id="t101.2.4.1 package.json">1.2.4.1 package.json <a href="#t101.2.4.1 package.json"> # </a></h6>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+  "name": "root",
+  "private": true,
+<span class="hljs-addition">+  "workspaces": [</span>
+<span class="hljs-addition">+    "packages/*"</span>
+<span class="hljs-addition">+  ],</span>
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
+</code></pre>
+<h6 id="t111.2.4.2 lerna.json">1.2.4.2 lerna.json <a href="#t111.2.4.2 lerna.json"> # </a></h6>
+<p>lerna.json</p>
+<pre><code class="lang-diff">{
+  "packages": [
+    "packages/*"
+  ],
+  "version": "1.0.0",
+<span class="hljs-addition">+ "useWorkspaces": true,</span>
+<span class="hljs-addition">+ "npmClient": "yarn"</span>
+}
+</code></pre>
+<h6 id="t121.2.4.3 添加依赖">1.2.4.3 添加依赖 <a href="#t121.2.4.3 添加依赖"> # </a></h6>
+<ul>
+<li><a href="https://classic.yarnpkg.com/en/docs/cli">yarnpkg</a></li>
+<li><a href="https://github.com/lerna/lerna#readme">lerna</a></li>
+</ul>
+<p>设置加速镜像</p>
+<pre><code class="lang-js">yarn config <span class="hljs-keyword">set</span> registry http://registry.npm.taobao.org
+ npm config <span class="hljs-keyword">set</span> registry https://registry.npm.taobao.org
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">作用</th>
+<th style="text-align:left">命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">查看工作空间信息</td>
+<td style="text-align:left">yarn workspaces info</td>
+</tr>
+<tr>
+<td style="text-align:left">给根空间添加依赖</td>
+<td style="text-align:left">yarn add chalk cross-spawn fs-extra --ignore-workspace-root-check</td>
+</tr>
+<tr>
+<td style="text-align:left">给某个项目添加依赖</td>
+<td style="text-align:left">yarn workspace create-react-app3 add commander</td>
+</tr>
+<tr>
+<td style="text-align:left">删除所有的 node_modules</td>
+<td style="text-align:left">lerna clean 等于 yarn workspaces run clean</td>
+</tr>
+<tr>
+<td style="text-align:left">安装和link</td>
+<td style="text-align:left">yarn install 等于 lerna bootstrap --npm-client yarn --use-workspaces</td>
+</tr>
+<tr>
+<td style="text-align:left">重新获取所有的 node_modules</td>
+<td style="text-align:left">yarn install --force</td>
+</tr>
+<tr>
+<td style="text-align:left">查看缓存目录</td>
+<td style="text-align:left">yarn cache dir</td>
+</tr>
+<tr>
+<td style="text-align:left">清除本地缓存</td>
+<td style="text-align:left">yarn cache clean</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t131.2.5 创建子项目">1.2.5 创建子项目 <a href="#t131.2.5 创建子项目"> # </a></h4>
+<pre><code class="lang-js">lerna create zhang-cli
+lerna create  zhang-cli-shared-utils
+</code></pre>
+<h5 id="t141.2.5.1 zhang-cli">1.2.5.1 zhang-cli <a href="#t141.2.5.1 zhang-cli"> # </a></h5>
+<h6 id="t151.2.5.1.1 package.json">1.2.5.1.1 package.json <a href="#t151.2.5.1.1 package.json"> # </a></h6>
+<p>packages\zhang-cli\bin\vue.js</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"zhang-cli"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">"zhang-cli"</span>,
+  <span class="hljs-attr">"author"</span>: <span class="hljs-string">"zhangrenyang &lt;zhang_renyang@126.com&gt;"</span>,
+  <span class="hljs-attr">"homepage"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"license"</span>: <span class="hljs-string">"MIT"</span>,
+  <span class="hljs-attr">"main"</span>: <span class="hljs-string">"bin/vue.js"</span>
+}
+</code></pre>
+<h6 id="t161.2.5.1.2 vue.js">1.2.5.1.2 vue.js <a href="#t161.2.5.1.2 vue.js"> # </a></h6>
+<p>packages\zhang-cli\bin\vue.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'vue cli'</span>);
+</code></pre>
+<h5 id="t171.2.5.2 zhang-cli-shared-utils">1.2.5.2 zhang-cli-shared-utils <a href="#t171.2.5.2 zhang-cli-shared-utils"> # </a></h5>
+<h6 id="t181.2.5.2.1 package.json">1.2.5.2.1 package.json <a href="#t181.2.5.2.1 package.json"> # </a></h6>
+<p>packages\zhang-cli-shared-utils\package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"zhang-cli-shared-utils"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">"zhang-cli-shared-utils"</span>,
+  <span class="hljs-attr">"author"</span>: <span class="hljs-string">"zhangrenyang &lt;zhang_renyang@126.com&gt;"</span>,
+  <span class="hljs-attr">"homepage"</span>: <span class="hljs-string">""</span>,
+  <span class="hljs-attr">"license"</span>: <span class="hljs-string">"MIT"</span>,
+  <span class="hljs-attr">"main"</span>: <span class="hljs-string">"index.js"</span>
+}
+</code></pre>
+<h6 id="t191.2.5.2.2 index.js">1.2.5.2.2 index.js <a href="#t191.2.5.2.2 index.js"> # </a></h6>
+<p>packages\zhang-cli-shared-utils\index.js</p>
+<pre><code class="lang-js">
+</code></pre>
+<h4 id="t201.2.6 创建软链接">1.2.6 创建软链接 <a href="#t201.2.6 创建软链接"> # </a></h4>
+<pre><code class="lang-sh">yarn
+<span class="hljs-built_in">cd</span> packages/zhang-cli
+npm link
+npm root -g
+zhang-cli
+</code></pre>
+<h4 id="t211.2.7 create命令">1.2.7 create命令 <a href="#t211.2.7 create命令"> # </a></h4>
+<pre><code class="lang-diff">{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  },
+  "scripts": {
+<span class="hljs-addition">+   "create": "node ./packages/zhang-cli/bin/vue.js create hello1"</span>
+  }
+}
+</code></pre>
+<h4 id="t221.2.8 调试命令">1.2.8 调试命令 <a href="#t221.2.8 调试命令"> # </a></h4>
+<p>.vscode\launch.json</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.2.0"</span>,
+    <span class="hljs-attr">"configurations"</span>: [
+        {
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"node"</span>,
+            <span class="hljs-attr">"request"</span>: <span class="hljs-string">"launch"</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"vue-cli"</span>,
+            <span class="hljs-attr">"cwd"</span>:<span class="hljs-string">"${workspaceFolder}"</span>,
+            <span class="hljs-attr">"runtimeExecutable"</span>: <span class="hljs-string">"npm"</span>,
+            <span class="hljs-attr">"runtimeArgs"</span>: [
+                <span class="hljs-string">"run"</span>,
+                <span class="hljs-string">"create"</span>
+            ],
+            <span class="hljs-attr">"port"</span>:<span class="hljs-number">9229</span>,
+            <span class="hljs-attr">"autoAttachChildProcesses"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"stopOnEntry"</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">"skipFiles"</span>: [
+                <span class="hljs-string">"&lt;node_internals&gt;/**"</span>
+            ]
+        }
+    ]
+}
+</code></pre>
+<h3 id="t231.3 安装依赖">1.3 安装依赖 <a href="#t231.3 安装依赖"> # </a></h3>
+<pre><code class="lang-js">npm config <span class="hljs-keyword">set</span> registry=https://registry.npm.taobao.org
+yarn config <span class="hljs-keyword">set</span> registry https://registry.npm.taobao.org
+
+cd packages/zhang-cli-shared-utils
+yarn workspace zhang-cli-shared-utils add  chalk execa
+
+cd packages/zhang-cli
+yarn workspace zhang-cli add  zhang-cli-shared-utils commander inquirer execa chalk ejs globby  lodash.clonedeep fs-extra ora isbinaryfile 
+</code></pre>
+<h3 id="t241.4 lerna vs yarn">1.4 lerna vs yarn <a href="#t241.4 lerna vs yarn"> # </a></h3>
+<ul>
+<li>两者很多功能是等价的</li>
+<li><code>yarn</code>用来处理依赖，<code>lerna</code>用于初始化和发布</li>
+</ul>
+<h3 id="t251.4 commander.js">1.4 commander.js <a href="#t251.4 commander.js"> # </a></h3>
+<ul>
+<li><a href="https://github.com/tj/commander.js/blob/master/Readme_zh-CN.md">commander</a> 是一款强大的命令行框架，提供了用户命令行输入和参数解析功能</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">const</span> program = <span class="hljs-built_in">require</span>(<span class="hljs-string">'commander'</span>);
+program
+    .version(<span class="hljs-string">`zhang-cli 0.0.0}`</span>)
+    .usage(<span class="hljs-string">'&lt;command&gt; [options]'</span>)
+
+program
+    .command(<span class="hljs-string">'create &lt;app-name&gt;'</span>)
+    .description(<span class="hljs-string">'create a new project powered by vue-cli-service'</span>)
+    .action(<span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(name);
+    })
+
+program.parse(process.argv)
+</code></pre>
+<pre><code class="lang-js">node <span class="hljs-number">1.2</span>.commander.js
+<span class="hljs-attr">Usage</span>: <span class="hljs-number">1.2</span>.commander &lt;command&gt; [options]
+
+<span class="hljs-attr">Options</span>:
+  -V, --version      output the version number
+  -h, --help         display help <span class="hljs-keyword">for</span> command
+
+<span class="hljs-attr">Commands</span>:
+  create &lt;app-name&gt;  create a <span class="hljs-keyword">new</span> project powered by vue-cli-service
+  help [command]     display help <span class="hljs-keyword">for</span> command
+
+node <span class="hljs-number">1.2</span>.commander.js create hello  
+</code></pre>
+<h3 id="t261.5 Inquirer.js">1.5 Inquirer.js <a href="#t261.5 Inquirer.js"> # </a></h3>
+<ul>
+<li><a href="https://github.com/SBoudrias/Inquirer.js">Inquirer</a>是一个交互式命令行工具</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> inquirer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'inquirer'</span>)
+<span class="hljs-keyword">const</span> isManualMode = <span class="hljs-function"><span class="hljs-params">answers</span> =&gt;</span> answers.preset === <span class="hljs-string">'__manual__'</span>;
+<span class="hljs-keyword">let</span> defaultPreset = {
+    <span class="hljs-attr">useConfigFiles</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">cssPreprocessor</span>: <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">plugins</span>: {
+        <span class="hljs-string">'@vue/cli-plugin-babel'</span>: {},
+        <span class="hljs-string">'@vue/cli-plugin-eslint'</span>: {
+            <span class="hljs-attr">config</span>: <span class="hljs-string">'base'</span>,
+            <span class="hljs-attr">lintOn</span>: [<span class="hljs-string">'save'</span>]
+        }
+    }
+}
+<span class="hljs-keyword">let</span> presets = {
+    <span class="hljs-string">'default'</span>: <span class="hljs-built_in">Object</span>.assign({ <span class="hljs-attr">vueVersion</span>: <span class="hljs-string">'2'</span> }, defaultPreset),
+    <span class="hljs-string">'__default_vue_3__'</span>: <span class="hljs-built_in">Object</span>.assign({ <span class="hljs-attr">vueVersion</span>: <span class="hljs-string">'3'</span> }, defaultPreset)
+}
+<span class="hljs-keyword">const</span> presetChoices = <span class="hljs-built_in">Object</span>.entries(presets).map(<span class="hljs-function">(<span class="hljs-params">[name, preset]</span>) =&gt;</span> {
+    <span class="hljs-keyword">let</span> displayName = name
+    <span class="hljs-keyword">if</span> (name === <span class="hljs-string">'default'</span>) {
+        displayName = <span class="hljs-string">'Default'</span>
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (name === <span class="hljs-string">'__default_vue_3__'</span>) {
+        displayName = <span class="hljs-string">'Default (Vue 3)'</span>
+    }
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">`<span class="hljs-subst">${displayName}</span>`</span>,
+        <span class="hljs-attr">value</span>: name
+    }
+})
+<span class="hljs-keyword">const</span> presetPrompt = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'preset'</span>,
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'list'</span>,
+    <span class="hljs-attr">message</span>: <span class="hljs-string">`Please pick a preset:`</span>,
+    <span class="hljs-attr">choices</span>: [
+        ...presetChoices,
+        {
+            <span class="hljs-attr">name</span>: <span class="hljs-string">'Manually select features'</span>,
+            <span class="hljs-attr">value</span>: <span class="hljs-string">'__manual__'</span>
+        }
+    ]
+}
+<span class="hljs-keyword">let</span> features = [
+    <span class="hljs-string">'vueVersion'</span>,
+    <span class="hljs-string">'babel'</span>,
+    <span class="hljs-string">'typescript'</span>,
+    <span class="hljs-string">'pwa'</span>,
+    <span class="hljs-string">'router'</span>,
+    <span class="hljs-string">'vuex'</span>,
+    <span class="hljs-string">'cssPreprocessors'</span>,
+    <span class="hljs-string">'linter'</span>,
+    <span class="hljs-string">'unit'</span>,
+    <span class="hljs-string">'e2e'</span>
+];
+<span class="hljs-keyword">const</span> featurePrompt = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'features'</span>,
+    <span class="hljs-attr">when</span>: isManualMode,
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'checkbox'</span>,
+    <span class="hljs-attr">message</span>: <span class="hljs-string">'Check the features needed for your project:'</span>,
+    <span class="hljs-attr">choices</span>: features,
+    <span class="hljs-attr">pageSize</span>: <span class="hljs-number">10</span>
+}
+<span class="hljs-keyword">const</span> prompts = [
+    presetPrompt,
+    featurePrompt
+]
+
+;(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+ <span class="hljs-keyword">let</span> result = <span class="hljs-keyword">await</span> inquirer.prompt(prompts);
+ <span class="hljs-built_in">console</span>.log(result);
+})();
+</code></pre>
+<h3 id="t271.6 execa">1.6 execa <a href="#t271.6 execa"> # </a></h3>
+<ul>
+<li>execa 是可以调用 shell 和本地外部程序</li>
+<li>它会启动子进程执行，是对<code>child_process.exec</code>的封装</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> execa = <span class="hljs-built_in">require</span>(<span class="hljs-string">'execa'</span>);
+
+<span class="hljs-function">(<span class="hljs-params"><span class="hljs-keyword">async</span> (</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> {stdout} = <span class="hljs-keyword">await</span> execa(<span class="hljs-string">'echo'</span>, [<span class="hljs-string">'hello'</span>]);
+    <span class="hljs-built_in">console</span>.log(stdout);
+})();
+</code></pre>
+<h3 id="t281.7 chalk">1.7 chalk <a href="#t281.7 chalk"> # </a></h3>
+<ul>
+<li><a href="https://github.com/chalk/chalk">chalk</a>可以修改控制台字符串的样式，包括字体样式、颜色以及背景颜色等</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>);
+<span class="hljs-built_in">console</span>.log(chalk.blue(<span class="hljs-string">'Hello world!'</span>));
+</code></pre>
+<h3 id="t291.8 ejs">1.8 ejs <a href="#t291.8 ejs"> # </a></h3>
+<ul>
+<li><a href="https://ejs.bootcss.com">ejs</a>是高效的嵌入式 JavaScript 模板引擎</li>
+<li><a href="https://www.npmjs.com/package/slash">slash</a>将Windows反斜杠路径转换为斜杠路径，如<code>foo\\bar</code>➔ <code>foo/bar</code></li>
+<li><a href="https://www.npmjs.com/package/globby">globby</a>是用于模式匹配目录文件的</li>
+</ul>
+<h4 id="t301.8.1 main.js">1.8.1 main.js <a href="#t301.8.1 main.js"> # </a></h4>
+<p>template\main.js</p>
+<pre><code class="lang-js">&lt;%_ <span class="hljs-keyword">if</span> (rootOptions.vueVersion === <span class="hljs-string">'3'</span>) { _%&gt;
+  <span class="hljs-keyword">import</span> { createApp } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+  <span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App.vue'</span>
+  createApp(App).mount(<span class="hljs-string">'#app'</span>)
+&lt;%_ } <span class="hljs-keyword">else</span> { _%&gt;
+  <span class="hljs-keyword">import</span> Vue <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+  <span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App.vue'</span>
+  Vue.config.productionTip = <span class="hljs-literal">false</span>
+  <span class="hljs-keyword">new</span> Vue({
+    <span class="hljs-attr">render</span>: <span class="hljs-function"><span class="hljs-params">h</span> =&gt;</span> h(App),
+  }).$mount(<span class="hljs-string">'#app'</span>)
+&lt;%_ } _%&gt;
+</code></pre>
+<h4 id="t311.8.2 components">1.8.2 components <a href="#t311.8.2 components"> # </a></h4>
+<p>doc\template\components</p>
+<pre><code class="lang-js">&lt;template&gt;
+  &lt;h1&gt;HelloWorld&lt;/h1&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: 'HelloWorld'
+}
+&lt;/script&gt;
+</code></pre>
+<h4 id="t321.8.3 ejs.js">1.8.3 ejs.js <a href="#t321.8.3 ejs.js"> # </a></h4>
+<p>doc\1.7.ejs.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> ejs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ejs'</span>);
+<span class="hljs-keyword">const</span> globby = <span class="hljs-built_in">require</span>(<span class="hljs-string">'globby'</span>)
+<span class="hljs-keyword">const</span> slash = <span class="hljs-built_in">require</span>(<span class="hljs-string">'slash'</span>)
+<span class="hljs-keyword">let</span> source = path.join(__dirname, <span class="hljs-string">'template'</span>);
+;(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> _files = <span class="hljs-keyword">await</span> globby([<span class="hljs-string">'**/*'</span>], { <span class="hljs-attr">cwd</span>: source })
+    <span class="hljs-keyword">let</span> files = {};
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> rawPath <span class="hljs-keyword">of</span> _files) {
+        <span class="hljs-keyword">const</span> sourcePath = slash(path.resolve(source, rawPath))
+        <span class="hljs-keyword">const</span> template = fs.readFileSync(sourcePath, <span class="hljs-string">'utf8'</span>)
+        <span class="hljs-keyword">const</span> content = ejs.render(template, {
+            <span class="hljs-attr">rootOptions</span>: { <span class="hljs-attr">vueVersion</span>: <span class="hljs-string">'2'</span> }
+        })
+        files[sourcePath] = content;
+    }
+    <span class="hljs-built_in">console</span>.log(files);
+})();
+
+</code></pre>
+<h3 id="t331.9 isbinaryfile">1.9 isbinaryfile <a href="#t331.9 isbinaryfile"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/isbinaryfile">isbinaryfile</a>可以检测一个文件是否是二进制文件</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> { isBinaryFileSync } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'isbinaryfile'</span>);
+<span class="hljs-keyword">let</span> logo = path.join(__dirname,<span class="hljs-string">'template/assets/logo.png'</span>);
+<span class="hljs-keyword">let</span> isBinary = isBinaryFileSync(logo);
+<span class="hljs-built_in">console</span>.log(isBinary);
+<span class="hljs-keyword">let</span> main = path.join(__dirname,<span class="hljs-string">'template/main.js'</span>);
+isBinary = isBinaryFileSync(main);
+<span class="hljs-built_in">console</span>.log(isBinary);
+</code></pre>
+<h3 id="t341.10 ora">1.10 ora <a href="#t341.10 ora"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/ora">ora</a>主要用来实现node.js命令行环境的loading效果，和显示各种状态的图标等</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> ora = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ora'</span>)
+<span class="hljs-keyword">const</span> spinner = ora()
+
+exports.logWithSpinner = <span class="hljs-function">(<span class="hljs-params">msg</span>) =&gt;</span> {
+    spinner.text = msg
+    spinner.start();
+}
+
+exports.stopSpinner = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    spinner.stop();
+}
+
+exports.logWithSpinner(<span class="hljs-string">'npm install'</span>);
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    exports.stopSpinner();
+},<span class="hljs-number">3000</span>);
+</code></pre>
+<h2 id="t352.核心概念">2.核心概念 <a href="#t352.核心概念"> # </a></h2>
+<ul>
+<li><a href="https://cli.vuejs.org/zh/guide/">@vue/cli</a>是一个基于 Vue.js 进行快速开发的完整系统</li>
+</ul>
+<h3 id="t362.1 插件">2.1 插件 <a href="#t362.1 插件"> # </a></h3>
+<ul>
+<li><a href="https://cli.vuejs.org/zh/guide/plugins-and-presets.html">插件</a></li>
+<li>Vue CLI 使用了一套基于插件的架构。如果你查阅一个新创建项目的 package.json，就会发现依赖都是以 @vue/cli-plugin- 开头的。插件可以修改 webpack 的内部配置，也可以向 <code>vue-cli-service</code> 注入命令。在项目创建的过程中，绝大部分列出的特性都是通过插件来实现的</li>
+<li>每个 CLI 插件都会包含一个 (用来创建文件的) 生成器和一个 (用来调整 webpack 核心配置和注入命令的) 运行时插件</li>
+<li>官方插件格式<code>@vue/cli-plugin-eslint</code>,社区插件<code>vue-cli-plugin-apollo</code>,指定的 scope 使用第三方插件<code>@foo/vue-cli-plugin-bar</code></li>
+</ul>
+<h3 id="t372.3 预设">2.3 预设 <a href="#t372.3 预设"> # </a></h3>
+<ul>
+<li>一个 Vue CLI preset 是一个包含创建新项目所需预定义选项和插件的 JSON 对象，让用户无需在命令提示中选择它们</li>
+<li>在 vue create 过程中保存的 preset 会被放在你的 home 目录下的一个配置文件中 (~/.vuerc)。你可以通过直接编辑这个文件来调整、添加、删除保存好的 preset</li>
+<li>Preset 的数据会被插件生成器用来生成相应的项目文件</li>
+</ul>
+<pre><code class="lang-js">exports.defaultPreset = {
+  <span class="hljs-attr">useConfigFiles</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">cssPreprocessor</span>: <span class="hljs-literal">undefined</span>,
+  <span class="hljs-attr">plugins</span>: {
+    <span class="hljs-string">'@vue/cli-plugin-babel'</span>: {},
+    <span class="hljs-string">'@vue/cli-plugin-eslint'</span>: {
+      <span class="hljs-attr">config</span>: <span class="hljs-string">'base'</span>,
+      <span class="hljs-attr">lintOn</span>: [<span class="hljs-string">'save'</span>]
+    }
+  }
+}
+</code></pre>
+<h3 id="t382.4 特性">2.4 特性 <a href="#t382.4 特性"> # </a></h3>
+<ul>
+<li>在手工模式下，我们可以自由选择以下特性<ul>
+<li>vueVersion</li>
+<li>babel</li>
+<li>typescript</li>
+<li>pwa</li>
+<li>router</li>
+<li>vuex</li>
+<li>cssPreprocessors</li>
+<li>linter</li>
+<li>unit</li>
+<li>e2e</li>
+</ul>
+</li>
+<li>选择不同的特性会添加不同的插件，不同的插件会生成不同的文件和修改项目的配置</li>
+</ul>
+<h3 id="t392.5 create">2.5 create <a href="#t392.5 create"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/589f4d15c7d8574f847e57ef0e0d2191" alt="589f4d15c7d8574f847e57ef0e0d2191"></p>
+<h2 id="t403.参数解析">3.参数解析 <a href="#t403.参数解析"> # </a></h2>
+<h3 id="t413.1 vue.js">3.1 vue.js <a href="#t413.1 vue.js"> # </a></h3>
+<p>packages\zhang-cli\bin\vue.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">const</span> program = <span class="hljs-built_in">require</span>(<span class="hljs-string">'commander'</span>);
+program
+    .version(<span class="hljs-string">`@vue/zhang-cli <span class="hljs-subst">${<span class="hljs-built_in">require</span>(<span class="hljs-string">'../package'</span>).version}</span>`</span>)
+    .usage(<span class="hljs-string">'&lt;command&gt; [options]'</span>)
+
+program
+    .command(<span class="hljs-string">'create &lt;app-name&gt;'</span>)
+    .description(<span class="hljs-string">'create a new project powered by vue-cli-service'</span>)
+    .action(<span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> {
+        <span class="hljs-built_in">require</span>(<span class="hljs-string">'../lib/create'</span>)(name)
+    })
+
+program.parse(process.argv)
+</code></pre>
+<h3 id="t423.2 create.js">3.2 create.js <a href="#t423.2 create.js"> # </a></h3>
+<p>packages\zhang-\lib\create.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span>(<span class="hljs-params">projectName, options</span>) </span>{
+  <span class="hljs-keyword">const</span> cwd = process.cwd();
+  <span class="hljs-keyword">const</span> name = projectName;
+  <span class="hljs-keyword">const</span> targetDir = path.resolve(cwd, projectName);
+  <span class="hljs-built_in">console</span>.log(name);
+  <span class="hljs-built_in">console</span>.log(targetDir);
+}
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> create(...args).catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(err);
+  })
+}
+</code></pre>
+<h2 id="t434.获取预设">4.获取预设 <a href="#t434.获取预设"> # </a></h2>
+<h3 id="t444.1 create.js">4.1 create.js <a href="#t444.1 create.js"> # </a></h3>
+<p>packages\zhang-cli\lib\create.js</p>
+<pre><code class="lang-diff">const path = require('path');
+<span class="hljs-addition">+const Creator = require('./Creator');</span>
+<span class="hljs-addition">+const { getPromptModules } = require('./util/createTools')</span>
+async function create(projectName) {
+  const cwd = process.cwd();
+  const name = projectName;
+  const targetDir = path.resolve(cwd, projectName);
+<span class="hljs-addition">+ const promptModules = getPromptModules();</span>
+<span class="hljs-addition">+ const creator = new Creator(name, targetDir,promptModules);</span>
+<span class="hljs-addition">+ await creator.create();</span>
+}
+
+module.exports = (...args) =&gt; {
+  return create(...args).catch(err =&gt; {
+    console.log(err);
+  })
+}
+</code></pre>
+<h3 id="t454.2 options.js">4.2 options.js <a href="#t454.2 options.js"> # </a></h3>
+<p>packages\zhang-cli\lib\options.js</p>
+<pre><code class="lang-js">exports.defaultPreset = {
+  <span class="hljs-attr">useConfigFiles</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">cssPreprocessor</span>: <span class="hljs-literal">undefined</span>,
+  <span class="hljs-attr">plugins</span>: {
+    <span class="hljs-string">'@vue/cli-plugin-babel'</span>: {},
+    <span class="hljs-string">'@vue/cli-plugin-eslint'</span>: {
+      <span class="hljs-attr">config</span>: <span class="hljs-string">'base'</span>,
+      <span class="hljs-attr">lintOn</span>: [<span class="hljs-string">'save'</span>]
+    }
+  }
+}
+
+exports.defaults = {
+  <span class="hljs-attr">presets</span>: {
+    <span class="hljs-string">'default'</span>: <span class="hljs-built_in">Object</span>.assign({ <span class="hljs-attr">vueVersion</span>: <span class="hljs-string">'2'</span> }, exports.defaultPreset),
+    <span class="hljs-string">'__default_vue_3__'</span>: <span class="hljs-built_in">Object</span>.assign({ <span class="hljs-attr">vueVersion</span>: <span class="hljs-string">'3'</span> }, exports.defaultPreset)
+  }
+}
+</code></pre>
+<h3 id="t464.3 PromptModuleAPI.js">4.3 PromptModuleAPI.js <a href="#t464.3 PromptModuleAPI.js"> # </a></h3>
+<p>packages\zhang-cli\lib\PromptModuleAPI.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PromptModuleAPI</span> </span>{
+    <span class="hljs-keyword">constructor</span>(creator) {
+        <span class="hljs-keyword">this</span>.creator = creator
+    }
+
+    injectFeature(feature) {
+        <span class="hljs-keyword">this</span>.creator.featurePrompt.choices.push(feature)
+    }
+
+    injectPrompt(prompt) {
+        <span class="hljs-keyword">this</span>.creator.injectedPrompts.push(prompt)
+    }
+
+    onPromptComplete(cb) {
+        <span class="hljs-keyword">this</span>.creator.promptCompleteCbs.push(cb)
+    }
+}
+<span class="hljs-built_in">module</span>.exports = PromptModuleAPI;
+
+</code></pre>
+<h3 id="t474.4 createTools.js">4.4 createTools.js <a href="#t474.4 createTools.js"> # </a></h3>
+<p>packages\zhang-cli\lib\util\createTools.js</p>
+<pre><code class="lang-js">exports.getPromptModules = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> [
+        <span class="hljs-string">'vueVersion'</span>
+    ].map(<span class="hljs-function"><span class="hljs-params">file</span> =&gt;</span> <span class="hljs-built_in">require</span>(<span class="hljs-string">`../promptModules/<span class="hljs-subst">${file}</span>`</span>))
+}
+
+</code></pre>
+<h3 id="t484.5 vueVersion.js">4.5 vueVersion.js <a href="#t484.5 vueVersion.js"> # </a></h3>
+<p>packages\zhang-cli\lib\promptModules\vueVersion.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">cli</span> =&gt;</span> {
+  <span class="hljs-comment">//cli.injectFeature 是注入 featurePrompt，即初始化项目时选择 babel，typescript，pwa 等等</span>
+  cli.injectFeature({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'Choose Vue version'</span>,
+    <span class="hljs-attr">value</span>: <span class="hljs-string">'vueVersion'</span>,
+    <span class="hljs-attr">description</span>: <span class="hljs-string">'Choose a version of Vue.js that you want to start the project with'</span>,
+    <span class="hljs-attr">checked</span>: <span class="hljs-literal">true</span>
+  })
+  <span class="hljs-comment">//cli.injectPrompt 是根据选择的 featurePrompt 然后注入对应的 prompt，当选择了 unit，接下来会有以下的 prompt，选择 Mocha + Chai 还是 Jest</span>
+  cli.injectPrompt({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'vueVersion'</span>,
+    <span class="hljs-attr">when</span>: <span class="hljs-function"><span class="hljs-params">answers</span> =&gt;</span> answers.features.includes(<span class="hljs-string">'vueVersion'</span>),
+    <span class="hljs-attr">message</span>: <span class="hljs-string">'Choose a version of Vue.js that you want to start the project with'</span>,
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'list'</span>,
+    <span class="hljs-attr">choices</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'2.x'</span>,
+        <span class="hljs-attr">value</span>: <span class="hljs-string">'2'</span>
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'3.x'</span>,
+        <span class="hljs-attr">value</span>: <span class="hljs-string">'3'</span>
+      }
+    ],
+    <span class="hljs-attr">default</span>: <span class="hljs-string">'2'</span>
+  })
+  <span class="hljs-comment">//cli.onPromptComplete 就是一个回调，会根据选择来添加对应的插件， 当选择了 mocha ，那么就会添加 @vue/cli-plugin-unit-mocha 插件</span>
+  cli.onPromptComplete(<span class="hljs-function">(<span class="hljs-params">answers, options</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (answers.vueVersion) {
+      options.vueVersion = answers.vueVersion
+    }
+  })
+}
+
+</code></pre>
+<h3 id="t494.6 Creator.js">4.6 Creator.js <a href="#t494.6 Creator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Creator.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { defaults } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./options'</span>);
+<span class="hljs-keyword">const</span> PromptModuleAPI = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./PromptModuleAPI'</span>);
+<span class="hljs-keyword">const</span> inquirer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'inquirer'</span>)
+<span class="hljs-keyword">const</span> isManualMode = <span class="hljs-function"><span class="hljs-params">answers</span> =&gt;</span> answers.preset === <span class="hljs-string">'__manual__'</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Creator</span> </span>{
+    <span class="hljs-keyword">constructor</span>(name, context, promptModules) {
+        <span class="hljs-keyword">this</span>.name = name;
+        <span class="hljs-keyword">this</span>.context = process.env.VUE_CLI_CONTEXT = context;
+        <span class="hljs-keyword">const</span> { presetPrompt, featurePrompt } = <span class="hljs-keyword">this</span>.resolveIntroPrompts();
+        <span class="hljs-keyword">this</span>.presetPrompt = presetPrompt;
+        <span class="hljs-keyword">this</span>.featurePrompt = featurePrompt;
+        <span class="hljs-keyword">this</span>.injectedPrompts = []
+        <span class="hljs-keyword">this</span>.promptCompleteCbs = []
+        <span class="hljs-keyword">const</span> promptAPI = <span class="hljs-keyword">new</span> PromptModuleAPI(<span class="hljs-keyword">this</span>)
+        promptModules.forEach(<span class="hljs-function"><span class="hljs-params">m</span> =&gt;</span> m(promptAPI))
+    }
+    <span class="hljs-keyword">async</span> create() {
+        <span class="hljs-keyword">let</span> preset = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.promptAndResolvePreset()
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'preset'</span>, preset);
+    }
+    resolveFinalPrompts() {
+        <span class="hljs-keyword">this</span>.injectedPrompts.forEach(<span class="hljs-function"><span class="hljs-params">prompt</span> =&gt;</span> {
+            <span class="hljs-keyword">const</span> originalWhen = prompt.when || <span class="hljs-function">(<span class="hljs-params">(</span>) =&gt;</span> <span class="hljs-literal">true</span>)
+            prompt.when = <span class="hljs-function"><span class="hljs-params">answers</span> =&gt;</span> {
+                <span class="hljs-keyword">return</span> isManualMode(answers) &amp;&amp; originalWhen(answers)
+            }
+        })
+        <span class="hljs-keyword">const</span> prompts = [
+            <span class="hljs-keyword">this</span>.presetPrompt,
+            <span class="hljs-keyword">this</span>.featurePrompt,
+            ...this.injectedPrompts,
+        ]
+        <span class="hljs-keyword">return</span> prompts
+    }
+    <span class="hljs-keyword">async</span> promptAndResolvePreset(answers = <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">if</span> (!answers) {
+            answers = <span class="hljs-keyword">await</span> inquirer.prompt(<span class="hljs-keyword">this</span>.resolveFinalPrompts())
+        }
+        <span class="hljs-keyword">let</span> preset;
+        <span class="hljs-keyword">if</span> (answers.preset &amp;&amp; answers.preset !== <span class="hljs-string">'__manual__'</span>) {
+            preset = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.resolvePreset(answers.preset)
+        } <span class="hljs-keyword">else</span> {
+            preset = {
+                <span class="hljs-attr">plugins</span>: {}
+            }
+            answers.features = answers.features || []
+            <span class="hljs-keyword">this</span>.promptCompleteCbs.forEach(<span class="hljs-function"><span class="hljs-params">cb</span> =&gt;</span> cb(answers, preset))
+        }
+        <span class="hljs-keyword">return</span> preset
+    }
+    <span class="hljs-keyword">async</span> resolvePreset (name) {
+        <span class="hljs-keyword">const</span> savedPresets = <span class="hljs-keyword">this</span>.getPresets()
+        <span class="hljs-keyword">return</span> savedPresets[name];
+    }
+    getPresets() {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign({}, defaults.presets)
+    }
+    resolveIntroPrompts() {
+        <span class="hljs-keyword">const</span> presets = <span class="hljs-keyword">this</span>.getPresets()
+        <span class="hljs-keyword">const</span> presetChoices = <span class="hljs-built_in">Object</span>.entries(presets).map(<span class="hljs-function">(<span class="hljs-params">[name]</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> displayName = name
+            <span class="hljs-keyword">if</span> (name === <span class="hljs-string">'default'</span>) {
+                displayName = <span class="hljs-string">'Default'</span>
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (name === <span class="hljs-string">'__default_vue_3__'</span>) {
+                displayName = <span class="hljs-string">'Default (Vue 3)'</span>
+            }
+            <span class="hljs-keyword">return</span> {
+                <span class="hljs-attr">name</span>: <span class="hljs-string">`<span class="hljs-subst">${displayName}</span>`</span>,
+                <span class="hljs-attr">value</span>: name
+            }
+        })
+        <span class="hljs-keyword">const</span> presetPrompt = {
+            <span class="hljs-attr">name</span>: <span class="hljs-string">'preset'</span>,
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'list'</span>,
+            <span class="hljs-attr">message</span>: <span class="hljs-string">`Please pick a preset:`</span>,
+            <span class="hljs-attr">choices</span>: [
+                ...presetChoices,
+                {
+                    <span class="hljs-attr">name</span>: <span class="hljs-string">'Manually select features'</span>,
+                    <span class="hljs-attr">value</span>: <span class="hljs-string">'__manual__'</span>
+                }
+            ]
+        }
+        <span class="hljs-keyword">const</span> featurePrompt = {
+            <span class="hljs-attr">name</span>: <span class="hljs-string">'features'</span>,
+            <span class="hljs-attr">when</span>: isManualMode,
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'checkbox'</span>,
+            <span class="hljs-attr">message</span>: <span class="hljs-string">'Check the features needed for your project:'</span>,
+            <span class="hljs-attr">choices</span>: [],
+            <span class="hljs-attr">pageSize</span>: <span class="hljs-number">10</span>
+        }
+        <span class="hljs-keyword">return</span> {
+            presetPrompt,
+            featurePrompt
+        }
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Creator;
+</code></pre>
+<h2 id="t505.写入package.json">5.写入package.json <a href="#t505.写入package.json"> # </a></h2>
+<h3 id="t515.1 cli-shared-utils\index.js">5.1 cli-shared-utils\index.js <a href="#t515.1 cli-shared-utils\index.js"> # </a></h3>
+<p>packages\zhang-cli-shared-utils\index.js</p>
+<pre><code class="lang-js">exports.chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>)
+</code></pre>
+<h3 id="t525.2 Creator.js">5.2 Creator.js <a href="#t525.2 Creator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Creator.js</p>
+<pre><code class="lang-diff">const { defaults } = require('./options');
+const PromptModuleAPI = require('./PromptModuleAPI');
+const inquirer = require('inquirer')
+<span class="hljs-addition">+const cloneDeep = require('lodash.clonedeep')</span>
+<span class="hljs-addition">+const writeFileTree = require('./util/writeFileTree')</span>
+<span class="hljs-addition">+const { chalk } = require('zhang-cli-shared-utils')</span>
+const isManualMode = answers =&gt; answers.preset <span class="hljs-comment">=== '__manual__'</span>
+class Creator {
+    constructor(name, context, promptModules) {
+        this.name = name;
+        this.context = process.env.VUE_CLI_CONTEXT = context;
+        const { presetPrompt, featurePrompt } = this.resolveIntroPrompts();
+        this.presetPrompt = presetPrompt;
+        this.featurePrompt = featurePrompt;
+        this.injectedPrompts = []
+        this.promptCompleteCbs = []
+        const promptAPI = new PromptModuleAPI(this)
+        promptModules.forEach(m =&gt; m(promptAPI))
+    }
+    async create() {
+<span class="hljs-addition">+       const {name,context} = this;</span>
+        let preset = await this.promptAndResolvePreset()
+        console.log('preset', preset);
+<span class="hljs-addition">+       preset = cloneDeep(preset);</span>
+<span class="hljs-addition">+       preset.plugins['@vue/cli-service'] = Object.assign({projectName: name}, preset);</span>
+<span class="hljs-addition">+       console.log(`✨  Creating project in ${chalk.yellow(context)}.`)</span>
+<span class="hljs-addition">+       const pkg = {</span>
+<span class="hljs-addition">+           name,</span>
+<span class="hljs-addition">+           version: '0.1.0',</span>
+<span class="hljs-addition">+           private: true,</span>
+<span class="hljs-addition">+           devDependencies: {}</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+       const deps = Object.keys(preset.plugins)</span>
+<span class="hljs-addition">+       deps.forEach(dep =&gt; {</span>
+<span class="hljs-addition">+           pkg.devDependencies[dep] = 'latest';</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+       await writeFileTree(context, {</span>
+<span class="hljs-addition">+           'package.json': JSON.stringify(pkg, null, 2)</span>
+<span class="hljs-addition">+       })</span>
+    }
+    resolveFinalPrompts() {
+        this.injectedPrompts.forEach(prompt =&gt; {
+            const originalWhen = prompt.when || (() =&gt; true)
+            prompt.when = answers =&gt; {
+                return isManualMode(answers) &amp;&amp; originalWhen(answers)
+            }
+        })
+        const prompts = [
+            this.presetPrompt,
+            this.featurePrompt,
+            ...this.injectedPrompts,
+        ]
+        return prompts
+    }
+    async promptAndResolvePreset(answers = null) {
+        if (!answers) {
+            answers = await inquirer.prompt(this.resolveFinalPrompts())
+        }
+        let preset;
+        if (answers.preset &amp;&amp; answers.preset !== '__manual__') {
+            preset = await this.resolvePreset(answers.preset)
+        } else {
+            preset = {
+                plugins: {}
+            }
+            answers.features = answers.features || []
+            this.promptCompleteCbs.forEach(cb =&gt; cb(answers, preset))
+        }
+        return preset
+    }
+    async resolvePreset (name) {
+        const savedPresets = this.getPresets()
+        return savedPresets[name];
+    }
+    getPresets() {
+        return Object.assign({}, defaults.presets)
+    }
+    resolveIntroPrompts() {
+        const presets = this.getPresets()
+        const presetChoices = Object.entries(presets).map(([name]) =&gt; {
+            let displayName = name
+            if (name <span class="hljs-comment">=== 'default') {</span>
+                displayName = 'Default'
+            } else if (name <span class="hljs-comment">=== '__default_vue_3__') {</span>
+                displayName = 'Default (Vue 3)'
+            }
+            return {
+                name: `${displayName}`,
+                value: name
+            }
+        })
+        const presetPrompt = {
+            name: 'preset',
+            type: 'list',
+            message: `Please pick a preset:`,
+            choices: [
+                ...presetChoices,
+                {
+                    name: 'Manually select features',
+                    value: '__manual__'
+                }
+            ]
+        }
+        const featurePrompt = {
+            name: 'features',
+            when: isManualMode,
+            type: 'checkbox',
+            message: 'Check the features needed for your project:',
+            choices: [],
+            pageSize: 10
+        }
+        return {
+            presetPrompt,
+            featurePrompt
+        }
+    }
+}
+
+
+module.exports = Creator;
+</code></pre>
+<h3 id="t535.3 writeFileTree.js">5.3 writeFileTree.js <a href="#t535.3 writeFileTree.js"> # </a></h3>
+<p>packages\zhang-cli\lib\util\writeFileTree.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs-extra'</span>)
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>)
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">writeFileTree</span>(<span class="hljs-params">dir, files</span>) </span>{
+  <span class="hljs-built_in">Object</span>.keys(files).forEach(<span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> filePath = path.join(dir, name)
+    fs.ensureDirSync(path.dirname(filePath))
+    fs.writeFileSync(filePath, files[name])
+  })
+}
+</code></pre>
+<h2 id="t546.安装依赖">6.安装依赖 <a href="#t546.安装依赖"> # </a></h2>
+<h3 id="t556.1 Creator.js">6.1 Creator.js <a href="#t556.1 Creator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Creator.js</p>
+<pre><code class="lang-diff">const { defaults } = require('./options');
+const PromptModuleAPI = require('./PromptModuleAPI');
+const inquirer = require('inquirer')
+const cloneDeep = require('lodash.clonedeep')
+const writeFileTree = require('./util/writeFileTree')
+<span class="hljs-addition">+const { chalk, execa } = require('zhang-cli-shared-utils')</span>
+const isManualMode = answers =&gt; answers.preset <span class="hljs-comment">=== '__manual__'</span>
+class Creator {
+    constructor(name, context, promptModules) {
+        this.name = name;
+        this.context = process.env.VUE_CLI_CONTEXT = context;
+        const { presetPrompt, featurePrompt } = this.resolveIntroPrompts();
+        this.presetPrompt = presetPrompt;
+        this.featurePrompt = featurePrompt;
+        this.injectedPrompts = []
+        this.promptCompleteCbs = []
+<span class="hljs-addition">+       this.run = this.run.bind(this)//运行函数</span>
+        const promptAPI = new PromptModuleAPI(this)
+        promptModules.forEach(m =&gt; m(promptAPI))
+    }
+<span class="hljs-addition">+   run(command, args) {</span>
+<span class="hljs-addition">+       return execa(command, args, { cwd: this.context })</span>
+<span class="hljs-addition">+   }</span>
+    async create() {
+<span class="hljs-addition">+       const {name,context,run} = this;</span>
+        let preset = await this.promptAndResolvePreset()
+        console.log('preset', preset);
+        preset = cloneDeep(preset);
+        preset.plugins['@vue/cli-service'] = Object.assign({projectName: name}, preset);
+        console.log(`✨  Creating project in ${chalk.yellow(context)}.`)
+        const pkg = {
+            name,
+            version: '0.1.0',
+            private: true,
+            devDependencies: {}
+        }
+        const deps = Object.keys(preset.plugins)
+        deps.forEach(dep =&gt; {
+            pkg.devDependencies[dep] = 'latest';
+        })
+        await writeFileTree(context, {
+            'package.json': JSON.stringify(pkg, null, 2)
+        })
+<span class="hljs-addition">+       console.log(`🗃  Initializing git repository...`)</span>
+<span class="hljs-addition">+       await run('git init');</span>
+<span class="hljs-addition">+       console.log(`⚙\u{fe0f} Installing CLI plugins. This might take a while...`)</span>
+<span class="hljs-addition">+       await run('npm install');</span>
+    }
+    resolveFinalPrompts() {
+        this.injectedPrompts.forEach(prompt =&gt; {
+            const originalWhen = prompt.when || (() =&gt; true)
+            prompt.when = answers =&gt; {
+                return isManualMode(answers) &amp;&amp; originalWhen(answers)
+            }
+        })
+        const prompts = [
+            this.presetPrompt,
+            this.featurePrompt,
+            ...this.injectedPrompts,
+        ]
+        return prompts
+    }
+    async promptAndResolvePreset(answers = null) {
+        if (!answers) {
+            answers = await inquirer.prompt(this.resolveFinalPrompts())
+        }
+        let preset;
+        if (answers.preset &amp;&amp; answers.preset !== '__manual__') {
+            preset = await this.resolvePreset(answers.preset)
+        } else {
+            preset = {
+                plugins: {}
+            }
+            answers.features = answers.features || []
+            this.promptCompleteCbs.forEach(cb =&gt; cb(answers, preset))
+        }
+        return preset
+    }
+    async resolvePreset (name) {
+        const savedPresets = this.getPresets()
+        return savedPresets[name];
+    }
+    getPresets() {
+        return Object.assign({}, defaults.presets)
+    }
+    resolveIntroPrompts() {
+        const presets = this.getPresets()
+        const presetChoices = Object.entries(presets).map(([name]) =&gt; {
+            let displayName = name
+            if (name <span class="hljs-comment">=== 'default') {</span>
+                displayName = 'Default'
+            } else if (name <span class="hljs-comment">=== '__default_vue_3__') {</span>
+                displayName = 'Default (Vue 3)'
+            }
+            return {
+                name: `${displayName}`,
+                value: name
+            }
+        })
+        const presetPrompt = {
+            name: 'preset',
+            type: 'list',
+            message: `Please pick a preset:`,
+            choices: [
+                ...presetChoices,
+                {
+                    name: 'Manually select features',
+                    value: '__manual__'
+                }
+            ]
+        }
+        const featurePrompt = {
+            name: 'features',
+            when: isManualMode,
+            type: 'checkbox',
+            message: 'Check the features needed for your project:',
+            choices: [],
+            pageSize: 10
+        }
+        return {
+            presetPrompt,
+            featurePrompt
+        }
+    }
+}
+
+
+module.exports = Creator;
+</code></pre>
+<h2 id="t567.实现插件机制">7.实现插件机制 <a href="#t567.实现插件机制"> # </a></h2>
+<p><img src="https://img.zhufengpeixun.com/4a36deaf32188b9303b71a0f2936c043" alt="4a36deaf32188b9303b71a0f2936c043"></p>
+<h3 id="t577.1 Creator.js">7.1 Creator.js <a href="#t577.1 Creator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Creator.js</p>
+<pre><code class="lang-diff">const { defaults } = require('./options');
+const PromptModuleAPI = require('./PromptModuleAPI');
+const inquirer = require('inquirer')
+const cloneDeep = require('lodash.clonedeep')
+const writeFileTree = require('./util/writeFileTree')
+<span class="hljs-addition">+const { chalk, execa,loadModule } = require('zhang-cli-shared-utils')</span>
+<span class="hljs-addition">+const Generator = require('./Generator')</span>
+const isManualMode = answers =&gt; answers.preset <span class="hljs-comment">=== '__manual__'</span>
+class Creator {
+    constructor(name, context, promptModules) {
+        this.name = name;
+        this.context = process.env.VUE_CLI_CONTEXT = context;
+        const { presetPrompt, featurePrompt } = this.resolveIntroPrompts();
+        this.presetPrompt = presetPrompt;
+        this.featurePrompt = featurePrompt;
+        this.injectedPrompts = []
+        this.promptCompleteCbs = []
+        this.run = this.run.bind(this)//运行函数
+        const promptAPI = new PromptModuleAPI(this)
+        promptModules.forEach(m =&gt; m(promptAPI))
+    }
+    run(command, args) {
+        return execa(command, args, { cwd: this.context })
+    }
+    async create() {
+        const {name,context,run} = this;
+        let preset = await this.promptAndResolvePreset()
+        console.log('preset', preset);
+        preset = cloneDeep(preset);
+        preset.plugins['@vue/cli-service'] = Object.assign({projectName: name}, preset);
+        console.log(`✨  Creating project in ${chalk.yellow(context)}.`)
+        const pkg = {
+            name,
+            version: '0.1.0',
+            private: true,
+            devDependencies: {}
+        }
+        const deps = Object.keys(preset.plugins)
+        deps.forEach(dep =&gt; {
+            pkg.devDependencies[dep] = 'latest';
+        })
+        await writeFileTree(context, {
+            'package.json': JSON.stringify(pkg, null, 2)
+        })
+        console.log(`🗃  Initializing git repository...`)
+        await run('git init');
+        console.log(`⚙\u{fe0f} Installing CLI plugins. This might take a while...`)
+        await run('npm install');
+<span class="hljs-addition">+       console.log(`🚀  Invoking generators...`)</span>
+<span class="hljs-addition">+       const plugins = await this.resolvePlugins(preset.plugins)</span>
+<span class="hljs-addition">+       const generator = new Generator(context, {pkg,plugins})</span>
+<span class="hljs-addition">+       await generator.generate();</span>
+    }
+<span class="hljs-addition">+   async resolvePlugins(rawPlugins) {</span>
+<span class="hljs-addition">+       const plugins = []</span>
+<span class="hljs-addition">+       for (const id of Object.keys(rawPlugins)) {</span>
+<span class="hljs-addition">+           try{</span>
+<span class="hljs-addition">+               const apply = loadModule(`${id}/generator`, this.context) || (() =&gt; {})</span>
+<span class="hljs-addition">+               let options = rawPlugins[id] || {}</span>
+<span class="hljs-addition">+               plugins.push({ id, apply, options })</span>
+<span class="hljs-addition">+           }catch(error){</span>
+<span class="hljs-addition">+               console.log(error);</span>
+<span class="hljs-addition">+           } </span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+       return plugins</span>
+<span class="hljs-addition">+   }</span>
+    resolveFinalPrompts() {
+        this.injectedPrompts.forEach(prompt =&gt; {
+            const originalWhen = prompt.when || (() =&gt; true)
+            prompt.when = answers =&gt; {
+                return isManualMode(answers) &amp;&amp; originalWhen(answers)
+            }
+        })
+        const prompts = [
+            this.presetPrompt,
+            this.featurePrompt,
+            ...this.injectedPrompts,
+        ]
+        return prompts
+    }
+    async promptAndResolvePreset(answers = null) {
+        if (!answers) {
+            answers = await inquirer.prompt(this.resolveFinalPrompts())
+        }
+        let preset;
+        if (answers.preset &amp;&amp; answers.preset !== '__manual__') {
+            preset = await this.resolvePreset(answers.preset)
+        } else {
+            preset = {
+                plugins: {}
+            }
+            answers.features = answers.features || []
+            this.promptCompleteCbs.forEach(cb =&gt; cb(answers, preset))
+        }
+        return preset
+    }
+    async resolvePreset (name) {
+        const savedPresets = this.getPresets()
+        return savedPresets[name];
+    }
+    getPresets() {
+        return Object.assign({}, defaults.presets)
+    }
+    resolveIntroPrompts() {
+        const presets = this.getPresets()
+        const presetChoices = Object.entries(presets).map(([name]) =&gt; {
+            let displayName = name
+            if (name <span class="hljs-comment">=== 'default') {</span>
+                displayName = 'Default'
+            } else if (name <span class="hljs-comment">=== '__default_vue_3__') {</span>
+                displayName = 'Default (Vue 3)'
+            }
+            return {
+                name: `${displayName}`,
+                value: name
+            }
+        })
+        const presetPrompt = {
+            name: 'preset',
+            type: 'list',
+            message: `Please pick a preset:`,
+            choices: [
+                ...presetChoices,
+                {
+                    name: 'Manually select features',
+                    value: '__manual__'
+                }
+            ]
+        }
+        const featurePrompt = {
+            name: 'features',
+            when: isManualMode,
+            type: 'checkbox',
+            message: 'Check the features needed for your project:',
+            choices: [],
+            pageSize: 10
+        }
+        return {
+            presetPrompt,
+            featurePrompt
+        }
+    }
+}
+module.exports = Creator;
+</code></pre>
+<h3 id="t587.2 cli-shared-utils\index.js">7.2 cli-shared-utils\index.js <a href="#t587.2 cli-shared-utils\index.js"> # </a></h3>
+<p>packages\zhang-cli-shared-utils\index.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+['pluginResolution','module'].forEach(m =&gt; {</span>
+<span class="hljs-addition">+    Object.assign(exports, require(`./lib/${m}`))</span>
+<span class="hljs-addition">+})</span>
+exports.chalk = require('chalk')
+exports.execa = require('execa')
+</code></pre>
+<h3 id="t597.3 module.js">7.3 module.js <a href="#t597.3 module.js"> # </a></h3>
+<p>packages\zhang-cli-shared-utils\lib\module.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Module = <span class="hljs-built_in">require</span>(<span class="hljs-string">'module'</span>)
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>)
+
+exports.loadModule = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">request, context</span>) </span>{
+    <span class="hljs-keyword">return</span> Module.createRequire(path.resolve(context, <span class="hljs-string">'package.json'</span>))(request)
+}
+</code></pre>
+<h3 id="t607.4 pluginResolution.js">7.4 pluginResolution.js <a href="#t607.4 pluginResolution.js"> # </a></h3>
+<p>packages\zhang-cli-shared-utils\lib\pluginResolution.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> pluginRE = <span class="hljs-regexp">/^@vue\/cli-plugin-/</span>
+exports.toShortPluginId = <span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> id.replace(pluginRE, <span class="hljs-string">''</span>);<span class="hljs-comment">//@vue/cli-plugin-babel =&gt; babel</span>
+exports.isPlugin = <span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> pluginRE.test(id)
+exports.matchesPluginId = <span class="hljs-function">(<span class="hljs-params">input, full</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> full === input;
+}
+</code></pre>
+<h3 id="t617.5 mergeDeps.js">7.5 mergeDeps.js <a href="#t617.5 mergeDeps.js"> # </a></h3>
+<p>packages\zhang-cli\lib\util\mergeDeps.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mergeDeps</span>(<span class="hljs-params">sourceDeps, depsToInject</span>) </span>{
+  <span class="hljs-keyword">const</span> result = <span class="hljs-built_in">Object</span>.assign({}, sourceDeps)
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> depName <span class="hljs-keyword">in</span> depsToInject) {
+    result[depName] = depsToInject[depName];
+  }
+  <span class="hljs-keyword">return</span> result
+}
+
+<span class="hljs-built_in">module</span>.exports = mergeDeps;
+</code></pre>
+<h3 id="t627.6 normalizeFilePaths.js">7.6 normalizeFilePaths.js <a href="#t627.6 normalizeFilePaths.js"> # </a></h3>
+<p>packages\zhang-cli\lib\util\normalizeFilePaths.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> slash = <span class="hljs-built_in">require</span>(<span class="hljs-string">'slash'</span>)
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">normalizeFilePaths</span> (<span class="hljs-params">files</span>) </span>{
+  <span class="hljs-built_in">Object</span>.keys(files).forEach(<span class="hljs-function"><span class="hljs-params">file</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> normalized = slash(file)
+    <span class="hljs-keyword">if</span> (file !== normalized) {
+      files[normalized] = files[file]
+      <span class="hljs-keyword">delete</span> files[file]
+    }
+  })
+  <span class="hljs-keyword">return</span> files
+}
+</code></pre>
+<h3 id="t637.7 GeneratorAPI.js">7.7 GeneratorAPI.js <a href="#t637.7 GeneratorAPI.js"> # </a></h3>
+<p>packages\zhang-cli\lib\GeneratorAPI.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { toShortPluginId } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'zhang-cli-shared-utils'</span>)
+<span class="hljs-keyword">const</span> mergeDeps = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./util/mergeDeps'</span>)
+<span class="hljs-keyword">const</span> { isBinaryFileSync } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'isbinaryfile'</span>)
+<span class="hljs-keyword">const</span> isString = <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> <span class="hljs-keyword">typeof</span> val === <span class="hljs-string">'string'</span>
+<span class="hljs-keyword">const</span> isObject = <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> val &amp;&amp; <span class="hljs-keyword">typeof</span> val === <span class="hljs-string">'object'</span>
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> ejs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ejs'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GeneratorAPI</span> </span>{
+    <span class="hljs-keyword">constructor</span>(id, generator, options, rootOptions) {
+        <span class="hljs-keyword">this</span>.id = id
+        <span class="hljs-keyword">this</span>.generator = generator
+        <span class="hljs-keyword">this</span>.options = options
+        <span class="hljs-keyword">this</span>.rootOptions = rootOptions
+        <span class="hljs-keyword">this</span>.pluginsData = generator.plugins
+            .filter(<span class="hljs-function">(<span class="hljs-params">{ id }</span>) =&gt;</span> id !== <span class="hljs-string">`@vue/cli-service`</span>)
+            .map(<span class="hljs-function">(<span class="hljs-params">{ id }</span>) =&gt;</span> ({ <span class="hljs-attr">name</span>: toShortPluginId(id) }))
+    }
+    hasPlugin(id) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.generator.hasPlugin(id)
+    }
+    extendPackage(fields) {
+        <span class="hljs-keyword">const</span> pkg = <span class="hljs-keyword">this</span>.generator.pkg
+        <span class="hljs-keyword">const</span> toMerge = fields
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> toMerge) {
+            <span class="hljs-keyword">const</span> value = toMerge[key]
+            <span class="hljs-keyword">const</span> existing = pkg[key]
+            <span class="hljs-keyword">if</span> (isObject(value) &amp;&amp; (key === <span class="hljs-string">'dependencies'</span> || key === <span class="hljs-string">'devDependencies'</span>)) {
+                pkg[key] = mergeDeps(existing || {}, value)
+            } <span class="hljs-keyword">else</span> {
+                pkg[key] = value
+            }
+        }
+    }
+    _injectFileMiddleware(middleware) {
+        <span class="hljs-keyword">this</span>.generator.fileMiddlewares.push(middleware)
+    }
+    _resolveData(additionalData) {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign({
+            <span class="hljs-attr">options</span>: <span class="hljs-keyword">this</span>.options,
+            <span class="hljs-attr">rootOptions</span>: <span class="hljs-keyword">this</span>.rootOptions,
+            <span class="hljs-attr">plugins</span>: <span class="hljs-keyword">this</span>.pluginsData
+          }, additionalData)
+    }
+    render(source,additionalData) {
+        <span class="hljs-keyword">const</span> baseDir = extractCallDir()
+        <span class="hljs-keyword">if</span> (isString(source)) {
+            source = path.resolve(baseDir, source)
+            <span class="hljs-keyword">this</span>._injectFileMiddleware(<span class="hljs-keyword">async</span> (files) =&gt; {
+                <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">this</span>._resolveData(additionalData)
+                <span class="hljs-keyword">const</span> globby = <span class="hljs-built_in">require</span>(<span class="hljs-string">'globby'</span>)
+                <span class="hljs-keyword">const</span> _files = <span class="hljs-keyword">await</span> globby([<span class="hljs-string">'**/*'</span>], { <span class="hljs-attr">cwd</span>: source })
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> rawPath <span class="hljs-keyword">of</span> _files) {
+                    <span class="hljs-keyword">const</span> targetPath = rawPath.split(<span class="hljs-string">'/'</span>).map(<span class="hljs-function"><span class="hljs-params">filename</span> =&gt;</span> {
+                        <span class="hljs-keyword">if</span> (filename.charAt(<span class="hljs-number">0</span>) === <span class="hljs-string">'_'</span> &amp;&amp; filename.charAt(<span class="hljs-number">1</span>) !== <span class="hljs-string">'_'</span>) {
+                            <span class="hljs-keyword">return</span> <span class="hljs-string">`.<span class="hljs-subst">${filename.slice(<span class="hljs-number">1</span>)}</span>`</span>
+                        }
+                        <span class="hljs-keyword">return</span> filename
+                    }).join(<span class="hljs-string">'/'</span>)
+                    <span class="hljs-keyword">const</span> sourcePath = path.resolve(source, rawPath)
+                    <span class="hljs-keyword">const</span> content = renderFile(sourcePath, data)
+                    files[targetPath] = content;
+                }
+            })
+        }
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">extractCallDir</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> obj = {}
+    <span class="hljs-built_in">Error</span>.captureStackTrace(obj)
+    <span class="hljs-keyword">const</span> callSite = obj.stack.split(<span class="hljs-string">'\n'</span>)[<span class="hljs-number">3</span>]
+    <span class="hljs-keyword">const</span> namedStackRegExp = <span class="hljs-regexp">/\s\((.*):\d+:\d+\)$/</span>
+    <span class="hljs-keyword">let</span> matchResult = callSite.match(namedStackRegExp)
+    <span class="hljs-keyword">const</span> fileName = matchResult[<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">return</span> path.dirname(fileName)
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderFile</span>(<span class="hljs-params">name, data</span>) </span>{
+    <span class="hljs-keyword">if</span> (isBinaryFileSync(name)) {
+        <span class="hljs-keyword">return</span> fs.readFileSync(name)
+    }
+    <span class="hljs-keyword">const</span> template = fs.readFileSync(name, <span class="hljs-string">'utf8'</span>)
+    <span class="hljs-keyword">return</span> ejs.render(template, data)
+}
+<span class="hljs-built_in">module</span>.exports = GeneratorAPI
+</code></pre>
+<h3 id="t647.8 Generator.js">7.8 Generator.js <a href="#t647.8 Generator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Generator.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { isPlugin,matchesPluginId } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'zhang-cli-shared-utils'</span>)
+<span class="hljs-keyword">const</span> GeneratorAPI = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./GeneratorAPI'</span>)
+<span class="hljs-keyword">const</span> normalizeFilePaths = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./util/normalizeFilePaths'</span>)
+<span class="hljs-keyword">const</span> writeFileTree = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./util/writeFileTree'</span>)
+<span class="hljs-keyword">const</span> ejs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ejs'</span>)
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Generator</span> </span>{
+    <span class="hljs-keyword">constructor</span>(context, { pkg = {}, plugins = [] } = {}) {
+        <span class="hljs-keyword">this</span>.context = context
+        <span class="hljs-keyword">this</span>.plugins = plugins
+        <span class="hljs-keyword">this</span>.files = {}
+        <span class="hljs-keyword">this</span>.fileMiddlewares = []
+        <span class="hljs-keyword">this</span>.pkg = pkg;
+        <span class="hljs-keyword">this</span>.allPluginIds = <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.pkg.dependencies || {})
+            .concat(<span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.pkg.devDependencies || {}))
+            .filter(isPlugin)
+        <span class="hljs-keyword">const</span> cliService = plugins.find(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.id === <span class="hljs-string">'@vue/cli-service'</span>)
+        <span class="hljs-keyword">this</span>.rootOptions = cliService.options;
+    }
+    <span class="hljs-keyword">async</span> generate() {
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.initPlugins()
+        <span class="hljs-comment">//将一些配置信息从package.json中提取到单独的文件中，比如postcss.config.js babel.config.js</span>
+        <span class="hljs-keyword">this</span>.extractConfigFiles()
+        <span class="hljs-comment">//遍历fileMiddleware，向files里写入文件，并插入import和rootOptions</span>
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.resolveFiles()
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.files);
+        <span class="hljs-keyword">this</span>.sortPkg()
+        <span class="hljs-keyword">this</span>.files[<span class="hljs-string">'package.json'</span>] = <span class="hljs-built_in">JSON</span>.stringify(<span class="hljs-keyword">this</span>.pkg, <span class="hljs-literal">null</span>, <span class="hljs-number">2</span>) + <span class="hljs-string">'\n'</span>
+        <span class="hljs-comment">//把内存中的文件写入硬盘</span>
+        <span class="hljs-keyword">await</span> writeFileTree(<span class="hljs-keyword">this</span>.context, <span class="hljs-keyword">this</span>.files)
+    }
+    sortPkg() {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'ensure package.json keys has readable order'</span>);
+    }
+    <span class="hljs-keyword">async</span> resolveFiles() {
+        <span class="hljs-keyword">const</span> files = <span class="hljs-keyword">this</span>.files
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> middleware <span class="hljs-keyword">of</span> <span class="hljs-keyword">this</span>.fileMiddlewares) {
+            <span class="hljs-keyword">await</span> middleware(files, ejs.render)
+        }
+        normalizeFilePaths(files)
+    }
+    extractConfigFiles() {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'extractConfigFiles'</span>);
+    }
+    <span class="hljs-keyword">async</span> initPlugins() {
+        <span class="hljs-keyword">const</span> { rootOptions } = <span class="hljs-keyword">this</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> plugin <span class="hljs-keyword">of</span> <span class="hljs-keyword">this</span>.plugins) {
+            <span class="hljs-keyword">const</span> { id, apply, options } = plugin
+            <span class="hljs-keyword">const</span> api = <span class="hljs-keyword">new</span> GeneratorAPI(id, <span class="hljs-keyword">this</span>, options, rootOptions)
+            <span class="hljs-keyword">await</span> apply(api, options, rootOptions)
+        }
+    }
+    hasPlugin(_id) {
+        <span class="hljs-keyword">return</span> [
+          ...this.plugins.map(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.id),
+          ...this.allPluginIds
+        ].some(<span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> {
+          <span class="hljs-keyword">return</span> matchesPluginId(_id, id);
+        })
+      }
+}
+<span class="hljs-built_in">module</span>.exports = Generator;
+</code></pre>
+<h2 id="t658.完成create命令">8.完成create命令 <a href="#t658.完成create命令"> # </a></h2>
+<h3 id="t668.1 Creator.js">8.1 Creator.js <a href="#t668.1 Creator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Creator.js</p>
+<pre><code class="lang-diff">const { defaults } = require('./options');
+const PromptModuleAPI = require('./PromptModuleAPI');
+const inquirer = require('inquirer')
+const cloneDeep = require('lodash.clonedeep')
+const writeFileTree = require('./util/writeFileTree')
+const { chalk, execa,loadModule } = require('zhang-cli-shared-utils')
+const Generator = require('./Generator')
+const isManualMode = answers =&gt; answers.preset <span class="hljs-comment">=== '__manual__'</span>
+class Creator {
+    constructor(name, context, promptModules) {
+        this.name = name;
+        this.context = process.env.VUE_CLI_CONTEXT = context;
+        const { presetPrompt, featurePrompt } = this.resolveIntroPrompts();
+        this.presetPrompt = presetPrompt;
+        this.featurePrompt = featurePrompt;
+        this.injectedPrompts = []
+        this.promptCompleteCbs = []
+        this.run = this.run.bind(this)//运行函数
+        const promptAPI = new PromptModuleAPI(this)
+        promptModules.forEach(m =&gt; m(promptAPI))
+    }
+    run(command, args) {
+        return execa(command, args, { cwd: this.context })
+    }
+    async create() {
+        const {name,context,run} = this;
+        let preset = await this.promptAndResolvePreset()
+        console.log('preset', preset);
+        preset = cloneDeep(preset);
+        preset.plugins['@vue/cli-service'] = Object.assign({projectName: name}, preset);
+        console.log(`✨  Creating project in ${chalk.yellow(context)}.`)
+        const pkg = {
+            name,
+            version: '0.1.0',
+            private: true,
+            devDependencies: {}
+        }
+        const deps = Object.keys(preset.plugins)
+        deps.forEach(dep =&gt; {
+            pkg.devDependencies[dep] = 'latest';
+        })
+        await writeFileTree(context, {
+            'package.json': JSON.stringify(pkg, null, 2)
+        })
+        console.log(`🗃  Initializing git repository...`)
+        await run('git init');
+        console.log(`⚙\u{fe0f} Installing CLI plugins. This might take a while...`)
+        await run('npm install');
+        console.log(`🚀  Invoking generators...`)
+        const plugins = await this.resolvePlugins(preset.plugins)
+        const generator = new Generator(context, {pkg,plugins})
+        await generator.generate();
+<span class="hljs-addition">+       console.log(`📦  Installing additional dependencies...`)</span>
+<span class="hljs-addition">+       await run('npm install');</span>
+<span class="hljs-addition">+       console.log('📄  Generating README.md...')</span>
+<span class="hljs-addition">+       await writeFileTree(context, {</span>
+<span class="hljs-addition">+           'README.md': `cd ${name}\n npm run serve`</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+       await run('git', ['add', '-A'])</span>
+<span class="hljs-addition">+       await run('git', ['commit', '-m', 'created', '--no-verify'])</span>
+<span class="hljs-addition">+       console.log(`🎉  Successfully created project ${chalk.yellow(name)}.`)</span>
+<span class="hljs-addition">+       console.log(</span>
+<span class="hljs-addition">+           `👉  Get started with the following commands:\n\n` +</span>
+<span class="hljs-addition">+           (chalk.cyan(`cd ${name}\n`)) +</span>
+<span class="hljs-addition">+           (chalk.cyan(`npm run serve`))</span>
+<span class="hljs-addition">+       )</span>
+<span class="hljs-addition">+       generator.printExitLogs()</span>
+    }
+    //遍历插件的generator,插件通过GeneratorAPI向package.json中加入依赖或字段，并通过render准备添加文件
+    async resolvePlugins(rawPlugins) {
+        const plugins = []
+        for (const id of Object.keys(rawPlugins)) {
+            try{
+                const apply = loadModule(`${id}/generator`, this.context) || (() =&gt; {})
+                let options = rawPlugins[id] || {}
+                plugins.push({ id, apply, options })
+            }catch(error){
+                console.log(error);
+            } 
+        }
+        return plugins
+    }
+    resolveFinalPrompts() {
+        this.injectedPrompts.forEach(prompt =&gt; {
+            const originalWhen = prompt.when || (() =&gt; true)
+            prompt.when = answers =&gt; {
+                return isManualMode(answers) &amp;&amp; originalWhen(answers)
+            }
+        })
+        const prompts = [
+            this.presetPrompt,
+            this.featurePrompt,
+            ...this.injectedPrompts,
+        ]
+        return prompts
+    }
+    async promptAndResolvePreset(answers = null) {
+        if (!answers) {
+            answers = await inquirer.prompt(this.resolveFinalPrompts())
+        }
+        let preset;
+        if (answers.preset &amp;&amp; answers.preset !== '__manual__') {
+            preset = await this.resolvePreset(answers.preset)
+        } else {
+            preset = {
+                plugins: {}
+            }
+            answers.features = answers.features || []
+            this.promptCompleteCbs.forEach(cb =&gt; cb(answers, preset))
+        }
+        return preset
+    }
+    async resolvePreset (name) {
+        const savedPresets = this.getPresets()
+        return savedPresets[name];
+    }
+    getPresets() {
+        return Object.assign({}, defaults.presets)
+    }
+    resolveIntroPrompts() {
+        const presets = this.getPresets()
+        const presetChoices = Object.entries(presets).map(([name]) =&gt; {
+            let displayName = name
+            if (name <span class="hljs-comment">=== 'default') {</span>
+                displayName = 'Default'
+            } else if (name <span class="hljs-comment">=== '__default_vue_3__') {</span>
+                displayName = 'Default (Vue 3)'
+            }
+            return {
+                name: `${displayName}`,
+                value: name
+            }
+        })
+        const presetPrompt = {
+            name: 'preset',
+            type: 'list',
+            message: `Please pick a preset:`,
+            choices: [
+                ...presetChoices,
+                {
+                    name: 'Manually select features',
+                    value: '__manual__'
+                }
+            ]
+        }
+        const featurePrompt = {
+            name: 'features',
+            when: isManualMode,
+            type: 'checkbox',
+            message: 'Check the features needed for your project:',
+            choices: [],
+            pageSize: 10
+        }
+        return {
+            presetPrompt,
+            featurePrompt
+        }
+    }
+}
+
+
+module.exports = Creator;
+</code></pre>
+<h3 id="t678.2 Generator.js">8.2 Generator.js <a href="#t678.2 Generator.js"> # </a></h3>
+<p>packages\zhang-cli\lib\Generator.js</p>
+<pre><code class="lang-diff">const { isPlugin,matchesPluginId } = require('zhang-cli-shared-utils')
+const GeneratorAPI = require('./GeneratorAPI')
+const normalizeFilePaths = require('./util/normalizeFilePaths')
+const writeFileTree = require('./util/writeFileTree')
+const ejs = require('ejs')
+class Generator {
+    constructor(context, { pkg = {}, plugins = [] } = {}) {
+        this.context = context
+        this.plugins = plugins
+        this.files = {}
+        this.fileMiddlewares = []
+        this.pkg = pkg;
+        this.allPluginIds = Object.keys(this.pkg.dependencies || {})
+            .concat(Object.keys(this.pkg.devDependencies || {}))
+            .filter(isPlugin)
+        const cliService = plugins.find(p =&gt; p.id <span class="hljs-comment">=== '@vue/cli-service')</span>
+        this.rootOptions = cliService.options;
+    }
+    async generate() {
+        await this.initPlugins()
+        this.extractConfigFiles()
+        await this.resolveFiles()
+        this.sortPkg()
+        this.files['package.json'] = JSON.stringify(this.pkg, null, 2) + '\n'
+        await writeFileTree(this.context, this.files)
+    }
+    sortPkg() {
+        console.log('ensure package.json keys has readable order');
+    }
+    async resolveFiles() {
+        const files = this.files
+        for (const middleware of this.fileMiddlewares) {
+            await middleware(files, ejs.render)
+        }
+        normalizeFilePaths(files)
+    }
+    extractConfigFiles() {
+        console.log('extractConfigFiles');
+    }
+    async initPlugins() {
+        const { rootOptions } = this
+        for (const plugin of this.plugins) {
+            const { id, apply, options } = plugin
+            const api = new GeneratorAPI(id, this, options, rootOptions)
+            await apply(api, options, rootOptions)
+        }
+    }
+    hasPlugin(_id) {
+        return [
+          ...this.plugins.map(p =&gt; p.id),
+          ...this.allPluginIds
+        ].some(id =&gt; {
+          return matchesPluginId(_id, id);
+        })
+    }
+<span class="hljs-addition">+    printExitLogs(){</span>
+<span class="hljs-addition">+        console.log('printExitLogs');</span>
+<span class="hljs-addition">+    }</span>
+}
+
+module.exports = Generator;
+</code></pre>
+
+    

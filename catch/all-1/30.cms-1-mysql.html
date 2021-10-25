@@ -1,0 +1,983 @@
+
+        <h2 id="t01. 数据库能够做什么">1. 数据库能够做什么 <a href="#t01. 数据库能够做什么"> # </a></h2>
+<ul>
+<li>存储大量数据，方便检索和访问</li>
+<li>保持数据信息的一致、完整</li>
+<li>共享和安全</li>
+<li>通过组合分析，产生新的有用信息</li>
+</ul>
+<h2 id="t12. 数据库的基本概念">2. 数据库的基本概念 <a href="#t12. 数据库的基本概念"> # </a></h2>
+<h3 id="t22.1 实体">2.1 实体 <a href="#t22.1 实体"> # </a></h3>
+<p>只要是在客观世界存在的、可以被描述出来的都是实体</p>
+<h3 id="t32.2 数据库(DB)">2.2 数据库(DB) <a href="#t32.2 数据库(DB)"> # </a></h3>
+<ul>
+<li>数据库就是数据的仓库，可以存放结构化的数据</li>
+</ul>
+<h3 id="t42.3 数据库管理系统(DBMS)">2.3 数据库管理系统(DBMS) <a href="#t42.3 数据库管理系统(DBMS)"> # </a></h3>
+<p>是一种系统软件，提供操作数据库的环境，可以通过数据库管理系统对数据进行插入、修改、删除和查询等操作。</p>
+<h3 id="t52.4  SQL">2.4  SQL <a href="#t52.4  SQL"> # </a></h3>
+<p>结构化查询语言 专门用来和数据库进行交流的语言,几乎所有的DBMS都支持SQL</p>
+<p><img src="http://img.zhufengpeixun.cn/dbmspng.png" alt="dbms"></p>
+<h3 id="t62.5  SQL规范">2.5  SQL规范 <a href="#t62.5  SQL规范"> # </a></h3>
+<ol>
+<li>SQL语句不区分大小写，建议SQL关键字大写，表名和列表小写</li>
+<li>命令用分号结尾</li>
+<li>命令可以缩进和换行，一种类型的关键字放在一行</li>
+<li>可以写单行和多行注释 , #和--是单行注释，/***/多行注释</li>
+</ol>
+<h2 id="t73. 数据表">3. 数据表 <a href="#t73. 数据表"> # </a></h2>
+<ul>
+<li>表是数据库中包含所有数据的数据库对象，也是其它对象的基础。</li>
+<li>表定义是一个列的集合，数据在表中是按行和列的格式组织的，用来存放数据</li>
+<li>行也称为记录用来存放一个个实体，列称为字段用来描述实体的某一个属性
+学生管理系统 </li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/table.png" alt="table"></p>
+<h2 id="t84.MYSQL简介">4.MYSQL简介 <a href="#t84.MYSQL简介"> # </a></h2>
+<h3 id="t94.1 MYSQL特点">4.1 MYSQL特点 <a href="#t94.1 MYSQL特点"> # </a></h3>
+<ul>
+<li>开源免费</li>
+<li>性能高</li>
+<li>安装使用都简单</li>
+</ul>
+<h3 id="t104.2 MYSQL安装">4.2 MYSQL安装 <a href="#t104.2 MYSQL安装"> # </a></h3>
+<ul>
+<li><a href="https://dev.mysql.com/downloads/mysql/5.5.html">mysql下载</a></li>
+<li>安装MYSQL</li>
+</ul>
+<h3 id="t114.3 MYSQL配置">4.3 MYSQL配置 <a href="#t114.3 MYSQL配置"> # </a></h3>
+<p>C:\Program Files\MySQL\MySQL Server 5.5\my.ini</p>
+<ul>
+<li>port 端口号</li>
+<li>basedir 安装目录</li>
+<li>datadir 数据存放访目录</li>
+<li>character_set_server 字符集</li>
+<li>default-storage-engine 存储引擎</li>
+<li>sql-mode 语法模式</li>
+<li>max-connections 最大连接数</li>
+</ul>
+<h3 id="t124.4  MYSQL启动和停止">4.4  MYSQL启动和停止 <a href="#t124.4  MYSQL启动和停止"> # </a></h3>
+<pre><code class="lang-js">net start MySQL
+net stop MySQL
+</code></pre>
+<h3 id="t134.5 通过命令行连接MYSQL">4.5 通过命令行连接MYSQL <a href="#t134.5 通过命令行连接MYSQL"> # </a></h3>
+<pre><code class="lang-js">mysql -h <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> -P <span class="hljs-number">3306</span> -uroot -p123456
+exit
+</code></pre>
+<h3 id="t144.6 切换数据库">4.6 切换数据库 <a href="#t144.6 切换数据库"> # </a></h3>
+<pre><code class="lang-js">use test;
+</code></pre>
+<h3 id="t154.7 显示有哪些表">4.7 显示有哪些表 <a href="#t154.7 显示有哪些表"> # </a></h3>
+<pre><code class="lang-js">show tables;
+show tables <span class="hljs-keyword">from</span> mysql;
+</code></pre>
+<h3 id="t164.8 显示当前数据库">4.8 显示当前数据库 <a href="#t164.8 显示当前数据库"> # </a></h3>
+<pre><code class="lang-js">select database();
+</code></pre>
+<h3 id="t174.9 查询表结构">4.9 查询表结构 <a href="#t174.9 查询表结构"> # </a></h3>
+<pre><code class="lang-js">DESC user;
+</code></pre>
+<h2 id="t185. 创建表">5. 创建表 <a href="#t185. 创建表"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/students.png" alt="student">
+<img src="http://img.zhufengpeixun.cn/course.png" alt="course">
+<img src="http://img.zhufengpeixun.cn/score.png" alt="score"></p>
+<h2 id="t196. 数据完整性">6. 数据完整性 <a href="#t196. 数据完整性"> # </a></h2>
+<ul>
+<li>为了实现数据完整性，需要检验数据库表中的每行和每列数据是否符合要求</li>
+<li>在创建表的时候，应该保证以后的数据输入是正确的，错误的数据不允许输入</li>
+</ul>
+<h3 id="t206.1 域完整性">6.1 域完整性 <a href="#t206.1 域完整性"> # </a></h3>
+<p>不同的字段需要设置为各种合适的类型，比如年龄就是整数类型</p>
+<p><img src="http://img.zhufengpeixun.cn/datatype.jpg" alt="datatype"></p>
+<p><img src="http://img.zhufengpeixun.cn/mysqlint.jpg" alt="mysqlint"></p>
+<p><img src="http://img.zhufengpeixun.cn/mysqlnumber.jpg" alt="mysqlnumber"></p>
+<h3 id="t216.2 默认值">6.2 默认值 <a href="#t216.2 默认值"> # </a></h3>
+<p>默认值是指如果用户没有指定值的情况下会记录的此字段指定一个提供一个预先设定的值</p>
+<blockquote>
+<p>可以把居住地默认值设置为北京</p>
+</blockquote>
+<h3 id="t226.3 非空约束">6.3 非空约束 <a href="#t226.3 非空约束"> # </a></h3>
+<p>我们可以指定某个字段不能不输入，必须提供一个非空的值</p>
+<blockquote>
+<p>姓名字段不能为空</p>
+</blockquote>
+<h2 id="t237.实体完整性">7.实体完整性 <a href="#t237.实体完整性"> # </a></h2>
+<h3 id="t247.1 主键约束">7.1 主键约束 <a href="#t247.1 主键约束"> # </a></h3>
+<ul>
+<li>表中一列或者几列组合的值能用来唯一标识表中的每一行，这样的列或者列组合称为表的主键，主键表的数据不同重复。</li>
+<li>如果两列或者多列组合起来唯一标识表中的每一行，则该主键又称为"组合键"</li>
+</ul>
+<p><strong>主键的选择标准</strong></p>
+<ol>
+<li>最少性 尽量选择单个键作为主键 </li>
+<li>稳定性 ，由于主键是用来在两个表间建立联接的，所以不能经常更新，最好就不更新</li>
+</ol>
+<h3 id="t257.2  外键">7.2  外键 <a href="#t257.2  外键"> # </a></h3>
+<p> 成绩表中的学生ID应该在学生表中是存在的
+ 我们应该让成绩表中的ID只能引用学生表中的ID，它们的值应该是一一对应的，也就是说成绩表中的ID是成绩表中的外键，对应学生表的主键 ，这样就可以保证数据的引用完整性</p>
+<h3 id="t267.3  唯一约束">7.3  唯一约束 <a href="#t267.3  唯一约束"> # </a></h3>
+<p>唯一约束是指某个字段值是唯一的，在所有的记录中不能有重复的值.</p>
+<blockquote>
+<p>学生的身份证号可以设置为唯一约束</p>
+</blockquote>
+<h3 id="t277.4  标识列">7.4  标识列 <a href="#t277.4  标识列"> # </a></h3>
+<ul>
+<li>当表中没有合适的列作为主键时可以考虑增加标识列，标识列是一个无实际业务含义的列，仅仅用来区分每条记录。</li>
+<li>标识列的值是自动生成的，不能在该列上输入数据</li>
+</ul>
+<h3 id="t287.5  外键约束">7.5  外键约束 <a href="#t287.5  外键约束"> # </a></h3>
+<p>一个表的外键必须引用另一个表的主键,比如成绩表中的学生ID会引用学生表的主键，课程ID会引用成绩表的主键</p>
+<ul>
+<li>主表没有记录，子表中不能添加相应的记录</li>
+<li>修改和删除主表记录不能让子表记录孤立，必须相应修改和删除</li>
+</ul>
+<h2 id="t298. 数据操作">8. 数据操作 <a href="#t298. 数据操作"> # </a></h2>
+<h3 id="t308.1 创建学生表">8.1 创建学生表 <a href="#t308.1 创建学生表"> # </a></h3>
+<pre><code class="lang-sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> (
+<span class="hljs-string">`id`</span>  <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> PRIMARY <span class="hljs-keyword">KEY</span> AUTO_INCREMENT   ,
+<span class="hljs-string">`name`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> ,
+<span class="hljs-string">`age`</span>  <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">NULL</span> ,
+<span class="hljs-string">`city`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">'北京'</span> ,
+)
+</code></pre>
+<h3 id="t318.2 增加身份证号字段">8.2 增加身份证号字段 <a href="#t318.2 增加身份证号字段"> # </a></h3>
+<pre><code class="lang-sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`idcard`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">15</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`city`</span>; <span class="hljs-comment">--增加身份证字段</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> <span class="hljs-keyword">MODIFY</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`idcard`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">18</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`name`</span>; <span class="hljs-comment">--修改身份证字段</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span><span class="hljs-keyword">DROP</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`idcard`</span>; <span class="hljs-comment">--删除身份证字段</span>
+</code></pre>
+<h3 id="t328.3 添加约束">8.3 添加约束 <a href="#t328.3 添加约束"> # </a></h3>
+<pre><code class="lang-sql"><span class="hljs-comment">-- 主键约束</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> <span class="hljs-keyword">ADD</span> PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-comment">-- 唯一约束</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">INDEX</span> <span class="hljs-string">`uq_idcard`</span> (<span class="hljs-string">`idcard`</span>) ;
+<span class="hljs-comment">-- 默认约束</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> <span class="hljs-keyword">MODIFY</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`city`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>)  <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">'北京'</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`age`</span>;
+<span class="hljs-comment">-- 外键约束</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_stuid`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`student_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`student`</span> (<span class="hljs-string">`id`</span>);
+<span class="hljs-comment">-- 删除约束</span>
+<span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_stuid`</span>;
+</code></pre>
+<h3 id="t338.4 准备数据">8.4 准备数据 <a href="#t338.4 准备数据"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/relations.png" alt="relations"></p>
+<pre><code class="lang-sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span> (
+  <span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+  <span class="hljs-string">`name`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+  <span class="hljs-string">`idcard`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">18</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">NULL</span>,
+  <span class="hljs-string">`age`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">NULL</span>,
+  <span class="hljs-string">`city`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">''</span>,
+  PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>)
+);
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`course`</span> (
+  <span class="hljs-string">`id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> AUTO_INCREMENT,
+  <span class="hljs-string">`name`</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">NULL</span>,
+  PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`id`</span>)
+);
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`score`</span> (
+  <span class="hljs-string">`student_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">'0'</span>,
+  <span class="hljs-string">`course_id`</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">'0'</span>,
+  <span class="hljs-string">`grade`</span> <span class="hljs-built_in">float</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-literal">NULL</span>,
+  PRIMARY <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`student_id`</span>,<span class="hljs-string">`course_id`</span>),
+  <span class="hljs-keyword">KEY</span> <span class="hljs-string">`fk_courseid`</span> (<span class="hljs-string">`course_id`</span>),
+  <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_courseid`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`course_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`course`</span> (<span class="hljs-string">`id`</span>),
+  <span class="hljs-keyword">CONSTRAINT</span> <span class="hljs-string">`fk_stuid`</span> <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (<span class="hljs-string">`student_id`</span>) <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">`student`</span> (<span class="hljs-string">`id`</span>)
+) <span class="hljs-keyword">ENGINE</span>=<span class="hljs-keyword">InnoDB</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">CHARSET</span>=utf8;
+
+</code></pre>
+<h2 id="t349. SQL">9. SQL <a href="#t349. SQL"> # </a></h2>
+<h3 id="t359.1 SQL是什么">9.1 SQL是什么 <a href="#t359.1 SQL是什么"> # </a></h3>
+<p>Structured Query Language：结构化查询语言</p>
+<h3 id="t369.2 为什么要用SQL">9.2 为什么要用SQL <a href="#t369.2 为什么要用SQL"> # </a></h3>
+<ol>
+<li>使用界面操作数据库不方便</li>
+<li>我们需要通过应用程序去操作数据库</li>
+</ol>
+<h3 id="t379.3 SQL组成">9.3 SQL组成 <a href="#t379.3 SQL组成"> # </a></h3>
+<h4 id="t389.3.1 DDL（data definition language）是数据定义语言">9.3.1 DDL（data definition language）是数据定义语言 <a href="#t389.3.1 DDL（data definition language）是数据定义语言"> # </a></h4>
+<p>主要的命令有<code>CREATE</code>、<code>ALTER</code>、<code>DROP</code>等，<strong>DDL</strong>主要是用在定义或改变表（TABLE）的结构，数据类型，表之间的链接和约束等初始化工作上，他们大多在建立表时使用</p>
+<h4 id="t399.3.2  DML（data manipulation language）是数据操纵语言">9.3.2  DML（data manipulation language）是数据操纵语言 <a href="#t399.3.2  DML（data manipulation language）是数据操纵语言"> # </a></h4>
+<p>它们是<code>SELECT</code>、<code>UPDATE、</code>INSERT<code>、</code>DELETE`，就象它的名字一样，这4条命令是用来对数据库里的数据进行操作的语言</p>
+<h4 id="t409.3.3   DCL（DataControlLanguage）是数据库控制语言">9.3.3   DCL（DataControlLanguage）是数据库控制语言 <a href="#t409.3.3   DCL（DataControlLanguage）是数据库控制语言"> # </a></h4>
+<p>是用来设置或更改数据库用户或角色权限的语句，包括（<code>grant</code>,<code>revoke</code>等）语句</p>
+<h3 id="t419.4  SQL运算符">9.4  SQL运算符 <a href="#t419.4  SQL运算符"> # </a></h3>
+<p>是一种符号，它是用来进行列间或者变量之间的比较和数学运算的</p>
+<h3 id="t429.4.1 算术运算符">9.4.1 算术运算符 <a href="#t429.4.1 算术运算符"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">运算符</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">+</td>
+<td style="text-align:left">加运算，求两个数或表达式相加的和，如1+1</td>
+</tr>
+<tr>
+<td style="text-align:left">-</td>
+<td style="text-align:left">减少减运算，求两个数或表达式相减的差，如4-1</td>
+</tr>
+<tr>
+<td style="text-align:left">*</td>
+<td style="text-align:left">乘运算，求两个数或表达式相乘的积，如2*2</td>
+</tr>
+<tr>
+<td style="text-align:left">/</td>
+<td style="text-align:left">除运算，求两个数或表达式相除的商，如6/4的值为1</td>
+</tr>
+<tr>
+<td style="text-align:left">%</td>
+<td style="text-align:left">取模运算，求两个数或表达式相除的余数，如：6%4的值为2</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>查询姓名全称</li>
+</ul>
+<h3 id="t439.4.2  逻辑运算符">9.4.2  逻辑运算符 <a href="#t439.4.2  逻辑运算符"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">运算符</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">AND</td>
+<td style="text-align:left">当且仅当两个布尔表达式都为true时，返回TRUE</td>
+</tr>
+<tr>
+<td style="text-align:left">OR</td>
+<td style="text-align:left">当且仅当两个布尔表达式都为false，返回FALSE</td>
+</tr>
+<tr>
+<td style="text-align:left">NOT</td>
+<td style="text-align:left">布尔表达式的值取反</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t449.4.3   比较运算符">9.4.3   比较运算符 <a href="#t449.4.3   比较运算符"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">运算符</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">=</td>
+<td style="text-align:left">等于</td>
+</tr>
+<tr>
+<td style="text-align:left">&gt;</td>
+<td style="text-align:left">大于</td>
+</tr>
+<tr>
+<td style="text-align:left">&lt;</td>
+<td style="text-align:left">小于</td>
+</tr>
+<tr>
+<td style="text-align:left">&lt;&gt;</td>
+<td style="text-align:left">不等于</td>
+</tr>
+<tr>
+<td style="text-align:left">&gt;=</td>
+<td style="text-align:left">大于等于</td>
+</tr>
+<tr>
+<td style="text-align:left">&lt;=</td>
+<td style="text-align:left">小于等于</td>
+</tr>
+<tr>
+<td style="text-align:left">!=</td>
+<td style="text-align:left">不等于</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t459.5 查询窗口">9.5 查询窗口 <a href="#t459.5 查询窗口"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/query.png" alt="query"></p>
+<h2 id="t469.6 数据操作语言">9.6 数据操作语言 <a href="#t469.6 数据操作语言"> # </a></h2>
+<h3 id="t479.6.1  插入数据行">9.6.1  插入数据行 <a href="#t479.6.1  插入数据行"> # </a></h3>
+<h4 id="t489.6.1.1 语法">9.6.1.1 语法 <a href="#t489.6.1.1 语法"> # </a></h4>
+<pre><code class="lang-sql"> <span class="hljs-keyword">INSERT</span>  [<span class="hljs-keyword">INTO</span>]  表名  [(列名)] <span class="hljs-keyword">VALUES</span>  (值列表)
+</code></pre>
+<h4 id="t499.6.1.2 插入记录">9.6.1.2 插入记录 <a href="#t499.6.1.2 插入记录"> # </a></h4>
+<p>向学生表插入一条记录, 姓名张三,身份证号123456,年龄30,城市北京</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> [school].[student]
+(<span class="hljs-keyword">name</span>,idcard,age,city)
+<span class="hljs-keyword">VALUES</span>
+(<span class="hljs-string">'张三'</span>,<span class="hljs-string">'123456'</span>,<span class="hljs-number">30</span>,<span class="hljs-string">'北京'</span>)
+</code></pre>
+<h4 id="t509.6.1.3 注意事项">9.6.1.3 注意事项 <a href="#t509.6.1.3 注意事项"> # </a></h4>
+<ul>
+<li>每次插入一行数据，不能只插入一部分数据，插入的数据是否有效将按照整行的完整性要求来检验</li>
+<li>每个数据值的数据类型、精度、位数必须与要应的列名精确匹配</li>
+<li>不能为标识符指定值</li>
+<li>如果某字段设置为不能为空，则必须插入数据</li>
+<li>插入数据时还要符合检查性约束的要求</li>
+<li>有缺省值的列，可以使用DEFAULT关键字来代替插入实际的值</li>
+</ul>
+<h3 id="t519.6.2  更新数据行">9.6.2  更新数据行 <a href="#t519.6.2  更新数据行"> # </a></h3>
+<h4 id="t529.6.2.1 语法">9.6.2.1 语法 <a href="#t529.6.2.1 语法"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">UPDATE</span> 表名 <span class="hljs-keyword">SET</span> 列名 = 更新值 [<span class="hljs-keyword">WHERE</span> 更新条件]
+</code></pre>
+<h4 id="t539.6.2.2 更新记录">9.6.2.2 更新记录 <a href="#t539.6.2.2 更新记录"> # </a></h4>
+<ul>
+<li>更新ID等于7的学生年龄改为40，城市改为上海<pre><code class="lang-sql"><span class="hljs-keyword">UPDATE</span> [school].[student]
+ <span class="hljs-keyword">SET</span> age = <span class="hljs-number">40</span>,city = <span class="hljs-string">'上海'</span>
+<span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">7</span>
+</code></pre>
+</li>
+</ul>
+<h4 id="t549.6.2.3 注意">9.6.2.3 注意 <a href="#t549.6.2.3 注意"> # </a></h4>
+<ul>
+<li>多列时用逗号隔开，一定要加更新条件以免错误更新</li>
+<li>多个联合条件使用 AND <code>id=7 and idcard='410787'</code></li>
+<li>判断某字段是否为空 <code>email is null or email = ''</code></li>
+</ul>
+<h3 id="t559.6.3 删除数据">9.6.3 删除数据 <a href="#t559.6.3 删除数据"> # </a></h3>
+<h4 id="t569.6.3.1 语法">9.6.3.1 语法 <a href="#t569.6.3.1 语法"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">DELETE</span> [<span class="hljs-keyword">FROM</span>]  表名 [<span class="hljs-keyword">WHERE</span> &lt;删除条件&gt;]
+</code></pre>
+<h4 id="t579.6.3.2 删除记录">9.6.3.2 删除记录 <a href="#t579.6.3.2 删除记录"> # </a></h4>
+<ul>
+<li>删除ID=7的学生记录<pre><code class="lang-sql"><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> [school].[student] <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">7</span>
+</code></pre>
+</li>
+</ul>
+<h4 id="t589.6.3.3 注意">9.6.3.3 注意 <a href="#t589.6.3.3 注意"> # </a></h4>
+<ul>
+<li>Delete语句是对整行进行操作，因此不需要提供列名</li>
+<li>如果要删除主表数据，则要先删除子表记录</li>
+</ul>
+<h3 id="t599.6.4 TRUNCATE 截断表">9.6.4 TRUNCATE 截断表 <a href="#t599.6.4 TRUNCATE 截断表"> # </a></h3>
+<p>截断整个表中的数据</p>
+<h4 id="t609.6.4.1 语法">9.6.4.1 语法 <a href="#t609.6.4.1 语法"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">TRUNCATE</span>  <span class="hljs-keyword">TABLE</span>  表名
+</code></pre>
+<h4 id="t619.6.4.2 截断学生表">9.6.4.2 截断学生表 <a href="#t619.6.4.2 截断学生表"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">TRUNCATE</span> <span class="hljs-keyword">TABLE</span> student
+</code></pre>
+<blockquote>
+<p> 数据全部清空,但表结构、列、约束等不被改动
+ 不能用于有外键约束引用的表
+ 标识列重新开始编号
+ 因为要删除的数据不会写入日志，数据也不能恢复，所以工作中请尽量不要使用此命令</p>
+</blockquote>
+<h2 id="t629.7  数据查询">9.7  数据查询 <a href="#t629.7  数据查询"> # </a></h2>
+<ul>
+<li>查询就是从客户端 发出查询请求数据库服务器，并从数据库返回查询结果的过程</li>
+<li>每次执行查询只是从数据表中提取数据，并按表的方式呈现出来</li>
+<li>查询产生的是虚拟表,并不会保存起来</li>
+</ul>
+<h3 id="t639.7.1  查询">9.7.1  查询 <a href="#t639.7.1  查询"> # </a></h3>
+<h4 id="t649.7.1.1 语法">9.7.1.1 语法 <a href="#t649.7.1.1 语法"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span>    &lt;列名&gt; 
+<span class="hljs-keyword">FROM</span>      &lt;表名&gt; 
+[<span class="hljs-keyword">WHERE</span>    &lt;查询条件表达式&gt;] 
+[<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> &lt;排序的列名&gt;[<span class="hljs-keyword">ASC</span>或<span class="hljs-keyword">DESC</span>]]
+</code></pre>
+<h4 id="t659.7.1.2 排序">9.7.1.2 排序 <a href="#t659.7.1.2 排序"> # </a></h4>
+<ul>
+<li>查询北京的学生信息，并按ID正序排列<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,idcard,age,city
+<span class="hljs-keyword">FROM</span> student
+<span class="hljs-keyword">WHERE</span> home= <span class="hljs-string">'北京'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">id</span> <span class="hljs-keyword">asc</span>
+</code></pre>
+<img src="http://img.zhufengpeixun.cn/selectquery.png" alt="selectquery"></li>
+</ul>
+<h4 id="t669.7.1.3  别名">9.7.1.3  别名 <a href="#t669.7.1.3  别名"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,idcard,age,city <span class="hljs-keyword">AS</span> home
+<span class="hljs-keyword">FROM</span> student
+<span class="hljs-keyword">WHERE</span> city= <span class="hljs-string">'山东'</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">id</span> <span class="hljs-keyword">asc</span>
+</code></pre>
+<h4 id="t679.7.1.4  查询空行">9.7.1.4  查询空行 <a href="#t679.7.1.4  查询空行"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,age,city
+<span class="hljs-keyword">FROM</span> student
+<span class="hljs-keyword">WHERE</span> city <span class="hljs-keyword">is</span> <span class="hljs-literal">null</span> <span class="hljs-keyword">or</span> city =<span class="hljs-string">''</span>
+</code></pre>
+<h4 id="t689.7.1.5  常量列">9.7.1.5  常量列 <a href="#t689.7.1.5  常量列"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,age,city,<span class="hljs-string">'中国'</span> <span class="hljs-keyword">as</span> country
+<span class="hljs-keyword">FROM</span> student
+</code></pre>
+<h4 id="t699.7.1.6  限制返回的行数">9.7.1.6  限制返回的行数 <a href="#t699.7.1.6  限制返回的行数"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,age,city,<span class="hljs-string">'中国'</span> <span class="hljs-keyword">as</span> country
+<span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">limit</span> <span class="hljs-number">2</span>
+</code></pre>
+<h4 id="t709.7.1.7  DISTINCT">9.7.1.7  DISTINCT <a href="#t709.7.1.7  DISTINCT"> # </a></h4>
+<ul>
+<li>查询同学们一共来自哪些不同的城市<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,age,<span class="hljs-keyword">DISTINCT</span> city,<span class="hljs-string">'中国'</span> <span class="hljs-keyword">as</span> country
+<span class="hljs-keyword">FROM</span> student 
+</code></pre>
+</li>
+</ul>
+<h4 id="t719.7.1.8  +">9.7.1.8  + <a href="#t719.7.1.8  +"> # </a></h4>
+<ul>
+<li>在MYSQL中+号只能用作于数字<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-number">1</span>+<span class="hljs-number">1</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-number">1</span>+<span class="hljs-string">'1'</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-number">1</span>+<span class="hljs-string">'zfpx'</span>  
+<span class="hljs-keyword">SELECT</span> <span class="hljs-number">1</span>+<span class="hljs-literal">null</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CONCAT</span>(last_name,first_name) <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">user</span>;
+</code></pre>
+</li>
+</ul>
+<h3 id="t729.7.1.7  练习">9.7.1.7  练习 <a href="#t729.7.1.7  练习"> # </a></h3>
+<h4 id="t739.7.1.7.1  准备数据">9.7.1.7.1  准备数据 <a href="#t739.7.1.7.1  准备数据"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">`student`</span>
+<span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`province`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`city`</span>,
+<span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`birthday`</span>  <span class="hljs-built_in">date</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`province`</span>,
+<span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`gender`</span>   <span class="hljs-built_in">int</span>(<span class="hljs-number">11</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`birthday`</span>,
+<span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span> <span class="hljs-string">`email`</span>  <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-literal">NULL</span> <span class="hljs-keyword">AFTER</span> <span class="hljs-string">`gender`</span>;
+
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/studenttable.png" alt="studenttable">
+<img src="http://img.zhufengpeixun.cn/coursetable.png" alt="coursetable">
+<img src="http://img.zhufengpeixun.cn/scoretable.png" alt="scoretable"></p>
+<pre><code class="lang-sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`student`</span>(<span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,gender,age,city,province,birthday,idcard,email) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'1'</span>, <span class="hljs-string">'郭靖'</span>, <span class="hljs-string">'1'</span>, <span class="hljs-string">'1'</span>, <span class="hljs-string">'济南'</span>, <span class="hljs-string">'山东省'</span>, <span class="hljs-string">'1982-09-03'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'1@qq.com'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`student`</span>(<span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,gender,age,city,province,birthday,idcard,email) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'2'</span>, <span class="hljs-string">'黄蓉'</span>, <span class="hljs-string">'2'</span>, <span class="hljs-string">'2'</span>, <span class="hljs-string">'济南'</span>, <span class="hljs-string">'山东省'</span>, <span class="hljs-string">'1982-09-03'</span>, <span class="hljs-number">0</span>, <span class="hljs-string">'2@qq.com'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`student`</span>(<span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,gender,age,city,province,birthday,idcard,email) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'3'</span>, <span class="hljs-string">'杨过'</span>, <span class="hljs-string">'3'</span>, <span class="hljs-string">'3'</span>, <span class="hljs-string">'终南山'</span>, <span class="hljs-string">'陕西省'</span>, <span class="hljs-string">'1979-09-03'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'3@qq.com'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`student`</span>(<span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,gender,age,city,province,birthday,idcard,email) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'4'</span>, <span class="hljs-string">'小龙女'</span>, <span class="hljs-string">'4'</span>, <span class="hljs-string">'4'</span>, <span class="hljs-string">'终南山'</span>, <span class="hljs-string">'陕西省'</span>, <span class="hljs-string">'1970-09-03'</span>, <span class="hljs-number">0</span>, <span class="hljs-string">'4@qq.com'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`student`</span>(<span class="hljs-keyword">id</span>,<span class="hljs-keyword">name</span>,gender,age,city,province,birthday,idcard,email) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'5'</span>, <span class="hljs-string">'欧阳锋'</span>, <span class="hljs-string">'5'</span>, <span class="hljs-string">'5'</span>, <span class="hljs-string">'白驼山'</span>, <span class="hljs-string">'新疆'</span>, <span class="hljs-string">'1989-09-09'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'5@qq.com'</span>);
+
+
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`course`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'1'</span>, <span class="hljs-string">'语文'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`course`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'2'</span>, <span class="hljs-string">'数学'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`course`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'3'</span>, <span class="hljs-string">'英语'</span>);
+
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'1'</span>, <span class="hljs-string">'1'</span>, <span class="hljs-string">'100'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'1'</span>, <span class="hljs-string">'2'</span>, <span class="hljs-string">'90'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'1'</span>, <span class="hljs-string">'3'</span>, <span class="hljs-string">'70'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'2'</span>, <span class="hljs-string">'1'</span>, <span class="hljs-string">'100'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'2'</span>, <span class="hljs-string">'2'</span>, <span class="hljs-string">'90'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'2'</span>, <span class="hljs-string">'3'</span>, <span class="hljs-string">'80'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'3'</span>, <span class="hljs-string">'1'</span>, <span class="hljs-string">'100'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'3'</span>, <span class="hljs-string">'2'</span>, <span class="hljs-string">'90'</span>);
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> <span class="hljs-string">`score`</span> <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">'3'</span>, <span class="hljs-string">'3'</span>, <span class="hljs-string">'80'</span>);
+
+</code></pre>
+<h4 id="t749.7.1.7.2  查询山东省的同学全部信息">9.7.1.7.2  查询山东省的同学全部信息 <a href="#t749.7.1.7.2  查询山东省的同学全部信息"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> student <span class="hljs-keyword">where</span> province = <span class="hljs-string">'山东'</span>;
+</code></pre>
+<h4 id="t759.7.1.7.3  查询山东省的男同学的全部信息">9.7.1.7.3  查询山东省的男同学的全部信息 <a href="#t759.7.1.7.3  查询山东省的男同学的全部信息"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> student <span class="hljs-keyword">where</span> province = <span class="hljs-string">'山东'</span> <span class="hljs-keyword">and</span> gender=<span class="hljs-number">1</span>;
+</code></pre>
+<h4 id="t769.7.1.7.4  查询没有填写电子邮箱的同学的姓名和身份证号">9.7.1.7.4  查询没有填写电子邮箱的同学的姓名和身份证号 <a href="#t769.7.1.7.4  查询没有填写电子邮箱的同学的姓名和身份证号"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">name</span>,idcard <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> email <span class="hljs-keyword">IS</span> <span class="hljs-literal">NULL</span>
+</code></pre>
+<h3 id="t779.7.1.8 排序">9.7.1.8 排序 <a href="#t779.7.1.8 排序"> # </a></h3>
+<h4 id="t789.7.1.8.1 把学生的分数按升序排列">9.7.1.8.1 把学生的分数按升序排列 <a href="#t789.7.1.8.1 把学生的分数按升序排列"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> score <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> grade <span class="hljs-keyword">asc</span>;
+</code></pre>
+<h4 id="t799.7.1.8.2 把学生的分数按降序排列">9.7.1.8.2 把学生的分数按降序排列 <a href="#t799.7.1.8.2 把学生的分数按降序排列"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> score <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> grade <span class="hljs-keyword">desc</span>;
+</code></pre>
+<h4 id="t809.7.1.8.3 课程编号按升序，成绩按降序">9.7.1.8.3 课程编号按升序，成绩按降序 <a href="#t809.7.1.8.3 课程编号按升序，成绩按降序"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> score <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> course_id <span class="hljs-keyword">asc</span>, grade <span class="hljs-keyword">desc</span>;
+</code></pre>
+<h2 id="t819.8 函数">9.8 函数 <a href="#t819.8 函数"> # </a></h2>
+<h3 id="t829.8.1  字符函数">9.8.1  字符函数 <a href="#t829.8.1  字符函数"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数名称</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">CONCAT</td>
+<td style="text-align:left">字符串连接</td>
+</tr>
+<tr>
+<td style="text-align:left">CONCAT_WS</td>
+<td style="text-align:left">使用指定的分隔符进行字符连接</td>
+</tr>
+<tr>
+<td style="text-align:left">FORMAT</td>
+<td style="text-align:left">数字格式化</td>
+</tr>
+<tr>
+<td style="text-align:left">LOWER</td>
+<td style="text-align:left">转小写字母</td>
+</tr>
+<tr>
+<td style="text-align:left">UPPER</td>
+<td style="text-align:left">转大写字母</td>
+</tr>
+<tr>
+<td style="text-align:left">LEFT</td>
+<td style="text-align:left">返回字符串s开始的最左边n个字符</td>
+</tr>
+<tr>
+<td style="text-align:left">RIGHT</td>
+<td style="text-align:left">返回字符串s开始的最左边n个字符</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t839.8.1.1  LENGTH">9.8.1.1  LENGTH <a href="#t839.8.1.1  LENGTH"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">LENGTH</span>(<span class="hljs-string">'zfpx'</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">LENGTH</span>(<span class="hljs-string">'珠峰培训'</span>);
+<span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">VARIABLES</span> <span class="hljs-keyword">like</span> <span class="hljs-string">'%char%'</span>;
+</code></pre>
+<h4 id="t849.8.1.2  拼接字符串 [CONCAT]">9.8.1.2  拼接字符串 [CONCAT] <a href="#t849.8.1.2  拼接字符串 [CONCAT]"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CONCAT</span>(last_name,<span class="hljs-string">'_'</span>,first_name) <span class="hljs-keyword">FROM</span> employees;
+</code></pre>
+<h4 id="t859.8.1.3  拼接字符串 [UPPER]">9.8.1.3  拼接字符串 [UPPER] <a href="#t859.8.1.3  拼接字符串 [UPPER]"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">UPPER</span>(<span class="hljs-string">'zfpx'</span>) <span class="hljs-keyword">FROM</span> employees;
+</code></pre>
+<h4 id="t869.8.1.4  拼接字符串 [LOWER]">9.8.1.4  拼接字符串 [LOWER] <a href="#t869.8.1.4  拼接字符串 [LOWER]"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">LOWER</span>(<span class="hljs-string">'ZFPX'</span>) <span class="hljs-keyword">FROM</span> employees;
+</code></pre>
+<h4 id="t879.8.1.5  截取字符串 [SUBSTR]">9.8.1.5  截取字符串 [SUBSTR] <a href="#t879.8.1.5  截取字符串 [SUBSTR]"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">SUBSTR</span>(<span class="hljs-string">'zfpx'</span>,<span class="hljs-number">2</span>);<span class="hljs-comment">-- 截取从指定索引处开始的所有的字符</span>
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">SUBSTR</span>(<span class="hljs-string">'zfpx'</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>);<span class="hljs-comment">--截取从指定索引处开始的指定数量的字符</span>
+</code></pre>
+<h4 id="t889.8.1.6  姓名的首字符大写，其它字符小写然后用_拼接">9.8.1.6  姓名的首字符大写，其它字符小写然后用_拼接 <a href="#t889.8.1.6  姓名的首字符大写，其它字符小写然后用_拼接"> # </a></h4>
+<pre><code class="lang-sql"> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CONCAT</span>(<span class="hljs-keyword">UPPER</span>(<span class="hljs-keyword">SUBSTR</span>(last_name,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)),<span class="hljs-string">'_'</span>,<span class="hljs-keyword">LOWER</span>(<span class="hljs-keyword">SUBSTR</span>(last_name,<span class="hljs-number">2</span>)));
+</code></pre>
+<h4 id="t899.8.1.7  返回子串在原始字符串的起始索引">9.8.1.7  返回子串在原始字符串的起始索引 <a href="#t899.8.1.7  返回子串在原始字符串的起始索引"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">INSTR</span>(<span class="hljs-string">'zfpx'</span>,<span class="hljs-string">'f'</span>);
+</code></pre>
+<h4 id="t909.8.1.8  去掉左右空格[TRIM]">9.8.1.8  去掉左右空格[TRIM] <a href="#t909.8.1.8  去掉左右空格[TRIM]"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">TRIM</span>(<span class="hljs-string">'  zfpx  '</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">LTRIM</span>(<span class="hljs-string">'  zfpx  '</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">RTRIM</span>(<span class="hljs-string">'  zfpx  '</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">TRIM</span>(<span class="hljs-string">'x'</span> <span class="hljs-keyword">FROM</span> <span class="hljs-string">'xxzfpxxx'</span>);
+</code></pre>
+<h4 id="t919.8.1.9  用空格补齐[LPAD]">9.8.1.9  用空格补齐[LPAD] <a href="#t919.8.1.9  用空格补齐[LPAD]"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">LPAD</span>(<span class="hljs-string">'zfpx'</span>,<span class="hljs-number">10</span>,<span class="hljs-string">'@'</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">LPAD</span>(<span class="hljs-string">'1'</span>,<span class="hljs-number">8</span>,<span class="hljs-string">'0'</span>);
+<span class="hljs-keyword">SELECT</span> RPAD(<span class="hljs-string">'1'</span>,<span class="hljs-number">8</span>,<span class="hljs-string">'0'</span>);
+</code></pre>
+<h4 id="t929.8.1.10  替换">9.8.1.10  替换 <a href="#t929.8.1.10  替换"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">REPLACE</span>(<span class="hljs-string">'zfpx'</span>,<span class="hljs-string">'f'</span>,<span class="hljs-string">'q'</span>)
+</code></pre>
+<h4 id="t939.8.1.11  FORMAT">9.8.1.11  FORMAT <a href="#t939.8.1.11  FORMAT"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">FORMAT</span>(<span class="hljs-number">100000</span>,<span class="hljs-number">2</span>); 100,000.00
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">format</span>(<span class="hljs-number">100.31111</span>,<span class="hljs-number">2</span>) <span class="hljs-number">100.31</span>
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">format</span>(<span class="hljs-number">100.31111</span>,<span class="hljs-number">0</span>); 100
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">FORMAT</span>(<span class="hljs-number">423423234.65534453</span>,<span class="hljs-number">2</span>); 423,423,234.66
+</code></pre>
+<h4 id="t949.8.1.12 LEFT RIGHT">9.8.1.12 LEFT RIGHT <a href="#t949.8.1.12 LEFT RIGHT"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">left</span>(<span class="hljs-string">'abcde12345'</span>,<span class="hljs-number">5</span>);   //abcde
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">left</span>(<span class="hljs-string">'abcde12345'</span>,<span class="hljs-number">5</span>);   //12345
+</code></pre>
+<h3 id="t959.8.2 数学函数">9.8.2 数学函数 <a href="#t959.8.2 数学函数"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数名称</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">CEIL</td>
+<td style="text-align:left">向上取整</td>
+</tr>
+<tr>
+<td style="text-align:left">FLOOR</td>
+<td style="text-align:left">向下取整数</td>
+</tr>
+<tr>
+<td style="text-align:left">DIV</td>
+<td style="text-align:left">整数取</td>
+</tr>
+<tr>
+<td style="text-align:left">MOD</td>
+<td style="text-align:left">取余(取模)</td>
+</tr>
+<tr>
+<td style="text-align:left">POWER</td>
+<td style="text-align:left">幂运算</td>
+</tr>
+<tr>
+<td style="text-align:left">ROUND</td>
+<td style="text-align:left">四舍五入</td>
+</tr>
+<tr>
+<td style="text-align:left">TRUNCATE</td>
+<td style="text-align:left">数字截取</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t969.8.2.1 四舍五入">9.8.2.1 四舍五入 <a href="#t969.8.2.1 四舍五入"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ROUND</span>(<span class="hljs-number">2.5</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ROUND</span>(<span class="hljs-number">2.555</span>,<span class="hljs-number">2</span>);
+</code></pre>
+<h4 id="t979.8.2.2 向上取整">9.8.2.2 向上取整 <a href="#t979.8.2.2 向上取整"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CEIL</span>(<span class="hljs-number">1.00</span>);
+</code></pre>
+<h4 id="t989.8.2.3 向下取整">9.8.2.3 向下取整 <a href="#t989.8.2.3 向下取整"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">FLOOR</span>(<span class="hljs-number">1.00</span>);
+</code></pre>
+<h4 id="t999.8.2.4 截断">9.8.2.4 截断 <a href="#t999.8.2.4 截断"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">TRUNCATE</span>(<span class="hljs-number">1.66</span>,<span class="hljs-number">1</span>);
+</code></pre>
+<h4 id="t1009.8.2.5 取余">9.8.2.5 取余 <a href="#t1009.8.2.5 取余"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">mod</span>(<span class="hljs-number">10</span>,<span class="hljs-number">3</span>);
+</code></pre>
+<h3 id="t1019.8.3 日期函数">9.8.3 日期函数 <a href="#t1019.8.3 日期函数"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">函数名称</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">NOW</td>
+<td style="text-align:left">当前日期和时间</td>
+</tr>
+<tr>
+<td style="text-align:left">CURDATE</td>
+<td style="text-align:left">当前日期</td>
+</tr>
+<tr>
+<td style="text-align:left">CURTIME</td>
+<td style="text-align:left">当前时间</td>
+</tr>
+<tr>
+<td style="text-align:left">DATE_ADD</td>
+<td style="text-align:left">日期变化</td>
+</tr>
+<tr>
+<td style="text-align:left">DATEDIFF</td>
+<td style="text-align:left">计算日期差</td>
+</tr>
+<tr>
+<td style="text-align:left">DATE_FORMAT</td>
+<td style="text-align:left">日期格式化</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t1029.8.3.1 返回日期时间">9.8.3.1 返回日期时间 <a href="#t1029.8.3.1 返回日期时间"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NOW</span>():
+</code></pre>
+<h4 id="t1039.8.3.2 返回日期">9.8.3.2 返回日期 <a href="#t1039.8.3.2 返回日期"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CURDATE</span>():
+</code></pre>
+<h4 id="t1049.8.3.3 返回日期">9.8.3.3 返回日期 <a href="#t1049.8.3.3 返回日期"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CURTIME</span>():
+</code></pre>
+<h4 id="t1059.8.3.4 返回日期中指定的部分">9.8.3.4 返回日期中指定的部分 <a href="#t1059.8.3.4 返回日期中指定的部分"> # </a></h4>
+<p>年 月 日 小时 分钟 秒</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">YEAR</span>(<span class="hljs-keyword">NOW</span>());
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">MONTH</span>(<span class="hljs-keyword">NOW</span>());
+<span class="hljs-keyword">SELECT</span> MONTHNAME(<span class="hljs-keyword">NOW</span>());
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DAY</span>(<span class="hljs-keyword">NOW</span>());
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">HOUR</span>(<span class="hljs-keyword">NOW</span>());
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">MINUTE</span>(<span class="hljs-keyword">NOW</span>());
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">SECOND</span>(<span class="hljs-keyword">NOW</span>());
+</code></pre>
+<h4 id="t1069.8.3.5 str_to_date">9.8.3.5 str_to_date <a href="#t1069.8.3.5 str_to_date"> # </a></h4>
+<p>将日期格式的字符串转成指定格式的日期</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">STR_TO_DATE</span>(<span class="hljs-string">'2018-09-09'</span>,<span class="hljs-string">'%Y-%m-%d'</span>)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">序号</th>
+<th style="text-align:left">格式符</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">%Y</td>
+<td>4位的年份</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">%y</td>
+<td>2位的年份</td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">%m</td>
+<td>月份(01,02)</td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">%c</td>
+<td>月份(1,2)</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">%d</td>
+<td>日(01,02)</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">%H</td>
+<td>小时(24小时制)</td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">%h</td>
+<td>小时(12小时制)</td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">%i</td>
+<td>分钟(00,01)</td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">%s</td>
+<td>秒(00,01)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t1079.8.3.6">9.8.3.6 <a href="#t1079.8.3.6"> # </a></h4>
+<p>查询入职日期为1984-8-4的员工信息</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> employees <span class="hljs-keyword">WHERE</span> hiredate = <span class="hljs-keyword">STR_TO_DATE</span>(<span class="hljs-string">'12-30 1984'</span>,<span class="hljs-string">'%m-%d %Y'</span>);
+</code></pre>
+<h4 id="t1089.8.3.7 DATE_FORMAT">9.8.3.7 DATE_FORMAT <a href="#t1089.8.3.7 DATE_FORMAT"> # </a></h4>
+<p>将日期转换成指定字符串</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DATE_FORMAT</span>(<span class="hljs-keyword">NOW</span>(),<span class="hljs-string">'%Y年%m月%d日'</span>)
+</code></pre>
+<h4 id="t1099.8.3.8 DATE_ADD">9.8.3.8 DATE_ADD <a href="#t1099.8.3.8 DATE_ADD"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DATE_ADD</span>(<span class="hljs-keyword">NOW</span>(),<span class="hljs-built_in">INTERVAL</span> <span class="hljs-number">365</span> <span class="hljs-keyword">DAY</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DATE_ADD</span>(<span class="hljs-keyword">NOW</span>(),<span class="hljs-built_in">INTERVAL</span> <span class="hljs-number">1</span> <span class="hljs-keyword">MONTH</span>);
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DATE_ADD</span>(<span class="hljs-keyword">NOW</span>(),<span class="hljs-built_in">INTERVAL</span> <span class="hljs-number">1</span> <span class="hljs-keyword">YEAR</span>);
+</code></pre>
+<h4 id="t1109.8.3.9 DATEDIFF">9.8.3.9 DATEDIFF <a href="#t1109.8.3.9 DATEDIFF"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DATEDIFF</span>(<span class="hljs-string">'2019-1-1'</span>,<span class="hljs-keyword">NOW</span>());
+</code></pre>
+<h3 id="t1119.8.4 其它函数">9.8.4 其它函数 <a href="#t1119.8.4 其它函数"> # </a></h3>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> CONNECTION_ID();
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DATABASE</span>();
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">VERSION</span>();
+<span class="hljs-keyword">select</span> <span class="hljs-keyword">LAST_INSERT_ID</span>();
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">USER</span>();
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">MD5</span>(<span class="hljs-string">'123456'</span>);//摘要算法
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">PASSWORD</span>(<span class="hljs-string">'123456'</span>);//修改当前用户的密码
+<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">User</span>,<span class="hljs-keyword">Password</span> <span class="hljs-keyword">from</span> mysql.user;
+</code></pre>
+<h3 id="t1129.8.5 流程控制函数">9.8.5 流程控制函数 <a href="#t1129.8.5 流程控制函数"> # </a></h3>
+<h4 id="t1139.8.5.1 IF">9.8.5.1 IF <a href="#t1139.8.5.1 IF"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">IF</span>(<span class="hljs-number">1</span>&gt;<span class="hljs-number">0</span>,<span class="hljs-string">'A'</span>,<span class="hljs-string">'B'</span>);
+</code></pre>
+<h4 id="t1149.8.5.2 CASE函数">9.8.5.2 CASE函数 <a href="#t1149.8.5.2 CASE函数"> # </a></h4>
+<pre><code class="lang-sql">CASE 要判断的字段和表达式
+WHEN 常量1 then 要显示的值或语句1
+WHEN 常量2 then 要显示的值或语句2
+ELSE 要显示的值
+<span class="hljs-keyword">END</span>
+</code></pre>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> 
+<span class="hljs-keyword">CASE</span> 
+<span class="hljs-keyword">WHEN</span> grade&lt;<span class="hljs-number">60</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'不及格'</span>
+<span class="hljs-keyword">WHEN</span> grade&gt;=<span class="hljs-number">60</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'及格'</span>
+<span class="hljs-keyword">ELSE</span> <span class="hljs-string">'未知'</span>
+<span class="hljs-keyword">END</span>
+<span class="hljs-keyword">FROM</span> score;
+</code></pre>
+<pre><code class="lang-sql"><span class="hljs-keyword">SELECT</span> 
+<span class="hljs-keyword">CASE</span> <span class="hljs-keyword">level</span>
+<span class="hljs-keyword">WHEN</span> <span class="hljs-string">'A'</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'优秀'</span>
+<span class="hljs-keyword">WHEN</span> <span class="hljs-string">'B'</span> <span class="hljs-keyword">then</span> <span class="hljs-string">'良好'</span>
+<span class="hljs-keyword">ELSE</span> <span class="hljs-string">'未知'</span>
+<span class="hljs-keyword">END</span>
+<span class="hljs-keyword">FROM</span> score;
+</code></pre>
+<h3 id="t1159.9 自定义函数">9.9 自定义函数 <a href="#t1159.9 自定义函数"> # </a></h3>
+<ul>
+<li>自定义函数是对MySQL的扩展，使用方式和内置函数相同</li>
+<li>函数必须要有参数和返回值</li>
+<li>函数可以接收任意类型的值，也可以接收这些类型的参数</li>
+<li>函数体由合法的SQL语句组成</li>
+<li>函数体可以是简单的SELECT语句或INSERT语句，如果是复合结构要用BEGIN...END</li>
+<li>函数体也可以包含声明，循环和流程控制</li>
+<li>返回值只能有一个</li>
+</ul>
+<h4 id="t1169.9.1 语法">9.9.1 语法 <a href="#t1169.9.1 语法"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">FUNCTION</span> func_name() <span class="hljs-keyword">RETURNS</span>  <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">64</span>)
+<span class="hljs-keyword">body</span>
+</code></pre>
+<h4 id="t1179.9.2 znow">9.9.2 znow <a href="#t1179.9.2 znow"> # </a></h4>
+<ul>
+<li>注意函数名一定要跟着小括号表示参数</li>
+</ul>
+<pre><code class="lang-sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">FUNCTION</span> znow() <span class="hljs-keyword">RETURNS</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">30</span>)
+<span class="hljs-keyword">RETURN</span> <span class="hljs-keyword">DATE_FORMAT</span>(<span class="hljs-keyword">NOW</span>(),<span class="hljs-string">'%Y年%m月%d日 %H点:%i分%s秒'</span>);
+</code></pre>
+<h4 id="t1189.9.3 zadd">9.9.3 zadd <a href="#t1189.9.3 zadd"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">FUNCTION</span> zadd(num1 <span class="hljs-built_in">INT</span>,num2 <span class="hljs-built_in">INT</span>) <span class="hljs-keyword">RETURNS</span> <span class="hljs-built_in">INT</span>
+<span class="hljs-keyword">RETURN</span> num1+num2;
+</code></pre>
+<h4 id="t1199.9.4 addUser">9.9.4 addUser <a href="#t1199.9.4 addUser"> # </a></h4>
+<pre><code class="lang-sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> stu(<span class="hljs-keyword">id</span> <span class="hljs-built_in">int</span> PRIMARY <span class="hljs-keyword">KEY</span> AUTO_INCREMENT,<span class="hljs-keyword">name</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>));
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">FUNCTION</span> addUser(<span class="hljs-keyword">name</span> <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>)) <span class="hljs-keyword">RETURNS</span> <span class="hljs-built_in">INT</span>
+<span class="hljs-keyword">BEGIN</span>
+  <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> stu(<span class="hljs-keyword">name</span>) <span class="hljs-keyword">VALUES</span>(<span class="hljs-keyword">name</span>);
+  RETURN LAST_INSERT_ID();
+<span class="hljs-keyword">END</span>
+
+<span class="hljs-keyword">SELECT</span> addUser(<span class="hljs-string">'zfpx'</span>);
+<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">FUNCTION</span> addUser
+</code></pre>
+<h3 id="t1209.10 模糊查询">9.10 模糊查询 <a href="#t1209.10 模糊查询"> # </a></h3>
+<p>就是查询的条件是模糊的，不是特别明确的</p>
+<h4 id="t1219.10.1 通配符">9.10.1 通配符 <a href="#t1219.10.1 通配符"> # </a></h4>
+<p>代替一个或多个真正的字符，与LIKE 关键字一起使用</p>
+<ul>
+<li><code>_</code>表示一个任意字符  </li>
+<li><code>%</code>表示任意长度的字符串</li>
+</ul>
+<h4 id="t1229.10.2  BETWEEN AND">9.10.2  BETWEEN AND <a href="#t1229.10.2  BETWEEN AND"> # </a></h4>
+<p>查询某一列在指定的规范内的记录，包括两个边界</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> score <span class="hljs-keyword">where</span> grade <span class="hljs-keyword">between</span> <span class="hljs-number">80</span> <span class="hljs-keyword">and</span> <span class="hljs-number">100</span>
+</code></pre>
+<h4 id="t1239.10.3  IN">9.10.3  IN <a href="#t1239.10.3  IN"> # </a></h4>
+<p>查询某一列中的值在列出的内容列表中</p>
+<pre><code class="lang-sql"><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> student <span class="hljs-keyword">where</span> city <span class="hljs-keyword">in</span> (<span class="hljs-string">'北京'</span>,<span class="hljs-string">'上海'</span>,<span class="hljs-string">'广东'</span>)
+</code></pre>
+<h4 id="t1249.10.4 IS NUL">9.10.4 IS NUL <a href="#t1249.10.4 IS NUL"> # </a></h4>
+<ul>
+<li>查询没有邮箱的 IS NUL</li>
+<li>查询有邮箱的 IS NOT NULL</li>
+</ul>
+<h2 id="t12510. DCL">10. DCL <a href="#t12510. DCL"> # </a></h2>
+<h3 id="t12610.1 创建用户">10.1 创建用户 <a href="#t12610.1 创建用户"> # </a></h3>
+<pre><code class="lang-js">CREATE USER 用户名@访问地址 IDENTIFIED BY <span class="hljs-string">'密码'</span>
+CREATE USER user1@localhost IDENTIFIED BY <span class="hljs-string">'123456'</span>
+</code></pre>
+<h3 id="t12710.2 授予权限">10.2 授予权限 <a href="#t12710.2 授予权限"> # </a></h3>
+<pre><code class="lang-js">GRANT 权限<span class="hljs-number">1</span>,权限<span class="hljs-number">2</span>,,, ON 数据库.* TO 用户名
+
+GRANT CREATE,DROP ON db1.* TO user1@localhost;
+</code></pre>
+<h3 id="t12810.3 授予权限">10.3 授予权限 <a href="#t12810.3 授予权限"> # </a></h3>
+<pre><code class="lang-js">REVOKE 权限<span class="hljs-number">1</span>，权限<span class="hljs-number">2</span>，，，ON 数据库.* FROM 用户名;
+REVOKE CREATE,DROP ONT db1.* FROM user1@localhost;
+</code></pre>
+<h3 id="t12910.4 查看用户权限">10.4 查看用户权限 <a href="#t12910.4 查看用户权限"> # </a></h3>
+<pre><code class="lang-js">SHOW GRANTS FROM 用户名
+SHOW GRANTS FROM user1@localhost;
+</code></pre>
+<h3 id="t13010.5 删除用户">10.5 删除用户 <a href="#t13010.5 删除用户"> # </a></h3>
+<pre><code class="lang-js">DROP USER 用户名
+DROP USER user1@localhost;
+</code></pre>
+<h3 id="t13110.6 修改密码">10.6 修改密码 <a href="#t13110.6 修改密码"> # </a></h3>
+<pre><code class="lang-js">UPDATE USER SET PASSWORD=PASSWORD(<span class="hljs-string">'password'</span>) WHERE User=<span class="hljs-string">'username'</span> and Host=<span class="hljs-string">'localhost'</span>;
+FLUSH PRIVILEGES;
+</code></pre>
+<h2 id="t13211. 存储过程">11. 存储过程 <a href="#t13211. 存储过程"> # </a></h2>
+<ul>
+<li>大多数SQL语句都是针对一个或多个表的单条语句。但是并不是所有的操作都是可以用一条语句来完成的，经常有一些操作是需要多条语句配合才能完成。我们引入的存储过程（Stored Procedure）是一组为了完成特定功能的SQL语句集，经编译后存储在数据库中，用户通过指定存储过程的名字并给定参数（如果该存储过程带有参数）来调用执行它</li>
+</ul>
+<h3 id="t13311.1 语法">11.1 语法 <a href="#t13311.1 语法"> # </a></h3>
+<pre><code class="lang-js">CREATE PROCEDURE([[IN |OUT |INOUT ] 参数名 数据类形...])
+</code></pre>
+<h3 id="t13411.2 调用">11.2 调用 <a href="#t13411.2 调用"> # </a></h3>
+<ul>
+<li>因为存储过程实际上是一种函数,所以存储过程名后需要有 () 符号(即使不传递参数也需要)<pre><code class="lang-js">CALL Avg_Price()
+</code></pre>
+</li>
+</ul>
+<h3 id="t13511.3 删除">11.3 删除 <a href="#t13511.3 删除"> # </a></h3>
+<pre><code class="lang-js">DROP PROCEDURE IF EXISTS Avg_Price;
+</code></pre>
+<h3 id="t13611.4 参数">11.4 参数 <a href="#t13611.4 参数"> # </a></h3>
+<ul>
+<li>存储过程并不显示结果，而是把结果返回给你指定的变量</li>
+</ul>
+<pre><code class="lang-js">create procedure sum (<span class="hljs-keyword">in</span> a int,<span class="hljs-keyword">in</span> b int,out result int)
+begin
+select a+b INTO result;
+end
+
+call sum5(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,@result);
+select @result;
+</code></pre>
+<h2 id="t13712. 索引">12. 索引 <a href="#t13712. 索引"> # </a></h2>
+<ul>
+<li>索引可以提高数据库的查询速度</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/treeindex.jpg" alt="treeindex"></p>
+<h3 id="t13812.1 准备数据">12.1 准备数据 <a href="#t13812.1 准备数据"> # </a></h3>
+<pre><code class="lang-js">-- 构建一个<span class="hljs-number">8388608</span>条记录的数据 
+
+-- 创建用户表
+create table user(
+  id int,
+    username varchar(<span class="hljs-number">64</span>),
+    userno int
+)
+
+-- 创建生成随机字符串的函数
+CREATE FUNCTION <span class="hljs-string">`rand_string`</span>(n INT) RETURNS varchar(<span class="hljs-number">255</span>)
+BEGIN 
+DECLARE chars_str varchar(<span class="hljs-number">100</span>) DEFAULT <span class="hljs-string">'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'</span>; 
+DECLARE return_str varchar(<span class="hljs-number">255</span>) DEFAULT <span class="hljs-string">''</span>; 
+DECLARE i INT DEFAULT <span class="hljs-number">0</span>; 
+WHILE i &lt; n DO 
+SET return_str = concat(return_str,substring(chars_str , FLOOR(<span class="hljs-number">1</span> + RAND()*<span class="hljs-number">62</span> ),<span class="hljs-number">1</span>)); 
+SET i = i +<span class="hljs-number">1</span>; 
+END WHILE; 
+RETURN return_str; 
+END; 
+
+
+-- 产生随机数字 
+create <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rand_num</span>(<span class="hljs-params"></span>) 
+<span class="hljs-title">returns</span> <span class="hljs-title">int</span>(<span class="hljs-params"><span class="hljs-number">5</span></span>) 
+<span class="hljs-title">begin</span>  
+<span class="hljs-title">declare</span> <span class="hljs-title">i</span> <span class="hljs-title">int</span> <span class="hljs-title">default</span> 0; 
+<span class="hljs-title">set</span> <span class="hljs-title">i</span> = <span class="hljs-title">floor</span>(<span class="hljs-params"><span class="hljs-number">10</span>+rand(</span>)*500); 
+<span class="hljs-title">return</span> <span class="hljs-title">i</span>; 
+<span class="hljs-title">end</span>
+
+-- 创建存储过程，向用户表添加海量数据 
+
+<span class="hljs-title">create</span> <span class="hljs-title">procedure</span> <span class="hljs-title">insert_user</span>(<span class="hljs-params">in start int(<span class="hljs-number">10</span></span>),<span class="hljs-title">in</span> <span class="hljs-title">max_num</span> <span class="hljs-title">int</span>(<span class="hljs-params"><span class="hljs-number">10</span></span>))
+ <span class="hljs-title">begin</span>
+   <span class="hljs-title">declare</span> <span class="hljs-title">i</span> <span class="hljs-title">int</span>;
+   <span class="hljs-title">set</span> <span class="hljs-title">i</span>=0;
+   <span class="hljs-title">while</span> <span class="hljs-title">i</span>&lt;<span class="hljs-title">max_num</span> <span class="hljs-title">do</span>
+     <span class="hljs-title">set</span> <span class="hljs-title">i</span>=<span class="hljs-title">i</span>+1;
+         <span class="hljs-title">insert</span> <span class="hljs-title">into</span> <span class="hljs-title">user</span>(<span class="hljs-params">id,username,userno</span>) <span class="hljs-title">values</span>(<span class="hljs-params">(start+i</span>),<span class="hljs-title">rand_string</span>(<span class="hljs-params"><span class="hljs-number">6</span></span>),<span class="hljs-title">rand_num</span>(<span class="hljs-params"></span>));
+   <span class="hljs-title">end</span> <span class="hljs-title">while</span>;
+ <span class="hljs-title">end</span>;
+<span class="hljs-title">call</span> <span class="hljs-title">insert_user</span>(<span class="hljs-params"><span class="hljs-number">1</span>,<span class="hljs-number">8388608</span></span>);
+</span></code></pre>
+<h3 id="t13912.2 创建普通索引">12.2 创建普通索引 <a href="#t13912.2 创建普通索引"> # </a></h3>
+<pre><code class="lang-js">create table user(id int primary key,name varchar(<span class="hljs-number">32</span>),email varchar(<span class="hljs-number">32</span>));
+alter table user add index(name);
+create index idx_name on  user(name);
+</code></pre>
+<h3 id="t14012.3 查看索引">12.3 查看索引 <a href="#t14012.3 查看索引"> # </a></h3>
+<pre><code class="lang-js">show index <span class="hljs-keyword">from</span> 表名;
+show index <span class="hljs-keyword">from</span> user
+</code></pre>
+<h3 id="t14112.4 删除索引">12.4 删除索引 <a href="#t14112.4 删除索引"> # </a></h3>
+<pre><code class="lang-js">alter table 表名 drop primary;
+alter table 表名 drop index 索引名;
+drop index 索引名 on 表名;
+</code></pre>
+<h3 id="t14212.5 慢查询">12.5 慢查询 <a href="#t14212.5 慢查询"> # </a></h3>
+<pre><code class="lang-js">explain
+select * <span class="hljs-keyword">from</span> users where userno=<span class="hljs-number">4593</span>;
+alter table users add index(userno);
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/mysqlexplain.jpg" alt="mysqlexplain"></p>
+<h3 id="t14312.6 索引创建的原则">12.6 索引创建的原则 <a href="#t14312.6 索引创建的原则"> # </a></h3>
+<ul>
+<li>比较频繁作为查询条件的字段应该创建索引</li>
+<li>唯一性太差的字段不适合单独创建索引，即使频繁作为查询条件</li>
+<li>更新非常频繁的字段不适合作创建索引</li>
+<li>不会出现在where子句中的字段不该创建索引</li>
+</ul>
+
+    

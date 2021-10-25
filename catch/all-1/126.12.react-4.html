@@ -1,0 +1,1613 @@
+
+        <h2 id="t01. DOM事件">1. DOM事件 <a href="#t01. DOM事件"> # </a></h2>
+<h3 id="t11.1 事件">1.1 事件 <a href="#t11.1 事件"> # </a></h3>
+<ul>
+<li>事件是用户或浏览器自身执行的某种动作，而响应某个事件的函数叫做事件处理程序</li>
+</ul>
+<h3 id="t21.2 DOM事件流">1.2 DOM事件流 <a href="#t21.2 DOM事件流"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/6f1dae04a2159507c0875343ca202169" alt="6f1dae04a2159507c0875343ca202169"></p>
+<ul>
+<li>事件流包含三个阶段<ul>
+<li>事件捕获阶段</li>
+<li>处于目标阶段</li>
+<li>事件冒泡阶段</li>
+</ul>
+</li>
+<li>首先发生的是事件捕获，然后是实际的目标接收到事件，最后阶段是冒泡阶段</li>
+</ul>
+<h4 id="t31.2.1  事件捕获">1.2.1  事件捕获 <a href="#t31.2.1  事件捕获"> # </a></h4>
+<ul>
+<li>是先由最上一级的节点先接收事件,然后向下传播到具体的节点 <code>document-&gt;body-&gt;div-&gt;button</code></li>
+</ul>
+<h4 id="t41.2.2  目标阶段">1.2.2  目标阶段 <a href="#t41.2.2  目标阶段"> # </a></h4>
+<ul>
+<li>在目标节点上触发,称为目标阶段</li>
+<li>事件目标是真正触发事件的对象</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//w3c浏览器：event.target</span>
+<span class="hljs-comment">//IE6、7、8： event.srcElement</span>
+<span class="hljs-keyword">let</span> target = event.target || event.srcElement;
+</code></pre>
+<h4 id="t51.2.3  事件冒泡">1.2.3  事件冒泡 <a href="#t51.2.3  事件冒泡"> # </a></h4>
+<ul>
+<li>事件开始时由最具体的元素(文档中嵌套层次最深的那个节点)接收,然后逐级向上传播  <code>button-&gt;div-&gt;body-&gt;document</code></li>
+</ul>
+<h3 id="t61.3 addEventListener">1.3 addEventListener <a href="#t61.3 addEventListener"> # </a></h3>
+<ul>
+<li>任何发生在W3C事件模型中的事件，首是进入捕获阶段，直到达到目标元素，再进入冒泡阶段</li>
+<li>可以选择是在捕获阶段还是冒泡阶段绑定事件处理函数</li>
+<li><code>useCapture</code>参数是<code>true</code>，则在捕获阶段绑定函数，反之<code>false</code>，在冒泡阶段绑定函数</li>
+</ul>
+<pre><code class="lang-js">element.addEventListener(event, <span class="hljs-function"><span class="hljs-keyword">function</span>, <span class="hljs-title">useCapture</span>)
+</span></code></pre>
+<h3 id="t71.4 阻止冒泡">1.4 阻止冒泡 <a href="#t71.4 阻止冒泡"> # </a></h3>
+<ul>
+<li>如果想要阻止事件的传播<ul>
+<li>在微软的模型中你必须设置事件的<code>cancelBubble</code>的属性为true</li>
+<li>在W3C模型中你必须调用事件的<code>stopPropagation()</code>方法</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">stopPropagation</span>(<span class="hljs-params">event</span>) </span>{
+    <span class="hljs-keyword">if</span> (!event) {
+        <span class="hljs-built_in">window</span>.event.cancelBubble = <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">if</span> (event.stopPropagation) {
+        event.stopPropagation();
+    }
+}
+</code></pre>
+<h3 id="t81.5 阻止默认行为">1.5 阻止默认行为 <a href="#t81.5 阻止默认行为"> # </a></h3>
+<ul>
+<li>取消默认事件</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">preventDefault</span>(<span class="hljs-params">event</span>) </span>{
+    <span class="hljs-keyword">if</span> (!event) {
+        <span class="hljs-built_in">window</span>.event.returnValue  = <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">if</span> (event.preventDefault) {
+        event.preventDefault();
+    }
+}
+</code></pre>
+<h3 id="t91.6 事件代理">1.6 事件代理 <a href="#t91.6 事件代理"> # </a></h3>
+<ul>
+<li>事件代理又称之为事件委托</li>
+<li>事件代理是把原本需要绑定在<code>子元素</code>的事件委托给<code>父元素</code>，让父元素负责事件监听</li>
+<li>事件代理是利用<code>事件冒泡</code>来实现的</li>
+<li>优点<ul>
+<li>可以大量节省内存占用，减少事件注册</li>
+<li>当新增子对象时无需再次对其绑定</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"list"</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"show(event)"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>item 1<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>item 2<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>item 3<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>item n<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">(event)</span></span>{
+          alert(event.target.innerHTML);  
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+<h2 id="t102.React事件系统">2.React事件系统 <a href="#t102.React事件系统"> # </a></h2>
+<ul>
+<li>合成事件是围绕浏览器原生事件充当跨浏览器包装器的对象,它们将不同浏览器的行为合并为一个 API,这样做是为了确保事件在不同浏览器中显示一致的属性</li>
+</ul>
+<h3 id="t112.1 面试题">2.1 面试题 <a href="#t112.1 面试题"> # </a></h3>
+<ul>
+<li>为什么不能使用<code>return false</code>来阻止事件默认行为?</li>
+<li>请说一下React合成事件的工作原理?</li>
+<li>可以给函数组件绑定事件吗?为什么?</li>
+<li>......</li>
+</ul>
+<h3 id="t122.2 使用">2.2 使用 <a href="#t122.2 使用"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/5f3ce0fe2ec27f8644983e7d8f31c367" alt="5f3ce0fe2ec27f8644983e7d8f31c367"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  parentRef=React.createRef();
+  childRef=React.createRef();
+  componentDidMount() {
+    <span class="hljs-keyword">this</span>.parentRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">this</span>.parentRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生冒泡"</span>);
+    });
+    <span class="hljs-keyword">this</span>.childRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">this</span>.childRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生冒泡"</span>);
+    });
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document原生冒泡"</span>);
+    });
+  }
+  parentBubble = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件冒泡"</span>);
+  };
+  childBubble = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件冒泡"</span>);
+  };
+  parentCapture = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件捕获"</span>);
+  };
+  childCapture = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件捕获"</span>);
+  };
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.parentRef}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.parentBubble}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{this.parentCapture}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.childRef}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.childBubble}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{this.childCapture}</span>&gt;</span>
+          事件执行顺序
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+<span class="hljs-comment">/**
+document原生捕获
+父元素React事件捕获
+子元素React事件捕获
+父元素原生捕获
+子元素原生捕获
+子元素原生冒泡
+父元素原生冒泡
+子元素React事件冒泡
+父元素React事件冒泡
+document原生冒泡
+ */</span>
+</code></pre>
+<h3 id="t132.3 简易实现">2.3 简易实现 <a href="#t132.3 简易实现"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>event<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"parent"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"child"</span>&gt;</span>
+                点击
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+        <span class="hljs-keyword">let</span> parent = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'parent'</span>);
+        <span class="hljs-keyword">let</span> child = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'child'</span>);
+        <span class="hljs-comment">//listenToNativeEvent('click',false,root);</span>
+        <span class="hljs-comment">//listenToNativeEvent( 'click',true,root);</span>
+
+        <span class="hljs-comment">//root的捕获阶段的处理函数</span>
+        root.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;dispatchEvent(event,<span class="hljs-literal">true</span>),<span class="hljs-literal">true</span>);
+        <span class="hljs-comment">//root的冒泡阶段的处理函数</span>
+        root.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;dispatchEvent(event,<span class="hljs-literal">false</span>),<span class="hljs-literal">false</span>);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatchEvent</span>(<span class="hljs-params">event,isCapture</span>)</span>{
+            <span class="hljs-comment">//console.log(event,isCapture);</span>
+            <span class="hljs-keyword">let</span> paths = [];<span class="hljs-comment">//事件的传播路径数组[child,parent,root,body,document]</span>
+            <span class="hljs-keyword">let</span> currentTarget = event.target;<span class="hljs-comment">//事件源</span>
+            <span class="hljs-keyword">while</span>(currentTarget){
+                paths.push(currentTarget);
+                currentTarget=currentTarget.parentNode;
+            }
+            <span class="hljs-keyword">if</span>(isCapture){<span class="hljs-comment">//如果当前是捕获阶段</span>
+                <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=paths.length<span class="hljs-number">-1</span>;i&gt;=<span class="hljs-number">0</span>;i--){<span class="hljs-comment">//[document,body,root,parent.child]</span>
+                    <span class="hljs-keyword">let</span> handler = paths[i].onClickCapture;<span class="hljs-comment">//react捕获事件</span>
+                    handler&amp;&amp;handler();
+                }
+            }<span class="hljs-keyword">else</span>{
+                <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;paths.length;i++){<span class="hljs-comment">//[child,parent,root,body,document]</span>
+                    <span class="hljs-keyword">let</span> handler = paths[i].onClick;<span class="hljs-comment">//react冒泡事件</span>
+                    handler&amp;&amp;handler();
+                }
+            }
+
+        }
+        root.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'根元素原生事件捕获'</span>),<span class="hljs-literal">true</span>);
+        root.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'根元素原生事件冒泡'</span>),<span class="hljs-literal">false</span>);
+        parent.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+         <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'父元素原生事件捕获'</span>);
+        },<span class="hljs-literal">true</span>);
+        parent.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+         <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'父元素原生事件冒泡'</span>);
+        },<span class="hljs-literal">false</span>);
+        child.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+         <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'子元素原生事件捕获'</span>);
+        },<span class="hljs-literal">true</span>);
+        child.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+         <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'子元素原生事件冒泡'</span>);
+        },<span class="hljs-literal">false</span>);
+        parent.onClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'React:父元素React事件冒泡'</span>);
+        }
+        parent.onClickCapture = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'React:父元素React事件捕获'</span>);
+        }
+        child.onClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'React:子元素React事件冒泡'</span>);
+        }
+        child.onClickCapture = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'React:子元素React事件捕获'</span>);
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t142.4 源码实现">2.4 源码实现 <a href="#t142.4 源码实现"> # </a></h3>
+<ul>
+<li>事件注册</li>
+<li>事件绑定</li>
+<li>事件触发</li>
+</ul>
+<h2 id="t153. 初次渲染">3. 初次渲染 <a href="#t153. 初次渲染"> # </a></h2>
+<h3 id="t163.1 src\index.js">3.1 src\index.js <a href="#t163.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+<span class="hljs-keyword">let</span> rootContainerElement = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+<span class="hljs-keyword">const</span> handleDivClick = <span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'handleDivClick'</span>);
+}
+<span class="hljs-keyword">const</span> handleDivClickCapture = <span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'handleDivClickCapture'</span>);
+
+}
+<span class="hljs-keyword">const</span> handleButtonClick = <span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'handleButtonClick'</span>);
+}
+<span class="hljs-keyword">const</span> handleButtonClickCapture = <span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'handleButtonClickCapture'</span>);
+}
+<span class="hljs-keyword">let</span> element = (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleDivClick}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{handleDivClickCapture}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleButtonClick}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{handleButtonClickCapture}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+<span class="hljs-built_in">console</span>.log(element);
+ReactDOM.render(
+  element,
+  rootContainerElement
+);
+</code></pre>
+<h3 id="t173.2 react.js">3.2 react.js <a href="#t173.2 react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createElement</span>(<span class="hljs-params">type, config, children</span>) </span>{
+    <span class="hljs-keyword">delete</span> config.__source;
+    <span class="hljs-keyword">delete</span> config.__self;
+    <span class="hljs-keyword">delete</span> config.ref;
+    <span class="hljs-keyword">delete</span> config.key;
+    <span class="hljs-keyword">let</span> props = { ...config };
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length &gt; <span class="hljs-number">3</span>) {
+        props.children = <span class="hljs-built_in">Array</span>.prototype.slice.call(<span class="hljs-built_in">arguments</span>, <span class="hljs-number">2</span>);
+    } <span class="hljs-keyword">else</span> {
+        props.children = children;
+    }
+    <span class="hljs-keyword">return</span> {
+        type,
+        props
+    }
+}
+<span class="hljs-keyword">const</span> React = {
+    createElement
+};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React;
+</code></pre>
+<h3 id="t183.3 react-dom.js">3.3 react-dom.js <a href="#t183.3 react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params">vdom, container</span>) </span>{
+    mount(vdom, container);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mount</span>(<span class="hljs-params">vdom, container</span>) </span>{
+    <span class="hljs-keyword">let</span> newDOM = createDOM(vdom, container);
+    container.appendChild(newDOM)
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createDOM</span>(<span class="hljs-params">vdom, parentDOM</span>) </span>{
+    <span class="hljs-keyword">let</span> { type, props } = vdom;
+    <span class="hljs-keyword">let</span> dom;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> vdom === <span class="hljs-string">'string'</span> || <span class="hljs-keyword">typeof</span> vdom === <span class="hljs-string">'number'</span>) {
+        dom = <span class="hljs-built_in">document</span>.createTextNode(vdom);
+    } <span class="hljs-keyword">else</span> {
+        dom = <span class="hljs-built_in">document</span>.createElement(type);
+    }
+    <span class="hljs-keyword">if</span> (props) {
+        updateProps(dom, {}, props);
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(props.children)) {
+            reconcileChildren(props.children, dom);
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (props.children) {
+            mount(props.children, dom);
+        }
+    }
+    <span class="hljs-keyword">return</span> dom;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateProps</span>(<span class="hljs-params">dom, oldProps, newProps</span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> key <span class="hljs-keyword">in</span> newProps) {
+        <span class="hljs-keyword">if</span> (key === <span class="hljs-string">'children'</span>) { <span class="hljs-keyword">continue</span>; }
+        <span class="hljs-keyword">if</span> (key === <span class="hljs-string">'style'</span>) {
+            <span class="hljs-keyword">let</span> style = newProps[key];
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> attr <span class="hljs-keyword">in</span> style) {
+                dom.style[attr] = style[attr]
+            }
+        } <span class="hljs-keyword">else</span> {
+            dom[key] = newProps[key];
+        }
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reconcileChildren</span>(<span class="hljs-params">childrenVdom, parentDOM</span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; childrenVdom.length; i++) {
+        <span class="hljs-keyword">let</span> childVdom = childrenVdom[i];
+        mount(childVdom, parentDOM);
+    }
+}
+<span class="hljs-keyword">const</span> ReactDOM = {
+    render
+};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ReactDOM;
+</code></pre>
+<h2 id="t194. 事件注册">4. 事件注册 <a href="#t194. 事件注册"> # </a></h2>
+<h3 id="t204.1 react-dom.js">4.1 react-dom.js <a href="#t204.1 react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { listenToAllSupportedEvents } from './DOMPluginEventSystem';</span>
+function render(vdom, container) {
+<span class="hljs-addition">+   listenToAllSupportedEvents(container);</span>
+    mount(vdom, container);
+}
+export function mount(vdom, container) {
+    let newDOM = createDOM(vdom, container);
+    container.appendChild(newDOM)
+}
+export function createDOM(vdom, parentDOM) {
+    let { type, props } = vdom;
+    let dom;
+    if (typeof vdom <span class="hljs-comment">=== 'string' || typeof vdom === 'number') {</span>
+        dom = document.createTextNode(vdom);
+    } else {
+        dom = document.createElement(type);
+    }
+    if (props) {
+        updateProps(dom, {}, props);
+        if (Array.isArray(props.children)) {
+            reconcileChildren(props.children, dom);
+        } else if (props.children) {
+            mount(props.children, dom);
+        }
+    }
+    return dom;
+}
+
+function updateProps(dom, oldProps, newProps) {
+    for (let key in newProps) {
+        if (key <span class="hljs-comment">=== 'children') { continue; }</span>
+        if (key <span class="hljs-comment">=== 'style') {</span>
+            let style = newProps[key];
+            for (let attr in style) {
+                dom.style[attr] = style[attr]
+            }
+        } else {
+            dom[key] = newProps[key];
+        }
+    }
+}
+function reconcileChildren(childrenVdom, parentDOM) {
+    for (let i = 0; i &lt; childrenVdom.length; i++) {
+        let childVdom = childrenVdom[i];
+        mount(childVdom, parentDOM);
+    }
+}
+const ReactDOM = {
+    render
+};
+export default ReactDOM;
+</code></pre>
+<h3 id="t214.2 EventRegistry.js">4.2 EventRegistry.js <a href="#t214.2 EventRegistry.js"> # </a></h3>
+<p>src\EventRegistry.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">//依赖 {onClick:['click'],onClickCapture:['click']}</span>
+<span class="hljs-comment">//export const registrationNameDependencies = {};</span>
+<span class="hljs-comment">//所有的原生事件 ['click','dblclick']</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> allNativeEvents = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+<span class="hljs-comment">/**
+ * 注意两个阶段的事件监听 
+ * @param {*} registrationName react事件名称,比如onClick
+ * @param {*} dependencies ['click']
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerTwoPhaseEvent</span>(<span class="hljs-params">registrationName, dependencies</span>) </span>{
+    registerDirectEvent(registrationName, dependencies);
+    registerDirectEvent(registrationName + <span class="hljs-string">'Capture'</span>, dependencies);
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerDirectEvent</span>(<span class="hljs-params">registrationName,dependencies,</span>) </span>{
+<span class="hljs-comment">//   registrationNameDependencies[registrationName] = dependencies;</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; dependencies.length; i++) {
+        allNativeEvents.add(dependencies[i]);<span class="hljs-comment">//</span>
+    }
+}
+</code></pre>
+<h3 id="t224.3 DOMEventProperties.js">4.3 DOMEventProperties.js <a href="#t224.3 DOMEventProperties.js"> # </a></h3>
+<p>src\DOMEventProperties.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { registerTwoPhaseEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">'./EventRegistry'</span>;
+<span class="hljs-comment">//SimpleEventPlugin的离散的成对事件名称</span>
+<span class="hljs-keyword">const</span> discreteEventPairsForSimpleEventPlugin = [
+    <span class="hljs-string">'click'</span>, <span class="hljs-string">'click'</span>,
+    <span class="hljs-string">'dblclick'</span>, <span class="hljs-string">'doubleClick'</span>];
+<span class="hljs-comment">//原生事件名称和React事件名称的对应关系</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> topLevelEventsToReactNames = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();<span class="hljs-comment">//{click:onClick}</span>
+<span class="hljs-comment">//注册简单事件</span>
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerSimpleEvents</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; discreteEventPairsForSimpleEventPlugin.length; i += <span class="hljs-number">2</span>) {
+        <span class="hljs-keyword">const</span> topEvent = discreteEventPairsForSimpleEventPlugin[i];<span class="hljs-comment">//原生事件名称 dblclick</span>
+        <span class="hljs-keyword">const</span> event = discreteEventPairsForSimpleEventPlugin[i + <span class="hljs-number">1</span>];<span class="hljs-comment">//react事件名称 doubleClick</span>
+        <span class="hljs-keyword">const</span> capitalizedEvent = event[<span class="hljs-number">0</span>].toUpperCase() + event.slice(<span class="hljs-number">1</span>);<span class="hljs-comment">//DoubleClick</span>
+        <span class="hljs-keyword">const</span> reactName = <span class="hljs-string">'on'</span> + capitalizedEvent;<span class="hljs-comment">//react事件监听属性名称 onDoubleClick</span>
+        topLevelEventsToReactNames.set(topEvent, reactName);<span class="hljs-comment">//建立原生事件和React监听事件的对应关系</span>
+        registerTwoPhaseEvent(reactName, [topEvent]);
+    }
+}
+</code></pre>
+<h3 id="t234.4 SimpleEventPlugin.js">4.4 SimpleEventPlugin.js <a href="#t234.4 SimpleEventPlugin.js"> # </a></h3>
+<p>src\SimpleEventPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { registerSimpleEvents } <span class="hljs-keyword">from</span> <span class="hljs-string">'./DOMEventProperties'</span>;
+<span class="hljs-keyword">export</span> { registerSimpleEvents <span class="hljs-keyword">as</span> registerEvents };
+</code></pre>
+<h3 id="t244.5 DOMPluginEventSystem.js">4.5 DOMPluginEventSystem.js <a href="#t244.5 DOMPluginEventSystem.js"> # </a></h3>
+<p>src\DOMPluginEventSystem.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { allNativeEvents } <span class="hljs-keyword">from</span> <span class="hljs-string">'./EventRegistry'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> SimpleEventPlugin <span class="hljs-keyword">from</span> <span class="hljs-string">'./SimpleEventPlugin'</span>;
+<span class="hljs-comment">//注册插件 其实就是收集原生事件名称</span>
+SimpleEventPlugin.registerEvents();
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">listenToAllSupportedEvents</span>(<span class="hljs-params">rootContainerElement</span>) </span>{
+    allNativeEvents.forEach(<span class="hljs-function"><span class="hljs-params">domEventName</span> =&gt;</span> {
+       <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'dom事件名'</span>,domEventName);
+    });
+}
+</code></pre>
+<h2 id="t255. 事件绑定">5. 事件绑定 <a href="#t255. 事件绑定"> # </a></h2>
+<h3 id="t265.1 DOMPluginEventSystem.js">5.1 DOMPluginEventSystem.js <a href="#t265.1 DOMPluginEventSystem.js"> # </a></h3>
+<p>src\DOMPluginEventSystem.js</p>
+<pre><code class="lang-diff">import { allNativeEvents } from './EventRegistry';
+import * as SimpleEventPlugin from './SimpleEventPlugin';
+<span class="hljs-addition">+import { addEventCaptureListener, addEventBubbleListener } from './EventListener';</span>
+<span class="hljs-addition">+import { getEventListenerSet } from './ReactDOMComponentTree';</span>
+<span class="hljs-addition">+import { IS_CAPTURE_PHASE } from './EventSystemFlags';</span>
+<span class="hljs-addition">+import { dispatchEvent } from './ReactDOMEventListener';</span>
+//注册插件 其实就是收集原生事件名称
+SimpleEventPlugin.registerEvents();
+<span class="hljs-addition">+export const nonDelegatedEvents = new Set(['scroll'])</span>
+export function listenToAllSupportedEvents(rootContainerElement) {
+    allNativeEvents.forEach(domEventName =&gt; {
+<span class="hljs-addition">+       //注册冒泡阶段</span>
+<span class="hljs-addition">+       if (!nonDelegatedEvents.has(domEventName)) {</span>
+<span class="hljs-addition">+           listenToNativeEvent(</span>
+<span class="hljs-addition">+               domEventName,//click</span>
+<span class="hljs-addition">+               false,//isCapturePhaseListener=false</span>
+<span class="hljs-addition">+               rootContainerElement</span>
+<span class="hljs-addition">+           );</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+       //注册捕获阶段</span>
+<span class="hljs-addition">+       listenToNativeEvent(</span>
+<span class="hljs-addition">+           domEventName,//click</span>
+<span class="hljs-addition">+           true,//isCapturePhaseListener=false</span>
+<span class="hljs-addition">+           rootContainerElement//容器DOM元素</span>
+<span class="hljs-addition">+       );</span>
+    });
+}
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * </span>
+<span class="hljs-addition">+ * @param {*} domEventName DOM事件 click</span>
+<span class="hljs-addition">+ * @param {*} isCapturePhaseListener 是否是捕获事件监听</span>
+<span class="hljs-addition">+ * @param {*} rootContainerElement 根容器</span>
+<span class="hljs-addition">+ * @param {*} targetElement 目标元素</span>
+<span class="hljs-addition">+ * @param {*} eventSystemFlags 事件系统标志</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ export function listenToNativeEvent(domEventName, isCapturePhaseListener,rootContainerElement, eventSystemFlags = 0) {</span>
+<span class="hljs-addition">+    const listenerSet = getEventListenerSet(rootContainerElement);//[]</span>
+<span class="hljs-addition">+    //click__bubble click__capture</span>
+<span class="hljs-addition">+    const listenerSetKey = getListenerSetKey(domEventName, isCapturePhaseListener);</span>
+<span class="hljs-addition">+    if (!listenerSet.has(listenerSetKey)) {</span>
+<span class="hljs-addition">+        if (isCapturePhaseListener) {</span>
+<span class="hljs-addition">+            eventSystemFlags |= IS_CAPTURE_PHASE;//4</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        addTrappedEventListener(</span>
+<span class="hljs-addition">+            rootContainerElement,</span>
+<span class="hljs-addition">+            domEventName,</span>
+<span class="hljs-addition">+            eventSystemFlags,</span>
+<span class="hljs-addition">+            isCapturePhaseListener</span>
+<span class="hljs-addition">+        );</span>
+<span class="hljs-addition">+        listenerSet.add(listenerSetKey);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 根据事件名称和是否捕获阶段得到监听的key</span>
+<span class="hljs-addition">+ * @param {*} domEventName 事件名称 click</span>
+<span class="hljs-addition">+ * @param {*} capture  是否是捕获阶段</span>
+<span class="hljs-addition">+ * @returns 监听事件的key</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ export function getListenerSetKey(domEventName, capture) {</span>
+<span class="hljs-addition">+    return `${domEventName}__${capture ? 'capture' : 'bubble'}`;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 注册监听函数</span>
+<span class="hljs-addition">+ * @param {*} targetContainer 绑定的目标容器</span>
+<span class="hljs-addition">+ * @param {*} domEventName  事件名称</span>
+<span class="hljs-addition">+ * @param {*} eventSystemFlags  事件系统标识</span>
+<span class="hljs-addition">+ * @param {*} isCapturePhaseListener  是否是捕获阶段</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener) {</span>
+<span class="hljs-addition">+    let listener = dispatchEvent.bind(null, domEventName, eventSystemFlags, targetContainer);</span>
+<span class="hljs-addition">+    if (isCapturePhaseListener) {</span>
+<span class="hljs-addition">+        addEventCaptureListener(targetContainer, domEventName, listener);</span>
+<span class="hljs-addition">+    } else {</span>
+<span class="hljs-addition">+        addEventBubbleListener(targetContainer, domEventName, listener);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t275.2 EventSystemFlags.js">5.2 EventSystemFlags.js <a href="#t275.2 EventSystemFlags.js"> # </a></h3>
+<p>src\EventSystemFlags.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> IS_CAPTURE_PHASE = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">2</span>;
+</code></pre>
+<h3 id="t285.3 EventListener.js">5.3 EventListener.js <a href="#t285.3 EventListener.js"> # </a></h3>
+<p>src\EventListener.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventCaptureListener</span>(<span class="hljs-params">target,eventType,listener</span>) </span>{
+    target.addEventListener(eventType, listener, <span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">return</span> listener;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventBubbleListener</span>(<span class="hljs-params">target, eventType, listener</span>) </span>{
+    target.addEventListener(eventType, listener, <span class="hljs-literal">false</span>);
+    <span class="hljs-keyword">return</span> listener;
+}
+</code></pre>
+<h3 id="t295.4 ReactDOMComponentTree.js">5.4 ReactDOMComponentTree.js <a href="#t295.4 ReactDOMComponentTree.js"> # </a></h3>
+<p>src\ReactDOMComponentTree.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> randomKey = <span class="hljs-built_in">Math</span>.random().toString(<span class="hljs-number">36</span>).slice(<span class="hljs-number">2</span>);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> internalEventHandlersKey = <span class="hljs-string">'__reactEvents$'</span> + randomKey;<span class="hljs-comment">//dom上的事件绑定集合</span>
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getEventListenerSet</span>(<span class="hljs-params">node</span>) </span>{
+  <span class="hljs-keyword">let</span> elementListenerSet = node[internalEventHandlersKey];
+  <span class="hljs-keyword">if</span> (elementListenerSet === <span class="hljs-literal">undefined</span>) {
+    elementListenerSet = node[internalEventHandlersKey] = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+  }
+  <span class="hljs-keyword">return</span> elementListenerSet;
+}
+</code></pre>
+<h3 id="t305.5 ReactDOMEventListener.js">5.5 ReactDOMEventListener.js <a href="#t305.5 ReactDOMEventListener.js"> # </a></h3>
+<p>src\ReactDOMEventListener.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ * 事件处理函数
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>domEventName 事件名 click
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>eventSystemFlags 4 事件系统标志
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>targetContainer 代理的容器 div#root
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>nativeEvent 原生的事件对象 MouseEvent
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatchEvent</span>(<span class="hljs-params">domEventName,eventSystemFlags,targetContainer,nativeEvent</span>) </span>{
+    <span class="hljs-keyword">const</span> nativeEventTarget = nativeEvent.target;<span class="hljs-comment">//获得事件来源对象</span>
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'domEventName'</span>,domEventName,<span class="hljs-string">'eventSystemFlags'</span>,eventSystemFlags,<span class="hljs-string">'nativeEventTarget'</span>,nativeEventTarget);
+}
+</code></pre>
+<h2 id="t316 事件触发">6 事件触发 <a href="#t316 事件触发"> # </a></h2>
+<h3 id="t326.1 构建fiber树">6.1 构建fiber树 <a href="#t326.1 构建fiber树"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/f5567dd756ad8b372fcdf12ece2477a8" alt="f5567dd756ad8b372fcdf12ece2477a8"></p>
+<h4 id="t336.1.1 react-dom.js">6.1.1 react-dom.js <a href="#t336.1.1 react-dom.js"> # </a></h4>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff">import { listenToAllSupportedEvents } from './DOMPluginEventSystem';
+<span class="hljs-addition">+import { internalInstanceKey, internalPropsKey } from './ReactDOMComponentTree';</span>
+<span class="hljs-addition">+import { HostComponent } from './ReactWorkTags';</span>
+function render(vdom, container) {
+    listenToAllSupportedEvents(container);
+    mount(vdom, container);
+}
+export function mount(vdom, container) {
+    let newDOM = createDOM(vdom, container);
+    container.appendChild(newDOM)
+}
+export function createDOM(vdom, parentDOM) {
+    let { type, props } = vdom;
+    let dom;
+    if (typeof vdom <span class="hljs-comment">=== 'string' || typeof vdom === 'number') {</span>
+        dom = document.createTextNode(vdom);
+    } else {
+        dom = document.createElement(type);
+    }
+<span class="hljs-addition">+   let returnFiber = parentDOM[internalInstanceKey] || null;</span>
+<span class="hljs-addition">+   let fiber = { tag: HostComponent, type, stateNode: dom, return: returnFiber };</span>
+<span class="hljs-addition">+   dom[internalInstanceKey] = fiber;</span>
+<span class="hljs-addition">+   dom[internalPropsKey] = props;</span>
+    if (props) {
+        updateProps(dom, {}, props);
+        if (Array.isArray(props.children)) {
+            reconcileChildren(props.children, dom);
+        } else if (props.children) {
+            mount(props.children, dom);
+        }
+    }
+    return dom;
+}
+
+function updateProps(dom, oldProps, newProps) {
+    for (let key in newProps) {
+        if (key <span class="hljs-comment">=== 'children') { continue; }</span>
+        if (key <span class="hljs-comment">=== 'style') {</span>
+            let style = newProps[key];
+            for (let attr in style) {
+                dom.style[attr] = style[attr]
+            }
+        } else {
+            dom[key] = newProps[key];
+        }
+    }
+}
+function reconcileChildren(childrenVdom, parentDOM) {
+    for (let i = 0; i &lt; childrenVdom.length; i++) {
+        let childVdom = childrenVdom[i];
+        mount(childVdom, parentDOM);
+    }
+}
+const ReactDOM = {
+    render
+};
+export default ReactDOM;
+</code></pre>
+<h4 id="t346.1.2 ReactWorkTags.js">6.1.2 ReactWorkTags.js <a href="#t346.1.2 ReactWorkTags.js"> # </a></h4>
+<p>src\ReactWorkTags.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> HostComponent = <span class="hljs-number">5</span>;
+</code></pre>
+<h4 id="t356.1.3 ReactDOMComponentTree.js">6.1.3 ReactDOMComponentTree.js <a href="#t356.1.3 ReactDOMComponentTree.js"> # </a></h4>
+<p>src\ReactDOMComponentTree.js</p>
+<pre><code class="lang-diff">const randomKey = Math.random().toString(36).slice(2);
+export const internalEventHandlersKey = '__reactEvents$' + randomKey;//dom上的事件绑定集合
+<span class="hljs-addition">+export const internalInstanceKey = '__reactFiber$' + randomKey;//dom上的fiber节点</span>
+<span class="hljs-addition">+export const internalPropsKey = '__reactProps$' + randomKey;//dom上的属性对象</span>
+export function getEventListenerSet(node) {
+  let elementListenerSet = node[internalEventHandlersKey];
+  if (elementListenerSet <span class="hljs-comment">=== undefined) {</span>
+    elementListenerSet = node[internalEventHandlersKey] = new Set();
+  }
+  return elementListenerSet;
+}
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 根据DOM元素获取对应的fiber对象 </span>
+<span class="hljs-addition">+ * @param {*} targetNode DOM元素</span>
+<span class="hljs-addition">+ * @returns fiber对象 </span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ export function getClosestInstanceFromNode(targetNode) {</span>
+<span class="hljs-addition">+  let targetInst = targetNode[internalInstanceKey];</span>
+<span class="hljs-addition">+  if (targetInst) {</span>
+<span class="hljs-addition">+    return targetInst;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export function getFiberCurrentPropsFromNode(node) {</span>
+<span class="hljs-addition">+  return node[internalPropsKey] || null;</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h4 id="t366.1.4 ReactDOMEventListener.js">6.1.4 ReactDOMEventListener.js <a href="#t366.1.4 ReactDOMEventListener.js"> # </a></h4>
+<p>src\ReactDOMEventListener.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import {getClosestInstanceFromNode,getFiberCurrentPropsFromNode} from './ReactDOMComponentTree';</span>
+
+/**
+ * 事件处理函数
+ * @param {*} domEventName 事件名 click
+ * @param {*} eventSystemFlags 4 事件系统标志
+ * @param {*} targetContainer 代理的容器 div#root
+ * @param {*} nativeEvent 原生的事件对象 MouseEvent
+ */
+export function dispatchEvent(domEventName,eventSystemFlags,targetContainer,nativeEvent) {
+<span class="hljs-addition">+    const nativeEventTarget = nativeEvent.target;</span>
+<span class="hljs-addition">+    //获得来源对应的fiber对象</span>
+<span class="hljs-addition">+    const targetInst = getClosestInstanceFromNode(nativeEventTarget);</span>
+<span class="hljs-addition">+    console.log('targetInst',targetInst);</span>
+<span class="hljs-addition">+   //获得来源对应的fiber的属性对象</span>
+<span class="hljs-addition">+    const props = getFiberCurrentPropsFromNode(nativeEventTarget);</span>
+<span class="hljs-addition">+    console.log('props',props);</span>
+}
+</code></pre>
+<h3 id="t376.2 收集事件函数">6.2 收集事件函数 <a href="#t376.2 收集事件函数"> # </a></h3>
+<h4 id="t386.2.1 ReactDOMEventListener.js">6.2.1 ReactDOMEventListener.js <a href="#t386.2.1 ReactDOMEventListener.js"> # </a></h4>
+<p>src\ReactDOMEventListener.js</p>
+<pre><code class="lang-diff">import {getClosestInstanceFromNode,getFiberCurrentPropsFromNode} from './ReactDOMComponentTree';
+<span class="hljs-addition">+import {dispatchEventsForPlugins} from './DOMPluginEventSystem';</span>
+/**
+ * 事件处理函数
+ * @param {*} domEventName 事件名 click
+ * @param {*} eventSystemFlags 4 事件系统标志
+ * @param {*} targetContainer 代理的容器 div#root
+ * @param {*} nativeEvent 原生的事件对象 MouseEvent
+ */
+export function dispatchEvent(domEventName,eventSystemFlags,targetContainer,nativeEvent) {
+    const nativeEventTarget = nativeEvent.target;
+    //获得来源对应的fiber对象
+    const targetInst = getClosestInstanceFromNode(nativeEventTarget);
+    //console.log('targetInst',targetInst);
+    //获得来源对应的fiber对象
+    //const props = getFiberCurrentPropsFromNode(nativeEventTarget);
+    //console.log('props',props);
+<span class="hljs-addition">+   dispatchEventsForPlugins(</span>
+<span class="hljs-addition">+       domEventName,</span>
+<span class="hljs-addition">+       eventSystemFlags,</span>
+<span class="hljs-addition">+       nativeEvent,</span>
+<span class="hljs-addition">+       targetInst,</span>
+<span class="hljs-addition">+       targetContainer</span>
+<span class="hljs-addition">+   );</span>
+}
+</code></pre>
+<h4 id="t396.2.2 DOMPluginEventSystem.js">6.2.2 DOMPluginEventSystem.js <a href="#t396.2.2 DOMPluginEventSystem.js"> # </a></h4>
+<p>src\DOMPluginEventSystem.js</p>
+<pre><code class="lang-diff">import { allNativeEvents } from './EventRegistry';
+import * as SimpleEventPlugin from './SimpleEventPlugin';
+import { addEventCaptureListener, addEventBubbleListener } from './EventListener';
+import { getEventListenerSet } from './ReactDOMComponentTree';
+import { IS_CAPTURE_PHASE } from './EventSystemFlags';
+import { dispatchEvent } from './ReactDOMEventListener';
+<span class="hljs-addition">+import { HostComponent } from './ReactWorkTags';</span>
+<span class="hljs-addition">+import getListener from './getListener';</span>
+//注册插件 其实就是收集原生事件名称
+SimpleEventPlugin.registerEvents();
+export const nonDelegatedEvents = new Set(['scroll'])
+export function listenToAllSupportedEvents(rootContainerElement) {
+    allNativeEvents.forEach(domEventName =&gt; {
+        //注册冒泡阶段
+        if (!nonDelegatedEvents.has(domEventName)) {
+            listenToNativeEvent(
+                domEventName,//click
+                false,//isCapturePhaseListener=false
+                rootContainerElement
+            );
+        }
+        //注册捕获阶段
+        listenToNativeEvent(
+            domEventName,//click
+            true,//isCapturePhaseListener=false
+            rootContainerElement//容器DOM元素
+        );
+    });
+}
+/**
+ * 
+ * @param {*} domEventName DOM事件 click
+ * @param {*} isCapturePhaseListener 是否是捕获事件监听
+ * @param {*} rootContainerElement 根容器
+ * @param {*} targetElement 目标元素
+ * @param {*} eventSystemFlags 事件系统标志
+ */
+ export function listenToNativeEvent(domEventName, isCapturePhaseListener, rootContainerElement, eventSystemFlags = 0) {
+    const listenerSet = getEventListenerSet(rootContainerElement);//[]
+    //click__bubble click__capture
+    const listenerSetKey = getListenerSetKey(domEventName, isCapturePhaseListener);
+    if (!listenerSet.has(listenerSetKey)) {
+        if (isCapturePhaseListener) {
+            eventSystemFlags |= IS_CAPTURE_PHASE;//4
+        }
+        addTrappedEventListener(
+            rootContainerElement,
+            domEventName,
+            eventSystemFlags,
+            isCapturePhaseListener
+        );
+        listenerSet.add(listenerSetKey);
+    }
+}
+/**
+ * 根据事件名称和是否捕获阶段得到监听的key
+ * @param {*} domEventName 事件名称 click
+ * @param {*} capture  是否是捕获阶段
+ * @returns 监听事件的key
+ */
+ export function getListenerSetKey(domEventName, capture) {
+    return `${domEventName}__${capture ? 'capture' : 'bubble'}`;
+}
+/**
+ * 注册监听函数
+ * @param {*} targetContainer 绑定的目标容器
+ * @param {*} domEventName  事件名称
+ * @param {*} eventSystemFlags  事件系统标识
+ * @param {*} isCapturePhaseListener  是否是捕获阶段
+ */
+ function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener) {
+    let listener = dispatchEvent.bind(null, domEventName, eventSystemFlags, targetContainer);
+    if (isCapturePhaseListener) {
+        addEventCaptureListener(targetContainer, domEventName, listener);
+    } else {
+        addEventBubbleListener(targetContainer, domEventName, listener);
+    }
+}
+
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 派发事件 </span>
+<span class="hljs-addition">+ * @param {*} domEventName 事件名称 event</span>
+<span class="hljs-addition">+ * @param {*} eventSystemFlags 事件标志，0或者4</span>
+<span class="hljs-addition">+ * @param {*} nativeEvent 原生事件对象</span>
+<span class="hljs-addition">+ * @param {*} targetInst fiber实例</span>
+<span class="hljs-addition">+ * @param {*} targetContainer 目标容器</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ export function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {</span>
+<span class="hljs-addition">+    const nativeEventTarget = nativeEvent.target;</span>
+<span class="hljs-addition">+    //事件处理函数数组</span>
+<span class="hljs-addition">+    const dispatchQueue = [];</span>
+<span class="hljs-addition">+    //提取监听事件</span>
+<span class="hljs-addition">+    SimpleEventPlugin.extractEvents(</span>
+<span class="hljs-addition">+        dispatchQueue,</span>
+<span class="hljs-addition">+        domEventName,</span>
+<span class="hljs-addition">+        targetInst,</span>
+<span class="hljs-addition">+        nativeEvent,</span>
+<span class="hljs-addition">+        nativeEventTarget,</span>
+<span class="hljs-addition">+        eventSystemFlags,</span>
+<span class="hljs-addition">+        targetContainer</span>
+<span class="hljs-addition">+    );</span>
+<span class="hljs-addition">+    console.log('dispatchQueue',dispatchQueue);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 收集一个阶段的监听</span>
+<span class="hljs-addition">+ * @param {*} targetFiber 对应的fiber {tag:5,type:'button'}</span>
+<span class="hljs-addition">+ * @param {*} reactName 事件名 onClick</span>
+<span class="hljs-addition">+ * @param {*} nativeEventType 原生事件名 click</span>
+<span class="hljs-addition">+ * @param {*} inCapturePhase 是否捕获阶段 </span>
+<span class="hljs-addition">+ * @returns </span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ export function accumulateSinglePhaseListeners(targetFiber, reactName, nativeEventType, +inCapturePhase) {</span>
+<span class="hljs-addition">+    const captureName = reactName + 'Capture';//onClickCapture</span>
+<span class="hljs-addition">+    //onClick或+onClickCapture</span>
+<span class="hljs-addition">+    const reactEventName = inCapturePhase ? captureName : reactName;</span>
+<span class="hljs-addition">+    const listeners = [];//所有的监听函数</span>
+<span class="hljs-addition">+    let instance = targetFiber;//当前的fiber</span>
+<span class="hljs-addition">+    let lastHostComponent = null;//上一个原生DOM元素</span>
+<span class="hljs-addition">+    //从当前向上出发，收集所有的Dispatch </span>
+<span class="hljs-addition">+    while (instance !== null) {</span>
+<span class="hljs-addition">+        const { stateNode, tag } = instance;</span>
+<span class="hljs-addition">+        if (tag === HostComponent &amp;&amp; stateNode !== null) {</span>
+<span class="hljs-addition">+            lastHostComponent = stateNode;</span>
+<span class="hljs-addition">+            if (reactEventName !== null) {</span>
+<span class="hljs-addition">+                const listener = getListener(instance, reactEventName);</span>
+<span class="hljs-addition">+                if (listener != null) {</span>
+<span class="hljs-addition">+                    listeners.push(createDispatchListener(instance, listener, lastHostComponent));</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        instance = instance.return;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return listeners;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+ /**</span>
+<span class="hljs-addition">+ * 创建Dispatch</span>
+<span class="hljs-addition">+ * @param {*} instance fiber实例</span>
+<span class="hljs-addition">+ * @param {*} listener 监听函数</span>
+<span class="hljs-addition">+ * @param {*} currentTarget 当前的DOM事件对象</span>
+<span class="hljs-addition">+ * @returns Dispatch</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ function createDispatchListener(instance, listener, currentTarget) {</span>
+<span class="hljs-addition">+    return { instance, listener, currentTarget };</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h4 id="t406.2.3 SimpleEventPlugin.js">6.2.3 SimpleEventPlugin.js <a href="#t406.2.3 SimpleEventPlugin.js"> # </a></h4>
+<p>src\SimpleEventPlugin.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { registerSimpleEvents ,topLevelEventsToReactNames} from './DOMEventProperties';</span>
+<span class="hljs-addition">+import { IS_CAPTURE_PHASE } from './EventSystemFlags';</span>
+<span class="hljs-addition">+import { SyntheticMouseEvent } from './SyntheticEvent';</span>
+<span class="hljs-addition">+import { accumulateSinglePhaseListeners } from './DOMPluginEventSystem';</span>
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 提取事件处理函数</span>
+<span class="hljs-addition">+ * @param {*} dispatchQueue 队列</span>
+<span class="hljs-addition">+ * @param {*} domEventName 事件名称 click</span>
+<span class="hljs-addition">+ * @param {*} targetInst fiber实例</span>
+<span class="hljs-addition">+ * @param {*} nativeEvent 原生事件</span>
+<span class="hljs-addition">+ * @param {*} nativeEventTarget 原生事件对象</span>
+<span class="hljs-addition">+ * @param {*} eventSystemFlags 事件标志</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ function extractEvents(dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget,eventSystemFlags) {</span>
+<span class="hljs-addition">+    const reactName = topLevelEventsToReactNames.get(domEventName);//click=&gt;onClick</span>
+<span class="hljs-addition">+    let SyntheticEventCtor;</span>
+<span class="hljs-addition">+    let reactEventType = domEventName;//click</span>
+<span class="hljs-addition">+    switch (domEventName) {</span>
+<span class="hljs-addition">+        case 'click':</span>
+<span class="hljs-addition">+            SyntheticEventCtor = SyntheticMouseEvent;</span>
+<span class="hljs-addition">+            break;</span>
+<span class="hljs-addition">+        default:</span>
+<span class="hljs-addition">+            break;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    const inCapturePhase = (eventSystemFlags &amp; IS_CAPTURE_PHASE) !== 0;</span>
+<span class="hljs-addition">+    const listeners = accumulateSinglePhaseListeners(targetInst,reactName,nativeEvent.type,inCapturePhase);</span>
+<span class="hljs-addition">+    if (listeners.length &gt; 0) {</span>
+<span class="hljs-addition">+        const event = new SyntheticEventCtor(</span>
+<span class="hljs-addition">+            reactName,</span>
+<span class="hljs-addition">+            reactEventType,</span>
+<span class="hljs-addition">+            targetInst,</span>
+<span class="hljs-addition">+            nativeEvent,</span>
+<span class="hljs-addition">+            nativeEventTarget</span>
+<span class="hljs-addition">+        );</span>
+<span class="hljs-addition">+        dispatchQueue.push({ event, listeners });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+export { registerSimpleEvents as registerEvents ,extractEvents};</span>
+</code></pre>
+<h4 id="t416.2.4 getListener.js">6.2.4 getListener.js <a href="#t416.2.4 getListener.js"> # </a></h4>
+<p>src\getListener.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {getFiberCurrentPropsFromNode} <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactDOMComponentTree'</span>;
+<span class="hljs-comment">/**
+ * 返回属性里的监听函数
+ * @param {*} inst fiber实例
+ * @param {*} registrationName 注册名称
+ * @returns 
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getListener</span>(<span class="hljs-params">inst,registrationName</span>) </span>{
+    <span class="hljs-keyword">const</span> stateNode = inst.stateNode;
+    <span class="hljs-keyword">const</span> props = getFiberCurrentPropsFromNode(stateNode);
+    <span class="hljs-keyword">const</span> listener = props[registrationName];
+    <span class="hljs-keyword">return</span> listener;
+}
+</code></pre>
+<h4 id="t426.2.5 SyntheticEvent.js">6.2.5 SyntheticEvent.js <a href="#t426.2.5 SyntheticEvent.js"> # </a></h4>
+<p>src\SyntheticEvent.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">functionThatReturnsTrue</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">functionThatReturnsFalse</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+<span class="hljs-comment">/**
+ * 返回事件构建函数
+ * <span class="hljs-doctag">@param <span class="hljs-type">{*}</span> </span>Interface 
+ * <span class="hljs-doctag">@returns </span>
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createSyntheticEvent</span>(<span class="hljs-params">Interface</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">SyntheticBaseEvent</span>(<span class="hljs-params">reactName, reactEventType, targetInst, nativeEvent, nativeEventTarget</span>) </span>{
+    <span class="hljs-keyword">this</span>._reactName = reactName;
+    <span class="hljs-keyword">this</span>.type = reactEventType;
+    <span class="hljs-keyword">this</span>._targetInst = targetInst;
+    <span class="hljs-keyword">this</span>.nativeEvent = nativeEvent;
+    <span class="hljs-keyword">this</span>.target = nativeEventTarget;
+    <span class="hljs-keyword">this</span>.currentTarget = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> propName <span class="hljs-keyword">in</span> Interface) {
+      <span class="hljs-keyword">this</span>[propName] = nativeEvent[propName];
+    }
+    <span class="hljs-keyword">this</span>.isDefaultPrevented = functionThatReturnsFalse;
+    <span class="hljs-keyword">this</span>.isPropagationStopped = functionThatReturnsFalse;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+  }
+  <span class="hljs-built_in">Object</span>.assign(SyntheticBaseEvent.prototype, {
+    <span class="hljs-attr">preventDefault</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">this</span>.defaultPrevented = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">const</span> event = <span class="hljs-keyword">this</span>.nativeEvent;
+      <span class="hljs-keyword">if</span> (event.preventDefault) {
+        event.preventDefault();
+      } <span class="hljs-keyword">else</span> {<span class="hljs-comment">//IE</span>
+        event.returnValue = <span class="hljs-literal">false</span>;
+      }
+      <span class="hljs-keyword">this</span>.isDefaultPrevented = functionThatReturnsTrue;
+    },
+    <span class="hljs-attr">stopPropagation</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">const</span> event = <span class="hljs-keyword">this</span>.nativeEvent;
+      <span class="hljs-keyword">if</span> (event.stopPropagation) {
+        event.stopPropagation();
+      } <span class="hljs-keyword">else</span> {<span class="hljs-comment">//IE</span>
+        event.cancelBubble = <span class="hljs-literal">true</span>;
+      }
+      <span class="hljs-keyword">this</span>.isPropagationStopped = functionThatReturnsTrue;
+    }
+  });
+  <span class="hljs-keyword">return</span> SyntheticBaseEvent;
+}
+<span class="hljs-keyword">const</span> MouseEventInterface = {
+  <span class="hljs-attr">clientX</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">clientY</span>: <span class="hljs-number">0</span>
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SyntheticMouseEvent = createSyntheticEvent(MouseEventInterface);
+</code></pre>
+<h3 id="t436.3 执行事件函数">6.3 执行事件函数 <a href="#t436.3 执行事件函数"> # </a></h3>
+<h4 id="t446.3.1 DOMPluginEventSystem.js">6.3.1 DOMPluginEventSystem.js <a href="#t446.3.1 DOMPluginEventSystem.js"> # </a></h4>
+<p>src\DOMPluginEventSystem.js</p>
+<pre><code class="lang-diff">import { allNativeEvents } from './EventRegistry';
+import * as SimpleEventPlugin from './SimpleEventPlugin';
+import { addEventCaptureListener, addEventBubbleListener } from './EventListener';
+import { getEventListenerSet } from './ReactDOMComponentTree';
+import { IS_CAPTURE_PHASE } from './EventSystemFlags';
+import { dispatchEvent } from './ReactDOMEventListener';
+import { HostComponent } from './ReactWorkTags';
+import getListener from './getListener';
+//注册插件 其实就是收集原生事件名称
+SimpleEventPlugin.registerEvents();
+export const nonDelegatedEvents = new Set(['scroll'])
+export function listenToAllSupportedEvents(rootContainerElement) {
+    allNativeEvents.forEach(domEventName =&gt; {
+        //注册冒泡阶段
+        if (!nonDelegatedEvents.has(domEventName)) {
+            listenToNativeEvent(
+                domEventName,//click
+                false,//isCapturePhaseListener=false
+                rootContainerElement
+            );
+        }
+        //注册捕获阶段
+        listenToNativeEvent(
+            domEventName,//click
+            true,//isCapturePhaseListener=false
+            rootContainerElement//容器DOM元素
+        );
+    });
+}
+/**
+ * 
+ * @param {*} domEventName DOM事件 click
+ * @param {*} isCapturePhaseListener 是否是捕获事件监听
+ * @param {*} rootContainerElement 根容器
+ * @param {*} targetElement 目标元素
+ * @param {*} eventSystemFlags 事件系统标志
+ */
+ export function listenToNativeEvent(domEventName, isCapturePhaseListener, rootContainerElement, eventSystemFlags = 0) {
+    const listenerSet = getEventListenerSet(rootContainerElement);//[]
+    //click__bubble click__capture
+    const listenerSetKey = getListenerSetKey(domEventName, isCapturePhaseListener);
+    if (!listenerSet.has(listenerSetKey)) {
+        if (isCapturePhaseListener) {
+            eventSystemFlags |= IS_CAPTURE_PHASE;//4
+        }
+        addTrappedEventListener(
+            rootContainerElement,
+            domEventName,
+            eventSystemFlags,
+            isCapturePhaseListener
+        );
+        listenerSet.add(listenerSetKey);
+    }
+}
+/**
+ * 根据事件名称和是否捕获阶段得到监听的key
+ * @param {*} domEventName 事件名称 click
+ * @param {*} capture  是否是捕获阶段
+ * @returns 监听事件的key
+ */
+ export function getListenerSetKey(domEventName, capture) {
+    return `${domEventName}__${capture ? 'capture' : 'bubble'}`;
+}
+/**
+ * 注册监听函数
+ * @param {*} targetContainer 绑定的目标容器
+ * @param {*} domEventName  事件名称
+ * @param {*} eventSystemFlags  事件系统标识
+ * @param {*} isCapturePhaseListener  是否是捕获阶段
+ */
+ function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener) {
+    let listener = dispatchEvent.bind(null, domEventName, eventSystemFlags, targetContainer);
+    if (isCapturePhaseListener) {
+        addEventCaptureListener(targetContainer, domEventName, listener);
+    } else {
+        addEventBubbleListener(targetContainer, domEventName, listener);
+    }
+}
+
+/**
+ * 派发事件 
+ * @param {*} domEventName 事件名称 event
+ * @param {*} eventSystemFlags 事件标志，0或者4
+ * @param {*} nativeEvent 原生事件对象
+ * @param {*} targetInst fiber实例
+ * @param {*} targetContainer 目标容器
+ */
+ export function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
+    const nativeEventTarget = nativeEvent.target;
+    //事件处理函数数组
+    const dispatchQueue = [];
+    //提取监听事件
+    SimpleEventPlugin.extractEvents(
+        dispatchQueue,
+        domEventName,
+        targetInst,
+        nativeEvent,
+        nativeEventTarget,
+        eventSystemFlags,
+        targetContainer
+    );
+    //console.log('dispatchQueue',dispatchQueue);
+<span class="hljs-addition">+   processDispatchQueue(dispatchQueue, eventSystemFlags);</span>
+}
+
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 执行所有的Dispatch</span>
+<span class="hljs-addition">+ * @param {*} dispatchQueue 队列</span>
+<span class="hljs-addition">+ * @param {*} eventSystemFlags 事件标志</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ export function processDispatchQueue(dispatchQueue, eventSystemFlags) {</span>
+<span class="hljs-addition">+    const inCapturePhase = (eventSystemFlags &amp; IS_CAPTURE_PHASE) !== 0;//是否是捕获阶段</span>
+<span class="hljs-addition">+    for (let i = 0; i &lt; dispatchQueue.length; i++) {</span>
+<span class="hljs-addition">+        const { event, listeners } = dispatchQueue[i];</span>
+<span class="hljs-addition">+        processDispatchQueueItemsInOrder(event, listeners, inCapturePhase);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 处理dispatch方法</span>
+<span class="hljs-addition">+ * @param {*} event 合成事件对象</span>
+<span class="hljs-addition">+ * @param {*} dispatchListeners 监听函数</span>
+<span class="hljs-addition">+ * @param {*} inCapturePhase 是否是获取阶段</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePhase,) {</span>
+<span class="hljs-addition">+    if (inCapturePhase) {//因为收集的时候是从内往外，所以捕获阶段是倒序执行</span>
+<span class="hljs-addition">+        for (let i = dispatchListeners.length - 1; i &gt;= 0; i--) {</span>
+<span class="hljs-addition">+            const { currentTarget, listener } = dispatchListeners[i];</span>
+<span class="hljs-addition">+            if (event.isPropagationStopped()) {</span>
+<span class="hljs-addition">+                return;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            executeDispatch(event, listener, currentTarget);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    } else {</span>
+<span class="hljs-addition">+        for (let i = 0; i &lt; dispatchListeners.length; i++) {</span>
+<span class="hljs-addition">+            const { currentTarget, listener } = dispatchListeners[i];</span>
+<span class="hljs-addition">+            if (event.isPropagationStopped()) {</span>
+<span class="hljs-addition">+                return;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            executeDispatch(event, listener, currentTarget);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 执行监听函数</span>
+<span class="hljs-addition">+ * @param {*} event 合成事件对象</span>
+<span class="hljs-addition">+ * @param {*} listener 监听函数</span>
+<span class="hljs-addition">+ * @param {*} currentTarget 当前的DOM对象</span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+ function executeDispatch(event, listener, currentTarget,) {</span>
+<span class="hljs-addition">+    event.currentTarget = currentTarget;</span>
+<span class="hljs-addition">+    listener(event);</span>
+<span class="hljs-addition">+    event.currentTarget = null;</span>
+<span class="hljs-addition">+}</span>
+/**
+ * 收集一个阶段的监听
+ * @param {*} targetFiber 对应的fiber {tag:5,type:'button'}
+ * @param {*} reactName 事件名 onClick
+ * @param {*} nativeEventType 原生事件名 click
+ * @param {*} inCapturePhase 是否捕获阶段 
+ * @returns 
+ */
+ export function accumulateSinglePhaseListeners(targetFiber, reactName, nativeEventType, inCapturePhase) {
+    const captureName = reactName + 'Capture';//onClickCapture
+    const reactEventName = inCapturePhase ? captureName : reactName;//onClick或onClickCapture
+    const listeners = [];//所有的监听函数
+    let instance = targetFiber;//当前的fiber
+    let lastHostComponent = null;//上一个原生DOM元素
+    //从当前向上出发，收集所有的Dispatch 
+    while (instance !== null) {
+        const { stateNode, tag } = instance;
+        if (tag <span class="hljs-comment">=== HostComponent &amp;&amp; stateNode !== null) {</span>
+            lastHostComponent = stateNode;
+            if (reactEventName !== null) {
+                const listener = getListener(instance, reactEventName);
+                if (listener != null) {
+                    listeners.push(createDispatchListener(instance, listener, lastHostComponent));
+                }
+            }
+        }
+        instance = instance.return;
+    }
+    return listeners;
+}
+/**
+ * 创建Dispatch
+ * @param {*} instance fiber实例
+ * @param {*} listener 监听函数
+ * @param {*} currentTarget 当前的DOM事件对象
+ * @returns Dispatch
+ */
+ function createDispatchListener(instance, listener, currentTarget) {
+    return { instance, listener, currentTarget };
+}
+</code></pre>
+<h2 id="t457 批量执行">7 批量执行 <a href="#t457 批量执行"> # </a></h2>
+<h3 id="t467.1 ReactDOMUpdateBatching.js">7.1 ReactDOMUpdateBatching.js <a href="#t467.1 ReactDOMUpdateBatching.js"> # </a></h3>
+<p>src\ReactDOMUpdateBatching.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> isBatchingEventUpdates = <span class="hljs-literal">false</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">batchedEventUpdates</span>(<span class="hljs-params">fn, a, b</span>) </span>{
+    isBatchingEventUpdates = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">return</span> fn(a, b);
+    } <span class="hljs-keyword">finally</span> {
+        isBatchingEventUpdates = <span class="hljs-literal">false</span>;
+    }
+}
+</code></pre>
+<h3 id="t477.2 ReactDOMEventListener.js">7.2 ReactDOMEventListener.js <a href="#t477.2 ReactDOMEventListener.js"> # </a></h3>
+<p>src\ReactDOMEventListener.js</p>
+<pre><code class="lang-diff">import {getClosestInstanceFromNode,getFiberCurrentPropsFromNode} from './ReactDOMComponentTree';
+import {dispatchEventsForPlugins} from './DOMPluginEventSystem';
+<span class="hljs-addition">+import {batchedEventUpdates} from './ReactDOMUpdateBatching'</span>
+/**
+ * 事件处理函数
+ * @param {*} domEventName 事件名 click
+ * @param {*} eventSystemFlags 4 事件系统标志
+ * @param {*} targetContainer 代理的容器 div#root
+ * @param {*} nativeEvent 原生的事件对象 MouseEvent
+ */
+export function dispatchEvent(domEventName,eventSystemFlags,targetContainer,nativeEvent) {
+    const nativeEventTarget = nativeEvent.target;
+    //获得来源对应的fiber对象
+    const targetInst = getClosestInstanceFromNode(nativeEventTarget);
+    //console.log('targetInst',targetInst);
+    //获得来源对应的fiber对象
+    //const props = getFiberCurrentPropsFromNode(nativeEventTarget);
+    //console.log('props',props);
+<span class="hljs-addition">+   batchedEventUpdates(() =&gt;{</span>
+        dispatchEventsForPlugins(
+            domEventName,
+            eventSystemFlags,
+            nativeEvent,
+            targetInst,
+            targetContainer
+<span class="hljs-addition">+       );</span>
+    })   
+}
+</code></pre>
+<h2 id="t488 支持onChange事件">8 支持onChange事件 <a href="#t488 支持onChange事件"> # </a></h2>
+<h3 id="t498.1 src\index.js">8.1 src\index.js <a href="#t498.1 src\index.js"> # </a></h3>
+<pre><code class="lang-diff">import React from './react';
+import ReactDOM from './react-dom';
+let rootContainerElement = document.getElementById('root');
+const handleDivClick = (event)=&gt;{
+  console.log('handleDivClick');
+}
+const handleDivClickCapture = (event)=&gt;{
+  console.log('handleDivClickCapture');
+
+}
+const handleButtonClick = (event)=&gt;{
+  console.log('handleButtonClick');
+}
+const handleButtonClickCapture = (event)=&gt;{
+  console.log('handleButtonClickCapture');
+}
+<span class="hljs-addition">+const handleChange = (event)=&gt;{</span>
+<span class="hljs-addition">+  console.log('handleChange',event);</span>
+<span class="hljs-addition">+}</span>
+let element = (
+  &lt;div onClick={handleDivClick} onClickCapture={handleDivClickCapture}&gt;
+<span class="hljs-addition">+   &lt;input onChange={handleChange}&gt;&lt;/input&gt;</span>
+    &lt;button onClick={handleButtonClick} onClickCapture={handleButtonClickCapture}&gt;+&lt;/button&gt;
+  &lt;/div&gt;
+)
+console.log(element);
+ReactDOM.render(
+  element,
+  rootContainerElement
+);
+</code></pre>
+<h3 id="t508.2 SyntheticEvent.js">8.2 SyntheticEvent.js <a href="#t508.2 SyntheticEvent.js"> # </a></h3>
+<p>src\SyntheticEvent.js</p>
+<pre><code class="lang-diff">function functionThatReturnsTrue() {
+  return true;
+}
+function functionThatReturnsFalse() {
+  return false;
+}
+/**
+ * 返回事件构建函数
+ * @param {*} Interface 
+ * @returns 
+ */
+function createSyntheticEvent(Interface) {
+  function SyntheticBaseEvent(reactName, reactEventType, targetInst, nativeEvent, nativeEventTarget) {
+    this._reactName = reactName;
+    this.type = reactEventType;
+    this._targetInst = targetInst;
+    this.nativeEvent = nativeEvent;
+    this.target = nativeEventTarget;
+    this.currentTarget = null;
+    for (const propName in Interface) {
+      this[propName] = nativeEvent[propName];
+    }
+    this.isDefaultPrevented = functionThatReturnsFalse;
+    this.isPropagationStopped = functionThatReturnsFalse;
+    return this;
+  }
+  Object.assign(SyntheticBaseEvent.prototype, {
+    preventDefault: function () {
+      this.defaultPrevented = true;
+      const event = this.nativeEvent;
+      if (event.preventDefault) {
+        event.preventDefault();
+      } else {//IE
+        event.returnValue = false;
+      }
+      this.isDefaultPrevented = functionThatReturnsTrue;
+    },
+    stopPropagation: function () {
+      const event = this.nativeEvent;
+      if (event.stopPropagation) {
+        event.stopPropagation();
+      } else {//IE
+        event.cancelBubble = true;
+      }
+      this.isPropagationStopped = functionThatReturnsTrue;
+    }
+  });
+  return SyntheticBaseEvent;
+}
+const MouseEventInterface = {
+  clientX: 0,
+  clientY: 0
+}
+export const SyntheticMouseEvent = createSyntheticEvent(MouseEventInterface);
+<span class="hljs-addition">+export const SyntheticEvent = createSyntheticEvent({});</span>
+</code></pre>
+<h3 id="t518.3 ChangeEventPlugin.js">8.3 ChangeEventPlugin.js <a href="#t518.3 ChangeEventPlugin.js"> # </a></h3>
+<p>src\ChangeEventPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { SyntheticEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">'./SyntheticEvent'</span>;
+<span class="hljs-keyword">import</span> {registerTwoPhaseEvent} <span class="hljs-keyword">from</span> <span class="hljs-string">'./EventRegistry'</span>;
+<span class="hljs-keyword">import</span> {accumulateTwoPhaseListeners} <span class="hljs-keyword">from</span> <span class="hljs-string">'./DOMPluginEventSystem'</span>;
+<span class="hljs-comment">/**
+ * 提取事件处理函数
+ * @param {*} dispatchQueue 队列
+ * @param {*} domEventName 事件名称 click
+ * @param {*} targetInst fiber实例
+ * @param {*} nativeEvent 原生事件
+ * @param {*} nativeEventTarget 原生事件对象
+ * @param {*} eventSystemFlags 事件标志
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">extractEvents</span>(<span class="hljs-params">dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget</span>) </span>{
+  <span class="hljs-keyword">if</span>(domEventName === <span class="hljs-string">'input'</span>||domEventName === <span class="hljs-string">'change'</span>){
+    <span class="hljs-keyword">const</span> listeners = accumulateTwoPhaseListeners(targetInst, <span class="hljs-string">'onChange'</span>);
+    <span class="hljs-keyword">if</span> (listeners.length &gt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">const</span> event = <span class="hljs-keyword">new</span> SyntheticEvent(
+        <span class="hljs-string">'onChange'</span>,
+        <span class="hljs-string">'change'</span>,
+        <span class="hljs-literal">null</span>,
+        nativeEvent,
+        nativeEventTarget,
+      );
+      dispatchQueue.push({event, listeners});
+    }
+  }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerEvents</span>(<span class="hljs-params"></span>) </span>{
+    registerTwoPhaseEvent(<span class="hljs-string">'onChange'</span>, [
+      <span class="hljs-string">'change'</span>,
+      <span class="hljs-string">'input'</span>
+    ]);
+  }
+<span class="hljs-keyword">export</span> { registerEvents, extractEvents };
+</code></pre>
+<h3 id="t528.4 DOMPluginEventSystem.js">8.4 DOMPluginEventSystem.js <a href="#t528.4 DOMPluginEventSystem.js"> # </a></h3>
+<p>src\DOMPluginEventSystem.js</p>
+<pre><code class="lang-diff">import { allNativeEvents } from './EventRegistry';
+import * as SimpleEventPlugin from './SimpleEventPlugin';
+<span class="hljs-addition">+import * as ChangeEventPlugin from './ChangeEventPlugin';</span>
+import { addEventCaptureListener, addEventBubbleListener } from './EventListener';
+import { getEventListenerSet } from './ReactDOMComponentTree';
+import { IS_CAPTURE_PHASE } from './EventSystemFlags';
+import { dispatchEvent } from './ReactDOMEventListener';
+import { HostComponent } from './ReactWorkTags';
+import getListener from './getListener';
+//注册插件 其实就是收集原生事件名称
+SimpleEventPlugin.registerEvents();
+<span class="hljs-addition">+ChangeEventPlugin.registerEvents();</span>
+export const nonDelegatedEvents = new Set(['scroll'])
+export function listenToAllSupportedEvents(rootContainerElement) {
+    allNativeEvents.forEach(domEventName =&gt; {
+        //注册冒泡阶段
+        if (!nonDelegatedEvents.has(domEventName)) {
+            listenToNativeEvent(
+                domEventName,//click
+                false,//isCapturePhaseListener=false
+                rootContainerElement
+            );
+        }
+        //注册捕获阶段
+        listenToNativeEvent(
+            domEventName,//click
+            true,//isCapturePhaseListener=false
+            rootContainerElement//容器DOM元素
+        );
+    });
+}
+/**
+ * 
+ * @param {*} domEventName DOM事件 click
+ * @param {*} isCapturePhaseListener 是否是捕获事件监听
+ * @param {*} rootContainerElement 根容器
+ * @param {*} targetElement 目标元素
+ * @param {*} eventSystemFlags 事件系统标志
+ */
+ export function listenToNativeEvent(domEventName, isCapturePhaseListener, rootContainerElement, eventSystemFlags = 0) {
+    const listenerSet = getEventListenerSet(rootContainerElement);//[]
+    //click__bubble click__capture
+    const listenerSetKey = getListenerSetKey(domEventName, isCapturePhaseListener);
+    if (!listenerSet.has(listenerSetKey)) {
+        if (isCapturePhaseListener) {
+            eventSystemFlags |= IS_CAPTURE_PHASE;//4
+        }
+        addTrappedEventListener(
+            rootContainerElement,
+            domEventName,
+            eventSystemFlags,
+            isCapturePhaseListener
+        );
+        listenerSet.add(listenerSetKey);
+    }
+}
+/**
+ * 根据事件名称和是否捕获阶段得到监听的key
+ * @param {*} domEventName 事件名称 click
+ * @param {*} capture  是否是捕获阶段
+ * @returns 监听事件的key
+ */
+ export function getListenerSetKey(domEventName, capture) {
+    return `${domEventName}__${capture ? 'capture' : 'bubble'}`;
+}
+/**
+ * 注册监听函数
+ * @param {*} targetContainer 绑定的目标容器
+ * @param {*} domEventName  事件名称
+ * @param {*} eventSystemFlags  事件系统标识
+ * @param {*} isCapturePhaseListener  是否是捕获阶段
+ */
+ function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener) {
+    let listener = dispatchEvent.bind(null, domEventName, eventSystemFlags, targetContainer);
+    if (isCapturePhaseListener) {
+        addEventCaptureListener(targetContainer, domEventName, listener);
+    } else {
+        addEventBubbleListener(targetContainer, domEventName, listener);
+    }
+}
+
+/**
+ * 派发事件 
+ * @param {*} domEventName 事件名称 event
+ * @param {*} eventSystemFlags 事件标志，0或者4
+ * @param {*} nativeEvent 原生事件对象
+ * @param {*} targetInst fiber实例
+ * @param {*} targetContainer 目标容器
+ */
+ export function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
+    const nativeEventTarget = nativeEvent.target;
+    //事件处理函数数组
+    const dispatchQueue = [];
+    //提取监听事件
+    SimpleEventPlugin.extractEvents(
+        dispatchQueue,
+        domEventName,
+        targetInst,
+        nativeEvent,
+        nativeEventTarget,
+        eventSystemFlags,
+        targetContainer
+    );
+<span class="hljs-addition">+   if (eventSystemFlags !== IS_CAPTURE_PHASE) {</span>
+<span class="hljs-addition">+       ChangeEventPlugin.extractEvents(</span>
+<span class="hljs-addition">+           dispatchQueue,</span>
+<span class="hljs-addition">+           domEventName,</span>
+<span class="hljs-addition">+           targetInst,</span>
+<span class="hljs-addition">+           nativeEvent,</span>
+<span class="hljs-addition">+           nativeEventTarget,</span>
+<span class="hljs-addition">+           eventSystemFlags,</span>
+<span class="hljs-addition">+           targetContainer</span>
+<span class="hljs-addition">+       )</span>
+<span class="hljs-addition">+   }</span>
+    processDispatchQueue(dispatchQueue, eventSystemFlags);
+}
+
+/**
+ * 执行所有的Dispatch
+ * @param {*} dispatchQueue 队列
+ * @param {*} eventSystemFlags 事件标志
+ */
+ export function processDispatchQueue(dispatchQueue, eventSystemFlags) {
+    const inCapturePhase = (eventSystemFlags &amp; IS_CAPTURE_PHASE) !== 0;//是否是捕获阶段
+    for (let i = 0; i &lt; dispatchQueue.length; i++) {
+        const { event, listeners } = dispatchQueue[i];
+        processDispatchQueueItemsInOrder(event, listeners, inCapturePhase);
+    }
+}
+/**
+ * 处理dispatch方法
+ * @param {*} event 合成事件对象
+ * @param {*} dispatchListeners 监听函数
+ * @param {*} inCapturePhase 是否是获取阶段
+ */
+function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePhase,) {
+    if (inCapturePhase) {//因为收集的时候是从内往外，所以捕获阶段是倒序执行
+        for (let i = dispatchListeners.length - 1; i &gt;= 0; i--) {
+            const { currentTarget, listener } = dispatchListeners[i];
+            if (event.isPropagationStopped()) {
+                return;
+            }
+            executeDispatch(event, listener, currentTarget);
+        }
+    } else {
+        for (let i = 0; i &lt; dispatchListeners.length; i++) {
+            const { currentTarget, listener } = dispatchListeners[i];
+            if (event.isPropagationStopped()) {
+                return;
+            }
+            executeDispatch(event, listener, currentTarget);
+        }
+    }
+}
+/**
+ * 执行监听函数
+ * @param {*} event 合成事件对象
+ * @param {*} listener 监听函数
+ * @param {*} currentTarget 当前的DOM对象
+ */
+ function executeDispatch(event, listener, currentTarget,) {
+    event.currentTarget = currentTarget;
+    listener(event);
+    event.currentTarget = null;
+}
+/**
+ * 收集一个阶段的监听
+ * @param {*} targetFiber 对应的fiber {tag:5,type:'button'}
+ * @param {*} reactName 事件名 onClick
+ * @param {*} nativeEventType 原生事件名 click
+ * @param {*} inCapturePhase 是否捕获阶段 
+ * @returns 
+ */
+ export function accumulateSinglePhaseListeners(targetFiber, reactName, nativeEventType, inCapturePhase) {
+    const captureName = reactName + 'Capture';//onClickCapture
+    const reactEventName = inCapturePhase ? captureName : reactName;//onClick或onClickCapture
+    const listeners = [];//所有的监听函数
+    let instance = targetFiber;//当前的fiber
+    let lastHostComponent = null;//上一个原生DOM元素
+    //从当前向上出发，收集所有的Dispatch 
+    while (instance !== null) {
+        const { stateNode, tag } = instance;
+        if (tag <span class="hljs-comment">=== HostComponent &amp;&amp; stateNode !== null) {</span>
+            lastHostComponent = stateNode;
+            if (reactEventName !== null) {
+                const listener = getListener(instance, reactEventName);
+                if (listener != null) {
+                    listeners.push(createDispatchListener(instance, listener, lastHostComponent));
+                }
+            }
+        }
+        instance = instance.return;
+    }
+    return listeners;
+}
+/**
+ * 创建Dispatch
+ * @param {*} instance fiber实例
+ * @param {*} listener 监听函数
+ * @param {*} currentTarget 当前的DOM事件对象
+ * @returns Dispatch
+ */
+ function createDispatchListener(instance, listener, currentTarget) {
+    return { instance, listener, currentTarget };
+}
+
+<span class="hljs-addition">+export function accumulateTwoPhaseListeners(targetFiber,reactName) {</span>
+<span class="hljs-addition">+    const captureName = reactName + 'Capture';</span>
+<span class="hljs-addition">+    const listeners = [];</span>
+<span class="hljs-addition">+    let instance = targetFiber;</span>
+<span class="hljs-addition">+    while (instance !== null) {</span>
+<span class="hljs-addition">+        const { stateNode, tag } = instance;</span>
+<span class="hljs-addition">+        if (tag === HostComponent &amp;&amp; stateNode !== null) {</span>
+<span class="hljs-addition">+            const currentTarget = stateNode;</span>
+<span class="hljs-addition">+            const captureListener = getListener(instance, captureName);</span>
+<span class="hljs-addition">+            if (captureListener != null) {</span>
+<span class="hljs-addition">+                listeners.unshift(</span>
+<span class="hljs-addition">+                    createDispatchListener(instance, captureListener, currentTarget),</span>
+<span class="hljs-addition">+                );</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            const bubbleListener = getListener(instance, reactName);</span>
+<span class="hljs-addition">+            if (bubbleListener != null) {</span>
+<span class="hljs-addition">+                listeners.push(</span>
+<span class="hljs-addition">+                    createDispatchListener(instance, bubbleListener, currentTarget),</span>
+<span class="hljs-addition">+                );</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        instance = instance.return;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return listeners;</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+
+    

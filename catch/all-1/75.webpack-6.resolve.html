@@ -1,0 +1,168 @@
+
+        <h2 id="t01. webpack整体工作流程">1. webpack整体工作流程 <a href="#t01. webpack整体工作流程"> # </a></h2>
+<ul>
+<li><a href="https://webpack.docschina.org/configuration/resolve/#resolve">resolve</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/resolve.jpg" alt="resolve"></p>
+<h2 id="t12. resolve入口">2. resolve入口 <a href="#t12. resolve入口"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/resovlerequest.jpg" alt="resovlerequest"></p>
+<ul>
+<li>resolve 流程开始的入口在 <code>factory</code> 阶段</li>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModuleFactory.js#L123-L158">NormalModuleFactory</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">this</span>.hooks.factory.tap(<span class="hljs-string">"NormalModuleFactory"</span>, () =&gt; <span class="hljs-function">(<span class="hljs-params">result, callback</span>) =&gt;</span> {
+    <span class="hljs-keyword">let</span> resolver = <span class="hljs-keyword">this</span>.hooks.resolver.call(<span class="hljs-literal">null</span>);
+    resolver(result, (err, data) =&gt; {
+        <span class="hljs-keyword">this</span>.hooks.afterResolve.callAsync(data, (err, result) =&gt; {    });
+    });
+});
+</code></pre>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/NormalModuleFactory.js#L159-L371">NormalModuleFactory</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">this</span>.hooks.resolver.tap(<span class="hljs-string">"NormalModuleFactory"</span>, () =&gt; <span class="hljs-function">(<span class="hljs-params">data, callback</span>) =&gt;</span> {
+    <span class="hljs-comment">// import '!style-loader!css-loader!./index.css';</span>
+    <span class="hljs-keyword">let</span> elements = request.split(<span class="hljs-string">"!"</span>);
+    <span class="hljs-keyword">let</span> resource = elements.pop();
+    <span class="hljs-keyword">const</span> loaderResolver = <span class="hljs-keyword">this</span>.getResolver(<span class="hljs-string">"loader"</span>);
+    <span class="hljs-keyword">const</span> normalResolver = <span class="hljs-keyword">this</span>.getResolver(<span class="hljs-string">"normal"</span>);
+    <span class="hljs-keyword">let</span> loaders = loaderResolver.resolve(elements);
+    <span class="hljs-keyword">let</span> request = normalResolver.resolve(resource);
+})
+</code></pre>
+<p><a href="https://github.com/webpack/webpack/blob/v4.43.0/lib/ResolverFactory.js#L44-L52">ResolverFactory</a></p>
+<p><img src="http://img.zhufengpeixun.cn/getResolver.jpg" alt="getResolver"></p>
+<pre><code class="lang-js">    <span class="hljs-keyword">get</span>(type, resolveOptions) {
+        <span class="hljs-keyword">const</span> newResolver = <span class="hljs-keyword">this</span>._create(type, resolveOptions);
+        <span class="hljs-keyword">return</span> newResolver;
+    }
+</code></pre>
+<p><img src="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/Resolver.js#L151-L218" alt="Resolver"></p>
+<pre><code class="lang-js">resolve(context, path, request, resolveContext, callback) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.doResolve(<span class="hljs-keyword">this</span>.hooks.resolve,obj);
+}
+</code></pre>
+<h2 id="t23. resolve流程">3. resolve流程 <a href="#t23. resolve流程"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/UnsafeCachePlugin.js">UnsafeCachePlugin</a> 增加缓存</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/ParsePlugin.js">ParsePlugin</a>  初步解析路径 </li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/DescriptionFilePlugin.js">DescriptionFilePlugin</a>  查看package.json文件</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/AliasFieldPlugin.js">AliasFieldPlugin</a> 读取package.json中的别名</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/AliasPlugin.js">AliasPlugin</a>取配置项中的别名</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/ModuleKindPlugin.js">ModuleKindPlugin</a> 判断是模块</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/ModulesInHierachicDirectoriesPlugin.js">ModulesInHierachicDirectoriesPlugin</a> </li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/JoinRequestPlugin.js">JoinRequestPlugin</a> 连接得到两个完整的路径</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/FileKindPlugin.js">FileKindPlugin</a> 判断是否为一个 directory</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/DirectoryExistsPlugin.js">DirectoryExistsPlugin</a> 判断directory是否存在</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/MainFieldPlugin.js">MainFieldPlugin</a> 读取package.json中的main字段</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/UseFilePlugin.js">UseFilePlugin</a> 试图读取目录下的index文件</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/FileExistsPlugin.js">FileExistsPlugin</a>  读取 request.path 所在的文件，看文件是否存在</li>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/ResultPlugin.js">ResultPlugin</a> 生成结果</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/resolveflow3.jpg" alt="resolveflow3"></p>
+<h3 id="t33.1 doResolve">3.1 doResolve <a href="#t33.1 doResolve"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/enhanced-resolve/blob/v4.1.1/lib/Resolver.js">Resolver.js</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesBailHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> resolveHook = <span class="hljs-keyword">new</span> AsyncSeriesBailHook([<span class="hljs-string">"request"</span>, <span class="hljs-string">"innerContext"</span>]);
+<span class="hljs-keyword">let</span> resultHook = <span class="hljs-keyword">new</span> AsyncSeriesBailHook([<span class="hljs-string">"content"</span>, <span class="hljs-string">"innerContext"</span>]);
+<span class="hljs-keyword">let</span> resolver = {
+    doResolve(resolveHook, request, callback) {
+        <span class="hljs-keyword">return</span> resolveHook.callAsync(request, (err, result) =&gt; {
+            <span class="hljs-keyword">if</span> (err) <span class="hljs-keyword">return</span> callback(err);
+            <span class="hljs-keyword">if</span> (result) <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, result);
+        });
+    }
+}
+resultHook.tapAsync(<span class="hljs-string">'resultHook'</span>, (content, callback) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resultHook'</span>);
+    callback(<span class="hljs-literal">null</span>, content);
+});
+resolveHook.tapAsync(<span class="hljs-string">'resolveHook'</span>, (request, callback) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resolveHook'</span>);
+    <span class="hljs-keyword">let</span> content = request + <span class="hljs-string">'的内容'</span>;
+    resolver.doResolve(resultHook, content, (err, result) =&gt; {
+        callback(err, result);
+    });
+});
+resolver.doResolve(resolveHook, <span class="hljs-string">'./src/index.js'</span>, (err, result) =&gt; {
+    <span class="hljs-built_in">console</span>.log(result);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'完成'</span>);
+})
+</code></pre>
+<h3 id="t43.1 resolve流程">3.1 resolve流程 <a href="#t43.1 resolve流程"> # </a></h3>
+<ul>
+<li>node_modules_<a href="mailto:enhanced-resolve@4.1.1">enhanced-resolve@4.1.1</a>@enhanced-resolve</li>
+</ul>
+<h4 id="t53.1.1 index.js">3.1.1 index.js <a href="#t53.1.1 index.js"> # </a></h4>
+<p>index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> a = <span class="hljs-number">10</span>;
+</code></pre>
+<h4 id="t63.1.2 cli.js">3.1.2 cli.js <a href="#t63.1.2 cli.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.config"</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-built_in">console</span>.log(stats);
+});
+</code></pre>
+<h4 id="t73.1.3 流程">3.1.3 流程 <a href="#t73.1.3 流程"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-comment">//{path:"c:\vipdata\webpackdemo",request:"./src/index.js"}</span>
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-attr">path</span>: path,<span class="hljs-attr">request</span>: request};
+</code></pre>
+<p>UnsafeCachePlugin</p>
+<pre><code class="lang-js">resolver.doResolve(<span class="hljs-string">'newResolve'</span>);
+</code></pre>
+<p>ParsePlugin</p>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ obj = {
+    directory:false
+    file:false
+    module:false
+    query:""
+    request:"./src/index.js"
+ }
+ */</span>
+resolver.doResolve(<span class="hljs-string">'parsedResolve'</span>, obj);
+</code></pre>
+<p>DescriptionFilePlugin</p>
+<pre><code class="lang-js"><span class="hljs-comment">/*
+obj={
+descriptionFileData:Object {name: "webpackdemo", version: "1.0.0", description: "", …}
+descriptionFilePath:"c:\vipdata\webpackdemo\package.json"
+descriptionFileRoot:"c:\vipdata\webpackdemo"
+directory:false
+file:false
+module:false
+path:"c:\vipdata\webpackdemo"
+query:""
+relativePath:"."
+request:"./src/index.js"
+}
+*/</span>
+resolver.doResolve(<span class="hljs-string">'describedResolve'</span>,obj);
+</code></pre>
+<p>AliasFieldPlugin</p>
+<pre><code class="lang-js">browser
+</code></pre>
+<p>AliasPlugin</p>
+<pre><code class="lang-js">alias
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-comment">/***
+ obj = {
+    __innerRequest:"./src/index.js"
+    __innerRequest_relativePath:"./src/index.js"
+    descriptionFileData:Object {name: "webpackdemo", version: "1.0.0", description: "", …}
+    descriptionFilePath:"c:\vipdata\webpackdemo\package.json"
+    descriptionFileRoot:"c:\vipdata\webpackdemo"
+    file:false
+    module:false
+    path:"c:\vipdata\webpackdemo\src\index.js"
+    relativePath:"./src/index.js"
+ }
+ * /
+</span></code></pre>
+
+    

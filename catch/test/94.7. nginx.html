@@ -1,0 +1,397 @@
+
+        <h2 id="t01.HTTP">1.HTTP <a href="#t01.HTTP"> # </a></h2>
+<ul>
+<li>HTTP 协议(HyperText Transfer Protocol，超文本传输协议)是客户端浏览器或其他程序与Web服务器之间的应用层通信协议</li>
+</ul>
+<h3 id="t11.1 HTTP服务器">1.1 HTTP服务器 <a href="#t11.1 HTTP服务器"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/1.httpprotocal.jpg" style="width:40%"></p>
+<p><img src="http://img.zhufengpeixun.cn/1.httpprotocal.png" style="width:40%"></p>
+<pre><code class="lang-js">tcp.port == <span class="hljs-number">7788</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+http.createServer(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'hello'</span>);
+    <span class="hljs-built_in">console</span>.log(buffer);
+    res.end(buffer);
+}).listen(<span class="hljs-number">7788</span>, () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'listening 7788'</span>));
+</code></pre>
+<h3 id="t21.2 HTTP三大风险">1.2 HTTP三大风险 <a href="#t21.2 HTTP三大风险"> # </a></h3>
+<ul>
+<li>(1)窃听风险：黑客可以获知通信内容</li>
+<li>(2)篡改风险：黑客可以修改通信内容</li>
+<li>(3)冒充风险：黑客可以冒充他人身份参与通信</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/2.httpprotocaldanger.jpg" style="width:40%"></p>
+<h2 id="t32. HTTPS">2. HTTPS <a href="#t32. HTTPS"> # </a></h2>
+<ul>
+<li>HTTP = HTTP+TLS/SSL</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">风险</th>
+<th style="text-align:left">对策</th>
+<th style="text-align:left">方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">信息窃听</td>
+<td style="text-align:left">信息加密</td>
+<td style="text-align:left">对称加密 AES</td>
+</tr>
+<tr>
+<td style="text-align:left">密钥传递</td>
+<td style="text-align:left">密钥协商</td>
+<td style="text-align:left">非对称加密(RSA和ECC)</td>
+</tr>
+<tr>
+<td style="text-align:left">信息篡改</td>
+<td style="text-align:left">完整性校验</td>
+<td style="text-align:left">散列算法(MD5和SHA)</td>
+</tr>
+<tr>
+<td style="text-align:left">身份冒充</td>
+<td style="text-align:left">CA权威机构</td>
+<td style="text-align:left">散列算法(MD5和SHA)+RSA签名</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t43. 加密算法">3. 加密算法 <a href="#t43. 加密算法"> # </a></h2>
+<h3 id="t53.1 对称加密 AES">3.1 对称加密 AES <a href="#t53.1 对称加密 AES"> # </a></h3>
+<ul>
+<li>加密和解密使用同一个密钥</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/Symmetric_encryption.jpg" style="width:40%"></p>
+<h3 id="t63.2 非对称加密">3.2 非对称加密 <a href="#t63.2 非对称加密"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/4.rsakey.jpg" style="width:60%"></p>
+<h3 id="t73.3 哈希算法">3.3 哈希算法 <a href="#t73.3 哈希算法"> # </a></h3>
+<ul>
+<li>哈希函数的作用是给一个任意长度的数据生成出一个固定长度的数据<ul>
+<li>安全性 可以从给定的数据X计算出哈希值Y，但不能从哈希值Y计算机数据X</li>
+<li>独一无二 不同的数据一定会产出不同的哈希值</li>
+<li>长度固定 不管输入多大的数据,输出长度都是固定的</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/5.hashkey.jpg" alt="5.hashkey"></p>
+<h3 id="t83.4 签名">3.4 签名 <a href="#t83.4 签名"> # </a></h3>
+<ul>
+<li>数字签名的基本原理是用私钥去签名，而用公钥去验证签名</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/verify3.png" alt="verify3"></p>
+<h3 id="t93.5 数字证书">3.5 数字证书 <a href="#t93.5 数字证书"> # </a></h3>
+<ul>
+<li>数字证书是一个由可信的第三方发出的，用来证明所有人身份以及所有人拥有某个公钥的电子文件</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/certification3.jpg" alt="certification3"></p>
+<h3 id="t103.6 密钥交换">3.6 密钥交换 <a href="#t103.6 密钥交换"> # </a></h3>
+<ul>
+<li>Diffie-Hellman算法是一种密钥交换协议，它可以让双方在不泄漏密钥的情况下协商出一个密钥来</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/6.DiffieHellman.jpg" style="width:50%"></p>
+<h3 id="t113.7 ECC">3.7 ECC <a href="#t113.7 ECC"> # </a></h3>
+<ul>
+<li>椭圆曲线加密算法(ECC) 是基于椭圆曲线数学的一种公钥加密的算法</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> basic = <span class="hljs-number">3</span>;<span class="hljs-comment">//共享basic</span>
+<span class="hljs-keyword">let</span> a = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> basicA = basic * a;<span class="hljs-comment">//15</span>
+<span class="hljs-keyword">let</span> b = <span class="hljs-number">7</span>;
+<span class="hljs-keyword">let</span> basicB = basic * b;<span class="hljs-comment">//21</span>
+
+<span class="hljs-built_in">console</span>.log(a * basicB);<span class="hljs-comment">//105</span>
+<span class="hljs-built_in">console</span>.log(b * basicA);<span class="hljs-comment">//105</span>
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/ecc.png" style="width:40%"></p>
+<h2 id="t124. 加密过程">4. 加密过程 <a href="#t124. 加密过程"> # </a></h2>
+<ul>
+<li><code>firefox: https://47.105.191.39</code> <code>ip.addr ==47.105.191.39 and tls</code></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/httpsoverflow.jpg" style="width:50%"></p>
+<h3 id="t134.1 ClientHello">4.1 ClientHello <a href="#t134.1 ClientHello"> # </a></h3>
+<ul>
+<li>在一次新的握手流程中，客户端先发送ClientHello<ul>
+<li>Version 协议版本</li>
+<li>Random  包含32个字节的随机数 28随机数字节+4字节时间戳,随机数是为了保证每一次连接者是独立无二的</li>
+<li>Cipher Suites 客户端支持的所有密码套件</li>
+<li>Extensions 扩展的额外数据</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/1.clienthello.png" alt="1.clienthello.png"></p>
+<h3 id="t144.2 ServerHello">4.2 ServerHello <a href="#t144.2 ServerHello"> # </a></h3>
+<ul>
+<li>将服务器选择的连接参数发回给客户端，消息结构和ClientHello类似 ，每个字段只包含一个选项</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/2.serverres.png" alt="serverres"></p>
+<p><img src="http://img.zhufengpeixun.cn/3.serverhello.png" alt="serverhello"></p>
+<h3 id="t154.3 Certificate">4.3 Certificate <a href="#t154.3 Certificate"> # </a></h3>
+<ul>
+<li>Certificate消息发送X.509证书</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/4.certificate.png" alt="4.certificate.png"></p>
+<h3 id="t164.4 ServerKeyExchange">4.4 ServerKeyExchange <a href="#t164.4 ServerKeyExchange"> # </a></h3>
+<ul>
+<li>ServerKeyExchange的目的在于发送交换密钥的参数</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/5.serverkeyexchange.png" alt="5.serverkeyexchange.png"></p>
+<h3 id="t174.5 Server Hello Done">4.5 Server Hello Done <a href="#t174.5 Server Hello Done"> # </a></h3>
+<ul>
+<li>ClientKeyExchange消息携带客户端为密钥交换的所有信息</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/6.serverhellodone.png" alt="6.serverhellodone.png"></p>
+<h3 id="t184.6 ClientKeyExchange">4.6 ClientKeyExchange <a href="#t184.6 ClientKeyExchange"> # </a></h3>
+<ul>
+<li>ClientKeyExchange消息携带客户端为密钥交换的所有信息</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/7.clientkeyexchange.png" alt="clientkeyexchange"></p>
+<h3 id="t194.7 ChangeCipherSpec">4.7 ChangeCipherSpec <a href="#t194.7 ChangeCipherSpec"> # </a></h3>
+<ul>
+<li>ChangeCipherSpec表示客户端已经得到了连接参数的足够信息，已生成加密密钥，并切换到了加密模式</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/8.ChangeCipherSpec.png" alt="ChangeCipherSpec"></p>
+<h3 id="t204.8 EncryptedHandshakeMessage">4.8 EncryptedHandshakeMessage <a href="#t204.8 EncryptedHandshakeMessage"> # </a></h3>
+<ul>
+<li>这个报文的目的就是告诉对端自己在整个握手过程中收到了什么数据，发送了什么数据,来保证中间没人篡改报文</li>
+<li>其次这个报文作用就是确认秘钥的正确性。因为<code>Encrypted handshake message</code>是使用对称秘钥进行加密的第一个报文，如果这个报文加解密校验成功，那么就说明对称秘钥是正确的</li>
+<li>计算方法就将之前所有的握手数据(包括接受和发送)计算哈希运算,然后就是使用协商好的对称密钥进行加密</li>
+</ul>
+<pre><code class="lang-js">加密(SHA(客户端随机数+服务器随机数))
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/9.EncryptedHandshakeMessage.png" alt="EncryptedHandshakeMessage"></p>
+<h3 id="t214.9 New Session Ticket">4.9 New Session Ticket <a href="#t214.9 New Session Ticket"> # </a></h3>
+<ul>
+<li>SSL 中的 session 会跟 HTTP 的 session 类似,都是用来保存客户端和服务端之间交互的一些记录</li>
+<li>如果服务端允许使用 Session ID,客户端的 Client Hello 带上 Session ID，服务端复用 Session ID 后，会直接略过协商加密密钥的过程，直接发出一个 Change Cipher Spec 报文,然后就是加密的握手信息报文</li>
+<li>在服务器发送New Session Ticket消息<ul>
+<li>Type 类型</li>
+<li>Version 版本</li>
+<li>Length长度</li>
+<li>Session Ticket Lifetime Hint 表示Ticket的剩余有效时间</li>
+<li>Session Ticket  会话标识</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/10.NewSessionTicket.png" alt="NewSessionTicket"></p>
+<p><img src="http://img.zhufengpeixun.cn/11.NewSessionTicket.png" alt="11.NewSessionTicket"></p>
+<h2 id="t225.openssl">5.openssl <a href="#t225.openssl"> # </a></h2>
+<ul>
+<li>linux中的openssl 是SSL/TLS协议和多种加密算法的开源实现 </li>
+<li>openssl包括libcrypto实现算法、libssl 实现TLS/SSL协议,libssl是基于会话的，实现了身份认证 ,数据加密, 会话完整性的一个TLS/SSL的库。</li>
+</ul>
+<h3 id="t235.1 查看版本">5.1 查看版本 <a href="#t235.1 查看版本"> # </a></h3>
+<pre><code class="lang-js">openssl version -a   
+</code></pre>
+<h3 id="t245.2 摘要算法">5.2 摘要算法 <a href="#t245.2 摘要算法"> # </a></h3>
+<pre><code class="lang-js">openssl dgst -help
+</code></pre>
+<ul>
+<li>file... files to digest (default is stdin) 生成摘要的文件</li>
+<li>-out outfile       Output to filename rather than stdout 输出文件</li>
+<li>-sign val          Sign digest using private key 使用私钥签名</li>
+<li>-verify val        Verify a signature using public key 使用公钥验证签名</li>
+<li>-signature infile  File with signature to verify  验证的签名的文件</li>
+<li>-hex               Print as hex dump   以16进制打印        </li>
+<li>-hmac val          Create hashed MAC with key  创建hashed过的消息摘要</li>
+</ul>
+<pre><code class="lang-js">echo <span class="hljs-number">123</span> &gt; msg.txt
+openssl dgst -md5  msg.txt
+openssl dgst -sha1  msg.txt
+openssl dgst -sha256  msg.txt
+</code></pre>
+<h3 id="t255.3 对称加密">5.3 对称加密 <a href="#t255.3 对称加密"> # </a></h3>
+<pre><code class="lang-js">openssl enc -help
+</code></pre>
+<ul>
+<li>-in infile     Input file  输入要加密的文件</li>
+<li>-out outfile   Output file 输出加密后的文件</li>
+<li>-e             Encrypt 加密</li>
+<li>-d             Decrypt 解密        </li>
+<li>-a             Base64 encode/decode, depending on encryption flag Base64编码和解码</li>
+<li>-pass val      Passphrase source  指定密码</li>
+<li>-k val         Passphrase 指定密码</li>
+</ul>
+<pre><code class="lang-js">openssl  enc -e -aes128 -a -k <span class="hljs-number">123456789</span>  -<span class="hljs-keyword">in</span> msg.txt  -out enc_msg.txt
+openssl  enc -d -aes128 -a -k <span class="hljs-number">123456789</span>  -<span class="hljs-keyword">in</span> enc_msg.txt  -out dec_msg.txt
+
+openssl  enc -e -aes128 -a -pass pass:<span class="hljs-number">123456</span>  -<span class="hljs-keyword">in</span> msg.txt  -out enc_msg.txt -P
+openssl  enc -d -aes128 -a -pass pass:<span class="hljs-number">123456</span>  -<span class="hljs-keyword">in</span> enc_msg.txt  -out dec_msg.txt
+</code></pre>
+<h3 id="t265.5 RSA非对称加密">5.5 RSA非对称加密 <a href="#t265.5 RSA非对称加密"> # </a></h3>
+<h4 id="t275.5.1 RSA">5.5.1 RSA <a href="#t275.5.1 RSA"> # </a></h4>
+<h5 id="t285.5.1.1 RSA生成公私钥">5.5.1.1 RSA生成公私钥 <a href="#t285.5.1.1 RSA生成公私钥"> # </a></h5>
+<pre><code class="lang-js">openssl genrsa -help
+</code></pre>
+<ul>
+<li>-aes256 是使用aes256算法加密这个私钥</li>
+<li>-passout  指定加密的密钥</li>
+<li>-out output the key to file 指明输出文件</li>
+<li>-in    指定输入文件     </li>
+<li>-pubout 输出公钥信息； 根据私钥的信息得出公钥</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//生成加密的私钥</span>
+openssl genrsa -aes256 -passout pass:<span class="hljs-number">123456</span> -out private.key <span class="hljs-number">2048</span>
+<span class="hljs-comment">//生成不加密的私钥</span>
+openssl genrsa  -out private.key <span class="hljs-number">1024</span>
+<span class="hljs-comment">//生成公钥</span>
+openssl rsa -pubout -<span class="hljs-keyword">in</span> private.key  -out  public.key
+</code></pre>
+<h5 id="t295.5.1.2 RSA加解密">5.5.1.2 RSA加解密 <a href="#t295.5.1.2 RSA加解密"> # </a></h5>
+<pre><code class="lang-js">openssl rsautl -help
+</code></pre>
+<ul>
+<li>-in infile Input file     输入文件（待加密或待解密的文件）</li>
+<li>-out outfile Output file 输出文件  加密解密后的文件</li>
+<li>-inkey val Input key   输入加密的公钥</li>
+<li>-encrypt Encrypt with public key         使用公钥加密</li>
+<li>-decrypt Decrypt with private key        使用私钥解密</li>
+<li>-pubin Input is an RSA public      表明输入的是公钥(默认是私钥)</li>
+<li>-sign Sign with private key    表明使用私钥签名</li>
+<li>-verify Verify with public key    表明使用公钥验证签名</li>
+<li>-hexdump Hex dump output     以十六进制形式输出</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//公钥加密</span>
+openssl rsautl -encrypt -inkey public.key  -pubin  -<span class="hljs-keyword">in</span> msg.txt  -out enc.msg.txt 
+<span class="hljs-comment">//私钥解密</span>
+openssl rsautl -decrypt -inkey private.key -<span class="hljs-keyword">in</span> enc.msg.txt   -out  dec.msg.txt 
+</code></pre>
+<h5 id="t305.5.1.3 数字签名">5.5.1.3 数字签名 <a href="#t305.5.1.3 数字签名"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-comment">//摘要后使用RSA私钥签名，摘要算法sha256</span>
+openssl dgst -sign private.key -sha256 -out  sign.msg.txt  msg.txt
+<span class="hljs-comment">//使用RSA公钥验证签名</span>
+openssl dgst -verify  public.key -sha256 -signature sign.msg.txt  msg.txt
+</code></pre>
+<h4 id="t315.5.2 ECDSA">5.5.2 ECDSA <a href="#t315.5.2 ECDSA"> # </a></h4>
+<h5 id="t325.5.2.1 生成公私钥">5.5.2.1 生成公私钥 <a href="#t325.5.2.1 生成公私钥"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-comment">//生成ecdsa私钥</span>
+openssl ecparam -genkey  -name secp256k1 -out ec.private.key
+<span class="hljs-comment">//提取 ecdsa 公钥</span>
+openssl ec -<span class="hljs-keyword">in</span> ec.private.key -pubout -out ec.public.key
+</code></pre>
+<h5 id="t335.5.2.2 数字签名">5.5.2.2 数字签名 <a href="#t335.5.2.2 数字签名"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-comment">//使用ECDSA私钥进行签名 (sha256) </span>
+openssl  dgst -sign ec.private.key  -sha256 -out sign.msg  msg.txt
+<span class="hljs-comment">//使用ECDSA公钥进行签名验证</span>
+openssl dgst -verify ec.public.key -sha256 -signature sign.msg  msg.txt
+</code></pre>
+<h2 id="t346.证书体系（PKI）">6.证书体系（PKI） <a href="#t346.证书体系（PKI）"> # </a></h2>
+<ul>
+<li>为了检查公钥不是服务器就需要引入权威第三方</li>
+<li>数字证书就是权威第三方发布的并包括<ul>
+<li>Issuer (证书的发布机构)：哪个权威第三方发布的证书</li>
+<li>Valid from,Valid to(证书的有效期) 过了有效期限，证书就会作废</li>
+<li>Public key(公钥) 权威第三方给申请者配发的公钥</li>
+<li>Subject(主题): 证书所有者,一般是公司名称、机构名称、公司网站的网址等</li>
+<li>Signature algorithm(签名所使用的算法): 使用哪个算法加密了指纹，指纹的加密结果就是数字签名</li>
+<li>Thumbprint, Thumbprint algorithm (指纹以及指纹算法) 这是个加密后的结果，是用来确保证书完整性的，保证证书不被篡改</li>
+</ul>
+</li>
+</ul>
+<h3 id="t356.1. 生成自签的根证书">6.1. 生成自签的根证书 <a href="#t356.1. 生成自签的根证书"> # </a></h3>
+<ul>
+<li>-new 新的签名请求</li>
+<li>-x509  输出x509格式的证书</li>
+<li>-key 私钥</li>
+<li>-out 输出文件</li>
+<li>-days 证书有效期天数</li>
+<li>-subject 请求主体</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//1.生成CA私钥</span>
+openssl genrsa -out ca.private.key  <span class="hljs-number">2048</span>
+<span class="hljs-comment">//2.根据CA私钥生成根证书</span>
+openssl req -<span class="hljs-keyword">new</span> -x509 -key ca.private.key  -out ca.crt  -days <span class="hljs-number">365</span>  -subj /C=CN/ST=BeiJing/L=BeiJing/O=ca/OU=ca/CN=www.ca.com/emailAddress=ca@qq.com
+</code></pre>
+<h3 id="t366.2.服务器证书申请">6.2.服务器证书申请 <a href="#t366.2.服务器证书申请"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">//1.生成服务器私钥</span>
+openssl genrsa -out server.private.key <span class="hljs-number">2048</span>
+<span class="hljs-comment">//2.创建证书签名申请CSR(certificate signing request)并且发送给CA</span>
+openssl req -<span class="hljs-keyword">new</span> -key server.private.key -out server.csr -subj  /C=CN/ST=BeiJing/L=BeiJing/O=<span class="hljs-number">47.105</span><span class="hljs-number">.67</span><span class="hljs-number">.214</span>/OU=<span class="hljs-number">47.105</span><span class="hljs-number">.67</span><span class="hljs-number">.214</span>/CN=<span class="hljs-number">47.105</span><span class="hljs-number">.67</span><span class="hljs-number">.214</span>/emailAddress=<span class="hljs-number">47.105</span><span class="hljs-number">.67</span><span class="hljs-number">.214</span>@qq.com
+<span class="hljs-comment">//3.签发证书</span>
+openssl x509 -req -days <span class="hljs-number">365</span>  -CA ca.crt -CAkey ca.private.key -CAcreateserial  -<span class="hljs-keyword">in</span>  server.csr  -out server.crt
+</code></pre>
+<h2 id="t377.nginx">7.nginx <a href="#t377.nginx"> # </a></h2>
+<h3 id="t387.1 安装">7.1 安装 <a href="#t387.1 安装"> # </a></h3>
+<pre><code class="lang-js">yum -y install gcc gcc-c++ pcre-devel zlib-devel
+
+wget https:<span class="hljs-comment">//nginx.org/download/nginx-1.12.2.tar.gz</span>
+wget https:<span class="hljs-comment">//www.openssl.org/source/openssl-1.1.0h.tar.gz</span>
+tar zxf nginx<span class="hljs-number">-1.12</span><span class="hljs-number">.2</span>.tar.gz
+tar zxf openssl<span class="hljs-number">-1.1</span><span class="hljs-number">.0</span>h
+cd nginx<span class="hljs-number">-1.12</span><span class="hljs-number">.2</span>
+
+groupadd nginx
+<span class="hljs-comment">// -M 不要自动建立用户的登入目录 -s 不能登录的shell</span>
+useradd nginx  -M -s /sbin/nologin -g nginx
+
+mkdir -p /usr/nginx
+mkdir -p /usr/nginx/logs  
+mkdir -p /usr/nginx/cache
+
+./configure  --prefix=<span class="hljs-regexp">/usr/</span>nginx   --<span class="hljs-keyword">with</span>-http_ssl_module --<span class="hljs-keyword">with</span>-openssl=<span class="hljs-regexp">/root/</span>openssl<span class="hljs-number">-1.1</span><span class="hljs-number">.0</span>h        --<span class="hljs-keyword">with</span>-http_ssl_module --user=nginx --group=nginx
+
+make 
+make install
+
+<span class="hljs-keyword">export</span> PATH=<span class="hljs-regexp">/usr/</span>nginx/sbin:$PATH
+nginx -t
+nginx -V
+nginx
+netstat -ntlp
+</code></pre>
+<h3 id="t397.2 布署证书">7.2 布署证书 <a href="#t397.2 布署证书"> # </a></h3>
+<ul>
+<li>配置文件<code>/usr/nginx</code></li>
+<li>重启 <code>nginx -s reload</code></li>
+</ul>
+<pre><code class="lang-diff">    server {
+        listen       443 ssl;
+        server_name  localhost;
+
+<span class="hljs-addition">+       ssl_certificate      /root/server.crt;</span>
+<span class="hljs-addition">+       ssl_certificate_key  /root/server.private.key;</span>
+
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+    }
+</code></pre>
+<h2 id="t408. tls安全">8. tls安全 <a href="#t408. tls安全"> # </a></h2>
+<h3 id="t418.1 证书吊销">8.1 证书吊销 <a href="#t418.1 证书吊销"> # </a></h3>
+<ul>
+<li>证书吊销列表分发点 (CRL Distribution Point ，简称 CDP) 是含在数字证书中的一个可以共各种应用软件自动下载的最新的 CRL 的位置信息,一般 CA 每隔一定时间 ( 几天或几个月 ) 才发布新的吊销列表</li>
+<li>OCSP(Online Certificate Status Protocol)证书状态在线查询协议，是IETF颁布的用于实时查询数字证书在某一时间是否有效的标准。</li>
+</ul>
+<h3 id="t428.1 证书链">8.1 证书链 <a href="#t428.1 证书链"> # </a></h3>
+<ul>
+<li>一个证书链就是能溯源到一个可信根证书的有序证书列表</li>
+<li>使用证书链的原因<ul>
+<li>保证根证书安全</li>
+<li>交叉证书 用已有的根证书签署新的根证书</li>
+<li>划分二级CA </li>
+<li>委派 签发给一个组织或者公司一个二级CA，但限制用于签署其自用的证书，只能签署他们自己所拥有的域名的证书。</li>
+</ul>
+</li>
+</ul>
+<h3 id="t438.2 多域名证书与泛域名证书">8.2 多域名证书与泛域名证书 <a href="#t438.2 多域名证书与泛域名证书"> # </a></h3>
+<ul>
+<li>建议给每个域名一个单独的证书</li>
+<li><em>.xxxx.com或 </em>.xxxx.org 就是泛域名</li>
+</ul>
+<h3 id="t448.2 安全的优化">8.2 安全的优化 <a href="#t448.2 安全的优化"> # </a></h3>
+<ul>
+<li>使用服务器优先的更安全的密码套件</li>
+<li>密钥算法与加密强度</li>
+<li>注意保护私钥，定期更换</li>
+<li>选择可靠的CA权威机构</li>
+<li>前向安全保密</li>
+</ul>
+
+    

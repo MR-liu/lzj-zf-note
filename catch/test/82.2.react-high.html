@@ -1,0 +1,566 @@
+
+        <h2 id="t01.Context(上下文)">1.Context(上下文) <a href="#t01.Context(上下文)"> # </a></h2>
+<ul>
+<li>在某些场景下，你想在整个组件树中传递数据，但却不想手动地在每一层传递属性。你可以直接在 React 中使用强大的<code>context</code>API解决上述问题</li>
+<li>在一个典型的 React 应用中，数据是通过 props 属性自上而下（由父及子）进行传递的，但这种做法对于某些类型的属性而言是极其繁琐的（例如：地区偏好，UI 主题），这些属性是应用程序中许多组件都需要的。Context 提供了一种在组件之间共享此类值的方式，而不必显式地通过组件树的逐层传递 props</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/contextapi.gif" alt="contextapi"></p>
+<h3 id="t11.1 使用">1.1 使用 <a href="#t11.1 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+interface PageProps {
+}
+interface PageState {
+    <span class="hljs-attr">color</span>: string
+}
+interface ContextValue {
+    <span class="hljs-attr">color</span>: string;
+    changeColor: <span class="hljs-function">(<span class="hljs-params">color: string</span>) =&gt;</span> <span class="hljs-keyword">void</span>
+}
+<span class="hljs-keyword">let</span> ThemeContext = React.createContext&lt;ContextValue | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
+<span class="hljs-keyword">let</span> root: HTMLElement | <span class="hljs-literal">null</span> = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Header</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    (value: ContextValue | null) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value</span>!<span class="hljs-attr">.color</span>}`, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span> }}&gt;</span>
+                            header
+                          <span class="hljs-tag">&lt;<span class="hljs-name">Title</span> /&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Title</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    (value: ContextValue | null) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value</span>!<span class="hljs-attr">.color</span>}` }}&gt;</span>
+                            title
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Main</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    (value: ContextValue | null) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value</span>!<span class="hljs-attr">.color</span>}`, <span class="hljs-attr">margin:</span> <span class="hljs-attr">5</span>, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span> }}&gt;</span>
+                            main
+                        <span class="hljs-tag">&lt;<span class="hljs-name">Content</span> /&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Content</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span>
+                {
+                    (value: ContextValue | null) =&gt; (
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">value</span>!<span class="hljs-attr">.color</span>}`, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span> }}&gt;</span>
+                            Content
+                            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> value!.changeColor('red')} style={{ color: 'red' }}&gt;红色<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> value!.changeColor('green')} style={{ color: 'green' }}&gt;绿色<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    )
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Consumer</span>&gt;</span></span>
+
+        )
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Page</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span>&lt;<span class="hljs-title">PageProps</span>, <span class="hljs-title">PageState</span>&gt; </span>{
+    <span class="hljs-keyword">constructor</span>(props: PageProps) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">color</span>: <span class="hljs-string">'red'</span> };
+    }
+    changeColor = <span class="hljs-function">(<span class="hljs-params">color: string</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({ color });
+    }
+    render() {
+        <span class="hljs-keyword">let</span> contextVal: ContextValue = { <span class="hljs-attr">changeColor</span>: <span class="hljs-keyword">this</span>.changeColor, <span class="hljs-attr">color</span>: <span class="hljs-keyword">this</span>.state.color };
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{contextVal}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">margin:</span> '<span class="hljs-attr">10px</span>', <span class="hljs-attr">border:</span> `<span class="hljs-attr">5px</span> <span class="hljs-attr">solid</span> ${<span class="hljs-attr">this.state.color</span>}`, <span class="hljs-attr">padding:</span> <span class="hljs-attr">5</span>, <span class="hljs-attr">width:</span> <span class="hljs-attr">200</span> }}&gt;</span>
+                    page
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Header</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Main</span> /&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Provider</span>&gt;</span></span>
+
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Page</span> /&gt;</span></span>, root);
+</code></pre>
+<h3 id="t21.2 实现">1.2 实现 <a href="#t21.2 实现"> # </a></h3>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+interface PageProps {
+}
+interface PageState {
+    color: string
+}
+<span class="hljs-addition">+interface ContextValue {</span>
+<span class="hljs-addition">+    color: string;</span>
+<span class="hljs-addition">+    changeColor: (color: string) =&gt; void</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+interface ContextProps&lt;T&gt; {</span>
+<span class="hljs-addition">+    value: T</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function createContext() {</span>
+<span class="hljs-addition">+    let value;</span>
+<span class="hljs-addition">+    function Provider(props) {</span>
+<span class="hljs-addition">+        value = props.value;</span>
+<span class="hljs-addition">+        Provider.value = value;</span>
+<span class="hljs-addition">+        return props.children;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    function Consumer(props) {</span>
+<span class="hljs-addition">+        return props.children(value);;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return {</span>
+<span class="hljs-addition">+        Provider,</span>
+<span class="hljs-addition">+        Consumer</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let ThemeContext = createContext&lt;ContextValue | null&gt;(null);</span>
+let root: HTMLElement | null = document.querySelector('#root');
+class Header extends Component {
+    render() {
+        return (
+            &lt;ThemeContext.Consumer&gt;
+                {
+                    (value: ContextValue | null) =&gt; (
+                        &lt;div style={{ border: `5px solid ${value!.color}`, padding: 5 }}&gt;
+                            header
+                          &lt;Title /&gt;
+                        &lt;/div&gt;
+                    )
+                }
+            &lt;/ThemeContext.Consumer&gt;
+        )
+    }
+}
+class Title extends Component {
+    render() {
+        return (
+            &lt;ThemeContext.Consumer&gt;
+                {
+                    (value: ContextValue | null) =&gt; (
+                        &lt;div style={{ border: `5px solid ${value!.color}` }}&gt;
+                            title
+                        &lt;/div&gt;
+                    )
+                }
+            &lt;/ThemeContext.Consumer&gt;
+        )
+    }
+}
+class Main extends Component {
+    render() {
+        return (
+            &lt;ThemeContext.Consumer&gt;
+                {
+                    (value: ContextValue | null) =&gt; (
+                        &lt;div style={{ border: `5px solid ${value!.color}`, margin: 5, padding: 5 }}&gt;
+                            main
+                        &lt;Content /&gt;
+                        &lt;/div&gt;
+                    )
+                }
+            &lt;/ThemeContext.Consumer&gt;
+        )
+    }
+}
+class Content extends Component {
+    render() {
+        return (
+            &lt;ThemeContext.Consumer&gt;
+                {
+                    (value: ContextValue | null) =&gt; (
+                        &lt;div style={{ border: `5px solid ${value!.color}`, padding: 5 }}&gt;
+                            Content
+                            &lt;button onClick={() =&gt; value!.changeColor('red')} style={{ color: 'red' }}&gt;红色&lt;/button&gt;
+                            &lt;button onClick={() =&gt; value!.changeColor('green')} style={{ color: 'green' }}&gt;绿色&lt;/button&gt;
+                        &lt;/div&gt;
+                    )
+                }
+            &lt;/ThemeContext.Consumer&gt;
+
+        )
+    }
+}
+
+class Page extends Component&lt;PageProps, PageState&gt; {
+    constructor(props: PageProps) {
+        super(props);
+        this.state = { color: 'red' };
+    }
+    changeColor = (color: string) =&gt; {
+        this.setState({ color });
+    }
+    render() {
+        let contextVal: ContextValue = { changeColor: this.changeColor, color: this.state.color };
+        return (
+            &lt;ThemeContext.Provider value={contextVal}&gt;
+                &lt;div style={{ margin: '10px', border: `5px solid ${this.state.color}`, padding: 5, width: 200 }}&gt;
+                    page
+                    &lt;Header /&gt;
+                    &lt;Main /&gt;
+                &lt;/div&gt;
+            &lt;/ThemeContext.Provider&gt;
+
+        )
+    }
+}
+ReactDOM.render(&lt;Page /&gt;, root);
+</code></pre>
+<pre><code class="lang-diff">class Header extends Component {
+<span class="hljs-addition">+    static contextType = ThemeContext</span>
+    render() {
+<span class="hljs-addition">+        this.context = Header.contextType.Provider.value;</span>
+        return (
+            &lt;div style={{ border: `5px solid ${this.context.color}`, padding: 5 }}&gt;
+                Header
+                &lt;Title /&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+</code></pre>
+<h2 id="t32. 高阶组件">2. 高阶组件 <a href="#t32. 高阶组件"> # </a></h2>
+<ul>
+<li>高阶组件就是一个函数，传给它一个组件，它返回一个新的组件</li>
+<li>高阶组件的作用其实就是为了组件之间的代码复用</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> NewComponent = higherOrderComponent(OldComponent)
+</code></pre>
+<h3 id="t42.1 日志组件">2.1 日志组件 <a href="#t42.1 日志组件"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> hoistNonReactStatics <span class="hljs-keyword">from</span> <span class="hljs-string">'hoist-non-react-statics'</span>;
+<span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">const</span> logger = <span class="hljs-function">(<span class="hljs-params">WrappedComponent: React.FC</span>) =&gt;</span> {
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LoggerComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+        <span class="hljs-attr">start</span>: number | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+        componentWillMount() {
+            <span class="hljs-keyword">this</span>.start = <span class="hljs-built_in">Date</span>.now();
+        }
+        componentDidMount() {
+            <span class="hljs-built_in">console</span>.log((<span class="hljs-built_in">Date</span>.now() - <span class="hljs-keyword">this</span>.start!) + <span class="hljs-string">'ms'</span>)
+        }
+        render() {
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> /&gt;</span></span>
+        }
+    }
+    hoistNonReactStatics(LoggerComponent, WrappedComponent);
+    <span class="hljs-keyword">return</span> LoggerComponent;
+}
+<span class="hljs-keyword">let</span> Hello = logger(<span class="hljs-function">(<span class="hljs-params">props</span>) =&gt;</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>);
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Hello</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t52.2 多层高阶组件">2.2 多层高阶组件 <a href="#t52.2 多层高阶组件"> # </a></h3>
+<h4 id="t62.2.1 从localStorage中加载">2.2.1 从localStorage中加载 <a href="#t62.2.1 从localStorage中加载"> # </a></h4>
+<ul>
+<li><code>localStorage</code>中有<code>username=zhansan</code></li>
+<li>从<code>localStorage</code>中根据key加载对应的值</li>
+</ul>
+<pre><code class="lang-js">localStorage.setItem(<span class="hljs-string">'username'</span>,<span class="hljs-string">'zhangsan'</span>);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+interface WrappedComponentProps {
+    <span class="hljs-attr">value</span>: string;
+}
+
+<span class="hljs-keyword">const</span> fromLocal = <span class="hljs-function">(<span class="hljs-params">WrappedComponent: React.FC&lt;WrappedComponentProps&gt; | React.ComponentClass&lt;WrappedComponentProps&gt;</span>) =&gt;</span> {
+    interface FromLocalComponentProps { <span class="hljs-comment">//最终返回的组件的属性对象</span>
+        <span class="hljs-attr">field</span>: string
+    }
+    interface State {  <span class="hljs-comment">//状态对象</span>
+        <span class="hljs-attr">value</span>: string;
+    }
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FromLocalComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span>&lt;<span class="hljs-title">FromLocalComponentProps</span>, <span class="hljs-title">State</span>&gt; </span>{
+        <span class="hljs-keyword">constructor</span>(props: FromLocalComponentProps) {
+            <span class="hljs-keyword">super</span>(props);
+            <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">value</span>: <span class="hljs-string">''</span> };
+        }
+        componentWillMount() {
+            <span class="hljs-keyword">let</span> value: string | <span class="hljs-literal">null</span> = localStorage.getItem(<span class="hljs-keyword">this</span>.props.field);
+            <span class="hljs-keyword">if</span> (value)
+                <span class="hljs-keyword">this</span>.setState({ value });
+        }
+        render() {
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{this.state.value}</span> /&gt;</span></span>
+        }
+    }
+    <span class="hljs-keyword">return</span> FromLocalComponent;
+}
+
+<span class="hljs-keyword">const</span> UserName = <span class="hljs-function">(<span class="hljs-params">props: WrappedComponentProps</span>) =&gt;</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">defaultValue</span>=<span class="hljs-string">{props.value}</span> /&gt;</span></span>
+)
+<span class="hljs-keyword">const</span> UserNameFromLocal = fromLocal(UserName);
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserNameFromLocal</span> <span class="hljs-attr">field</span>=<span class="hljs-string">"username"</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h4 id="t72.2.2 从ajax中加载">2.2.2 从ajax中加载 <a href="#t72.2.2 从ajax中加载"> # </a></h4>
+<ul>
+<li>如果我们得到的用户名<code>zhangsan</code>,但是要显示中文张三，需要包裹二次</li>
+<li>包裹的时候是从内往外一层层包裹</li>
+<li>渲染的时候是从外往内渲染</li>
+</ul>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+interface WrappedComponentProps {
+    value: string;
+}
+
+<span class="hljs-addition">+const fromLocal = (WrappedComponent: React.ComponentClass&lt;WrappedComponentProps&gt;) =&gt; {</span>
+    interface FromLocalComponentProps { //最终返回的组件的属性对象
+        field: string
+    }
+    interface State {  //状态对象
+        value: string;
+    }
+    class FromLocalComponent extends Component&lt;FromLocalComponentProps, State&gt; {
+        constructor(props: FromLocalComponentProps) {
+            super(props);
+            this.state = { value: '' };
+        }
+        componentWillMount() {
+            let value: string | null = localStorage.getItem(this.props.field);
+            if (value)
+                this.setState({ value });
+        }
+        render() {
+            return &lt;WrappedComponent value={this.state.value} /&gt;
+        }
+    }
+    return FromLocalComponent;
+}
+<span class="hljs-addition">+const fromAjax = (WrappedComponent: React.FC&lt;WrappedComponentProps&gt;) =&gt; {</span>
+<span class="hljs-addition">+    interface FromAjaxComponentProps { //最终返回的组件的属性对象</span>
+<span class="hljs-addition">+        value: string</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    interface State {</span>
+<span class="hljs-addition">+        value: string;</span>
+<span class="hljs-addition">+    }</span>
+
+<span class="hljs-addition">+    class FromAjaxComponent extends Component&lt;FromAjaxComponentProps, State&gt; {</span>
+<span class="hljs-addition">+        constructor(props: WrappedComponentProps) {</span>
+<span class="hljs-addition">+            super(props);</span>
+<span class="hljs-addition">+            this.state = { value: '' };</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        componentDidMount() {</span>
+<span class="hljs-addition">+            fetch(`/translate.json`).then(response =&gt; response.json()).then((data) =&gt; {</span>
+<span class="hljs-addition">+                let value = data[this.props.value];</span>
+<span class="hljs-addition">+                this.setState({ value });</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        render() {</span>
+<span class="hljs-addition">+            return &lt;WrappedComponent value={this.state.value} /&gt;</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return FromAjaxComponent;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+const UserName = (props: WrappedComponentProps) =&gt; (</span>
+<span class="hljs-addition">+    &lt;input defaultValue={props.value} /&gt;</span>
+<span class="hljs-addition">+)</span>
+<span class="hljs-addition">+const UserNameFromAjax = fromAjax(UserName);</span>
+<span class="hljs-addition">+const UserNameFromLocal = fromLocal(UserNameFromAjax);</span>
+
+ReactDOM.render(&lt;UserNameFromLocal field="username" /&gt;, document.getElementById('root'));
+</code></pre>
+<h2 id="t83. render props">3. render props <a href="#t83. render props"> # </a></h2>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/render-props.html">render-props</a></li>
+<li><code>render prop</code> 是指一种在 React 组件之间使用一个值为函数的 prop 共享代码的简单技术</li>
+<li>具有 render prop 的组件接受一个函数，该函数返回一个 React 元素并调用它而不是实现自己的渲染逻辑</li>
+<li>render prop 是一个用于告知组件需要渲染什么内容的函数 prop</li>
+<li>这也是逻辑复用的一种方式</li>
+</ul>
+<pre><code class="lang-js">&lt;DataProvider render={data =&gt; (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello {data.target}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+)}/&gt;
+</code></pre>
+<h3 id="t93.1 原生实现">3.1 原生实现 <a href="#t93.1 原生实现"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+interface Props {
+
+}
+interface State {
+    <span class="hljs-attr">x</span>: number;
+    y: number;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MouseTracker</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+    <span class="hljs-keyword">constructor</span>(props: Props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+    }
+
+    handleMouseMove = <span class="hljs-function">(<span class="hljs-params">event: React.MouseEvent&lt;HTMLDivElement&gt;</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">x</span>: event.clientX,
+            <span class="hljs-attr">y</span>: event.clientY
+        });
+    }
+
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onMouseMove</span>=<span class="hljs-string">{this.handleMouseMove}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>移动鼠标!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>当前的鼠标位置是 ({this.state.x}, {this.state.y})<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        );
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">MouseTracker</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t103.2  children">3.2  children <a href="#t103.2  children"> # </a></h3>
+<ul>
+<li>children是一个渲染的方法</li>
+</ul>
+<pre><code class="lang-js">import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+
+interface State {
+    x: number;
+    y: number;
+}
+interface Props {
+    children: (state: State) =&gt; React.ReactNode
+}
+class MouseTracker extends React.Component&lt;Props, State&gt; {
+    constructor(props: Props) {
+        super(props);
+        this.state = { x: 0, y: 0 };
+    }
+
+    handleMouseMove = (event: React.MouseEvent&lt;HTMLDivElement&gt;) =&gt; {
+        this.setState({
+            x: event.clientX,
+            y: event.clientY
+        });
+    }
+
+    render() {
+        return (
+            &lt;div onMouseMove={this.handleMouseMove}&gt;
+                {this.props.children(this.state)}
+            &lt;/div&gt;
+        );
+    }
+}
+ReactDOM.render(&lt;MouseTracker &gt;
+    {
+        (props: State) =&gt; (
+            &lt;&gt;
+                &lt;h1&gt;移动鼠标!&lt;/h1&gt;
+                &lt;p&gt;当前的鼠标位置是 ({props.x}, {props.y})&lt;/p&gt;
+            &lt;/&gt;
+        )
+    }
+&lt;/MouseTracker &gt;, document.getElementById('root'));
+</code></pre>
+<h3 id="t113.3 render属性">3.3 render属性 <a href="#t113.3 render属性"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+interface Props {
+    <span class="hljs-attr">render</span>: <span class="hljs-function">(<span class="hljs-params">state: State</span>) =&gt;</span> React.ReactNode
+}
+interface State {
+    <span class="hljs-attr">x</span>: number;
+    y: number;
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MouseTracker</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+    <span class="hljs-keyword">constructor</span>(props: Props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">0</span> };
+    }
+
+    handleMouseMove = <span class="hljs-function">(<span class="hljs-params">event: React.MouseEvent&lt;HTMLDivElement&gt;</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.setState({
+            <span class="hljs-attr">x</span>: event.clientX,
+            <span class="hljs-attr">y</span>: event.clientY
+        });
+    }
+
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onMouseMove</span>=<span class="hljs-string">{this.handleMouseMove}</span>&gt;</span>
+                {this.props.render(this.state)}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        );
+    }
+}
+
+ReactDOM.render(&lt; MouseTracker render={params =&gt; (
+    <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>移动鼠标!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>当前的鼠标位置是 ({params.x}, {params.y})<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+)} /&gt;, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t123.4 HOC">3.4 HOC <a href="#t123.4 HOC"> # </a></h3>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+interface Props {
+    render: (state: State) =&gt; React.ReactNode
+}
+interface State {
+    x: number;
+    y: number;
+}
+class MouseTracker extends React.Component&lt;Props, State&gt; {
+    constructor(props: Props) {
+        super(props);
+        this.state = { x: 0, y: 0 };
+    }
+
+    handleMouseMove = (event: React.MouseEvent&lt;HTMLDivElement&gt;) =&gt; {
+        this.setState({
+            x: event.clientX,
+            y: event.clientY
+        });
+    }
+
+    render() {
+        return (
+            &lt;div onMouseMove={this.handleMouseMove}&gt;
+                {this.props.render(this.state)}
+            &lt;/div&gt;
+        );
+    }
+}
+<span class="hljs-addition">+function withMouse(Component: React.FC&lt;State&gt;) {</span>
+<span class="hljs-addition">+    return (</span>
+<span class="hljs-addition">+        (props: State) =&gt; &lt;MouseTracker render={mouse =&gt; &lt;Component {...props} {...mouse} /&gt;} /&gt;</span>
+<span class="hljs-addition">+    )</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let App = withMouse((props: State) =&gt; (</span>
+<span class="hljs-addition">+    &lt;&gt;</span>
+<span class="hljs-addition">+        &lt;h1&gt;移动鼠标!&lt;/h1&gt;</span>
+<span class="hljs-addition">+        &lt;p&gt;当前的鼠标位置是 ({props.x}, {props.y})&lt;/p&gt;</span>
+<span class="hljs-addition">+    &lt;/&gt;</span>
+<span class="hljs-addition">+));</span>
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+</code></pre>
+
+    

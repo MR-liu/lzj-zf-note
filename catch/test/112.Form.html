@@ -1,0 +1,559 @@
+
+        <h2 id="t01.生成项目">1.生成项目 <a href="#t01.生成项目"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/rc-field-form">rc-field-form</a></li>
+<li><a href="https://github.com/yiminghe/async-validator">async-validator</a></li>
+</ul>
+<pre><code class="lang-js">create-react-app zhufeng_antdesign-form
+cd zhufeng_antdesign-form
+yarn add rc-field-form
+yarn start
+</code></pre>
+<h2 id="t12.使用Form">2.使用Form <a href="#t12.使用Form"> # </a></h2>
+<p><img src="https://img.zhufengpeixun.com/rc-field-form.jpg" alt="rc-field-form.jpg"></p>
+<h3 id="t22.1 src\index.js">2.1 src\index.js <a href="#t22.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Form, { Field } <span class="hljs-keyword">from</span> <span class="hljs-string">'rc-field-form'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span>
+    <span class="hljs-attr">initialValues</span>=<span class="hljs-string">{{username:</span>'',<span class="hljs-attr">password:</span>''}}
+    <span class="hljs-attr">onFinish</span>=<span class="hljs-string">{values</span> =&gt;</span> {
+      console.log('完成:', values);
+    }}
+  &gt;
+    <span class="hljs-tag">&lt;<span class="hljs-name">Field</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"username"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"用户名"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Field</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Field</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"password"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"密码"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Field</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h2 id="t33.实现双向数据绑定">3.实现双向数据绑定 <a href="#t33.实现双向数据绑定"> # </a></h2>
+<h3 id="t43.1 src\index.js">3.1 src\index.js <a href="#t43.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-comment">//import Form, { Field } from 'rc-field-form';</span>
+<span class="hljs-keyword">import</span> Form,{Field } <span class="hljs-keyword">from</span> <span class="hljs-string">'./rc-field-form'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span>
+    <span class="hljs-attr">initialValues</span>=<span class="hljs-string">{{username:</span>'',<span class="hljs-attr">password:</span>''}}
+    <span class="hljs-attr">onFinish</span>=<span class="hljs-string">{values</span> =&gt;</span> {
+      console.log('完成:', values);
+    }}
+  &gt;
+    <span class="hljs-tag">&lt;<span class="hljs-name">Field</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"username"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"用户名"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Field</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Field</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"password"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"密码"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Field</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+
+</code></pre>
+<h3 id="t53.2 rc-field-form\index.js">3.2 rc-field-form\index.js <a href="#t53.2 rc-field-form\index.js"> # </a></h3>
+<p>src\rc-field-form\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Form <span class="hljs-keyword">from</span> <span class="hljs-string">"./Form"</span>;
+<span class="hljs-keyword">import</span> Field <span class="hljs-keyword">from</span> <span class="hljs-string">"./Field"</span>;
+<span class="hljs-keyword">import</span> useForm <span class="hljs-keyword">from</span> <span class="hljs-string">"./useForm"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form;
+<span class="hljs-keyword">export</span> {
+    Field,useForm
+}
+</code></pre>
+<h3 id="t63.3 Form.js">3.3 Form.js <a href="#t63.3 Form.js"> # </a></h3>
+<p>src\rc-field-form\Form.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> useForm <span class="hljs-keyword">from</span> <span class="hljs-string">"./useForm"</span>;
+<span class="hljs-keyword">import</span> FieldContext <span class="hljs-keyword">from</span> <span class="hljs-string">"./FieldContext"</span>;
+
+<span class="hljs-keyword">const</span> Form = <span class="hljs-function">(<span class="hljs-params">{initialValues,onFinish,children}</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> [formInstance] = useForm();
+  formInstance.setCallbacks({
+    onFinish
+  });
+  <span class="hljs-keyword">const</span> mountRef = React.useRef(<span class="hljs-literal">null</span>);
+  formInstance.setInitialValues(initialValues, !mountRef.current);
+  <span class="hljs-keyword">if</span> (!mountRef.current) {
+    mountRef.current = <span class="hljs-literal">true</span>;
+  }
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span>
+      <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{event</span> =&gt;</span> {
+        event.preventDefault();
+        event.stopPropagation();
+        formInstance.submit();
+      }}&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">FieldContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{formInstance}</span>&gt;</span>
+        {children}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">FieldContext.Provider</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+  );
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form;
+</code></pre>
+<h3 id="t73.4 FieldContext.js">3.4 FieldContext.js <a href="#t73.4 FieldContext.js"> # </a></h3>
+<p>src\rc-field-form\FieldContext.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+
+<span class="hljs-keyword">const</span> warningFunc = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.warn(<span class="hljs-literal">false</span>, <span class="hljs-string">'无法找到FormContext. 请确定你是在Form下面使用Field'</span>);
+};
+
+<span class="hljs-keyword">const</span> Context = React.createContext({
+  <span class="hljs-attr">getFieldValue</span>: warningFunc,
+  <span class="hljs-attr">getFieldsValue</span>: warningFunc,
+  <span class="hljs-attr">setFieldsValue</span>: warningFunc,
+  <span class="hljs-attr">submit</span>: warningFunc,
+});
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Context;
+</code></pre>
+<h3 id="t83.5 Field.js">3.5 Field.js <a href="#t83.5 Field.js"> # </a></h3>
+<p>src\rc-field-form\Field.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> FieldContext <span class="hljs-keyword">from</span> <span class="hljs-string">"./FieldContext"</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Field</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">static</span> contextType = FieldContext;
+  componentDidMount() {
+    <span class="hljs-keyword">this</span>.context.registerField(<span class="hljs-keyword">this</span>);
+  }
+
+  onStoreChange = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">this</span>.forceUpdate();
+  };
+
+  getControlled = <span class="hljs-function">(<span class="hljs-params">childProps</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> {name} = <span class="hljs-keyword">this</span>.props;
+    <span class="hljs-keyword">const</span> {getFieldValue,setFieldsValue} = <span class="hljs-keyword">this</span>.context;
+    <span class="hljs-keyword">return</span> {
+      ...childProps,
+      <span class="hljs-attr">value</span>: getFieldValue(name),
+      <span class="hljs-attr">onChange</span>: <span class="hljs-function"><span class="hljs-params">event</span> =&gt;</span> {
+        setFieldsValue({[name]: event.target.value});
+      }
+    };
+  };
+
+  render() {
+    <span class="hljs-keyword">const</span> { children } = <span class="hljs-keyword">this</span>.props;
+    <span class="hljs-keyword">const</span> returnChildNode = React.cloneElement(children, <span class="hljs-keyword">this</span>.getControlled(children.props));
+    <span class="hljs-keyword">return</span> returnChildNode;
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Field;
+</code></pre>
+<h3 id="t93.6 useForm.js">3.6 useForm.js <a href="#t93.6 useForm.js"> # </a></h3>
+<p>src\rc-field-form\useForm.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FormStore</span> </span>{
+    store = {};
+    fieldEntities = [];
+    initialValues = {};
+    callbacks = {};
+    <span class="hljs-keyword">constructor</span>(forceRootUpdate) {
+        <span class="hljs-keyword">this</span>.forceRootUpdate = forceRootUpdate;
+    }
+    getForm = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ({
+        <span class="hljs-attr">getFieldValue</span>: <span class="hljs-keyword">this</span>.getFieldValue,
+        <span class="hljs-attr">getFieldsValue</span>: <span class="hljs-keyword">this</span>.getFieldsValue,
+        <span class="hljs-attr">setFieldsValue</span>: <span class="hljs-keyword">this</span>.setFieldsValue,
+        <span class="hljs-attr">setInitialValues</span>: <span class="hljs-keyword">this</span>.setInitialValues,
+        <span class="hljs-attr">setCallbacks</span>: <span class="hljs-keyword">this</span>.setCallbacks,
+        <span class="hljs-attr">registerField</span>: <span class="hljs-keyword">this</span>.registerField,
+        <span class="hljs-attr">submit</span>: <span class="hljs-keyword">this</span>.submit,
+    });
+    setInitialValues = <span class="hljs-function">(<span class="hljs-params">initialValues</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.store = { ...initialValues };
+    };
+    setCallbacks = <span class="hljs-function">(<span class="hljs-params">callbacks</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.callbacks = callbacks;
+    };
+    getFieldValue = <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.store[name];
+    };
+    getFieldsValue = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.store;
+    }
+    registerField = <span class="hljs-function">(<span class="hljs-params">entity</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.fieldEntities.push(entity);
+    };
+    setFieldsValue = <span class="hljs-function">(<span class="hljs-params">store</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>.store = { ...this.store, ...store };
+        <span class="hljs-keyword">this</span>.fieldEntities.forEach(<span class="hljs-function">(<span class="hljs-params">{ onStoreChange }</span>) =&gt;</span> {
+            onStoreChange();
+        });
+    };
+    submit = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> { onFinish } = <span class="hljs-keyword">this</span>.callbacks;
+        <span class="hljs-keyword">if</span> (onFinish) {
+            onFinish(<span class="hljs-keyword">this</span>.store);
+        }
+    };
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useForm</span>(<span class="hljs-params">form</span>) </span>{
+    <span class="hljs-keyword">const</span> formRef = React.useRef();
+    <span class="hljs-keyword">const</span> [, forceUpdate] = React.useState({});
+    <span class="hljs-keyword">if</span> (!formRef.current) {
+        <span class="hljs-keyword">if</span> (form) {
+            formRef.current = form;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">const</span> forceReRender = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                forceUpdate({});
+            };
+            <span class="hljs-keyword">const</span> formStore = <span class="hljs-keyword">new</span> FormStore(forceReRender);
+            formRef.current = formStore.getForm();
+        }
+    }
+    <span class="hljs-keyword">return</span> [formRef.current];
+}
+</code></pre>
+<h2 id="t104.实现表单校验">4.实现表单校验 <a href="#t104.实现表单校验"> # </a></h2>
+<h3 id="t114.1 src\index.js">4.1 src\index.js <a href="#t114.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+//import Form, { Field } from 'rc-field-form';
+import Form,{Field } from './rc-field-form';
+ReactDOM.render(
+  &lt;Form
+    initialValues={{username:'',password:''}}
+    onFinish={values =&gt; {
+      console.log('完成:', values);
+    }}
+<span class="hljs-addition">+    onFinishFailed={(errorInfo)=&gt;{</span>
+<span class="hljs-addition">+      console.log('失败:',errorInfo);</span>
+<span class="hljs-addition">+    }}</span>
+  &gt;
+<span class="hljs-addition">+    &lt;Field name="username" rules={[{ required: true }]}&gt;</span>
+      &lt;input placeholder="用户名"  /&gt;
+    &lt;/Field&gt;
+<span class="hljs-addition">+    &lt;Field name="password" rules={[{ required: true }]}&gt;</span>
+      &lt;input placeholder="密码" /&gt;
+    &lt;/Field&gt;
+    &lt;button&gt;提交&lt;/button&gt;
+  &lt;/Form&gt;,
+  document.getElementById('root')
+);
+</code></pre>
+<h3 id="t124.2 Form.js">4.2 Form.js <a href="#t124.2 Form.js"> # </a></h3>
+<p>src\rc-field-form\Form.js</p>
+<pre><code class="lang-diff">import React from "react";
+import useForm from "./useForm";
+import FieldContext from "./FieldContext";
+
+<span class="hljs-addition">+const Form = ({initialValues,onFinish,onFinishFailed,children}) =&gt; {</span>
+  const [formInstance] = useForm();
+  formInstance.setCallbacks({
+    onFinish,
+<span class="hljs-addition">+    onFinishFailed</span>
+  });
+  const mountRef = React.useRef(null);
+  formInstance.setInitialValues(initialValues, !mountRef.current);
+  if (!mountRef.current) {
+    mountRef.current = true;
+  }
+  return (
+    &lt;form
+      onSubmit={event =&gt; {
+        event.preventDefault();
+        event.stopPropagation();
+        formInstance.submit();
+      }}&gt;
+      &lt;FieldContext.Provider value={formInstance}&gt;
+        {children}
+      &lt;/FieldContext.Provider&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default Form;
+</code></pre>
+<h3 id="t134.3 useForm.js">4.3 useForm.js <a href="#t134.3 useForm.js"> # </a></h3>
+<p>src\rc-field-form\useForm.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import AsyncValidator from './async-validator';
+class FormStore {
+    store = {};
+    fieldEntities = [];
+    initialValues = {};
+    callbacks = {};
+    constructor(forceRootUpdate) {
+        this.forceRootUpdate = forceRootUpdate;
+    }
+    getForm = () =&gt; ({
+        getFieldValue: this.getFieldValue,
+        getFieldsValue: this.getFieldsValue,
+        setFieldsValue: this.setFieldsValue,
+        setInitialValues: this.setInitialValues,
+        setCallbacks: this.setCallbacks,
+        registerField: this.registerField,
+        submit: this.submit,
+    });
+    setInitialValues = (initialValues) =&gt; {
+        this.store = { ...initialValues };
+    };
+    setCallbacks = (callbacks) =&gt; {
+        this.callbacks = callbacks;
+    };
+    getFieldValue = (name) =&gt; {
+        return this.store[name];
+    };
+    getFieldsValue = () =&gt; {
+        return this.store;
+    }
+    registerField = (entity) =&gt; {
+        this.fieldEntities.push(entity);
+    };
+    setFieldsValue = (store) =&gt; {
+        this.store = { ...this.store, ...store };
+        this.fieldEntities.forEach(({ onStoreChange }) =&gt; {
+            onStoreChange();
+        });
+    };
+<span class="hljs-addition">+    submit = () =&gt; {</span>
+<span class="hljs-addition">+      this.validateFields()</span>
+<span class="hljs-addition">+      .then(values =&gt; {</span>
+<span class="hljs-addition">+        const { onFinish } = this.callbacks;</span>
+<span class="hljs-addition">+        if (onFinish) {</span>
+<span class="hljs-addition">+            onFinish(values);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+      })</span>
+<span class="hljs-addition">+      .catch(errorInfo =&gt; {</span>
+<span class="hljs-addition">+        const { onFinishFailed } = this.callbacks;</span>
+<span class="hljs-addition">+        if (onFinishFailed) {</span>
+<span class="hljs-addition">+          onFinishFailed(errorInfo);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+      });</span>
+<span class="hljs-addition">+    };</span>
+<span class="hljs-addition">+    validateFields = () =&gt; {</span>
+<span class="hljs-addition">+      let values = this.getFieldsValue();</span>
+<span class="hljs-addition">+      let descriptor = this.fieldEntities.reduce((descriptor,entity)=&gt;{</span>
+<span class="hljs-addition">+        let rules = entity.props.rules;</span>
+<span class="hljs-addition">+        if(rules &amp;&amp; rules.length){</span>
+<span class="hljs-addition">+            let config = rules.reduce((config,rule)=&gt;{</span>
+<span class="hljs-addition">+                config = {...config,...rule};</span>
+<span class="hljs-addition">+                return config;</span>
+<span class="hljs-addition">+            },{});</span>
+<span class="hljs-addition">+            descriptor[entity.props.name]=config;</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        return descriptor;</span>
+<span class="hljs-addition">+      },{});</span>
+<span class="hljs-addition">+      return new AsyncValidator(descriptor).validate(values);</span>
+<span class="hljs-addition">+    }</span>
+}
+
+export default function useForm(form) {
+    const formRef = React.useRef();
+    const [, forceUpdate] = React.useState({});
+    if (!formRef.current) {
+        if (form) {
+            formRef.current = form;
+        } else {
+            const forceReRender = () =&gt; {
+                forceUpdate({});
+            };
+            const formStore = new FormStore(forceReRender);
+            formRef.current = formStore.getForm();
+        }
+    }
+    return [formRef.current];
+}
+</code></pre>
+<h3 id="t144.4 async-validator.js">4.4 async-validator.js <a href="#t144.4 async-validator.js"> # </a></h3>
+<p>src\async-validator.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Schema</span> </span>{
+    <span class="hljs-keyword">constructor</span>(descriptor) {
+        <span class="hljs-keyword">this</span>.descriptor = descriptor;
+    }
+    validate(values) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve,reject</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> errorFields = [];
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> name <span class="hljs-keyword">in</span> <span class="hljs-keyword">this</span>.descriptor) {
+                <span class="hljs-keyword">let</span> rules = <span class="hljs-keyword">this</span>.descriptor[name];
+                <span class="hljs-keyword">if</span> (rules) {
+                    <span class="hljs-keyword">let</span> ruleKeys = <span class="hljs-built_in">Object</span>.keys(rules);
+                    <span class="hljs-keyword">let</span> errors = [];
+                    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;ruleKeys.length;i++){
+                        <span class="hljs-keyword">let</span> ruleKey = ruleKeys[i];
+                        <span class="hljs-keyword">if</span> (ruleKey === <span class="hljs-string">'required'</span>) {
+                            <span class="hljs-keyword">if</span> (rules[ruleKey] &amp;&amp; !values[name]) {
+                                errors.push(<span class="hljs-string">`<span class="hljs-subst">${name}</span> is required`</span>);
+                            }
+                        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ruleKey === <span class="hljs-string">'type'</span>) {
+                            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> values[name] !== rules[ruleKey]) {
+                                errors.push(<span class="hljs-string">`<span class="hljs-subst">${name}</span> is not <span class="hljs-subst">${rules[ruleKey]}</span>`</span>);
+                            }
+                        }<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ruleKey === <span class="hljs-string">'min'</span>) {
+                            <span class="hljs-keyword">if</span> (values[name].length &lt;  rules[ruleKey]) {
+                                errors.push(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be at least <span class="hljs-subst">${rules[ruleKey]}</span> characters`</span> );
+                            }
+                        }
+                    }
+                    <span class="hljs-keyword">if</span>(errors &amp;&amp; errors.length){
+                        errorFields.push({name,errors});
+                    }
+                }
+            }
+            <span class="hljs-keyword">if</span>(errorFields &amp;&amp; errorFields.length&gt;<span class="hljs-number">0</span>){
+                reject({errorFields,values});
+            }<span class="hljs-keyword">else</span>{
+                resolve(values);
+            }
+        });
+    }
+}
+<span class="hljs-comment">//export default Schema;</span>
+<span class="hljs-built_in">module</span>.exports = Schema;
+</code></pre>
+<h2 id="t155.实现异步校验">5.实现异步校验 <a href="#t155.实现异步校验"> # </a></h2>
+<h3 id="t165.1 src\index.js">5.1 src\index.js <a href="#t165.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+//import Form, { Field } from 'rc-field-form';
+import Form,{Field } from './rc-field-form';
+<span class="hljs-addition">+let uniqueValidator = (rule, value, callback, form) =&gt; {</span>
+<span class="hljs-addition">+  return new Promise((resolve,reject)=&gt;{</span>
+<span class="hljs-addition">+    setTimeout(()=&gt;{</span>
+<span class="hljs-addition">+      if(value === 'zhufeng'){</span>
+<span class="hljs-addition">+        resolve(`用户名已经被占用`);</span>
+<span class="hljs-addition">+      }else{</span>
+<span class="hljs-addition">+        resolve('');</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    },3000);</span>
+<span class="hljs-addition">+  });</span>
+<span class="hljs-addition">+}</span>
+ReactDOM.render(
+  &lt;Form
+    initialValues={{username:'',password:''}}
+    onFinish={values =&gt; {
+      console.log('成功:', values);
+    }}
+    onFinishFailed={(errorInfo)=&gt;{
+      console.log('失败:',errorInfo);
+    }}
+  &gt;
+<span class="hljs-addition">+    &lt;Field name="username" rules={[{ required: true },{ min: 3 },{validator:uniqueValidator}]}&gt;</span>
+      &lt;input placeholder="用户名"  /&gt;
+    &lt;/Field&gt;
+    &lt;Field name="password" rules={[{ required: true }]}&gt;
+      &lt;input placeholder="密码" /&gt;
+    &lt;/Field&gt;
+    &lt;button&gt;提交&lt;/button&gt;
+  &lt;/Form&gt;,
+  document.getElementById('root')
+);
+
+</code></pre>
+<h3 id="t175.2 async-validator.js">5.2 async-validator.js <a href="#t175.2 async-validator.js"> # </a></h3>
+<p>src\rc-field-form\async-validator.js</p>
+<pre><code class="lang-diff">
+class Schema {
+    constructor(descriptor) {
+        this.descriptor = descriptor;
+    }
+    validate(values) {
+<span class="hljs-addition">+        return new Promise(async (resolve,reject) =&gt; {</span>
+            let errorFields = [];
+            for (let name in this.descriptor) {
+                let rules = this.descriptor[name];
+                if (rules) {
+                    let ruleKeys = Object.keys(rules);
+                    let errors = [];
+                    for(let i=0;i&lt;ruleKeys.length;i++){
+                        let ruleKey = ruleKeys[i];
+                        if (ruleKey <span class="hljs-comment">=== 'required') {</span>
+                            if (rules[ruleKey] &amp;&amp; !values[name]) {
+                                errors.push(`${name} is required`);
+                            }
+                        } else if (ruleKey <span class="hljs-comment">=== 'type') {</span>
+                            if (typeof values[name] !== rules[ruleKey]) {
+                                errors.push(`${name} is not ${rules[ruleKey]}`);
+                            }
+                        }else if (ruleKey <span class="hljs-comment">=== 'min') {</span>
+                            if (values[name].length &lt;  rules[ruleKey]) {
+                                errors.push(`${name} must be at least ${rules[ruleKey]} characters` );
+                            }
+<span class="hljs-addition">+                        }else if (ruleKey === 'validator') {</span>
+<span class="hljs-addition">+                            let validator = rules[ruleKey];</span>
+<span class="hljs-addition">+                            let result = await validator(rules[ruleKey], values[name]);</span>
+<span class="hljs-addition">+                            if(result.length&gt;0){</span>
+<span class="hljs-addition">+                                errors.push(`${name}不符合自定义验证器的需求!` );</span>
+<span class="hljs-addition">+                            }</span>
+<span class="hljs-addition">+                        }</span>
+                    }
+                    if(errors &amp;&amp; errors.length){
+                        errorFields.push({name,errors});
+                    }
+                }
+            }
+            if(errorFields &amp;&amp; errorFields.length&gt;0){
+                reject({errorFields,values});
+            }else{
+                resolve(values);
+            }
+        });
+    }
+}
+//export default Schema;
+module.exports = Schema;
+</code></pre>
+<h2 id="t186.按需加载">6.按需加载 <a href="#t186.按需加载"> # </a></h2>
+<h3 id="t196.1 生成项目">6.1 生成项目 <a href="#t196.1 生成项目"> # </a></h3>
+<pre><code class="lang-js">create-react-app zhufeng-antdesign-form
+cd  zhufeng-antdesign-form
+yarn add react-app-rewired customize-cra babel-plugin-<span class="hljs-keyword">import</span>
+npm start
+</code></pre>
+<h3 id="t206.1 使用antd">6.1 使用antd <a href="#t206.1 使用antd"> # </a></h3>
+<h3 id="t216.1.1 安装依赖">6.1.1 安装依赖 <a href="#t216.1.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">yarn add react-app-rewired customize-cra babel-plugin-<span class="hljs-keyword">import</span> less less-loader
+</code></pre>
+<h3 id="t226.1.2 config-overrides.js">6.1.2 config-overrides.js <a href="#t226.1.2 config-overrides.js"> # </a></h3>
+<p>config-overrides.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {override,fixBabelImports, addLessLoader} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'customize-cra'</span>);
+<span class="hljs-built_in">module</span>.exports = override(
+    fixBabelImports(<span class="hljs-string">'import'</span>,{
+        <span class="hljs-attr">libraryName</span>:<span class="hljs-string">'antd'</span>,
+        <span class="hljs-attr">libraryDirectory</span>:<span class="hljs-string">'es'</span>,
+        <span class="hljs-attr">style</span>:<span class="hljs-literal">true</span>
+    }),
+    addLessLoader({
+        <span class="hljs-attr">lessOptions</span>:{
+            <span class="hljs-attr">javascriptEnabled</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">modifyVars</span>:{<span class="hljs-string">'@primary-color'</span>:<span class="hljs-string">'red'</span>}
+        }
+    })
+);
+</code></pre>
+<h3 id="t236.1.3 package.json">6.1.3 package.json <a href="#t236.1.3 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+  "scripts": {</span>
+<span class="hljs-addition">+    "start": "react-app-rewired start",</span>
+<span class="hljs-addition">+    "build": "react-app-rewired build",</span>
+<span class="hljs-addition">+    "test": "react-app-rewired test",</span>
+<span class="hljs-addition">+    "eject": "react-app-rewired eject"</span>
+<span class="hljs-addition">+  }</span>
+</code></pre>
+<h3 id="t246.1.4 src\index.js">6.1.4 src\index.js <a href="#t246.1.4 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {Button} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"primary"</span>&gt;</span>点击<span class="hljs-tag">&lt;/<span class="hljs-name">Button</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+
+    

@@ -1,0 +1,257 @@
+
+        <h2 id="t01. 扩展mongoose模型">1. 扩展mongoose模型 <a href="#t01. 扩展mongoose模型"> # </a></h2>
+<p>业务分层</p>
+<blockquote>
+<p>service(多个模型)-&gt;dao单个模型-&gt;model 模型定义</p>
+</blockquote>
+<blockquote>
+<p>service(多个模型)-&gt;dao单个模型-&gt;model (模型定义+扩展方法)</p>
+</blockquote>
+<h2 id="t12. statics 对类进行扩展">2. statics 对类进行扩展 <a href="#t12. statics 对类进行扩展"> # </a></h2>
+<p>根据用户名查找用户文档</p>
+<pre><code class="lang-js"> <span class="hljs-comment">//this指向model</span>
+PersonSchema.statics.findByUsername = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">username, callback</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.findOne({ username }, callback);
+}
+Person.findByUsername(<span class="hljs-string">'zfpx'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, doc</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(doc);
+});
+</code></pre>
+<h2 id="t23. methods 对实例进行扩展">3. methods 对实例进行扩展 <a href="#t23. methods 对实例进行扩展"> # </a></h2>
+<pre><code class="lang-js">PersonSchema.methods.exist = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">callback</span>) </span>{
+    <span class="hljs-keyword">let</span> query = { <span class="hljs-attr">username</span>: <span class="hljs-keyword">this</span>.username, <span class="hljs-attr">password</span>: <span class="hljs-keyword">this</span>.password };
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.model(<span class="hljs-string">'Person'</span>).findOne(query, callback);
+}
+<span class="hljs-keyword">let</span> person = <span class="hljs-keyword">new</span> Person({ <span class="hljs-attr">username</span>: <span class="hljs-string">'zfpx'</span>, <span class="hljs-attr">password</span>: <span class="hljs-string">'123456'</span>, <span class="hljs-attr">phone</span>: <span class="hljs-string">'010-6255889'</span>, <span class="hljs-attr">firstname</span>: <span class="hljs-string">'first'</span>, <span class="hljs-attr">lastname</span>: <span class="hljs-string">'last'</span> });
+person.exist(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, doc</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(err, doc);
+});
+</code></pre>
+<h2 id="t34. virutal虚拟属性">4. virutal虚拟属性 <a href="#t34. virutal虚拟属性"> # </a></h2>
+<ul>
+<li>virtual是虚拟属性的意思，即原来Schema定义里是不存在该属性，后来通过virutal方法赋予的属性。</li>
+<li>Schema中定义的属性是要保存到数据库里的，而virtual属性基于已有属性做的二次定义。<blockquote>
+<p>模型属性 = Schema定义的属性+virtual属性</p>
+</blockquote>
+</li>
+</ul>
+<pre><code class="lang-js">PersonSchema.virtual(<span class="hljs-string">'area'</span>).get(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">//this指向实例</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.phone.split(<span class="hljs-string">'-'</span>)[<span class="hljs-number">0</span>];
+});
+PersonSchema.virtual(<span class="hljs-string">'number'</span>).get(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.phone.split(<span class="hljs-string">'-'</span>)[<span class="hljs-number">1</span>];
+});
+<span class="hljs-keyword">let</span> Person = conn.model(<span class="hljs-string">'Person'</span>, PersonSchema);
+<span class="hljs-keyword">let</span> person = <span class="hljs-keyword">new</span> Person({ <span class="hljs-attr">username</span>: <span class="hljs-string">'zfpx'</span>, <span class="hljs-attr">password</span>: <span class="hljs-string">'123456'</span>, <span class="hljs-attr">phone</span>: <span class="hljs-string">'010-6255889'</span>, <span class="hljs-attr">firstname</span>: <span class="hljs-string">'first'</span>, <span class="hljs-attr">lastname</span>: <span class="hljs-string">'last'</span> });
+<span class="hljs-built_in">console</span>.log(person.fullname, person.area, person.number);
+</code></pre>
+<h2 id="t45. hook">5. hook <a href="#t45. hook"> # </a></h2>
+<p>在用户注册保存的时候，需要先把密码通过salt生成hash密码，并再次赋给password</p>
+<pre><code class="lang-js">PersonSchema.pre(<span class="hljs-string">'save'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">next</span>) </span>{
+    <span class="hljs-keyword">this</span>.password = crypto.createHmac(<span class="hljs-string">'sha256'</span>, <span class="hljs-string">'zfpx'</span>).update(<span class="hljs-keyword">this</span>.password).digest(<span class="hljs-string">'hex'</span>);
+    next();
+});
+
+PersonSchema.statics.login = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">username, password, callback</span>) </span>{
+    password = crypto.createHmac(<span class="hljs-string">'sha256'</span>, <span class="hljs-string">'zfpx'</span>).update(password).digest(<span class="hljs-string">'hex'</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.findOne({ username, password }, callback);
+}
+
+Person.login(<span class="hljs-string">'zfpx'</span>, <span class="hljs-string">'123456'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, doc</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(err, doc);
+});
+</code></pre>
+<h2 id="t56. schema 插件">6. schema 插件 <a href="#t56. schema 插件"> # </a></h2>
+<p>Schemas是可插拔的，也就是说，它们提供在应用预先打包能力来扩展他们的功能。</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">lastModified</span>(<span class="hljs-params">schema,options</span>)</span>{
+  schema.add({<span class="hljs-attr">lastModify</span>:<span class="hljs-built_in">Date</span>});
+  schema.pre(<span class="hljs-string">'save'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">next</span>)</span>{
+    <span class="hljs-keyword">this</span>.lastModify = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>;
+    next();
+  });
+  <span class="hljs-keyword">if</span>(options&amp;&amp; options.index){
+    schema.path(<span class="hljs-string">'lastModify'</span>).index(options.index);
+  }
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> plugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./plugin'</span>);
+<span class="hljs-keyword">let</span> Person = <span class="hljs-keyword">new</span> Schema({});
+Person.plugin(plugin,{<span class="hljs-attr">index</span>:<span class="hljs-literal">true</span>});
+</code></pre>
+<ul>
+<li>Person 是用户自己定义的Schema</li>
+<li>Person.plugin 是为Person增加plugin</li>
+<li>plugin有2个参数<ul>
+<li>插件对象 plugin </li>
+<li>配置项 {index:true}</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">schema.add({<span class="hljs-attr">age</span>:<span class="hljs-built_in">Number</span>});
+</code></pre>
+<h2 id="t67.MongoDB 聚合">7.MongoDB 聚合 <a href="#t67.MongoDB 聚合"> # </a></h2>
+<ul>
+<li>MongoDB中聚合(aggregate)主要用于处理数据(诸如统计平均值,求和等)，并返回计算后的数据结果。有点类似sql语句中的 count(*)。</li>
+<li>MongoDB中聚合的方法使用aggregate()。<h3 id="t77.1 语法">7.1 语法 <a href="#t77.1 语法"> # </a></h3>
+aggregate() 方法的基本语法格式如下所示：<pre><code class="lang-js">&gt;db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)
+</code></pre>
+</li>
+</ul>
+<h3 id="t87.2 分组">7.2 分组 <a href="#t87.2 分组"> # </a></h3>
+<p>现在我们通过以上集合计算每个作者所写的文章数，使用aggregate()计算结果如下：</p>
+<pre><code class="lang-js">&gt; db.article.insert({<span class="hljs-attr">uid</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">content</span>:<span class="hljs-string">'1'</span>,<span class="hljs-attr">visit</span>:<span class="hljs-number">1</span>});
+&gt; db.article.insert({<span class="hljs-attr">uid</span>:<span class="hljs-number">2</span>,<span class="hljs-attr">content</span>:<span class="hljs-string">'2'</span>,<span class="hljs-attr">visit</span>:<span class="hljs-number">2</span>});
+&gt; db.article.insert({<span class="hljs-attr">uid</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">content</span>:<span class="hljs-string">'3'</span>,<span class="hljs-attr">visit</span>:<span class="hljs-number">3</span>});
+</code></pre>
+<pre><code class="lang-js"> db.article.aggregate([{<span class="hljs-attr">$group</span>:{<span class="hljs-attr">_id</span>:<span class="hljs-string">'$uid'</span>,<span class="hljs-attr">total</span>:{<span class="hljs-attr">$sum</span>:<span class="hljs-number">1</span>}}}]);
+ { <span class="hljs-string">"_id"</span> : <span class="hljs-number">2</span>, <span class="hljs-string">"total"</span> : <span class="hljs-number">1</span> }
+{ <span class="hljs-string">"_id"</span> : <span class="hljs-number">1</span>, <span class="hljs-string">"total"</span> : <span class="hljs-number">2</span> }
+<span class="hljs-string">`
+</span></code></pre>
+<blockquote>
+<p>select uid, count(*) total from article group by uid</p>
+</blockquote>
+<h3 id="t97.3 聚合的表达式">7.3 聚合的表达式 <a href="#t97.3 聚合的表达式"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">表达式</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">实例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">$sum</td>
+<td style="text-align:left">计算总和。</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", num_tutorial : {$sum : "$visit"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$avg</td>
+<td style="text-align:left">计算平均值</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", num_tutorial : {$avg : "$visit"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$min</td>
+<td style="text-align:left">获取集合中所有文档对应值得最小值。</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", num_tutorial : {$min : "$visit"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$max</td>
+<td style="text-align:left">获取集合中所有文档对应值得最大值。</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", num_tutorial : {$max : "$visit"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$push</td>
+<td style="text-align:left">把某列的所有值都放到一个数组中</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", url : {$push: "$url"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$addToSet</td>
+<td style="text-align:left">返回一组文档中所有文档所选字段的全部唯一值的数组</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", url : {$addToSet : "$url"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$first</td>
+<td style="text-align:left">根据资源文档的排序获取第一个文档数据,可能为null</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", first_url : {$first : "$url"}}}])</td>
+</tr>
+<tr>
+<td style="text-align:left">$last</td>
+<td style="text-align:left">根据资源文档的排序获取最后一个文档数据,可能为null</td>
+<td style="text-align:left">db.article.aggregate([{$group : {_id : "$uid", last_url : {$last : "$url"}}}])</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">db.article.insert({<span class="hljs-attr">uid</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">content</span>:<span class="hljs-string">'3'</span>,<span class="hljs-attr">url</span>:<span class="hljs-string">'url1'</span>});
+db.article.insert({<span class="hljs-attr">uid</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">content</span>:<span class="hljs-string">'4'</span>,<span class="hljs-attr">url</span>:<span class="hljs-string">'url1'</span>});
+db.article.insert({<span class="hljs-attr">uid</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">content</span>:<span class="hljs-string">'5'</span>,<span class="hljs-attr">url</span>:<span class="hljs-string">'url2'</span>});
+把某列的所有值都放到一个数组中
+db.article.aggregate([{<span class="hljs-attr">$group</span> : {<span class="hljs-attr">_id</span> : <span class="hljs-string">"$uid"</span>, <span class="hljs-attr">url</span> : {<span class="hljs-attr">$push</span>: <span class="hljs-string">"$url"</span>}}}])
+{ <span class="hljs-string">"_id"</span> : <span class="hljs-number">1</span>, <span class="hljs-string">"url"</span> : [ <span class="hljs-string">"url1"</span>, <span class="hljs-string">"url1"</span>, <span class="hljs-string">"url2"</span>] }
+</code></pre>
+<h3 id="t107.4 管道的概念">7.4 管道的概念 <a href="#t107.4 管道的概念"> # </a></h3>
+<p>管道在Unix和Linux中一般用于将当前命令的输出结果作为下一个命令的参数。
+MongoDB的聚合管道将MongoDB文档在一个管道处理完毕后将结果传递给下一个管道处理。管道操作是可以重复的。</p>
+<ul>
+<li>$project：修改输入文档的结构。可以用来重命名、增加或删除字段，也可以用于创建计算结果以及嵌套文档。</li>
+<li>$match：用于过滤数据，只输出符合条件的文档。$match使用MongoDB的标准查询操作</li>
+<li>$limit：用来限制MongoDB聚合管道返回的文档数。</li>
+<li>$skip：在聚合管道中跳过指定数量的文档，并返回余下的文档。</li>
+<li>$unwind：将文档中的某一个数组类型字段拆分成多条，每条包含数组中的一个值。</li>
+<li>$group：将集合中的文档分组，可用于统计结果。</li>
+<li>$sort：将输入文档排序后输出。</li>
+</ul>
+<h4 id="t117.4.1 过滤显示字段">7.4.1 过滤显示字段 <a href="#t117.4.1 过滤显示字段"> # </a></h4>
+<ul>
+<li>修改输入文档的结构。可以用来重命名、增加或删除字段，也可以用于创建计算结果以及嵌套文档<pre><code class="lang-js">db.article.aggregate(
+  { <span class="hljs-attr">$project</span> : {
+      <span class="hljs-attr">_id</span>:<span class="hljs-number">0</span>,
+      <span class="hljs-attr">content</span> : <span class="hljs-number">1</span> ,
+  }}
+);
+</code></pre>
+<h4 id="t127.4.2 过滤文档">7.4.2 过滤文档 <a href="#t127.4.2 过滤文档"> # </a></h4>
+</li>
+<li>用于过滤数据，只输出符合条件的文档。$match使用MongoDB的标准查询操作<pre><code class="lang-js">db.article.aggregate( [
+  { <span class="hljs-attr">$match</span> : { <span class="hljs-attr">visit</span> : { <span class="hljs-attr">$gt</span> : <span class="hljs-number">10</span>, <span class="hljs-attr">$lte</span> : <span class="hljs-number">200</span> } } },
+  { <span class="hljs-attr">$group</span>: { <span class="hljs-attr">_id</span>: <span class="hljs-string">'$uid'</span>, <span class="hljs-attr">count</span>: { <span class="hljs-attr">$sum</span>: <span class="hljs-number">1</span> } } }
+]);
+</code></pre>
+</li>
+</ul>
+<h4 id="t137.4.3 跳过指定数量">7.4.3 跳过指定数量 <a href="#t137.4.3 跳过指定数量"> # </a></h4>
+<ul>
+<li>在聚合管道中跳过指定数量的文档，并返回余下的文档。
+<code>`</code>js
+var db = connect('school');
+var vistors = [];
+for(var i=1;i&lt;=20;i++){
+  vistors.push({uid:i,visit:i});
+}
+print(vistors.length);
+db.vistors.insert(vistors);</li>
+</ul>
+<p>db.vistors.aggregate( [
+    { $match : { visit : { $gt : 10, $lte : 200 } } },
+    { $group: { _id: '$uid', count: { $sum: 1 } } },
+    { $skip : 1 }
+] );</p>
+<pre><code>
+#### 7.4.5 $unwind
+- 将文档中的某一个数组类型字段拆分成多条，每条包含数组中的一个值。
+- 使用$unwind可以将weekday中的每个数据都被分解成一个文档,并且除了weekday的值不同外,其他的值都是相同的
+```js
+db.vistors.aggregate( [
+    { $project : {_id:1,uid:1,type:1,visit:1}},
+    { $match : { visit : { $gte : 1, $lte : 10 } } },
+    { $unwind:'$type'}
+]);
+</code></pre><h4 id="t147.4.6 $group">7.4.6 $group <a href="#t147.4.6 $group"> # </a></h4>
+<ul>
+<li>将集合中的文档分组，可用于统计结果。<pre><code class="lang-js">db.vistors.aggregate( [
+  { <span class="hljs-attr">$project</span> : {<span class="hljs-attr">_id</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">uid</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">type</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">visit</span>:<span class="hljs-number">1</span>}},
+  { <span class="hljs-attr">$match</span> : { <span class="hljs-attr">visit</span> : { <span class="hljs-attr">$gte</span> : <span class="hljs-number">1</span>, <span class="hljs-attr">$lte</span> : <span class="hljs-number">10</span> } } },
+  { <span class="hljs-attr">$unwind</span>:<span class="hljs-string">'$type'</span>},
+  { <span class="hljs-attr">$group</span>: { <span class="hljs-attr">_id</span>: <span class="hljs-string">'$uid'</span>, <span class="hljs-attr">count</span>: { <span class="hljs-attr">$sum</span>: <span class="hljs-number">1</span> } } },
+  { <span class="hljs-attr">$sort</span>: {<span class="hljs-attr">_id</span>:<span class="hljs-number">1</span>} },
+  { <span class="hljs-attr">$skip</span> : <span class="hljs-number">5</span> },
+  { <span class="hljs-attr">$limit</span>: <span class="hljs-number">5</span> }
+]);
+</code></pre>
+</li>
+</ul>
+<h4 id="t157.4.5 Mongoose中使用">7.4.5 Mongoose中使用 <a href="#t157.4.5 Mongoose中使用"> # </a></h4>
+<pre><code class="lang-js">Article.aggregate([
+                        { <span class="hljs-attr">$match</span> : { <span class="hljs-attr">visit</span> : { <span class="hljs-attr">$gt</span> : <span class="hljs-number">10</span>, <span class="hljs-attr">$lte</span> : <span class="hljs-number">200</span> } } },
+                        { <span class="hljs-attr">$group</span>: { <span class="hljs-attr">_id</span>: <span class="hljs-string">'$uid'</span>, <span class="hljs-attr">count</span>: { <span class="hljs-attr">$sum</span>: <span class="hljs-number">1</span> } } },
+                        { <span class="hljs-attr">$skip</span> : <span class="hljs-number">1</span> }
+ ])
+                .
+</code></pre>
+<ul>
+<li><a href="https://github.com/sodino/MongoDemo/blob/master/app.js">MongoDemo</a></li>
+</ul>
+
+    

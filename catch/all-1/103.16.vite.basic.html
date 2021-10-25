@@ -1,0 +1,1002 @@
+
+        <h2 id="t01.Vite">1.Vite <a href="#t01.Vite"> # </a></h2>
+<ul>
+<li><a href="https://cn.vitejs.dev/">Vite (法语意为 "快速的"，发音 /vit/) </a>是下一代前端开发与构建工具</li>
+<li>💡 极速的服务启动 使用原生 ESM 文件，无需打包!</li>
+<li>⚡️ 轻量快速的热重载 无论应用程序大小如何，都始终极快的模块热重载（HMR）</li>
+<li>🛠️ 丰富的功能 对 TypeScript、JSX、CSS 等支持开箱即用。</li>
+<li>📦 优化的构建 可选 “多页应用” 或 “库” 模式的预配置 Rollup 构建</li>
+<li>🔩 通用的插件 在开发和构建之间共享 Rollup-superset 插件接口。</li>
+<li>🔑 完全类型化的API 灵活的 API 和完整 TypeS</li>
+</ul>
+<h2 id="t12.配置开发环境">2.配置开发环境 <a href="#t12.配置开发环境"> # </a></h2>
+<ul>
+<li><a href="https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md">script-setup</a></li>
+</ul>
+<h3 id="t22.1 安装依赖">2.1 安装依赖 <a href="#t22.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">npm install vue  --save
+npm install  @vitejs/plugin-vue @vue/compiler-sfc vite --save-dev
+</code></pre>
+<h3 id="t32.2 配置文件">2.2 配置文件 <a href="#t32.2 配置文件"> # </a></h3>
+<p>vite.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">'vite'</span>
+<span class="hljs-keyword">import</span> vue <span class="hljs-keyword">from</span> <span class="hljs-string">'@vitejs/plugin-vue'</span>
+<span class="hljs-comment">// https://vitejs.dev/config/</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> defineConfig({
+  <span class="hljs-attr">plugins</span>: [vue()]
+})
+</code></pre>
+<h3 id="t42.3 package.json">2.3 package.json <a href="#t42.3 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"vite2-prepare"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"vite"</span>,
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"vite build"</span>,
+    <span class="hljs-attr">"serve"</span>: <span class="hljs-string">"vite preview"</span>
+  },
+  <span class="hljs-attr">"dependencies"</span>: {
+    <span class="hljs-attr">"vue"</span>: <span class="hljs-string">"^3.0.5"</span>
+  },
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"@vitejs/plugin-vue"</span>: <span class="hljs-string">"^1.2.4"</span>,
+    <span class="hljs-attr">"@vue/compiler-sfc"</span>: <span class="hljs-string">"^3.0.5"</span>,
+    <span class="hljs-attr">"vite"</span>: <span class="hljs-string">"^2.4.0"</span>
+  }
+}
+</code></pre>
+<h3 id="t52.4 index.html">2.4 index.html <a href="#t52.4 index.html"> # </a></h3>
+<p>index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"icon"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/favicon.ico"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Vite App<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"app"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/src/main.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+
+</code></pre>
+<h3 id="t62.5 src\main.js">2.5 src\main.js <a href="#t62.5 src\main.js"> # </a></h3>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createApp } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App.vue'</span>
+createApp(App).mount(<span class="hljs-string">'#app'</span>)
+</code></pre>
+<h3 id="t72.6 src\App.vue">2.6 src\App.vue <a href="#t72.6 src\App.vue"> # </a></h3>
+<p>src\App.vue</p>
+<pre><code class="lang-js">&lt;template&gt;
+  &lt;img src="./assets/ico.jpg" /&gt;
+  &lt;HelloWorld msg="Vue3 + Vite" /&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+//https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+import HelloWorld from './components/HelloWorld.vue'
+&lt;/script&gt;
+</code></pre>
+<h3 id="t82.7 HelloWorld.vue">2.7 HelloWorld.vue <a href="#t82.7 HelloWorld.vue"> # </a></h3>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-js">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+&lt;/template&gt;
+</code></pre>
+<h2 id="t93.静态资源处理">3.静态资源处理 <a href="#t93.静态资源处理"> # </a></h2>
+<ul>
+<li><a href="https://cn.vitejs.dev/guide/assets.html">静态资源处理</a></li>
+<li>服务时引入一个静态资源会返回解析后的公共路径</li>
+</ul>
+<h3 id="t103.1 模板中引入">3.1 模板中引入 <a href="#t103.1 模板中引入"> # </a></h3>
+<p>src\App.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+<span class="hljs-addition">+  &lt;img  src="./assets/avatar.jpg" /&gt;</span>
+&lt;/template&gt;
+</code></pre>
+<h3 id="t113.2 JS中引入">3.2 JS中引入 <a href="#t113.2 JS中引入"> # </a></h3>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;img  src="./assets/avatar.jpg" /&gt;
+<span class="hljs-addition">+  &lt;img  :src="imgUrl" /&gt;</span>
+  &lt;HelloWorld msg="Hello Vue 3 + Vite" /&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+//https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+import HelloWorld from './components/HelloWorld.vue'
+<span class="hljs-addition">+import imgUrl from './assets/avatar.jpg'</span>
+&lt;/script&gt;
+</code></pre>
+<h3 id="t123.3 CSS中引入">3.3 CSS中引入 <a href="#t123.3 CSS中引入"> # </a></h3>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;img  src="./assets/avatar.jpg" /&gt;
+  &lt;img  :src="imgUrl" /&gt;
+<span class="hljs-addition">+ &lt;div class="avatar"&gt;&lt;/div&gt;</span>
+  &lt;HelloWorld msg="Hello Vue 3 + Vite" /&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+//https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+import HelloWorld from './components/HelloWorld.vue'
+import imgUrl from './assets/avatar.jpg'
+&lt;/script&gt;
+<span class="hljs-addition">+&lt;style scoped&gt;</span>
+<span class="hljs-addition">+.avatar{</span>
+<span class="hljs-addition">+  width:200px;</span>
+<span class="hljs-addition">+  height:200px;</span>
+<span class="hljs-addition">+  background-image: url(./assets/avatar.jpg);</span>
+<span class="hljs-addition">+  background-size: contain;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+&lt;/style&gt;</span>
+</code></pre>
+<h3 id="t133.4 public目录">3.4 public目录 <a href="#t133.4 public目录"> # </a></h3>
+<ul>
+<li><a href="https://cn.vitejs.dev/guide/assets.html#the-public-directory">public目录</a></li>
+<li>如果有以下需求<ul>
+<li>这些资源不会被源码引用（例如 robots.txt）</li>
+<li>这些资源必须保持原有文件名（没有经过 hash）</li>
+</ul>
+</li>
+<li>那么你可以将该资源放在指定的 <code>public</code> 目录中，它应位于你的项目根目录</li>
+<li>该目录中的资源在开发时能直接通过 <code>/</code> 根路径访问到，并且打包时会被完整复制到目标目录的根目录下</li>
+</ul>
+<p><code>public\avatar.jpg</code></p>
+<h2 id="t144.配置别名">4.配置别名 <a href="#t144.配置别名"> # </a></h2>
+<h3 id="t154.1 vite.config.js">4.1 vite.config.js <a href="#t154.1 vite.config.js"> # </a></h3>
+<pre><code class="lang-diff">import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+<span class="hljs-addition">+import {resolve} from 'path';</span>
+
+// https://vitejs.dev/config/
+export default defineConfig({
+<span class="hljs-addition">+ resolve:{</span>
+<span class="hljs-addition">+   alias:{</span>
+<span class="hljs-addition">+    '@':resolve('src')</span>
+<span class="hljs-addition">+   }</span>
+<span class="hljs-addition">+ },</span>
+  plugins: [vue()]
+})
+</code></pre>
+<h3 id="t164.2 App.vue">4.2 App.vue <a href="#t164.2 App.vue"> # </a></h3>
+<p>src\App.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+<span class="hljs-addition">+ &lt;img src="@/assets/avatar.jpg" /&gt;</span>
+  &lt;img :src="avatarUrl" /&gt;
+  &lt;div class="avatar"&gt;&lt;/div&gt;
+  &lt;HelloWorld msg="Hello Vue 3 + Vite" /&gt;
+&lt;/template&gt;
+&lt;script setup&gt;
+//https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+<span class="hljs-addition">+import HelloWorld from "@/components/HelloWorld.vue";</span>
+<span class="hljs-addition">+import avatarUrl from "@/assets/avatar.jpg";</span>
+&lt;/script&gt;
+&lt;style scoped&gt;
+.avatar {
+  width: 200px;
+  height: 200px;
+<span class="hljs-addition">+ background-image: url(@/assets/avatar.jpg);</span>
+  background-size: contain;
+}
+&lt;/style&gt;
+</code></pre>
+<h2 id="t175.样式处理">5.样式处理 <a href="#t175.样式处理"> # </a></h2>
+<h3 id="t185.1 全局样式">5.1 全局样式 <a href="#t185.1 全局样式"> # </a></h3>
+<p>src\main.js</p>
+<pre><code class="lang-diff">import { createApp } from 'vue'
+import App from './App.vue'
+<span class="hljs-addition">+import './global.css'</span>
+createApp(App).mount('#app')
+</code></pre>
+<p>src\global.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-id">#app</span> {
+    <span class="hljs-attribute">background-color</span>: lightgrey;
+}
+</code></pre>
+<h3 id="t195.2 局部样式">5.2 局部样式 <a href="#t195.2 局部样式"> # </a></h3>
+<h3 id="t205.2.1 scoped">5.2.1 scoped <a href="#t205.2.1 scoped"> # </a></h3>
+<ul>
+<li>当 <code>&lt;style&gt;</code> 标签有 <code>scoped</code> 属性时，它的 CSS 只作用于当前组件中的元素</li>
+<li>它使用了<code>data-v-hash</code>的方式来使css有了它对应模块的标识</li>
+</ul>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+<span class="hljs-addition">+  &lt;a&gt;超链接&lt;/a&gt;</span>
+&lt;/template&gt;
+<span class="hljs-addition">+&lt;style scoped&gt;</span>
+<span class="hljs-addition">+a {</span>
+<span class="hljs-addition">+  color: #42b983;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+&lt;/style&gt;</span>
+</code></pre>
+<h3 id="t215.2.2 CSS Modules">5.2.2 CSS Modules <a href="#t215.2.2 CSS Modules"> # </a></h3>
+<ul>
+<li><a href="https://cn.vitejs.dev/guide/features.html#postcss">CSS Modules</a></li>
+<li>通过<code>module</code>作用的<code>style</code>都被保存到<code>$style</code>对象中</li>
+</ul>
+<h3 id="t225.2.2.1  内联">5.2.2.1  内联 <a href="#t225.2.2.1  内联"> # </a></h3>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+<span class="hljs-addition">+ &lt;a :class="$style.link"&gt;超链接&lt;/a&gt;</span>
+&lt;/template&gt;
+<span class="hljs-addition">+&lt;style module&gt;</span>
+<span class="hljs-addition">+.link {</span>
+<span class="hljs-addition">+  color: #42b983;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+&lt;/style&gt;</span>
+</code></pre>
+<h3 id="t235.2.2.2  外联">5.2.2.2  外联 <a href="#t235.2.2.2  外联"> # </a></h3>
+<ul>
+<li>任何以 .module.css 为后缀名的 CSS 文件都被认为是一个 CSS modules 文件</li>
+<li>导入这样的文件会返回一个相应的模块对象
+src\components\HelloWorld.vue</li>
+</ul>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+<span class="hljs-addition">+ &lt;a :class="style.link"&gt;超链接&lt;/a&gt;</span>
+&lt;/template&gt;
+
+&lt;script setup&gt;
+<span class="hljs-addition">+import style from './HelloWorld.module.css';</span>
+&lt;/script&gt;
+</code></pre>
+<p>src\components\HelloWorld.module.css</p>
+<pre><code class="lang-js">.link {
+    color: #42b983;
+}
+</code></pre>
+<h3 id="t245.3 less和sass">5.3 less和sass <a href="#t245.3 less和sass"> # </a></h3>
+<ul>
+<li>Vite 也同时提供了对 .scss, .sass, .less, .styl 和 .stylus 文件的内置支持。没有必要为它们安装特定的 Vite 插件，但必须安装相应的预处理器依赖</li>
+<li>如果是用的是单文件组件，可以通过 <code>style lang="sass"</code>（或其他预处理器）自动开启</li>
+</ul>
+<h4 id="t255.3.1 安装">5.3.1 安装 <a href="#t255.3.1 安装"> # </a></h4>
+<pre><code class="lang-js">npm i less sass -S
+</code></pre>
+<h4 id="t265.3.2 HelloWorld.vue">5.3.2 HelloWorld.vue <a href="#t265.3.2 HelloWorld.vue"> # </a></h4>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+  &lt;a :class="style.link"&gt;超链接&lt;/a&gt;
+<span class="hljs-addition">+ &lt;h2&gt;less&lt;/h2&gt;</span>
+<span class="hljs-addition">+ &lt;h3&gt;sass&lt;/h3&gt;</span>
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { reactive } from 'vue'
+import style from './HelloWorld.module.css';
+&lt;/script&gt;
+<span class="hljs-addition">+&lt;style scoped lang="less"&gt;</span>
+<span class="hljs-addition">+@color:red;</span>
+<span class="hljs-addition">+h2{</span>
+<span class="hljs-addition">+  color:@color;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+&lt;/style&gt;</span>
+<span class="hljs-addition">+&lt;style scoped lang="scss"&gt;</span>
+<span class="hljs-addition">+$color:green;</span>
+<span class="hljs-addition">+h3{</span>
+<span class="hljs-addition">+  color:$color;</span>
+<span class="hljs-addition">+}</span>
+&lt;/style&gt;
+</code></pre>
+<h3 id="t275.4 PostCSS">5.4 PostCSS <a href="#t275.4 PostCSS"> # </a></h3>
+<ul>
+<li><a href="https://cn.vitejs.dev/guide/features.html#postcss">postcss</a></li>
+<li>如果项目包含有效的 PostCSS 配置 (任何受 postcss-load-config 支持的格式，例如 postcss.config.js)，它将会自动应用于所有已导入的 CSS</li>
+</ul>
+<h4 id="t285.4.1 安装">5.4.1 安装 <a href="#t285.4.1 安装"> # </a></h4>
+<pre><code class="lang-js">npm install autoprefixer --save
+</code></pre>
+<h4 id="t295.4.2 postcss.config.js">5.4.2 postcss.config.js <a href="#t295.4.2 postcss.config.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">plugins</span>: [
+      <span class="hljs-built_in">require</span>(<span class="hljs-string">'autoprefixer'</span>)
+  ]
+}
+</code></pre>
+<h4 id="t305.4.3 .browserslistrc">5.4.3 .browserslistrc <a href="#t305.4.3 .browserslistrc"> # </a></h4>
+<pre><code class="lang-js">&gt;<span class="hljs-number">0.2</span>%
+not dead
+not op_mini all
+</code></pre>
+<h4 id="t315.4.4 HelloWorld.vue">5.4.4 HelloWorld.vue <a href="#t315.4.4 HelloWorld.vue"> # </a></h4>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+  &lt;a :class="style.link"&gt;超链接&lt;/a&gt;
+  &lt;h2&gt;less&lt;/h2&gt;
+  &lt;h3&gt;sass&lt;/h3&gt;
+<span class="hljs-addition">+ &lt;div class="postcss"&gt;&lt;/div&gt;</span>
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { reactive } from 'vue'
+import style from './HelloWorld.module.css';
+&lt;/script&gt;
+&lt;style scoped lang="less"&gt;
+@color:red;
+h2{
+  color:@color;
+}
+&lt;/style&gt;
+
+&lt;style scoped lang="scss"&gt;
+$color:green;
+h3{
+  color:$color;
+}
+&lt;/style&gt;
+<span class="hljs-addition">+&lt;style scoped&gt;</span>
+<span class="hljs-addition">+.postcss{</span>
+<span class="hljs-addition">+    height:50px;</span>
+<span class="hljs-addition">+    width:200px;</span>
+<span class="hljs-addition">+    background-color: orange;</span>
+<span class="hljs-addition">+    transform: rotate(90deg);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+&lt;/style&gt;</span>
+</code></pre>
+<h2 id="t326.typescript">6.typescript <a href="#t326.typescript"> # </a></h2>
+<h3 id="t336.1 安装">6.1 安装 <a href="#t336.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm install typescript @babel/core @babel/preset-env  @babel/preset-typescript --save-dev
+</code></pre>
+<h3 id="t346.2 .babelrc">6.2 .babelrc <a href="#t346.2 .babelrc"> # </a></h3>
+<p>.babelrc</p>
+<pre><code class="lang-js">{
+    <span class="hljs-string">"presets"</span>: [
+        [<span class="hljs-string">"@babel/preset-env"</span>],
+        <span class="hljs-string">"@babel/preset-typescript"</span>
+    ]
+}
+</code></pre>
+<h3 id="t356.3 tsconfig.json">6.3 tsconfig.json <a href="#t356.3 tsconfig.json"> # </a></h3>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"compilerOptions"</span>: {
+    <span class="hljs-attr">"target"</span>: <span class="hljs-string">"esnext"</span>,
+    <span class="hljs-attr">"module"</span>: <span class="hljs-string">"esnext"</span>,
+    <span class="hljs-attr">"moduleResolution"</span>: <span class="hljs-string">"node"</span>,
+    <span class="hljs-attr">"strict"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"jsx"</span>: <span class="hljs-string">"preserve"</span>,
+    <span class="hljs-attr">"sourceMap"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"resolveJsonModule"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"esModuleInterop"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"lib"</span>: [<span class="hljs-string">"esnext"</span>, <span class="hljs-string">"dom"</span>]
+  },
+  <span class="hljs-attr">"include"</span>: [<span class="hljs-string">"src/**/*.ts"</span>, <span class="hljs-string">"src/**/*.d.ts"</span>, <span class="hljs-string">"src/**/*.tsx"</span>, <span class="hljs-string">"src/**/*.vue"</span>]
+}
+</code></pre>
+<h3 id="t366.4 HelloWorld.vue">6.4 HelloWorld.vue <a href="#t366.4 HelloWorld.vue"> # </a></h3>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+  &lt;h2&gt;less&lt;/h2&gt;
+  &lt;h3&gt;sass&lt;/h3&gt;
+  &lt;div class="postcss"&gt;&lt;/div&gt;
+<span class="hljs-addition">+ &lt;button @click="handleClick"&gt;{{state.count}}&lt;/button&gt;</span>
+&lt;/template&gt;
+
+&lt;script setup lang="ts"&gt;
+import { reactive,defineProps } from 'vue'
+<span class="hljs-addition">+defineProps({</span>
+<span class="hljs-addition">+  msg:String</span>
+<span class="hljs-addition">+})</span>
+<span class="hljs-addition">+interface State {</span>
+<span class="hljs-addition">+  count:number;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let state = reactive&lt;State&gt;({count:0});</span>
+<span class="hljs-addition">+const handleClick = ()=&gt;{</span>
+<span class="hljs-addition">+  console.log(state.count);</span>
+<span class="hljs-addition">+  state.count++;</span>
+<span class="hljs-addition">+}</span>
+&lt;/script&gt;
+&lt;style scoped lang="less"&gt;
+@color:red;
+h2{
+  color:@color;
+}
+&lt;/style&gt;
+
+&lt;style scoped lang="scss"&gt;
+$color:green;
+h3{
+  color:$color;
+}
+&lt;/style&gt;
+&lt;style scoped&gt;
+.postcss{
+    height:50px;
+    width:200px;
+    background-color: orange;
+    transform: rotate(90deg);
+}
+&lt;/style&gt;
+</code></pre>
+<h3 id="t376.5 shims-vue.d.ts">6.5 shims-vue.d.ts <a href="#t376.5 shims-vue.d.ts"> # </a></h3>
+<ul>
+<li>让typescript识别支持<code>.vue</code>文件</li>
+</ul>
+<p>src\shims-vue.d.ts</p>
+<pre><code class="lang-js">declare <span class="hljs-built_in">module</span> <span class="hljs-string">'*.vue'</span> {
+  <span class="hljs-keyword">import</span> { DefineComponent } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+  <span class="hljs-keyword">const</span> component: DefineComponent&lt;{}, {}, any&gt;
+  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> component
+}
+
+</code></pre>
+<h3 id="t386.6 vite-env.d.ts">6.6 vite-env.d.ts <a href="#t386.6 vite-env.d.ts"> # </a></h3>
+<ul>
+<li>如果你的库依赖于某个全局库，使用/// <reference types="...">指令</reference></li>
+<li>三斜线指令仅可放在包含它的文件的最顶端</li>
+<li>三斜线引用告诉编译器在编译过程中要引入的额外的文件</li>
+</ul>
+<p>src\vite-env.d.ts</p>
+<pre><code class="lang-js"><span class="hljs-comment">/// &lt;reference types="vite/client" /&gt;</span>
+</code></pre>
+<h2 id="t397.配置代理">7.配置代理 <a href="#t397.配置代理"> # </a></h2>
+<ul>
+<li><a href="https://cn.vitejs.dev/config/#server-proxy">server-proxy</a></li>
+<li>为开发服务器配置自定义代理规则</li>
+<li>期望接收一个 { key: options } 对象。如果 key 值以 ^ 开头，将会被解释为 RegExp。configure 可用于访问 proxy 实例。</li>
+</ul>
+<h3 id="t407.1 vite.config.js">7.1 vite.config.js <a href="#t407.1 vite.config.js"> # </a></h3>
+<pre><code class="lang-diff">import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path';
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve('src')
+    }
+  },
+<span class="hljs-addition">+ server: {</span>
+<span class="hljs-addition">+   proxy: {</span>
+<span class="hljs-addition">+     '/api': {</span>
+<span class="hljs-addition">+       target: 'http://jsonplaceholder.typicode.com',</span>
+<span class="hljs-addition">+       changeOrigin: true,</span>
+<span class="hljs-addition">+       rewrite: (path) =&gt; path.replace(/^\/api/, '')</span>
+<span class="hljs-addition">+     }</span>
+<span class="hljs-addition">+   }</span>
+<span class="hljs-addition">+ },</span>
+  plugins: [vue()]
+})
+
+</code></pre>
+<h3 id="t417.2 src\App.vue">7.2 src\App.vue <a href="#t417.2 src\App.vue"> # </a></h3>
+<p>src\App.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;img src="@/assets/avatar.jpg" /&gt;
+  &lt;img :src="avatarUrl" /&gt;
+  &lt;div class="avatar"&gt;&lt;/div&gt;
+  &lt;HelloWorld msg="Hello Vue 3 + Vite" /&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+//https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
+import HelloWorld from "@/components/HelloWorld.vue";
+import avatarUrl from "@/assets/avatar.jpg";
+<span class="hljs-addition">+fetch('/api/todos/1')</span>
+<span class="hljs-addition">+  .then(response =&gt; response.json())</span>
+<span class="hljs-addition">+  .then(json =&gt; console.log(json))</span>
+&lt;/script&gt;
+&lt;style scoped&gt;
+.avatar {
+  width: 200px;
+  height: 200px;
+  background-image: url(@/assets/avatar.jpg);
+  background-size: contain;
+}
+&lt;/style&gt;
+</code></pre>
+<h2 id="t428.mock">8.mock <a href="#t428.mock"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/vite-plugin-mock">vite-plugin-mock</a></li>
+</ul>
+<pre><code class="lang-js">npm i mockjs vite-plugin-mock -D
+node ./node_modules/vite-plugin-mock/node_modules/esbuild/install.js
+</code></pre>
+<h3 id="t438.1 vite.config.js">8.1 vite.config.js <a href="#t438.1 vite.config.js"> # </a></h3>
+<pre><code class="lang-diff">import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path';
+<span class="hljs-addition">+import { viteMockServe } from "vite-plugin-mock";</span>
+// https://vitejs.dev/config/
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve('src')
+    }
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://jsonplaceholder.typicode.com',
+        changeOrigin: true,
+        rewrite: (path) =&gt; path.replace(/^\/api/, '')
+      }
+    }
+  },
+<span class="hljs-addition">+  plugins: [vue(),viteMockServe({})]</span>
+})
+</code></pre>
+<h3 id="t448.2 mock\test.ts">8.2 mock\test.ts <a href="#t448.2 mock\test.ts"> # </a></h3>
+<p>mock\test.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { MockMethod } <span class="hljs-keyword">from</span> <span class="hljs-string">'vite-plugin-mock'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> [
+    {
+        <span class="hljs-attr">url</span>: <span class="hljs-string">'/api/get'</span>,
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span>,
+        <span class="hljs-attr">response</span>: <span class="hljs-function">(<span class="hljs-params">{ query }</span>) =&gt;</span> {
+            <span class="hljs-keyword">return</span> {
+                <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">data</span>: {
+                    <span class="hljs-attr">name</span>: <span class="hljs-string">'vben'</span>,
+                },
+            };
+        },
+    },
+] <span class="hljs-keyword">as</span> MockMethod[];
+</code></pre>
+<h2 id="t459.ESLint">9.ESLint <a href="#t459.ESLint"> # </a></h2>
+<ul>
+<li>ESLint是一个开源的 JavaScript 的 linting 工具<ul>
+<li>代码质量问题：使用方式有可能有问题</li>
+<li>代码风格问题：风格不符合一定规则</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">npm install eslint eslint-plugin-vue  @vue/eslint-config-typescript @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
+</code></pre>
+<h3 id="t469.1 src\components\HelloWorld.vue">9.1 src\components\HelloWorld.vue <a href="#t469.1 src\components\HelloWorld.vue"> # </a></h3>
+<p>src\components\HelloWorld.vue</p>
+<pre><code class="lang-diff">&lt;template&gt;
+  &lt;h1&gt;{{ msg }}&lt;/h1&gt;
+  &lt;h2&gt;less&lt;/h2&gt;
+  &lt;h3&gt;sass&lt;/h3&gt;
+  &lt;div class="postcss" /&gt;
+  &lt;button @click="handleClick"&gt;
+    {{ state.count }}
+  &lt;/button&gt;
+&lt;/template&gt;
+
+&lt;script setup lang="ts"&gt;
+import { reactive,defineProps } from 'vue'
+defineProps({
+<span class="hljs-addition">+ msg:{</span>
+<span class="hljs-addition">+   type:String,</span>
+<span class="hljs-addition">+   default:''</span>
+<span class="hljs-addition">+ }</span>
+})
+interface State {
+  count:number;
+}
+let state = reactive&lt;State&gt;({count:0});
+const handleClick = ()=&gt;{
+  console.log(state.count);
+  state.count++;
+}
+&lt;/script&gt;
+&lt;style scoped lang="less"&gt;
+@color:red;
+h2{
+  color:@color;
+}
+&lt;/style&gt;
+
+&lt;style scoped lang="scss"&gt;
+$color:green;
+h3{
+  color:$color;
+}
+&lt;/style&gt;
+&lt;style scoped&gt;
+.postcss{
+    height:50px;
+    width:200px;
+    background-color: orange;
+    transform: rotate(90deg);
+}
+&lt;/style&gt;
+</code></pre>
+<h3 id="t479.2 main.ts">9.2 main.ts <a href="#t479.2 main.ts"> # </a></h3>
+<p>src\main.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createApp } <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App.vue'</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./global.css'</span>
+createApp(App).mount(<span class="hljs-string">'#app'</span>)
+</code></pre>
+<h3 id="t489.3 .eslintrc.js">9.3 .eslintrc.js <a href="#t489.3 .eslintrc.js"> # </a></h3>
+<p>.eslintrc.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">root</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">env</span>: {
+        <span class="hljs-attr">browser</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">es2021</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">node</span>: <span class="hljs-literal">true</span>
+    },
+    <span class="hljs-attr">extends</span>: [
+        <span class="hljs-string">"plugin:vue/vue3-recommended"</span>,
+        <span class="hljs-string">"eslint:recommended"</span>,
+        <span class="hljs-string">"@vue/typescript/recommended"</span>
+    ],
+    <span class="hljs-attr">parserOptions</span>: {
+        <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">2021</span>
+    },
+    <span class="hljs-attr">rules</span>: {
+       <span class="hljs-string">"no-unused-vars"</span>: <span class="hljs-string">"off"</span>,
+       <span class="hljs-string">"@typescript-eslint/no-unused-vars"</span>: <span class="hljs-string">"off"</span>,
+    }
+}
+</code></pre>
+<h3 id="t499.4 .eslintignore">9.4 .eslintignore <a href="#t499.4 .eslintignore"> # </a></h3>
+<p>.eslintignore</p>
+<pre><code class="lang-js">*.css
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.d.ts
+</code></pre>
+<h3 id="t509.5 package.json">9.5 package.json <a href="#t509.5 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+  "name": "zhufeng-vite2-prepare",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+<span class="hljs-addition">+   "lint":"eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --quiet",</span>
+<span class="hljs-addition">+   "lint:fix":"eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --fix"</span>
+  },
+  "dependencies": {
+    "less": "^4.1.1",
+    "sass": "^1.35.2",
+    "vue": "^3.0.5"
+  },
+  "devDependencies": {
+<span class="hljs-addition">+   "@typescript-eslint/eslint-plugin": "^4.28.2",</span>
+<span class="hljs-addition">+   "@typescript-eslint/parser": "^4.28.2",</span>
+    "@vitejs/plugin-vue": "^1.2.4",
+    "@vue/compiler-sfc": "^3.0.5",
+<span class="hljs-addition">+   "@vue/eslint-config-typescript": "^7.0.0",</span>
+    "autoprefixer": "^10.2.6",
+<span class="hljs-addition">+   "eslint": "^7.30.0",</span>
+<span class="hljs-addition">+   "eslint-plugin-vue": "^7.13.0",</span>
+    "mockjs": "^1.1.0",
+    "vite": "^2.4.0",
+    "vite-plugin-mock": "^2.9.1"
+  }
+}
+</code></pre>
+<h2 id="t5110.Prettier">10.Prettier <a href="#t5110.Prettier"> # </a></h2>
+<ul>
+<li>ESLint 主要解决的是代码质量问题</li>
+<li>代码质量规则 (code-quality rules)<ul>
+<li>no-unused-vars</li>
+<li>no-extra-bind</li>
+<li>no-implicit-globals</li>
+<li>prefer-promise-reject-errors</li>
+</ul>
+</li>
+<li>代码风格规则 (code-formatting rules)<ul>
+<li>max-len</li>
+<li>no-mixed-spaces-and-tabs</li>
+<li>keyword-spacing</li>
+<li>comma-style</li>
+</ul>
+</li>
+<li>代码风格问题需要使用<code>Prettier</code></li>
+<li>Prettier 声称自己是一个有主见的代码格式化工具 (opinionated code formatter)</li>
+</ul>
+<h3 id="t5210.1 安装">10.1 安装 <a href="#t5210.1 安装"> # </a></h3>
+<ul>
+<li><a href="https://github.com/prettier/eslint-plugin-prettier#options">eslint-plugin-prettier</a></li>
+</ul>
+<pre><code class="lang-js">npm install prettier eslint-plugin-prettier  @vue/eslint-config-prettier --save-dev
+</code></pre>
+<h3 id="t5310.2 package.json">10.2 package.json <a href="#t5310.2 package.json"> # </a></h3>
+<pre><code class="lang-diff">{
+  "name": "zhufeng-vite2-prepare",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --quiet",
+    "lint:fix": "eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --fix"
+  },
+  "dependencies": {
+    "less": "^4.1.1",
+    "sass": "^1.35.2",
+    "vue": "^3.0.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "@vitejs/plugin-vue": "^1.2.4",
+    "@vue/compiler-sfc": "^3.0.5",
+<span class="hljs-addition">+   "@vue/eslint-config-prettier": "^6.0.0",</span>
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "autoprefixer": "^10.2.6",
+    "eslint": "^7.30.0",
+<span class="hljs-addition">+   "eslint-plugin-prettier": "^3.4.0",</span>
+    "eslint-plugin-vue": "^7.13.0",
+    "mockjs": "^1.1.0",
+<span class="hljs-addition">+   "prettier": "^2.3.2",</span>
+    "vite": "^2.4.0",
+    "vite-plugin-mock": "^2.9.1"
+  }
+}
+</code></pre>
+<h3 id="t5410.3 .eslintrc.js">10.3 .eslintrc.js <a href="#t5410.3 .eslintrc.js"> # </a></h3>
+<p>.eslintrc.js</p>
+<pre><code class="lang-diff">module.exports = {
+  root: true,
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
+  },
+  extends: [
+    "plugin:vue/vue3-recommended",
+    "eslint:recommended",
+    "@vue/typescript/recommended",
+<span class="hljs-addition">+   "@vue/prettier",</span>
+<span class="hljs-addition">+   "@vue/prettier/@typescript-eslint",</span>
+  ],
+  parserOptions: {
+    ecmaVersion: 2021,
+  },
+  rules: {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+<span class="hljs-addition">+   "prettier/prettier": ["error", { endOfLine: "auto" }],</span>
+  },
+};
+
+</code></pre>
+<h2 id="t5511.单元测试">11.单元测试 <a href="#t5511.单元测试"> # </a></h2>
+<ul>
+<li><a href="https://next.vue-test-utils.vuejs.org/">next.vue-test-utils.vuejs.org</a></li>
+<li><a href="https://github.com/vuejs/vue-jest/tree/v3">vue-jest/tree/v3</a></li>
+<li><a href="https://www.jestjs.cn/docs/getting-started">jestjs</a></li>
+</ul>
+<h3 id="t5611.1 安装依赖">11.1 安装依赖 <a href="#t5611.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cnpm i jest@next babel-jest@next @types/jest vue-jest@next ts-jest@next @vue/test-utils@next --save-dev
+</code></pre>
+<h3 id="t5711.2 package.json">11.2 package.json <a href="#t5711.2 package.json"> # </a></h3>
+<pre><code class="lang-diff">{
+  "name": "zhufeng-vite2-prepare",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --quiet",
+    "lint:fix": "eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --fix"
+  },
+  "dependencies": {
+    "less": "^4.1.1",
+    "sass": "^1.35.2",
+    "vue": "^3.0.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
+    "@vitejs/plugin-vue": "^1.2.4",
+    "@vue/compiler-sfc": "^3.0.5",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "autoprefixer": "^10.2.6",
+    "eslint": "^7.30.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-vue": "^7.13.0",
+    "mockjs": "^1.1.0",
+    "prettier": "^2.3.2",
+    "vite": "^2.4.0",
+    "vite-plugin-mock": "^2.9.1"
+  }
+}
+</code></pre>
+<h3 id="t5811.3 jest.config.js">11.3 jest.config.js <a href="#t5811.3 jest.config.js"> # </a></h3>
+<ul>
+<li><a href="https://github.com/vuejs/vue-jest/tree/v3">vue-jest</a>Jest Vue transformer with source map support</li>
+<li><a href="https://www.npmjs.com/package/babel-jest">babel-jest</a>Babel jest plugin</li>
+<li><a href="https://www.npmjs.com/package/ts-jest">ts-jest</a>A Jest transformer with source map support that lets you use Jest to test projects written in TypeScript</li>
+</ul>
+<p>jest.config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">testEnvironment</span>: <span class="hljs-string">"jsdom"</span>,
+  <span class="hljs-attr">transform</span>: {
+    <span class="hljs-string">"^.+\\.vue$"</span>: <span class="hljs-string">"vue-jest"</span>,
+    <span class="hljs-string">"^.+\\.jsx?$"</span>: <span class="hljs-string">"babel-jest"</span>,
+    <span class="hljs-string">"^.+\\.tsx?$"</span>: <span class="hljs-string">"ts-jest"</span>,
+  },
+  <span class="hljs-attr">moduleNameMapper</span>: {
+    <span class="hljs-string">"^@/(.*)$"</span>: <span class="hljs-string">"&lt;rootDir&gt;/src/$1"</span>,
+  },
+  <span class="hljs-attr">testMatch</span>: [<span class="hljs-string">"**/tests/**/*.spec.[jt]s"</span>],
+};
+</code></pre>
+<h3 id="t5911.4 tests\test.ts">11.4 tests\test.ts <a href="#t5911.4 tests\test.ts"> # </a></h3>
+<p>tests\test.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { mount } <span class="hljs-keyword">from</span> <span class="hljs-string">'@vue/test-utils'</span>
+<span class="hljs-keyword">const</span> MessageComponent = {
+  <span class="hljs-attr">template</span>: <span class="hljs-string">'&lt;p&gt;{{ msg }}&lt;/p&gt;'</span>,
+  <span class="hljs-attr">props</span>: [<span class="hljs-string">'msg'</span>]
+}
+test(<span class="hljs-string">'displays message'</span>, () =&gt; {
+  <span class="hljs-keyword">const</span> wrapper = mount(MessageComponent, {
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">msg</span>: <span class="hljs-string">'Hello world'</span>
+    }
+  })
+  expect(wrapper.text()).toContain(<span class="hljs-string">'Hello world'</span>)
+})
+</code></pre>
+<h3 id="t6011.5 tsconfig.json">11.5 tsconfig.json <a href="#t6011.5 tsconfig.json"> # </a></h3>
+<p>tsconfig.json</p>
+<pre><code class="lang-diff">{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"],
+<span class="hljs-addition">+   "types":["vite/client","jest"],</span>
+<span class="hljs-addition">+   "baseUrl": "./",</span>
+<span class="hljs-addition">+   "paths": {</span>
+<span class="hljs-addition">+     "@": ["./src"]</span>
+<span class="hljs-addition">+   }</span>
+  },
+<span class="hljs-addition">+ "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue","tests/**/*.spec.ts", "tests/test.ts"]</span>
+}
+</code></pre>
+<h3 id="t6111.6 package.json">11.6 package.json <a href="#t6111.6 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --quiet",
+    "lint:fix": "eslint --ext .ts,vue src/** --no-error-on-unmatched-pattern --fix",
+<span class="hljs-addition">+   "test": "jest  --passWithNoTests"</span>
+  }
+}
+</code></pre>
+<h2 id="t6212.git hook">12.git hook <a href="#t6212.git hook"> # </a></h2>
+<ul>
+<li>可以在<code>git commit</code>之前检查代码，保证所有提交到版本库中的代码都是符合规范的</li>
+<li>可以在<code>git push</code>之前执行单元测试,保证所有的提交的代码经过的单元测试</li>
+<li><a href="[husky](https://www.npmjs.com/package/husky">husky</a>)可以让我们向项目中方便添加git hooks</li>
+<li><a href="https://www.npmjs.com/package/lint-staged">lint-staged</a>用于实现每次提交只检查本次提交所修改的文件</li>
+<li><a href="https://github.com/okonet/lint-staged#configuration">lint-staged#configuration</a></li>
+<li><a href="">Commitlint</a>可以规范<code>git commit -m ""</code>中的描述信息</li>
+</ul>
+<h3 id="t6312.1 注释规范">12.1 注释规范 <a href="#t6312.1 注释规范"> # </a></h3>
+<ul>
+<li>commitlint 推荐我们使用 config-conventional 配置去写 commit</li>
+<li>提交格式 <code>git commit -m &lt;type&gt;[optional scope]: &lt;description&gt;</code><ul>
+<li>type ：用于表明我们这次提交的改动类型，是新增了功能？还是修改了测试代码？又或者是更新了文档？</li>
+<li>optional scope：一个可选的修改范围。用于标识此次提交主要涉及到代码中哪个模块</li>
+<li>description：一句话描述此次提交的主要内容，做到言简意赅</li>
+</ul>
+</li>
+</ul>
+<h4 id="t6412.1.1 type类型">12.1.1 type类型 <a href="#t6412.1.1 type类型"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">build</td>
+<td style="text-align:left">编译相关的修改，例如发布版本、对项目构建或者依赖的改动</td>
+</tr>
+<tr>
+<td style="text-align:left">chore</td>
+<td style="text-align:left">其他修改, 比如改变构建流程、或者增加依赖库、工具等</td>
+</tr>
+<tr>
+<td style="text-align:left">ci</td>
+<td style="text-align:left">持续集成修改</td>
+</tr>
+<tr>
+<td style="text-align:left">docs</td>
+<td style="text-align:left">文档修改</td>
+</tr>
+<tr>
+<td style="text-align:left">feature</td>
+<td style="text-align:left">新特性、新功能</td>
+</tr>
+<tr>
+<td style="text-align:left">fix</td>
+<td style="text-align:left">修改bug</td>
+</tr>
+<tr>
+<td style="text-align:left">perf</td>
+<td style="text-align:left">优化相关，比如提升性能、体验</td>
+</tr>
+<tr>
+<td style="text-align:left">refactor</td>
+<td style="text-align:left">代码重构</td>
+</tr>
+<tr>
+<td style="text-align:left">revert</td>
+<td style="text-align:left">回滚到上一个版本</td>
+</tr>
+<tr>
+<td style="text-align:left">style</td>
+<td style="text-align:left">代码格式修改</td>
+</tr>
+<tr>
+<td style="text-align:left">test</td>
+<td style="text-align:left">测试用例修改</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t6512.2 安装">12.2 安装 <a href="#t6512.2 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm i husky lint-staged @commitlint/cli @commitlint/config-conventional --save-dev
+</code></pre>
+<h3 id="t6612.3 配置脚本">12.3 配置脚本 <a href="#t6612.3 配置脚本"> # </a></h3>
+<ul>
+<li><code>prepare</code>脚本会在<code>npm install</code>(不带参数)之后自动执行</li>
+<li>当我们执行npm install安装完项目依赖后会执行<code>husky install</code>命令，该命令会创建<code>.husky/</code>目录并指定该目录为<code>git hooks</code>所在的目录</li>
+</ul>
+<pre><code class="lang-js">npm <span class="hljs-keyword">set</span>-script prepare "husky install"
+npm run prepare
+</code></pre>
+<h3 id="t6712.4 创建hooks">12.4 创建hooks <a href="#t6712.4 创建hooks"> # </a></h3>
+<pre><code class="lang-js">npx husky add .husky/pre-commit <span class="hljs-string">"lint-staged"</span>
+npx husky add .husky/commit-msg <span class="hljs-string">"npx --no-install commitlint --edit $1"</span>
+npx husky add .husky/pre-push <span class="hljs-string">"npm run test"</span>
+</code></pre>
+<h3 id="t6812.5 commitlint.config.js">12.5 commitlint.config.js <a href="#t6812.5 commitlint.config.js"> # </a></h3>
+<p>commitlint.config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">extends</span>: [<span class="hljs-string">"@commitlint/config-conventional"</span>],
+  <span class="hljs-attr">rules</span>: {
+    <span class="hljs-string">"type-enum"</span>: [
+      <span class="hljs-number">2</span>,
+      <span class="hljs-string">"always"</span>,
+      [
+        <span class="hljs-string">"feature"</span>,
+        <span class="hljs-string">"update"</span>,
+        <span class="hljs-string">"fixbug"</span>,
+        <span class="hljs-string">"refactor"</span>,
+        <span class="hljs-string">"optimize"</span>,
+        <span class="hljs-string">"style"</span>,
+        <span class="hljs-string">"docs"</span>,
+        <span class="hljs-string">"chore"</span>,
+      ],
+    ],
+    <span class="hljs-string">"type-case"</span>: [<span class="hljs-number">0</span>],
+    <span class="hljs-string">"type-empty"</span>: [<span class="hljs-number">0</span>],
+    <span class="hljs-string">"scope-empty"</span>: [<span class="hljs-number">0</span>],
+    <span class="hljs-string">"scope-case"</span>: [<span class="hljs-number">0</span>],
+    <span class="hljs-string">"subject-full-stop"</span>: [<span class="hljs-number">0</span>, <span class="hljs-string">"never"</span>],
+    <span class="hljs-string">"subject-case"</span>: [<span class="hljs-number">0</span>, <span class="hljs-string">"never"</span>],
+    <span class="hljs-string">"header-max-length"</span>: [<span class="hljs-number">0</span>, <span class="hljs-string">"always"</span>, <span class="hljs-number">72</span>],
+  },
+};
+</code></pre>
+<h2 id="t69参考">参考 <a href="#t69参考"> # </a></h2>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/80574300">搞懂 ESLint 和 Prettier</a></li>
+</ul>
+
+    

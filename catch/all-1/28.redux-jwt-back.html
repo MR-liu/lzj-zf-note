@@ -1,0 +1,361 @@
+
+        <h2 id="t01.搭建JWT后端环境">1.搭建JWT后端环境 <a href="#t01.搭建JWT后端环境"> # </a></h2>
+<pre><code class="lang-js">cnpm i express cors jsonwebtoken cookie-parser morgan mongoose bcryptjs -S
+cnpm i nodemon -g
+</code></pre>
+<h2 id="t12.启动服务">2.启动服务 <a href="#t12.启动服务"> # </a></h2>
+<h3 id="t22.1 app.js">2.1 app.js <a href="#t22.1 app.js"> # </a></h3>
+<p>app.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> cors=<span class="hljs-built_in">require</span>(<span class="hljs-string">'cors'</span>);
+<span class="hljs-keyword">const</span> path=<span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> logger=<span class="hljs-built_in">require</span>(<span class="hljs-string">'morgan'</span>);
+<span class="hljs-keyword">const</span> cookieParser=<span class="hljs-built_in">require</span>(<span class="hljs-string">'cookie-parser'</span>);
+<span class="hljs-keyword">const</span> indexRouter=<span class="hljs-built_in">require</span>(<span class="hljs-string">'./routes/index'</span>);
+<span class="hljs-keyword">const</span> usersRouter=<span class="hljs-built_in">require</span>(<span class="hljs-string">'./routes/users'</span>);
+<span class="hljs-keyword">const</span> app=express();
+app.use(cors());
+app.use(logger(<span class="hljs-string">'dev'</span>));
+app.use(express.json());
+app.use(express.urlencoded({<span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span>}));
+app.use(cookieParser());
+app.use(<span class="hljs-string">'/'</span>,indexRouter);
+app.use(<span class="hljs-string">'/users'</span>,usersRouter);
+app.listen(<span class="hljs-number">3000</span>,() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'server started at port 3000'</span>));
+</code></pre>
+<h3 id="t32.2 index.js">2.2 index.js <a href="#t32.2 index.js"> # </a></h3>
+<p>routes/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> router=express.Router();
+router.get(<span class="hljs-string">'/'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req,res</span>) </span>{
+    res.send(<span class="hljs-string">'index'</span>);
+});
+<span class="hljs-built_in">module</span>.exports=router;
+</code></pre>
+<h3 id="t42.3 users.js">2.3 users.js <a href="#t42.3 users.js"> # </a></h3>
+<p>routes/users.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> router=express.Router();
+router.get(<span class="hljs-string">'/'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req,res</span>) </span>{
+    res.send(<span class="hljs-string">'users'</span>);
+});
+<span class="hljs-built_in">module</span>.exports=router;
+</code></pre>
+<h3 id="t52.4 start">2.4 start <a href="#t52.4 start"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-string">"scripts"</span>: {
+    <span class="hljs-string">"start"</span>: <span class="hljs-string">"nodemon ./app.js"</span>
+  },
+</code></pre>
+<h2 id="t63.用户接口">3.用户接口 <a href="#t63.用户接口"> # </a></h2>
+<h3 id="t73.1 config.js">3.1 config.js <a href="#t73.1 config.js"> # </a></h3>
+<p>config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports={
+    <span class="hljs-attr">PORT</span>: <span class="hljs-number">3000</span>,
+    <span class="hljs-attr">DB_URL</span>:<span class="hljs-string">"mongodb://localhost/userSystem"</span>
+}
+</code></pre>
+<h3 id="t83.2 users.js">3.2 users.js <a href="#t83.2 users.js"> # </a></h3>
+<p>routes/users.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> User=<span class="hljs-built_in">require</span>(<span class="hljs-string">'../models/user'</span>);
+<span class="hljs-keyword">const</span> router=express.Router();
+router.post(<span class="hljs-string">'/signup'</span>,<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req,res</span>) </span>{
+    <span class="hljs-keyword">let</span> user=<span class="hljs-keyword">new</span> User(req.body);
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">await</span> user.save();
+        res.json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">data</span>:user
+        });
+    } <span class="hljs-keyword">catch</span> (error) {
+        res.json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+            error
+        });
+    }
+
+});
+<span class="hljs-built_in">module</span>.exports=router;
+</code></pre>
+<h3 id="t93.3 index.js">3.3 index.js <a href="#t93.3 index.js"> # </a></h3>
+<p>models/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {DB_URL} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config'</span>);
+<span class="hljs-keyword">const</span> mongoose=<span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">let</span> connection=mongoose.createConnection(DB_URL);
+<span class="hljs-built_in">module</span>.exports=connection;
+</code></pre>
+<h3 id="t103.4 user.js">3.4 user.js <a href="#t103.4 user.js"> # </a></h3>
+<p>models/user.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose=<span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> connection=<span class="hljs-built_in">require</span>(<span class="hljs-string">'./index'</span>);
+<span class="hljs-keyword">const</span> Schema=mongoose.Schema;
+<span class="hljs-keyword">const</span> UserSchema=<span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">username</span>: {<span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>,<span class="hljs-attr">unique</span>: <span class="hljs-literal">true</span>},
+    <span class="hljs-attr">password</span>:{<span class="hljs-attr">type</span>:<span class="hljs-built_in">String</span>}
+},{<span class="hljs-attr">timestamps</span>:<span class="hljs-literal">true</span>});
+<span class="hljs-keyword">const</span> User=connection.model(<span class="hljs-string">'User'</span>,UserSchema);
+<span class="hljs-built_in">module</span>.exports=User;
+</code></pre>
+<h2 id="t114.密码加密">4.密码加密 <a href="#t114.密码加密"> # </a></h2>
+<h3 id="t124.1 user.js">4.1 user.js <a href="#t124.1 user.js"> # </a></h3>
+<p>models/user.js</p>
+<pre><code class="lang-js">UserSchema.pre(<span class="hljs-string">'save'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">next</span>) </span>{
+    bcrypt.genSalt(<span class="hljs-number">10</span>,(err,salt)=&gt;{
+        bcrypt.hash(<span class="hljs-keyword">this</span>.password,salt,(err,hash) =&gt; {
+            <span class="hljs-keyword">this</span>.password=hash;
+            next();
+        });
+    });
+});
+UserSchema.methods.comparePassword=<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">password</span>) </span>{
+    <span class="hljs-keyword">return</span> bcrypt.compareSync(password,<span class="hljs-keyword">this</span>.password);
+}
+</code></pre>
+<h3 id="t134.2 users.js">4.2 users.js <a href="#t134.2 users.js"> # </a></h3>
+<p>routes/users.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> User=<span class="hljs-built_in">require</span>(<span class="hljs-string">'../models/user'</span>);
+<span class="hljs-keyword">const</span> router=express.Router();
+router.post(<span class="hljs-string">'/signup'</span>,<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req,res</span>) </span>{
+    <span class="hljs-keyword">let</span> user=<span class="hljs-keyword">new</span> User(req.body);
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">await</span> user.save();
+        res.json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">data</span>: {
+                <span class="hljs-attr">id</span>: user._id,
+                <span class="hljs-attr">username</span>:user.username
+            }
+        });
+    } <span class="hljs-keyword">catch</span> (error) {
+        res.json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+            error
+        });
+    }
+
+});
+router.post(<span class="hljs-string">'/signin'</span>,<span class="hljs-keyword">async</span> (req,res) =&gt; {
+    <span class="hljs-keyword">const</span> {username,password}=req.body;
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">const</span> user=<span class="hljs-keyword">await</span> User.findOne({username});
+        <span class="hljs-keyword">if</span> (user &amp;&amp; user.comparePassword(password)) {
+            res.json({
+                <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">data</span>: {
+                    <span class="hljs-attr">id</span>: user._id,
+                    <span class="hljs-attr">username</span>:user.username
+                }
+            });
+        } <span class="hljs-keyword">else</span> {
+            res.status(<span class="hljs-number">403</span>).json({
+                <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+                <span class="hljs-attr">error</span>:<span class="hljs-string">'用户名或密码错误'</span>
+            });
+        }
+    } <span class="hljs-keyword">catch</span> (error) {
+        res.status(<span class="hljs-number">403</span>).json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+            error
+        });
+    }
+})
+<span class="hljs-built_in">module</span>.exports=router;
+</code></pre>
+<h2 id="t145.JWT认证">5.JWT认证 <a href="#t145.JWT认证"> # </a></h2>
+<h3 id="t155.1 config.js">5.1 config.js <a href="#t155.1 config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports={
+    <span class="hljs-attr">PORT</span>: <span class="hljs-number">3000</span>,
+    <span class="hljs-attr">DB_URL</span>: <span class="hljs-string">"mongodb://localhost:27017/userSystem"</span>,
+    <span class="hljs-attr">SECRET</span>:<span class="hljs-string">"zfpx"</span>
+}
+</code></pre>
+<h3 id="t165.2  models/index.js">5.2  models/index.js <a href="#t165.2  models/index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> connection=mongoose.createConnection(DB_URL,{ <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span> })
+</code></pre>
+<h3 id="t175.3 routes/users.js">5.3 routes/users.js <a href="#t175.3 routes/users.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {sign,verify}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils/jwt'</span>);
+router.post(<span class="hljs-string">'/signin'</span>,<span class="hljs-keyword">async</span> (req,res) =&gt; {
+    <span class="hljs-keyword">const</span> {username,password}=req.body;
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">const</span> user=<span class="hljs-keyword">await</span> User.findOne({username});
+        <span class="hljs-keyword">if</span> (user &amp;&amp; user.comparePassword(password)) {
+            res.json({
+                <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">data</span>: {
+                    <span class="hljs-attr">token</span>:sign({<span class="hljs-attr">username</span>:user.username})
+                }
+            });
+        } <span class="hljs-keyword">else</span> {
+            res.status(<span class="hljs-number">403</span>).json({
+                <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+                <span class="hljs-attr">error</span>:<span class="hljs-string">'用户名或密码错误'</span>
+            });
+        }
+    } <span class="hljs-keyword">catch</span> (error) {
+        res.status(<span class="hljs-number">403</span>).json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+            error
+        });
+    }
+})
+router.get(<span class="hljs-string">'/signout'</span>,verify,(req,res) =&gt; {
+    res.json({
+        <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">data</span>:<span class="hljs-string">'退出登录成功!'</span>
+    });
+});
+</code></pre>
+<h3 id="t185.4 jwt.js">5.4 jwt.js <a href="#t185.4 jwt.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> jwt=<span class="hljs-built_in">require</span>(<span class="hljs-string">'jsonwebtoken'</span>);
+<span class="hljs-keyword">const</span> {SECRET}=<span class="hljs-built_in">require</span>(<span class="hljs-string">'../config'</span>);
+<span class="hljs-keyword">const</span> sign=<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> jwt.sign(user,SECRET,{
+        <span class="hljs-attr">expiresIn</span>:<span class="hljs-number">10</span> <span class="hljs-comment">//秒</span>
+    });
+}
+<span class="hljs-keyword">const</span> verify=<span class="hljs-function">(<span class="hljs-params">req,res,next</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> token=req.headers.authorization;
+    <span class="hljs-keyword">if</span> (token) {
+        jwt.verify(token,SECRET,(err,data)=&gt;{
+            <span class="hljs-keyword">if</span> (err) {
+                <span class="hljs-keyword">if</span> (err.name == <span class="hljs-string">'TokenExpiredError'</span>) {
+                    <span class="hljs-keyword">return</span> res.status(<span class="hljs-number">401</span>).json({
+                        <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+                        <span class="hljs-attr">error</span>:<span class="hljs-string">'token已经过期!'</span>
+                    });
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">return</span> res.status(<span class="hljs-number">401</span>).json({
+                        <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+                        <span class="hljs-attr">error</span>:<span class="hljs-string">'token认证失败!'</span>
+                    });
+                }
+            } <span class="hljs-keyword">else</span> {
+                next();
+            }
+        });
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> res.status(<span class="hljs-number">401</span>).json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-attr">error</span>:<span class="hljs-string">'请提供token'</span>
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports={
+    sign,
+    verify
+}
+</code></pre>
+<h2 id="t196.管理员发表文章管理">6.管理员发表文章管理 <a href="#t196.管理员发表文章管理"> # </a></h2>
+<h3 id="t206.1 app.js">6.1 app.js <a href="#t206.1 app.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> articlesRouter=<span class="hljs-built_in">require</span>(<span class="hljs-string">'./routes/articles'</span>);
+app.use(<span class="hljs-string">'/articles'</span>,articlesRouter);
+</code></pre>
+<h3 id="t216.2 models/article.js">6.2 models/article.js <a href="#t216.2 models/article.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose=<span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> connection=<span class="hljs-built_in">require</span>(<span class="hljs-string">'./index'</span>);
+<span class="hljs-keyword">const</span> Schema=mongoose.Schema;
+<span class="hljs-keyword">const</span> ArticleSchema=<span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">title</span>: {<span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>},
+    <span class="hljs-attr">content</span>: {<span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>}
+},{<span class="hljs-attr">timestamps</span>: <span class="hljs-literal">true</span>});
+
+<span class="hljs-keyword">const</span> Article=connection.model(<span class="hljs-string">'Article'</span>,ArticleSchema);
+<span class="hljs-built_in">module</span>.exports=Article;
+</code></pre>
+<h3 id="t226.3 models/users.js">6.3 models/users.js <a href="#t226.3 models/users.js"> # </a></h3>
+<pre><code class="lang-diff"> const Schema=mongoose.Schema;
+ const UserSchema=new Schema({
+     username: {type: String,unique: true},
+<span class="hljs-deletion">-    password:{type:String}</span>
+<span class="hljs-addition">+    password: {type: String},</span>
+<span class="hljs-addition">+    admin:{type:Boolean,default:false}</span>
+ },{timestamps: true});
+ UserSchema.pre('save',function (next) {
+     bcrypt.genSalt(10,(err,salt)=&gt;{
+</code></pre>
+<h3 id="t236.4 routes/articles">6.4 routes/articles <a href="#t236.4 routes/articles"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">const</span> Article=<span class="hljs-built_in">require</span>(<span class="hljs-string">'../models/article'</span>);
+<span class="hljs-keyword">const</span> {verify} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils/jwt'</span>);
+<span class="hljs-keyword">const</span> router=express.Router();
+router.post(<span class="hljs-string">'/add'</span>,verify(<span class="hljs-literal">true</span>),<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req,res</span>) </span>{
+    <span class="hljs-keyword">const</span> article=<span class="hljs-keyword">new</span> Article(req.body);
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">await</span> article.save();
+        res.json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+            article
+        });
+    } <span class="hljs-keyword">catch</span> (error) {
+        res.status(<span class="hljs-number">500</span>).json({<span class="hljs-attr">code</span>:<span class="hljs-number">1</span>,error});
+    }
+});
+router.get(<span class="hljs-string">'/list'</span>,verify(),<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req,res</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> articles=<span class="hljs-keyword">await</span> Article.find();
+        res.json({
+            <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>,
+            articles
+        });
+    } <span class="hljs-keyword">catch</span> (error) {
+        res.status(<span class="hljs-number">500</span>).json({<span class="hljs-attr">code</span>:<span class="hljs-number">1</span>,error});
+    }
+});
+<span class="hljs-built_in">module</span>.exports=router;
+</code></pre>
+<h3 id="t246.5 routes/users.js">6.5 routes/users.js <a href="#t246.5 routes/users.js"> # </a></h3>
+<pre><code class="lang-diff">                 data: {
+<span class="hljs-deletion">-                    token:sign({username:user.username})</span>
+<span class="hljs-addition">+                    token:sign({username:user.username,admin:user.admin})</span>
+                 }
+
+</code></pre>
+<h3 id="t256.6 utils/jwt.js">6.6 utils/jwt.js <a href="#t256.6 utils/jwt.js"> # </a></h3>
+<pre><code class="lang-diff">const verify=(mustAdmin)=&gt;(req,res,next) =&gt; {
+    const token=req.headers.authorization;
+    if (token) {
+        jwt.verify(token,SECRET,(err,data)=&gt;{
+            if (err) {
+                if (err.name == 'TokenExpiredError') {
+                    return res.status(401).json({
+                        code: 1,
+                        error:'token已经过期!'
+                    });
+                } else {
+                    return res.status(401).json({
+                        code: 1,
+                        error:'token认证失败!'
+                    });
+                }
+            } else {
+<span class="hljs-deletion">-               next();</span>
+<span class="hljs-addition">+                if (mustAdmin) {</span>
+<span class="hljs-addition">+                    let {admin}=data;</span>
+<span class="hljs-addition">+                    if (admin) {</span>
+<span class="hljs-addition">+                        next();</span>
+<span class="hljs-addition">+                    } else {</span>
+<span class="hljs-addition">+                        return res.status(401).json({</span>
+<span class="hljs-addition">+                            code: 1,</span>
+<span class="hljs-addition">+                            error:'必须是管理员才能进行此项操作!'</span>
+<span class="hljs-addition">+                        });</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                } else {</span>
+<span class="hljs-addition">+                    next();</span>
+<span class="hljs-addition">+                }</span>
+
+            }
+        });
+    } else {
+        return res.status(401).json({
+            code: 1,
+            error:'请提供token'
+        });
+    }
+}
+</code></pre>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/jwt-backend">jwt-backend</a></li>
+</ul>
+
+    

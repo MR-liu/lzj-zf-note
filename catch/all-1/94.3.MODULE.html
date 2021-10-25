@@ -1,0 +1,355 @@
+
+        <h2 id="t01.模块化">1.模块化 <a href="#t01.模块化"> # </a></h2>
+<h3 id="t11.1.什么是模块化">1.1.什么是模块化 <a href="#t11.1.什么是模块化"> # </a></h3>
+<ul>
+<li>模块划就是按照一定的规则把代码封装成若干的相互依赖的文件并进行组合</li>
+<li>每个模块内的数据都是私有的，只向外选择性的暴露一些方法和数据与外界进行数据通信</li>
+</ul>
+<h3 id="t21.2.模块化的意义">1.2.模块化的意义 <a href="#t21.2.模块化的意义"> # </a></h3>
+<ul>
+<li>有利于代码分享、解耦以及复用</li>
+<li>团队并行开发</li>
+<li>避免命名冲突</li>
+<li>相互引用，按需加载</li>
+</ul>
+<h3 id="t31.3. 模块化的发展史">1.3. 模块化的发展史 <a href="#t31.3. 模块化的发展史"> # </a></h3>
+<ul>
+<li>自执行函数</li>
+<li>AMD (Asynchronous Module Definition)</li>
+<li>CMD (Common Module Definition)</li>
+<li>CommonJS (服务器端开发)</li>
+<li>UMD (Universal Module Definition)</li>
+<li>ES6 Module (ESM，JS官方标准模块定义方式)</li>
+</ul>
+<h2 id="t42. 自执行函数">2. 自执行函数 <a href="#t42. 自执行函数"> # </a></h2>
+<h3 id="t52.1 函数封装">2.1 函数封装 <a href="#t52.1 函数封装"> # </a></h3>
+<ul>
+<li>可能会命名冲突</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">a</span>(<span class="hljs-params"></span>)</span>{
+
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">b</span>(<span class="hljs-params"></span>)</span>{
+
+}
+</code></pre>
+<h3 id="t62.2 命名空间">2.2 命名空间 <a href="#t62.2 命名空间"> # </a></h3>
+<ul>
+<li>减少命名冲突</li>
+<li>暴露内部成员属性</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> moduleA = {
+  a(){},
+  b(){}
+}
+<span class="hljs-keyword">let</span> moduleB = {
+  a(){},
+  b(){}
+}
+</code></pre>
+<h3 id="t72.3 自执行函数">2.3 自执行函数 <a href="#t72.3 自执行函数"> # </a></h3>
+<ul>
+<li>可以保护私有变量</li>
+<li>无法实现自动依赖</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> moduleA = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> state;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getState</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> state;
+    }
+    <span class="hljs-keyword">return</span> { getState };
+})();
+<span class="hljs-keyword">let</span> moduleB = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> state;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getState</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> state;
+    }
+    <span class="hljs-keyword">return</span> { getState };
+})();
+
+<span class="hljs-built_in">console</span>.log(moduleA.getState());
+<span class="hljs-built_in">console</span>.log(moduleB.getState());
+</code></pre>
+<h3 id="t82.4  有依赖的自执行函数">2.4  有依赖的自执行函数 <a href="#t82.4  有依赖的自执行函数"> # </a></h3>
+<ul>
+<li>手工引入依赖</li>
+<li>依赖关系不明显</li>
+</ul>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">global</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a + b;
+    }
+    global.addModule = { add };
+})(<span class="hljs-built_in">window</span>);
+(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">global</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">minus</span>(<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a - b;
+    }
+    global.minusModule = { minus };
+})(<span class="hljs-built_in">window</span>);
+
+(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">global, addModule, minusModule</span>) </span>{
+    global.mathModule = { <span class="hljs-attr">add</span>: addModule.add, <span class="hljs-attr">minus</span>: minusModule.minus };
+})(<span class="hljs-built_in">window</span>, addModule, minusModule);
+
+<span class="hljs-built_in">console</span>.log(mathModule.add(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log(mathModule.minus(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>));
+</code></pre>
+<h2 id="t93. AMD">3. AMD <a href="#t93. AMD"> # </a></h2>
+<ul>
+<li><a href="https://requirejs.org/">requirejs</a></li>
+<li><a href="https://requirejs.org/docs/release/2.1.20/minified/require.js">require.js</a></li>
+<li>前置依赖</li>
+</ul>
+<pre><code class="lang-js">define(id?, dependencies?, factory);
+</code></pre>
+<h3 id="t103.1 html">3.1 html <a href="#t103.1 html"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Document<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"http://static.js.xywy.com/common/js/require.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t113.2 index.js">3.2 index.js <a href="#t113.2 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">require</span>.config({
+    <span class="hljs-attr">baseUrl</span>: <span class="hljs-string">'modules'</span>
+});
+<span class="hljs-built_in">require</span>([<span class="hljs-string">'addModule'</span>, <span class="hljs-string">'minusModule'</span>], (addModule, minusModule) =&gt; {
+    <span class="hljs-built_in">console</span>.log(addModule.add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>), minusModule.minus(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>));
+});
+</code></pre>
+<h3 id="t123.3  modules\addModule.js">3.3  modules\addModule.js <a href="#t123.3  modules\addModule.js"> # </a></h3>
+<p>modules\addModule.js</p>
+<pre><code class="lang-js">define(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a + b;
+    }
+    <span class="hljs-keyword">return</span> {
+        add
+    }
+});
+</code></pre>
+<h3 id="t133.4   modules\minusModule.js">3.4   modules\minusModule.js <a href="#t133.4   modules\minusModule.js"> # </a></h3>
+<p>2.js\amd\modules\minusModule.js</p>
+<pre><code class="lang-js">define(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">minus</span>(<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a - b;
+    }
+    <span class="hljs-keyword">return</span> {
+        minus
+    }
+});
+</code></pre>
+<h3 id="t143.5   2.js\amd\amd.js">3.5   2.js\amd\amd.js <a href="#t143.5   2.js\amd\amd.js"> # </a></h3>
+<p>amd\amd.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> moduleFactory = {};
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">define</span>(<span class="hljs-params">name, factory</span>) </span>{
+    moduleFactory[name] = factory;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">dependencies, callback</span>) </span>{
+    callback(...dependencies.map(<span class="hljs-function"><span class="hljs-params">dependency</span> =&gt;</span> moduleFactory[dependency]()));
+}
+
+define(<span class="hljs-string">'addModule'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a + b;
+    }
+    <span class="hljs-keyword">return</span> {
+        add
+    }
+});
+define(<span class="hljs-string">'minusModule'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">minus</span>(<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a - b;
+    }
+    <span class="hljs-keyword">return</span> {
+        minus
+    }
+});
+<span class="hljs-built_in">require</span>([<span class="hljs-string">'addModule'</span>, <span class="hljs-string">'minusModule'</span>], <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">addModule, minusModule</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(addModule.add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>), minusModule.minus(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>));
+})
+</code></pre>
+<h2 id="t154. CMD">4. CMD <a href="#t154. CMD"> # </a></h2>
+<ul>
+<li><code>CMD</code> 叫做通用模块定义规范（Common Module Defination )</li>
+<li>CMD 规范尽量保持简单，并与 CommonJS 的 Modules 规范保持了很大的兼容性</li>
+<li>通过 CMD 规范书写的模块，可以很容易在 Node.js 中运行。在 CMD 规范中，一个模块就是一个文件</li>
+<li><a href="http://seajs.org/">seajs</a></li>
+<li><a href="https://github.com/seajs/seajs/issues/242">CMD</a></li>
+<li><a href="https://github.com/cmdjs/specification/blob/master/draft/module.md">module</a></li>
+<li><h3 id="t164.1 index.html">4.1 index.html <a href="#t164.1 index.html"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.bootcss.com/seajs/3.0.3/sea.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
+      seajs.use(<span class="hljs-string">'./index.js'</span>)
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</code></pre>
+</li>
+</ul>
+<h3 id="t174.2 cmd\index.js">4.2 cmd\index.js <a href="#t174.2 cmd\index.js"> # </a></h3>
+<p>cmd\index.js</p>
+<pre><code class="lang-js">define(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">require, exports</span>) </span>{
+    <span class="hljs-keyword">var</span> addModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./modules/addModule'</span>)
+    <span class="hljs-keyword">let</span> result1 = addModule.add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+    <span class="hljs-built_in">console</span>.log(result1);
+    <span class="hljs-keyword">var</span> minusModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./modules/minusModule'</span>)
+    <span class="hljs-keyword">let</span> result2 = minusModule.minus(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+    <span class="hljs-built_in">console</span>.log(result2);
+})
+</code></pre>
+<h3 id="t184.3 modules\addModule.js">4.3 modules\addModule.js <a href="#t184.3 modules\addModule.js"> # </a></h3>
+<p>modules\addModule.js</p>
+<pre><code class="lang-js">define(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">require, exports</span>) </span>{
+    exports.add = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a + b;
+    }
+})
+</code></pre>
+<h3 id="t194.4 modules\minusModule.js">4.4 modules\minusModule.js <a href="#t194.4 modules\minusModule.js"> # </a></h3>
+<p>modules\minusModule.js</p>
+<pre><code class="lang-js">define(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">require, exports</span>) </span>{
+    exports.minus = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a - b;
+    }
+})
+</code></pre>
+<h3 id="t204.5 2sea.js">4.5 2sea.js <a href="#t204.5 2sea.js"> # </a></h3>
+<p>cmd\sea.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> factories = {}
+<span class="hljs-keyword">let</span> modules = {};
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">if</span> (modules[name]) {
+        <span class="hljs-keyword">return</span> modules[name];
+    }
+    <span class="hljs-keyword">let</span> factory = factories[name];
+    <span class="hljs-keyword">let</span> exports = {};
+    factory(<span class="hljs-built_in">require</span>, exports);
+    modules[name] = exports;
+    <span class="hljs-keyword">return</span> exports;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">define</span>(<span class="hljs-params">name, factory</span>) </span>{
+    factories[name] = factory;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">use</span>(<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-built_in">require</span>(name);
+}
+define(<span class="hljs-string">'addModule'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">require, exports</span>) </span>{
+    exports.add = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a + b;
+    }
+})
+define(<span class="hljs-string">'minusModule'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">require, exports</span>) </span>{
+    exports.minus = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+        <span class="hljs-keyword">return</span> a - b;
+    }
+})
+define(<span class="hljs-string">'index'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">require, exports</span>) </span>{
+    <span class="hljs-keyword">var</span> addModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">'addModule'</span>)
+    <span class="hljs-keyword">let</span> result1 = addModule.add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+    <span class="hljs-built_in">console</span>.log(result1);
+    <span class="hljs-keyword">var</span> minusModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">'minusModule'</span>)
+    <span class="hljs-keyword">let</span> result2 = minusModule.minus(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+    <span class="hljs-built_in">console</span>.log(result2);
+})
+use(<span class="hljs-string">'index'</span>);
+</code></pre>
+<h2 id="t215. COMMON.js">5. COMMON.js <a href="#t215. COMMON.js"> # </a></h2>
+<ul>
+<li>CommonJs 是一种 JavaScript 语言的模块化规范，它通常会在服务端的 Nodejs 上使用</li>
+<li>每一个文件就是一个模块，拥有自己独立的作用域、变量、以及方法等，对其他的模块都不可见</li>
+<li>CommonJS规范规定，每个模块内部，module 变量代表当前模块。这个变量是一个对象，它的 exports 属性（module.exports）是对外的接口。加载某个模块，其实是加载该模块的 module.exports 属性。require 方法用于加载模块</li>
+</ul>
+<p>a.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>
+};
+</code></pre>
+<p>b.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> a = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./a'</span>);
+<span class="hljs-keyword">var</span> b = a.a + <span class="hljs-number">2</span>;
+<span class="hljs-built_in">module</span>.exports ={
+    b
+};
+</code></pre>
+<h2 id="t226.UMD">6.UMD <a href="#t226.UMD"> # </a></h2>
+<ul>
+<li>UMD 叫做通用模块定义规范(Universal Module Definition)可以通过运行时或者编译时让同一个代码模块在使用 CommonJs、CMD 甚至是 AMD 的项目中运行</li>
+</ul>
+<pre><code class="lang-js">(<span class="hljs-function">(<span class="hljs-params">root, factory</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> define === <span class="hljs-string">'function'</span> &amp;&amp; define.amd) {
+        <span class="hljs-comment">//AMD</span>
+        define([<span class="hljs-string">'jquery'</span>], factory);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> exports === <span class="hljs-string">'object'</span>) {
+        <span class="hljs-comment">//CommonJS</span>
+        <span class="hljs-keyword">var</span> $ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jquery'</span>);
+        <span class="hljs-built_in">module</span>.exports = factory($);
+    } <span class="hljs-keyword">else</span> {
+        root.testModule = factory(root.jQuery);
+    }
+})(<span class="hljs-keyword">this</span>, ($) =&gt; {
+    <span class="hljs-comment">//todo</span>
+});
+</code></pre>
+<h2 id="t237.ESM">7.ESM <a href="#t237.ESM"> # </a></h2>
+<ul>
+<li>ES6 模块的设计思想是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量</li>
+<li>ES6 Module默认目前还没有被浏览器支持，需要使用babel</li>
+<li>CommonJS 模块输出的是一个值的拷贝,ES6 模块输出的是值的引用</li>
+<li>CommonJS 模块是运行时加载，ES6 模块是编译时输出接口</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">/** 导出模块的方式 **/</span>
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">export</span> { a }; <span class="hljs-comment">//第一种</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> b = <span class="hljs-number">1</span>; <span class="hljs-comment">//第二种 </span>
+
+<span class="hljs-keyword">let</span> c = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> { c }<span class="hljs-comment">//第三种 </span>
+
+<span class="hljs-keyword">let</span> d = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> { d <span class="hljs-keyword">as</span> e }<span class="hljs-comment">//第四种，别名</span>
+
+<span class="hljs-comment">/** 导入模块的方式 **/</span>
+
+<span class="hljs-keyword">import</span> { a } <span class="hljs-keyword">from</span> <span class="hljs-string">'./a.js'</span> <span class="hljs-comment">//针对export导出方式，.js后缀可省略</span>
+
+<span class="hljs-keyword">import</span> main <span class="hljs-keyword">from</span> <span class="hljs-string">'./c'</span> <span class="hljs-comment">//针对export default导出方式,使用时用 main.c</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">'lodash'</span> <span class="hljs-comment">//仅仅执行lodash模块，但是不输入任何值</span>
+</code></pre>
+<h3 id="t247.1 命名式导出与默认导出">7.1 命名式导出与默认导出 <a href="#t247.1 命名式导出与默认导出"> # </a></h3>
+<ul>
+<li>export {&lt;变量&gt;}这种方式一般称为 命名式导出 或者 具名导出，导出的是一个变量的引用。</li>
+<li>export default这种方式称为 默认导出 或者 匿名导出，导出的是一个值。</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// a.js</span>
+<span class="hljs-keyword">let</span> x = <span class="hljs-number">10</span>
+<span class="hljs-keyword">let</span> y = <span class="hljs-number">20</span>
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    x = <span class="hljs-number">100</span>
+    y = <span class="hljs-number">200</span>
+},<span class="hljs-number">100</span>)
+<span class="hljs-keyword">export</span> { x }
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> y
+
+<span class="hljs-comment">// b.js</span>
+<span class="hljs-keyword">import</span> { x } <span class="hljs-keyword">from</span> <span class="hljs-string">'./a.js'</span>
+<span class="hljs-keyword">import</span> y <span class="hljs-keyword">from</span> <span class="hljs-string">'./a.js'</span>
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(x,y) <span class="hljs-comment">// 100,20</span>
+},<span class="hljs-number">100</span>)
+</code></pre>
+
+    

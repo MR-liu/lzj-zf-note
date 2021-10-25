@@ -1,0 +1,267 @@
+
+        <h2 id="t01. roadhog">1. roadhog <a href="#t01. roadhog"> # </a></h2>
+<ul>
+<li>roadhog 是基于 webpack 的封装工具，目的是简化 webpack 的配置</li>
+<li>提供 <code>server</code>、 <code>build</code> 和 <code>test</code> 三个命令，分别用于本地调试和构建</li>
+<li>提供了特别易用的 mock 功能</li>
+<li>命令行体验和 create-react-app 一致，配置略有不同，比如默认开启 <code>css modules</code></li>
+<li><p>还提供了 <code>JSON</code> 格式的配置方式。</p>
+</li>
+<li><p><a href="https://www.npmjs.com/package/roadhog">roadhog</a></p>
+</li>
+</ul>
+<h3 id="t11.1 安装">1.1 安装 <a href="#t11.1 安装"> # </a></h3>
+<h4 id="t21.1.1 全局安装roadhog">1.1.1 全局安装roadhog <a href="#t21.1.1 全局安装roadhog"> # </a></h4>
+<pre><code class="lang-js">$ npm i roadhog -g
+</code></pre>
+<h4 id="t31.1.2 创建项目">1.1.2 创建项目 <a href="#t31.1.2 创建项目"> # </a></h4>
+<pre><code class="lang-js">mkdir zhufeng_roadhog
+cd zhufeng_roadhog
+cnpm init -y
+cnpm i react react-dom -S
+</code></pre>
+<h3 id="t41.2 编码">1.2 编码 <a href="#t41.2 编码"> # </a></h3>
+<ul>
+<li>默认入口文件为<code>src/index.js</code>，编译后会放置到 <code>dist\index.js</code><h4 id="t51.2.1  index.js">1.2.1  index.js <a href="#t51.2.1  index.js"> # </a></h4>
+src\index.js<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+</li>
+</ul>
+<h4 id="t61.2.2 index.html">1.2.2 index.html <a href="#t61.2.2 index.html"> # </a></h4>
+<ul>
+<li><code>public</code>目录也是静态文件根目录</li>
+</ul>
+<p>public\index.html</p>
+<pre><code class="lang-js">&lt;!DOCTYPE html&gt;
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
+</code></pre>
+<h4 id="t71.2.3 sum.js">1.2.3 sum.js <a href="#t71.2.3 sum.js"> # </a></h4>
+<p>src\sum.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) </span>{
+    <span class="hljs-keyword">return</span> a + b;
+}
+</code></pre>
+<h4 id="t81.2.4 sum.test.js">1.2.4 sum.test.js <a href="#t81.2.4 sum.test.js"> # </a></h4>
+<p>test\sum.test.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> sum = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../src/sum'</span>);
+describe(<span class="hljs-string">'sum'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    it(<span class="hljs-string">'1+2=3'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        expect(sum(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).toBe(<span class="hljs-number">3</span>);
+    });
+});
+</code></pre>
+<h3 id="t91.3 启动">1.3 启动 <a href="#t91.3 启动"> # </a></h3>
+<h4 id="t101.3.1 本地开发">1.3.1 本地开发 <a href="#t101.3.1 本地开发"> # </a></h4>
+<pre><code class="lang-js">$ roadhog server
+</code></pre>
+<h4 id="t111.3.2 打包发布">1.3.2 打包发布 <a href="#t111.3.2 打包发布"> # </a></h4>
+<pre><code class="lang-js">$ roadhog build
+</code></pre>
+<h4 id="t121.3.2 测试">1.3.2 测试 <a href="#t121.3.2 测试"> # </a></h4>
+<h5 id="t131.3.2.1 生成配置文件">1.3.2.1 生成配置文件 <a href="#t131.3.2.1 生成配置文件"> # </a></h5>
+<pre><code class="lang-js">npx jest --init
+</code></pre>
+<p>jest.config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">testEnvironment</span>: <span class="hljs-string">"jsdom"</span>,
+  <span class="hljs-attr">testURL</span>: <span class="hljs-string">"http://localhost"</span>
+}
+</code></pre>
+<h5 id="t141.3.2.2 执行测试命令">1.3.2.2 执行测试命令 <a href="#t141.3.2.2 执行测试命令"> # </a></h5>
+<pre><code class="lang-js">$ roadhog test
+</code></pre>
+<h2 id="t152. package.json">2. package.json <a href="#t152. package.json"> # </a></h2>
+<pre><code class="lang-json">"scripts": {
+    "dev": "roadhog server",
+    "build": "roadhog build",
+    "test": "roadhog test"
+}
+</code></pre>
+<h2 id="t163. .roadhogrc">3. .roadhogrc <a href="#t163. .roadhogrc"> # </a></h2>
+<ul>
+<li>配置文件修改的修改会触发 <code>roadhog server</code> 的自动重启</li>
+<li>配置存于 <code>.roadhogrc</code> 文件中（如果你不喜欢 JSON 配置，可以用 .roadhogrc.js 以 JS 的方式编写，支持 ES6）</li>
+<li>格式为 JSON，允许注释</li>
+</ul>
+<h3 id="t173.1 默认配置">3.1 默认配置 <a href="#t173.1 默认配置"> # </a></h3>
+<pre><code class="lang-js">{
+  <span class="hljs-string">"entry"</span>: <span class="hljs-string">"src/index.js"</span>,
+  <span class="hljs-string">"disableCSSModules"</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-string">"publicPath"</span>: <span class="hljs-string">"/"</span>,
+  <span class="hljs-string">"outputPath"</span>: <span class="hljs-string">"./dist"</span>,
+  <span class="hljs-string">"extraBabelPlugins"</span>: [],
+  <span class="hljs-string">"extraPostCSSPlugins"</span>: [],
+  <span class="hljs-string">"autoprefixer"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-string">"proxy"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-string">"externals"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-string">"library"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-string">"libraryTarget"</span>: <span class="hljs-string">"var"</span>,
+  <span class="hljs-string">"multipage"</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-string">"define"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-string">"env"</span>: <span class="hljs-literal">null</span>,
+  <span class="hljs-string">"theme"</span>: <span class="hljs-literal">null</span>,
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">entry</td>
+<td style="text-align:left">指定 webpack 入口文件，支持 glob 格式</td>
+</tr>
+<tr>
+<td style="text-align:left">outputPath</td>
+<td style="text-align:left">配置输出路径，默认是 ./dist</td>
+</tr>
+<tr>
+<td style="text-align:left">disableCSSModules</td>
+<td style="text-align:left">禁用 CSS Modules</td>
+</tr>
+<tr>
+<td style="text-align:left">publicPath</td>
+<td style="text-align:left">配置生产环境的 publicPath，开发环境下永远为 /</td>
+</tr>
+<tr>
+<td style="text-align:left">extraBabelPlugins</td>
+<td style="text-align:left">配置额外的 babel plugin。babel plugin 只能添加，不允许覆盖和删除</td>
+</tr>
+<tr>
+<td style="text-align:left">extraPostCSSPlugins</td>
+<td style="text-align:left">配置额外的 postcss 插件</td>
+</tr>
+<tr>
+<td style="text-align:left">autoprefixer</td>
+<td style="text-align:left">配置 autoprefixer 参数</td>
+</tr>
+<tr>
+<td style="text-align:left">proxy</td>
+<td style="text-align:left">配置代理</td>
+</tr>
+<tr>
+<td style="text-align:left">externals</td>
+<td style="text-align:left">配置 webpack 的 externals 属性</td>
+</tr>
+<tr>
+<td style="text-align:left">library</td>
+<td style="text-align:left">配置 webpack 的 library 属性</td>
+</tr>
+<tr>
+<td style="text-align:left">libraryTarget</td>
+<td style="text-align:left">配置 webpack 的 libraryTarget 属性</td>
+</tr>
+<tr>
+<td style="text-align:left">multipage</td>
+<td style="text-align:left">配置是否多页应用。多页应用会自动提取公共部分为 common.js 和 common.css</td>
+</tr>
+<tr>
+<td style="text-align:left">define</td>
+<td style="text-align:left">配置 webpack 的 DefinePlugin 插件，define 的值会自动做 JSON.stringify 处理</td>
+</tr>
+<tr>
+<td style="text-align:left">env</td>
+<td style="text-align:left">针对特定的环境进行配置。server 的环境变量是 development，build 的环境变量是 production</td>
+</tr>
+<tr>
+<td style="text-align:left">theme</td>
+<td style="text-align:left">配置主题，实际上是配 less 的 modifyVars</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t184. .roadhogrc.mock.js">4. .roadhogrc.mock.js <a href="#t184. .roadhogrc.mock.js"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+    <span class="hljs-comment">// Support type as Object and Array</span>
+    <span class="hljs-string">'GET /api/users'</span>: { <span class="hljs-attr">users</span>: [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>] },
+
+    <span class="hljs-comment">// Method like GET or POST can be omitted</span>
+    <span class="hljs-string">'GET /api/users/1'</span>: { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span> },
+
+    <span class="hljs-comment">// Support for custom functions, the API is the same as express@4</span>
+    <span class="hljs-string">'POST /api/users/create'</span>: <span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> { res.end(<span class="hljs-string">'OK'</span>); },
+  };
+</code></pre>
+<h2 id="t195. 实现">5. 实现 <a href="#t195. 实现"> # </a></h2>
+<h3 id="t205.1 初始化项目">5.1 初始化项目 <a href="#t205.1 初始化项目"> # </a></h3>
+<pre><code class="lang-js">mkdir zfroadhog
+cd zfroadhog
+cnpm init -y
+cnpm i chalk cross-spawn  webpack -S
+</code></pre>
+<h3 id="t215.2 package.json">5.2 package.json <a href="#t215.2 package.json"> # </a></h3>
+<pre><code class="lang-diff">{
+<span class="hljs-addition">+    "bin": {</span>
+<span class="hljs-addition">+      "zfroadhog": "./bin/zfroadhog.js"</span>
+<span class="hljs-addition">+    },</span>
+}
+</code></pre>
+<h3 id="t225.3 roadhog.js">5.3 roadhog.js <a href="#t225.3 roadhog.js"> # </a></h3>
+<p>bin\roadhog.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+
+<span class="hljs-keyword">const</span> spawn = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cross-spawn'</span>);
+<span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>);
+<span class="hljs-keyword">const</span> script = process.argv[<span class="hljs-number">2</span>];
+<span class="hljs-comment">//node bin/roadhog.js -v</span>
+<span class="hljs-keyword">switch</span> (script) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">"-v"</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">"--version"</span>:
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">require</span>(<span class="hljs-string">"../package.json"</span>).version);
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">"build"</span>:
+    <span class="hljs-keyword">case</span> <span class="hljs-string">"server"</span>:
+        result = spawn.sync(
+            <span class="hljs-string">"node"</span>,
+            [<span class="hljs-built_in">require</span>.resolve(<span class="hljs-string">`../lib/<span class="hljs-subst">${script}</span>`</span>)],
+            { <span class="hljs-attr">stdio</span>: <span class="hljs-string">"inherit"</span> }
+        );
+        process.exit(result.status);
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">default</span>:
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Unknown script <span class="hljs-subst">${chalk.cyan(script)}</span>.`</span>);
+        <span class="hljs-keyword">break</span>;
+}
+</code></pre>
+<h3 id="t235.4  build.js">5.4  build.js <a href="#t235.4  build.js"> # </a></h3>
+<p>lib\build.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">"chalk"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doneHandler</span>(<span class="hljs-params">err, stats</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(stats.toJson().assets);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./config/webpack.config.prod"</span>);
+    <span class="hljs-keyword">var</span> compiler = webpack(config);
+    compiler.run(doneHandler);
+}
+build();
+</code></pre>
+<h3 id="t245.5 webpack.config.prod">5.5 webpack.config.prod <a href="#t245.5 webpack.config.prod"> # </a></h3>
+<p>lib\config\webpack.config.prod.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>: path.resolve(<span class="hljs-string">'dist'</span>),
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">"[name].js"</span>
+    }
+};
+</code></pre>
+<h2 id="t255.参考">5.参考 <a href="#t255.参考"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/roadhog">roadhog</a></li>
+<li><a href="https://gitee.com/zhufengpeixun/zhufeng-roadhog">zhufeng-roadhog</a></li>
+</ul>
+<p><img src="https://zos.alipayobjects.com/rmsportal/guCnwwMItoLOTmcdbaEZ.png" alt="roadhog"></p>
+
+    

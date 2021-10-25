@@ -1,0 +1,406 @@
+
+        <h2 id="t01. 安装和初始化">1. 安装和初始化 <a href="#t01. 安装和初始化"> # </a></h2>
+<ul>
+<li><a href="https://ant.design/docs/react/use-with-create-react-app-cn">use-with-create-react-app-cn</a></li>
+</ul>
+<pre><code class="lang-js">$ yarn create react-app antd-form
+$ cd antd-form
+$ yarn start
+</code></pre>
+<h2 id="t12. 引入 antd">2. 引入 antd <a href="#t12. 引入 antd"> # </a></h2>
+<pre><code class="lang-js">$ yarn add antd
+</code></pre>
+<h2 id="t23. 支持typescript">3. 支持typescript <a href="#t23. 支持typescript"> # </a></h2>
+<pre><code class="lang-js">yarn add typescript @types/node @types/react @types/react-dom @types/jest
+</code></pre>
+<ul>
+<li>typescript</li>
+<li>@types/node 可以获得有关node.js的API的类型说明文件</li>
+<li>@types/react react的声明文件</li>
+<li>@types/react-dom  react-dom的声明文件</li>
+<li>@types/jest jest的声明文件</li>
+</ul>
+<h2 id="t34.表单组件">4.表单组件 <a href="#t34.表单组件"> # </a></h2>
+<ul>
+<li><a href="https://github.com/ant-design/ant-design/tree/master/components/form">form</a></li>
+<li><a href="https://github.com/react-component/form/blob/master/src/createBaseForm.js">createBaseForm</a></li>
+</ul>
+<h3 id="t44.1 src\index.tsx">4.1 src\index.tsx <a href="#t44.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> UserForm <span class="hljs-keyword">from</span> <span class="hljs-string">'./UserForm'</span>;
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserForm</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t54.2 UserForm.tsx">4.2 UserForm.tsx <a href="#t54.2 UserForm.tsx"> # </a></h3>
+<p>src\UserForm.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> Form  <span class="hljs-keyword">from</span> <span class="hljs-string">'antd/lib/form'</span>;
+interface Props {
+    <span class="hljs-attr">form</span>: any
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    handleSubmit = <span class="hljs-function">(<span class="hljs-params">event: React.FormEvent</span>) =&gt;</span> {
+        event.preventDefault();
+        <span class="hljs-comment">/*
+        let values = this.props.form.getFieldsValue();
+        console.log(values);
+         */</span>
+        <span class="hljs-keyword">this</span>.props.form.validateFields(<span class="hljs-function">(<span class="hljs-params">error: any, values: any</span>) =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(error);
+            <span class="hljs-built_in">console</span>.log(values);
+        });
+    }
+    render() {
+        <span class="hljs-keyword">let</span> { getFieldDecorator } = <span class="hljs-keyword">this</span>.props.form;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{this.handleSubmit}</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"用户名"</span>&gt;</span>
+                        {getFieldDecorator('username', {
+                            rules: [{ required: true, message: '用户名必须输入' }]
+                        })(<span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>)}
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"密码"</span>&gt;</span>
+                        {getFieldDecorator('password', {
+                            rules: [
+                                { required: true, message: '密码必须输入' },
+                                { min: 6, message: '密码长度不能小于6位' },
+                                { max: 8, message: '密码长度不能大于8位' }
+                            ]
+                        })(
+                            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>
+                        )}
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form.create()(UserForm);
+</code></pre>
+<h2 id="t65.实现表单组件">5.实现表单组件 <a href="#t65.实现表单组件"> # </a></h2>
+<h3 id="t75.1 UserForm.tsx">5.1 UserForm.tsx <a href="#t75.1 UserForm.tsx"> # </a></h3>
+<p>src\UserForm.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> Form  <span class="hljs-keyword">from</span> <span class="hljs-string">'./antd/lib/form'</span>;
+interface Props {
+    <span class="hljs-attr">form</span>: any
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    render() {
+        <span class="hljs-keyword">return</span> (
+                <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"用户名"</span>&gt;</span>
+                      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"密码"</span>&gt;</span>
+                      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form.create()(UserForm);
+</code></pre>
+<h3 id="t85.2 index.tsx">5.2 index.tsx <a href="#t85.2 index.tsx"> # </a></h3>
+<p>src\antd\lib\form\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Form <span class="hljs-keyword">from</span> <span class="hljs-string">'./Form'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form;
+</code></pre>
+<h3 id="t95.3 Form.tsx">5.3 Form.tsx <a href="#t95.3 Form.tsx"> # </a></h3>
+<p>src\antd\lib\form\Form.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>  * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span>  <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> FormItem <span class="hljs-keyword">from</span> <span class="hljs-string">'./FormItem'</span>;
+<span class="hljs-keyword">import</span> create <span class="hljs-keyword">from</span> <span class="hljs-string">'./create'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span>  <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    <span class="hljs-keyword">static</span> Item = FormItem;
+    <span class="hljs-keyword">static</span> create = create;
+    render(){
+      <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> {<span class="hljs-attr">...this.props</span>}/&gt;</span></span>
+    }
+}
+</code></pre>
+<h3 id="t105.4 FormItem.tsx">5.4 FormItem.tsx <a href="#t105.4 FormItem.tsx"> # </a></h3>
+<p>src\antd\lib\form\FormItem.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+
+<span class="hljs-keyword">export</span> interface FormItemProps {
+  label?:string
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FormItem</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">FormItemProps</span>, <span class="hljs-title">any</span>&gt; </span>{
+  render(){
+    <span class="hljs-keyword">const</span> {label,children} = <span class="hljs-keyword">this</span>.props;
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>{label}<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+        {children}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+}
+</code></pre>
+<h3 id="t115.5 create.tsx">5.5 create.tsx <a href="#t115.5 create.tsx"> # </a></h3>
+<p>src\antd\lib\form\create.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+interface WrapProps {}
+interface WrapState {}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decorate</span>(<span class="hljs-params">WrappedComponent:any</span>) </span>{
+        <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WrapComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">WrapProps</span>,<span class="hljs-title">WrapState</span>&gt;</span>{
+            render(){
+                <span class="hljs-keyword">const</span> props = {};
+                <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> {<span class="hljs-attr">...props</span>}/&gt;</span></span>;
+             }
+        }
+        <span class="hljs-keyword">return</span> WrapComponent;
+    }
+}
+</code></pre>
+<h2 id="t126. 获取数据">6. 获取数据 <a href="#t126. 获取数据"> # </a></h2>
+<h3 id="t136.1 UserForm.tsx">6.1 UserForm.tsx <a href="#t136.1 UserForm.tsx"> # </a></h3>
+<p>src\UserForm.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> Form  <span class="hljs-keyword">from</span> <span class="hljs-string">'./antd/lib/form'</span>;
+interface Props {
+    <span class="hljs-attr">form</span>: any
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    handleSubmit = <span class="hljs-function">(<span class="hljs-params">event:React.FormEvent</span>)=&gt;</span>{
+        event.preventDefault();
+        <span class="hljs-keyword">let</span> values = <span class="hljs-keyword">this</span>.props.form.getFieldsValue();
+        <span class="hljs-built_in">console</span>.log(values);
+    }
+    render() {
+        <span class="hljs-keyword">let</span> {getFieldDecorator} = <span class="hljs-keyword">this</span>.props.form;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{this.handleSubmit}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"用户名"</span>&gt;</span>
+                    {getFieldDecorator('username')(<span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span>)}
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"密码"</span>&gt;</span>
+                    {getFieldDecorator('password')(<span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span>)}
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form.create()(UserForm);
+</code></pre>
+<h3 id="t146.2 Form.tsx">6.2 Form.tsx <a href="#t146.2 Form.tsx"> # </a></h3>
+<p>src/antd/lib/form/Form.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>  * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span>  <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> FormItem <span class="hljs-keyword">from</span> <span class="hljs-string">'./FormItem'</span>;
+<span class="hljs-keyword">import</span> create <span class="hljs-keyword">from</span> <span class="hljs-string">'./create'</span>;
+interface FormProps{
+  <span class="hljs-attr">onSubmit</span>:any
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span>  <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">FormProps</span>&gt;</span>{
+    <span class="hljs-keyword">static</span> Item = FormItem;
+    <span class="hljs-keyword">static</span> create = create;
+    render(){
+      <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> {<span class="hljs-attr">...this.props</span>}/&gt;</span></span>
+    }
+}
+</code></pre>
+<h3 id="t156.3 create.tsx">6.3 create.tsx <a href="#t156.3 create.tsx"> # </a></h3>
+<p>src/antd/lib/form/create.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+interface FormProps {
+
+}
+interface Objects{
+    [propName: string]: any;
+}
+interface FormState {
+    <span class="hljs-attr">values</span>:Objects,
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decorate</span>(<span class="hljs-params">WrappedComponent:any</span>) </span>{
+        <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Form</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">FormProps</span>,<span class="hljs-title">FormState</span>&gt;</span>{
+            state = {<span class="hljs-attr">values</span>:{}}
+            handleChange = <span class="hljs-function">(<span class="hljs-params">event:React.ChangeEvent&lt;HTMLInputElement&gt;,name:string</span>)=&gt;</span>{
+                <span class="hljs-keyword">this</span>.setState({
+                   <span class="hljs-attr">values</span>:{...this.state.values,[name]:event.target.value}
+                });
+            }
+            getFieldDecorator = <span class="hljs-function">(<span class="hljs-params">name:string,fieldOption:any</span>)=&gt;</span>{
+                <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">fieldElement:any</span>)=&gt;</span>{
+                    <span class="hljs-keyword">let</span> values:Objects = <span class="hljs-keyword">this</span>.state.values;
+                    <span class="hljs-keyword">let</span> props:Objects = {
+                        <span class="hljs-attr">value</span>:values[name]||<span class="hljs-string">''</span>,
+                        <span class="hljs-attr">onChange</span>:<span class="hljs-function">(<span class="hljs-params">event:React.ChangeEvent&lt;HTMLInputElement&gt;</span>)=&gt;</span><span class="hljs-keyword">this</span>.handleChange(event,name)
+                    }
+                    <span class="hljs-keyword">return</span> React.cloneElement(fieldElement, props);
+                }
+            }
+            getFieldsValue = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.state.values; 
+            }
+            render(){
+                <span class="hljs-keyword">const</span> props = {
+                    <span class="hljs-attr">form</span>:{
+                        <span class="hljs-attr">getFieldDecorator</span>:<span class="hljs-keyword">this</span>.getFieldDecorator,
+                        <span class="hljs-attr">getFieldsValue</span>:<span class="hljs-keyword">this</span>.getFieldsValue
+                    }
+                };
+                <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> {<span class="hljs-attr">...props</span>}/&gt;</span></span>;
+             }
+        }
+        <span class="hljs-keyword">return</span> Form;
+    }
+}
+</code></pre>
+<h2 id="t167. 表单校验">7. 表单校验 <a href="#t167. 表单校验"> # </a></h2>
+<h3 id="t177.1 src\UserForm.tsx">7.1 src\UserForm.tsx <a href="#t177.1 src\UserForm.tsx"> # </a></h3>
+<p>src\UserForm.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> Form  <span class="hljs-keyword">from</span> <span class="hljs-string">'./antd/lib/form'</span>;
+interface Props {
+    <span class="hljs-attr">form</span>: any
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserForm</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt; </span>{
+    handleSubmit = <span class="hljs-function">(<span class="hljs-params">event:React.FormEvent</span>)=&gt;</span>{
+        event.preventDefault();
+        <span class="hljs-comment">/* let values = this.props.form.getFieldsValue();
+        console.log(values); */</span>
+        <span class="hljs-keyword">this</span>.props.form.validateFields(<span class="hljs-function">(<span class="hljs-params">error:any,values:any</span>)=&gt;</span>{
+            <span class="hljs-built_in">console</span>.log(error);
+            <span class="hljs-built_in">console</span>.log(values);
+        });
+    }
+    render() {
+        <span class="hljs-keyword">let</span> {getFieldDecorator} = <span class="hljs-keyword">this</span>.props.form;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{this.handleSubmit}</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"用户名"</span>&gt;</span>
+                        {getFieldDecorator('username',{
+                            rules:[{required:true,message:'用户名必须输入'}]
+                        })(<span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span>)}
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span> <span class="hljs-attr">label</span>=<span class="hljs-string">"密码"</span>&gt;</span>
+                        {getFieldDecorator('password',{
+                            rules:[
+                                {required:true,message:'密码必须输入'},
+                                {min:3,message:'密码长度不能小于6位'},
+                                {max:8,message:'密码长度不能大于8位'}
+                            ]
+                        })(<span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span>)}
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Form.Item</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">Form.Item</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Form</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Form.create()(UserForm);
+</code></pre>
+<h3 id="t187.2 create.tsx">7.2 create.tsx <a href="#t187.2 create.tsx"> # </a></h3>
+<p>src/antd/lib/form/create.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+interface FormProps {
+
+}
+interface Objects{
+    [propName: string]: any;
+}
+interface FormState {
+    <span class="hljs-attr">values</span>:Objects,
+    <span class="hljs-attr">errors</span>:Objects
+}
+type ValidateCallback&lt;V&gt; = <span class="hljs-function">(<span class="hljs-params">errors: any, values: V</span>) =&gt;</span> <span class="hljs-keyword">void</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">decorate</span>(<span class="hljs-params">WrappedComponent:any</span>) </span>{
+        <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Form</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">FormProps</span>,<span class="hljs-title">FormState</span>&gt;</span>{
+            state = {<span class="hljs-attr">values</span>:{},<span class="hljs-attr">errors</span>:{}}
+            <span class="hljs-attr">rules</span>:Objects={} <span class="hljs-comment">//记录所有的校验规则</span>
+            handleChange = <span class="hljs-function">(<span class="hljs-params">event:React.ChangeEvent&lt;HTMLInputElement&gt;,name:string</span>)=&gt;</span>{
+                <span class="hljs-keyword">this</span>.setState({
+                   <span class="hljs-attr">values</span>:{...this.state.values,[name]:event.target.value}
+                },()=&gt;<span class="hljs-keyword">this</span>.validateFields([name]));
+            }
+            validateFields = <span class="hljs-function">(<span class="hljs-params">fields:<span class="hljs-built_in">Array</span>&lt;string&gt;|ValidateCallback&lt;Objects&gt;,callback?:<span class="hljs-built_in">Array</span>&lt;string&gt;|ValidateCallback&lt;Objects&gt;</span>)=&gt;</span>{
+                <span class="hljs-keyword">if</span>(<span class="hljs-keyword">typeof</span> fields == <span class="hljs-string">'function'</span>){
+                    callback = fields;
+                    fields = <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.rules);
+                }
+                <span class="hljs-keyword">let</span> errors:Objects = <span class="hljs-keyword">this</span>.state.errors;
+                <span class="hljs-function">(<span class="hljs-params">fields <span class="hljs-keyword">as</span> <span class="hljs-built_in">Array</span>&lt;string&gt;</span>).<span class="hljs-params">forEach</span>(<span class="hljs-params">(field:string</span>)=&gt;</span>{
+                    <span class="hljs-keyword">let</span> rules = <span class="hljs-keyword">this</span>.rules[field];
+                    <span class="hljs-keyword">if</span>(rules &amp;&amp; rules.length&gt;<span class="hljs-number">0</span>){
+                        <span class="hljs-keyword">let</span> values:Objects = <span class="hljs-keyword">this</span>.state.values;
+                        <span class="hljs-keyword">let</span> value = values[field];
+                        <span class="hljs-keyword">let</span> fieldErrors = rules.map(<span class="hljs-function">(<span class="hljs-params">rule:Objects</span>)=&gt;</span>{
+                            <span class="hljs-keyword">if</span>((rule.required &amp;&amp; !value)||
+                            (rule.min &amp;&amp; value &amp;&amp; value.length &lt; rule.min)||
+                                (rule.max &amp;&amp; value &amp;&amp; value.length &gt; rule.max)
+                            ){
+                            <span class="hljs-keyword">return</span> {field,<span class="hljs-attr">message</span>:rule.message};
+                        }}).filter(<span class="hljs-function">(<span class="hljs-params">item:any</span>)=&gt;</span>item);
+                        <span class="hljs-keyword">if</span>(fieldErrors.length&gt;<span class="hljs-number">0</span>){
+                            errors[field] = {<span class="hljs-attr">errors</span>:fieldErrors};
+                        }<span class="hljs-keyword">else</span>{
+                            <span class="hljs-keyword">delete</span> errors[field];
+                        }
+                    }
+                });
+                <span class="hljs-keyword">let</span> error = <span class="hljs-built_in">Object</span>.keys(errors).length&gt;<span class="hljs-number">0</span>?errors:<span class="hljs-literal">null</span>;
+                <span class="hljs-keyword">this</span>.setState({errors},()=&gt;{
+                    callback&amp;&amp; (callback <span class="hljs-keyword">as</span> ValidateCallback&lt;Objects&gt;)(error,<span class="hljs-keyword">this</span>.state.values);
+                });
+            }
+            getFieldDecorator = <span class="hljs-function">(<span class="hljs-params">name:string,fieldOption:any</span>)=&gt;</span>{
+                <span class="hljs-keyword">if</span>(fieldOption.rules){
+                    <span class="hljs-keyword">this</span>.rules[name] = fieldOption.rules;
+                }
+                <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">fieldElement:any</span>)=&gt;</span>{
+                    <span class="hljs-keyword">let</span> values:Objects = <span class="hljs-keyword">this</span>.state.values;
+                    <span class="hljs-keyword">let</span> props:Objects = {
+                        <span class="hljs-attr">value</span>:values[name]||<span class="hljs-string">''</span>,
+                        <span class="hljs-attr">onChange</span>:<span class="hljs-function">(<span class="hljs-params">event:React.ChangeEvent&lt;HTMLInputElement&gt;</span>)=&gt;</span><span class="hljs-keyword">this</span>.handleChange(event,name)
+                    }
+                    <span class="hljs-keyword">let</span> errors:Objects = <span class="hljs-keyword">this</span>.state.errors;
+                    <span class="hljs-keyword">let</span> fieldErrors = errors[name];
+                    <span class="hljs-keyword">let</span> messages = [];
+                    <span class="hljs-keyword">if</span>(fieldErrors &amp;&amp; fieldErrors.errors.length&gt;<span class="hljs-number">0</span>){
+                        props.style={<span class="hljs-attr">border</span>:<span class="hljs-string">'1px solid red'</span>};
+                        messages = fieldErrors.errors.map(<span class="hljs-function">(<span class="hljs-params">item:any</span>)=&gt;</span>item.message).map(<span class="hljs-function">(<span class="hljs-params">message:string,index:number</span>)=&gt;</span><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{color:</span>'<span class="hljs-attr">red</span>'}}&gt;</span>{message}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>);
+                    }
+                    <span class="hljs-keyword">let</span> inputElement = React.cloneElement(fieldElement, props);
+                    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{inputElement} {messages.length&gt;0&amp;&amp;messages}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+                }
+            }
+            getFieldsValue = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.state.values; 
+            }
+            render(){
+                <span class="hljs-keyword">const</span> props = {
+                    <span class="hljs-attr">form</span>:{
+                        <span class="hljs-attr">getFieldDecorator</span>:<span class="hljs-keyword">this</span>.getFieldDecorator,
+                        <span class="hljs-attr">getFieldsValue</span>:<span class="hljs-keyword">this</span>.getFieldsValue,
+                        <span class="hljs-attr">validateFields</span>:<span class="hljs-keyword">this</span>.validateFields
+                    }
+                };
+                <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> {<span class="hljs-attr">...props</span>}/&gt;</span></span>;
+             }
+        }
+        <span class="hljs-keyword">return</span> Form;
+    }
+}
+</code></pre>
+
+    

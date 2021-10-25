@@ -1,0 +1,1413 @@
+
+        <h2 id="t01. 什么是同构">1. 什么是同构 <a href="#t01. 什么是同构"> # </a></h2>
+<ul>
+<li>同构的项目支持客户端渲染和服务器端渲染</li>
+<li>客户端渲染缺点<ul>
+<li>首屏速度加载慢</li>
+<li>不支持SEO和搜索引擎优化</li>
+<li>首页需要通过请求初始化数据</li>
+</ul>
+</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/renderflow.png" alt="renderflow"></p>
+<h2 id="t12.Next.js">2.Next.js <a href="#t12.Next.js"> # </a></h2>
+<ul>
+<li><a href="https://nextjs.org/docs">Next.js英文文档</a>,<a href="https://nextjs.frontendx.cn/docs/">Next.js中文文档</a> 是一个轻量级的 React 服务端渲染应用框架</li>
+<li>默认支持服务端渲染</li>
+<li>自动根据页面进行代码分割</li>
+<li>基于页面的客户端路由方案</li>
+<li>基于 Webpack 的开发环境，支持热模块替换</li>
+<li>可以跟<code>Koa</code>或者其它<code>Node.js</code>服务器进行集成</li>
+<li>支持 Babel 和 Webpack 的配置项定制</li>
+<li>静态文件服务 public</li>
+</ul>
+<h2 id="t23.项目初始化">3.项目初始化 <a href="#t23.项目初始化"> # </a></h2>
+<h3 id="t33.1 创建项目">3.1 创建项目 <a href="#t33.1 创建项目"> # </a></h3>
+<pre><code class="lang-js">mkdir zhufengnextjs
+cd zhufengnextjs
+npm init -y
+yarn add --dev react  react-dom  next axios redux react-redux express  body-parser  cors express-session connect-mongo mongoose koa koa-router
+mkdir pages
+</code></pre>
+<h3 id="t43.2 添加脚本">3.2 添加脚本 <a href="#t43.2 添加脚本"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"next dev"</span>,
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"next build"</span>,
+    <span class="hljs-attr">"start"</span>: <span class="hljs-string">"next start"</span>
+  }
+}
+</code></pre>
+<p><a href="https://github.com/zeit/next.js/blob/canary/.gitignore">.gitignore</a></p>
+<h3 id="t53.3 访问服务">3.3 访问服务 <a href="#t53.3 访问服务"> # </a></h3>
+<ul>
+<li>以 ./pages作为服务端的渲染和索引的根目录</li>
+<li><ul>
+<li>pages 是 next.js 中非常重要的一个目录，其中每一个 js 文件就代表一个页面，但是有两个例外，<code>_app.js</code> 和 <code>_document.js</code></li>
+</ul>
+</li>
+<li>next.js会将pages下的js文件根据其路径名和文件名自动生成对应的路由</li>
+<li><code>pages</code>组件代码自动分割</li>
+<li>next.js项目运行之后会自动生成<code>.next</code>目录</li>
+</ul>
+<h4 id="t63.3.1 index.js">3.3.1 index.js <a href="#t63.3.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h4 id="t73.3.2 访问">3.3.2 访问 <a href="#t73.3.2 访问"> # </a></h4>
+<pre><code class="lang-js">curl http:<span class="hljs-comment">//localhost:3000/</span>
+</code></pre>
+<h2 id="t84.跑通路由和样式">4.跑通路由和样式 <a href="#t84.跑通路由和样式"> # </a></h2>
+<h3 id="t94.1 知识点">4.1 知识点 <a href="#t94.1 知识点"> # </a></h3>
+<ul>
+<li>绑定 <code>styled-jsx</code> 来生成独立作用域的 <code>CSS</code></li>
+<li>如何支持本地和全局<code>css</code></li>
+<li>路由的使用和两种跳转路径的方法</li>
+</ul>
+<h3 id="t104.2 pages_app.js">4.2 pages_app.js <a href="#t104.2 pages_app.js"> # </a></h3>
+<ul>
+<li><code>App</code>组件是每个页面的根组件，页面切换时 App 不会销毁，但是里面的页面组件会销毁，因此可以利用这个来设置全局属性和样式</li>
+<li>全局 css 只能写在这里，否则会报错<ul>
+<li>当页面变化时保持页面布局</li>
+<li>当路由变化时保持页面状态</li>
+<li>注入额外数据到页面里</li>
+</ul>
+</li>
+</ul>
+<p>pages_app.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> App, { Container } <span class="hljs-keyword">from</span> <span class="hljs-string">'next/app'</span>;
+<span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>;
+<span class="hljs-keyword">import</span> _appStyle <span class="hljs-keyword">from</span> <span class="hljs-string">'./_app.module.css'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'../styles/global.css'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LayoutApp</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">App</span></span>{
+    render() {
+        <span class="hljs-keyword">let</span> { Component } = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">jsx</span>&gt;</span>
+                     {
+                     `li{
+                         display:inline-block;
+                         margin-left:10px;
+                         line-height:31px;
+                       }`
+                     }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">header</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/images/jglogo.png"</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{_appStyle.logo}/</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>首页<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/user"</span> &gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>用户管理<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/profile"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>个人中心<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">header</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Component</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">footer</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">textAlign:</span> '<span class="hljs-attr">center</span>' }} &gt;</span>@copyright 珠峰架构<span class="hljs-tag">&lt;/<span class="hljs-name">footer</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> LayoutApp;
+</code></pre>
+<h3 id="t114.3 pages_app.module.css">4.3 pages_app.module.css <a href="#t114.3 pages_app.module.css"> # </a></h3>
+<p>pages_app.module.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-class">.logo</span>{
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">120px</span>;
+    <span class="hljs-attribute">height</span>: <span class="hljs-number">31px</span>;
+    <span class="hljs-attribute">float</span>: left;
+}
+</code></pre>
+<h3 id="t124.4 global.css">4.4 global.css <a href="#t124.4 global.css"> # </a></h3>
+<p>styles\global.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-tag">html</span>,
+<span class="hljs-selector-tag">body</span> {
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+  <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+}
+</code></pre>
+<h3 id="t134.5 pages\index.js">4.5 pages\index.js <a href="#t134.5 pages\index.js"> # </a></h3>
+<p>pages\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h3 id="t144.6 pages\user.js">4.6 pages\user.js <a href="#t144.6 pages\user.js"> # </a></h3>
+<p>pages\user.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>User<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span>&gt;</span>首页<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h3 id="t154.7 pages\profile.js">4.7 pages\profile.js <a href="#t154.7 pages\profile.js"> # </a></h3>
+<p>pages\profile.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> router <span class="hljs-keyword">from</span> <span class="hljs-string">'next/router'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>User<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> router.back()}&gt;返回<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h2 id="t165.二级路由">5.二级路由 <a href="#t165.二级路由"> # </a></h2>
+<h3 id="t175.1 知识点">5.1 知识点 <a href="#t175.1 知识点"> # </a></h3>
+<ul>
+<li>支持二级路由</li>
+<li>实现二级布局组件</li>
+<li>路由跳转传递参数</li>
+<li>页面组件通过<code>getInitialProps</code>获取数据</li>
+</ul>
+<h3 id="t185.2 执行顺序">5.2 执行顺序 <a href="#t185.2 执行顺序"> # </a></h3>
+<h4 id="t195.2.1 后台顺序">5.2.1 后台顺序 <a href="#t195.2.1 后台顺序"> # </a></h4>
+<ul>
+<li>LayoutApp getInitialProps</li>
+<li>UseList getInitialProps</li>
+<li>LayoutApp constructor</li>
+<li>UseList constructor<h4 id="t205.2.2 前台顺序">5.2.2 前台顺序 <a href="#t205.2.2 前台顺序"> # </a></h4>
+</li>
+<li>初次渲染<ul>
+<li>LayoutApp constructor</li>
+<li>UseList constructor</li>
+</ul>
+</li>
+<li>路由切换<ul>
+<li>LayoutApp getInitialProps</li>
+<li>UseList getInitialProps</li>
+<li>UseList constructor</li>
+</ul>
+</li>
+</ul>
+<h4 id="t215.2.3 pages_app.js">5.2.3 pages_app.js <a href="#t215.2.3 pages_app.js"> # </a></h4>
+<p>pages_app.js</p>
+<pre><code class="lang-diff">import App from 'next/app';
+import Link from 'next/link';
+import _appStyle from './_app.module.css';
+import '../styles/global.css';
+class LayoutApp extends App{
+<span class="hljs-addition">+   static async getInitialProps({ Component, ctx }) {</span>
+<span class="hljs-addition">+       let pageProps = {};</span>
+<span class="hljs-addition">+       if (Component.getInitialProps)</span>
+<span class="hljs-addition">+           pageProps = await Component.getInitialProps(ctx);</span>
+<span class="hljs-addition">+       return { pageProps };</span>
+<span class="hljs-addition">+   }</span>
+    render() {
+<span class="hljs-addition">+       let { Component,pageProps } = this.props;</span>
+        return (
+            &lt;div&gt;
+                &lt;style jsx&gt;
+                     {
+                     `li{
+                         display:inline-block;
+                         margin-left:10px;
+                         line-height:31px;
+                       }`
+                     }
+                &lt;/style&gt;
+                &lt;div&gt;
+                    &lt;header&gt;
+                        &lt;img src="/images/jglogo.png" className={_appStyle.logo}/&gt;
+                        &lt;ul&gt;
+                            &lt;li&gt;&lt;Link href="/"&gt;&lt;a&gt;首页&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+                           &lt;li&gt;&lt;Link href="/user/list" &gt;&lt;a&gt;用户管理&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;</span>
+                            &lt;li&gt;&lt;Link href="/profile"&gt;&lt;a&gt;个人中心&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/header&gt;
+<span class="hljs-addition">+                   &lt;Component {...pageProps} /&gt;</span>
+                    &lt;footer style={{ textAlign: 'center' }} &gt;@copyright 珠峰架构&lt;/footer&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+export default LayoutApp;
+</code></pre>
+<h4 id="t225.2.4 user\index.js">5.2.4 user\index.js <a href="#t225.2.4 user\index.js"> # </a></h4>
+<p>pages\user\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserLayout</span>(<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                 <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/user/list"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>用户列表<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/user/add"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span>&gt;</span>添加用户<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                 <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+                 <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                   {props.children}
+                 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserLayout;
+</code></pre>
+<h4 id="t235.2.5 user\list.js">5.2.5 user\list.js <a href="#t235.2.5 user\list.js"> # </a></h4>
+<p>pages\user\list.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>;
+<span class="hljs-keyword">import</span> UserLayout <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UseList</span>(<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserLayout</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+                {
+                    props.list.map((user)=&gt;(
+                        <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{user.id}</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">{</span>`/<span class="hljs-attr">user</span>/<span class="hljs-attr">detail</span>/${<span class="hljs-attr">user.id</span>}`}&gt;</span>{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                    ))
+                }
+            <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">UserLayout</span>&gt;</span></span>
+    )
+}
+UseList.getInitialProps = <span class="hljs-keyword">async</span> (ctx) =&gt; {
+    <span class="hljs-keyword">let</span> list = [{ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'张三'</span>}, { <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'李四'</span>}];
+    <span class="hljs-keyword">return</span> { list };
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UseList;
+</code></pre>
+<h4 id="t245.2.6 user\add.js">5.2.6 user\add.js <a href="#t245.2.6 user\add.js"> # </a></h4>
+<p>pages\user\add.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>;
+<span class="hljs-keyword">import</span> UserLayout <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserAdd</span>(<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">let</span> nameRef = React.useRef();
+    <span class="hljs-keyword">let</span> passwordRef = React.useRef();
+    <span class="hljs-keyword">let</span> handleSubmit  = <span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{
+        event.preventDefault();
+        <span class="hljs-keyword">let</span> user = {<span class="hljs-attr">name</span>:nameRef.current.value,<span class="hljs-attr">password</span>:passwordRef.current.value};
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'添加'</span>,user);
+    }
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserLayout</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+                用户名:<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">ref</span>=<span class="hljs-string">{nameRef}/</span>&gt;</span>
+                密码:<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">ref</span>=<span class="hljs-string">{passwordRef}/</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>添加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">UserLayout</span>&gt;</span></span>
+    )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserAdd;
+</code></pre>
+<h4 id="t255.2.7 user\detail[id].js">5.2.7 user\detail[id].js <a href="#t255.2.7 user\detail[id].js"> # </a></h4>
+<p>pages\user\detail[id].js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> UserLayout <span class="hljs-keyword">from</span> <span class="hljs-string">'../'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserDetail</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserLayout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>ID:{props.user.id}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">UserLayout</span>&gt;</span></span>
+  )
+}
+UserDetail.getInitialProps = <span class="hljs-keyword">async</span> (ctx) =&gt; {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">user</span>:{<span class="hljs-attr">id</span>:ctx.query.id}};
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserDetail;
+</code></pre>
+<h2 id="t266.调用接口">6.调用接口 <a href="#t266.调用接口"> # </a></h2>
+<ul>
+<li>当服务渲染时,<code>getInitialProps</code>将会把数据序列化，就像<code>JSON.stringify</code></li>
+<li>所以确保<code>getInitialProps</code>返回的是一个普通 <code>JS</code> 对象，而不是Date, Map 或 Set类型</li>
+<li>当页面初始化加载时,<code>getInitialProps</code>只会加载在服务端。只有当路由跳转（Link组件跳转或 API 方法跳转）时，客户端才会执行<code>getInitialProps</code></li>
+<li><code>getInitialProps</code>将不能使用在子组件中。只能使用在<code>pages</code>页面中</li>
+</ul>
+<h3 id="t276.1 utils\axios.js">6.1 utils\axios.js <a href="#t276.1 utils\axios.js"> # </a></h3>
+<p>utils\axios.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'axios'</span>;
+axios.defaults.withCredentials = <span class="hljs-literal">true</span>
+<span class="hljs-keyword">const</span> instance = axios.create({
+    <span class="hljs-attr">baseURL</span>: <span class="hljs-string">'http://localhost:4000'</span>
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> instance;
+</code></pre>
+<h3 id="t286.2 pages\user\add.js">6.2 pages\user\add.js <a href="#t286.2 pages\user\add.js"> # </a></h3>
+<p>pages\user\add.js</p>
+<pre><code class="lang-diff">import Link from 'next/link';
+import UserLayout from './';
+import React from 'react';
+<span class="hljs-addition">+import axios from '../../utils/axios';</span>
+<span class="hljs-addition">+import router from 'next/router'</span>
+function UserAdd() {
+    let nameRef = React.useRef();
+    let passwordRef = React.useRef();
+    let handleSubmit  = async (event)=&gt;{
+        event.preventDefault();
+        let user = {name:nameRef.current.value,password:passwordRef.current.value};
+<span class="hljs-addition">+        let response = await axios.post('/api/register', user).then(res=&gt;res.data);</span>
+<span class="hljs-addition">+        if (response.success) {</span>
+<span class="hljs-addition">+            router.push('/user/list');</span>
+<span class="hljs-addition">+        } else {</span>
+<span class="hljs-addition">+            alert('添加用户失败');</span>
+<span class="hljs-addition">+        }</span>
+    }
+    return (
+        &lt;UserLayout&gt;
+            &lt;form onSubmit={handleSubmit}&gt;
+                用户名:&lt;input  ref={nameRef}/&gt;
+                密码:&lt;input  ref={passwordRef}/&gt;
+                &lt;button type="submit"&gt;添加&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/UserLayout&gt;
+    )
+}
+
+export default UserAdd;
+</code></pre>
+<h3 id="t296.3 user\list.js">6.3 user\list.js <a href="#t296.3 user\list.js"> # </a></h3>
+<p>pages\user\list.js</p>
+<pre><code class="lang-diff">import Link from 'next/link';
+import UserLayout from './';
+<span class="hljs-addition">+import axios from '../../utils/axios';</span>
+function UseList(props) {
+    return (
+        &lt;UserLayout&gt;
+            &lt;ul&gt;
+                {
+                    props.list.map((user)=&gt;(
+                        &lt;li key={user.id}&gt;
+                            &lt;Link href={`/user/detail/${user.id}`}&gt;{user.name}&lt;/Link&gt;
+                        &lt;/li&gt;
+                    ))
+                }
+            &lt;/ul&gt;
+        &lt;/UserLayout&gt;
+    )
+}
+UseList.getInitialProps = async (ctx) =&gt; {
+<span class="hljs-addition">+   let response = await axios({ url: '/api/users', method: 'GET' }).then(res=&gt;res.data);</span>
+<span class="hljs-addition">+   return { list:response.data };</span>
+}
+export default UseList;
+</code></pre>
+<h3 id="t306.4 [id].js">6.4 [id].js <a href="#t306.4 [id].js"> # </a></h3>
+<p>pages\user\detail[id].js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> UserLayout <span class="hljs-keyword">from</span> <span class="hljs-string">'../'</span>;
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'../../../utils/axios'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserDetail</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">let</span> {user} = props;
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserLayout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>ID:{user.id}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>ID:{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">UserLayout</span>&gt;</span></span>
+  )
+}
+UserDetail.getInitialProps = <span class="hljs-keyword">async</span> (ctx) =&gt; {
+  <span class="hljs-keyword">let</span> response = <span class="hljs-keyword">await</span> axios({ <span class="hljs-attr">url</span>: <span class="hljs-string">`/api/users/<span class="hljs-subst">${ctx.query.id}</span>`</span>, <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span> }).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.data);
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">user</span>: response.data };
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserDetail;
+</code></pre>
+<h2 id="t317.懒加载">7.懒加载 <a href="#t317.懒加载"> # </a></h2>
+<h3 id="t327.1 知识点">7.1 知识点 <a href="#t327.1 知识点"> # </a></h3>
+<ul>
+<li>组件懒加载</li>
+<li>模块懒加载</li>
+</ul>
+<h3 id="t337.2 pages\user\detail[id].js">7.2 pages\user\detail[id].js <a href="#t337.2 pages\user\detail[id].js"> # </a></h3>
+<p>pages\user\detail[id].js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> UserLayout <span class="hljs-keyword">from</span> <span class="hljs-string">'../'</span>;
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'../../../utils/axios'</span>;
+<span class="hljs-keyword">import</span> dynamic <span class="hljs-keyword">from</span> <span class="hljs-string">'next/dynamic'</span>;
+<span class="hljs-keyword">const</span> UserInfo = dynamic(<span class="hljs-keyword">import</span>(<span class="hljs-string">'../../../components/UserInfo'</span>))
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserDetail</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">let</span> {user} = props;
+  <span class="hljs-keyword">let</span> [show, setShow] = React.useState(<span class="hljs-literal">false</span>);
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserLayout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>ID:{user.id}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setShow(!show)}&gt;显示/隐藏<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      {
+        show &amp;&amp; <span class="hljs-tag">&lt;<span class="hljs-name">UserInfo</span> <span class="hljs-attr">user</span>=<span class="hljs-string">{user}</span> /&gt;</span>
+      }
+    <span class="hljs-tag">&lt;/<span class="hljs-name">UserLayout</span>&gt;</span></span>
+  )
+}
+UserDetail.getInitialProps = <span class="hljs-keyword">async</span> (ctx) =&gt; {
+  <span class="hljs-keyword">let</span> response = <span class="hljs-keyword">await</span> axios({ <span class="hljs-attr">url</span>: <span class="hljs-string">`/api/users/<span class="hljs-subst">${ctx.query.id}</span>`</span>, <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span> }).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.data);
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">user</span>: response.data };
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserDetail;
+</code></pre>
+<h3 id="t347.3 components\UserInfo.js">7.3 components\UserInfo.js <a href="#t347.3 components\UserInfo.js"> # </a></h3>
+<p>components\UserInfo.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserInfo</span>(<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">let</span> {user} = props;
+    <span class="hljs-keyword">let</span> [created, setCreated] = React.useState(props.user.created);
+    <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">changeFormat</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">let</span> moment = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">'moment'</span>);
+        setCreated(moment.default(user.created).fromNow());
+    }
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>用户名:{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>创建时间:{created}<span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{changeFormat}</span>&gt;</span>切换为相对时间<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserInfo;
+</code></pre>
+<h2 id="t358.用户登录">8.用户登录 <a href="#t358.用户登录"> # </a></h2>
+<h3 id="t368.1 pages_app.js">8.1 pages_app.js <a href="#t368.1 pages_app.js"> # </a></h3>
+<p>pages_app.js</p>
+<pre><code class="lang-diff">    &lt;ul&gt;
+        &lt;li&gt;&lt;Link href="/"&gt;&lt;a&gt;首页&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;Link href="/user/list" &gt;&lt;a&gt;用户管理&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;Link href="/profile"&gt;&lt;a&gt;个人中心&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+       &lt;li&gt;&lt;Link href="/login"&gt;登录&lt;/Link&gt;&lt;/li&gt;</span>
+    &lt;/ul&gt;
+</code></pre>
+<h3 id="t378.2 pages\login.js">8.2 pages\login.js <a href="#t378.2 pages\login.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils/axios'</span>;
+<span class="hljs-keyword">import</span> router <span class="hljs-keyword">from</span> <span class="hljs-string">'next/router'</span>;
+<span class="hljs-keyword">import</span> {connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/action-types'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Login</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> nameRef = React.useRef();
+    <span class="hljs-keyword">let</span> passwordRef = React.useRef();
+    <span class="hljs-keyword">let</span> handleSubmit  = <span class="hljs-keyword">async</span> (event)=&gt;{
+        event.preventDefault();
+        <span class="hljs-keyword">let</span> user = {<span class="hljs-attr">name</span>:nameRef.current.value,<span class="hljs-attr">password</span>:passwordRef.current.value};
+        <span class="hljs-keyword">let</span> response = <span class="hljs-keyword">await</span> axios.post(<span class="hljs-string">'/api/login'</span>, user).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.data);
+        <span class="hljs-keyword">if</span> (response.success) {
+             props.dispatch({<span class="hljs-attr">type</span>:types.SET_USER_INFO,<span class="hljs-attr">payload</span>:response.data});
+            router.push(<span class="hljs-string">'/'</span>);
+        } <span class="hljs-keyword">else</span> {
+            alert(<span class="hljs-string">'登录失败'</span>);
+        }
+    }
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+                用户名:<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">ref</span>=<span class="hljs-string">{nameRef}/</span>&gt;</span>
+                密码:<span class="hljs-tag">&lt;<span class="hljs-name">input</span>  <span class="hljs-attr">ref</span>=<span class="hljs-string">{passwordRef}/</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>登录<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+    )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(<span class="hljs-function"><span class="hljs-params">state</span>=&gt;</span>state)(Login);
+</code></pre>
+<h2 id="t389.集成redux">9.集成redux <a href="#t389.集成redux"> # </a></h2>
+<ul>
+<li>初次渲染的执行顺序是 <ul>
+<li>后台  LayoutApp.getInitialProps  LayoutApp.constructor</li>
+<li>前台  LayoutApp.getInitialProps</li>
+</ul>
+</li>
+<li>切换路由时的执行顺序<ul>
+<li>前台  LayoutApp.getInitialProps</li>
+</ul>
+</li>
+</ul>
+<h3 id="t399.1 安装依赖">9.1 安装依赖 <a href="#t399.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">yarn add redux react-redux
+</code></pre>
+<h3 id="t409.2 pages_app.js">9.2 pages_app.js <a href="#t409.2 pages_app.js"> # </a></h3>
+<p>pages_app.js</p>
+<pre><code class="lang-diff">import App from 'next/app';
+import Link from 'next/link';
+import _appStyle from './_app.module.css';
+import '../styles/global.css';
+<span class="hljs-addition">+import { Provider } from 'react-redux';</span>
+<span class="hljs-addition">+import axios from '../utils/axios';</span>
+<span class="hljs-addition">+import createStore from '../store';</span>
+<span class="hljs-addition">+import * as types from '../store/action-types';</span>
+<span class="hljs-addition">+function getStore(initialState) {</span>
+<span class="hljs-addition">+    if (typeof window == 'undefined') {</span>
+<span class="hljs-addition">+        return createStore(initialState);//如果是服务器端,每次都返回新的仓库</span>
+<span class="hljs-addition">+    } else {</span>
+<span class="hljs-addition">+        if (!window._REDUX_STORE_) {</span>
+<span class="hljs-addition">+            window._REDUX_STORE_ = createStore(initialState);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        return window._REDUX_STORE_;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+class LayoutApp extends App{</span>
+<span class="hljs-addition">+    constructor(props){</span>
+<span class="hljs-addition">+        super(props);</span>
+<span class="hljs-addition">+        this.store = getStore(props.initialState);//3.后台用新状重新创建新仓库</span>
+<span class="hljs-addition">+        //4.初始状态序列化后发给了客户端，在客户端重新创建新的仓库</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+   static async getInitialProps({ Component, ctx }) {</span>
+<span class="hljs-addition">+       let store = getStore();//1.后台创建新仓库  5.每次切换路由都会执行此方法获取老仓库</span>
+<span class="hljs-addition">+       if (typeof window == 'undefined') {//2.后台获取用户信息</span>
+<span class="hljs-addition">+           let options = { url: '/api/currentUser' };</span>
+<span class="hljs-addition">+           if (ctx.req&amp;&amp;ctx.req.headers.cookie) {</span>
+<span class="hljs-addition">+               options.headers = options.headers || {};</span>
+<span class="hljs-addition">+               options.headers.cookie = ctx.req.headers.cookie;</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+           let response = await axios(options).then(res=&gt;res.data);</span>
+<span class="hljs-addition">+           if (response.success) {</span>
+<span class="hljs-addition">+               store.dispatch({ type: types.SET_USER_INFO, payload: response.data });</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+      let pageProps = {};</span>
+<span class="hljs-addition">+      if (Component.getInitialProps)</span>
+<span class="hljs-addition">+         pageProps = await Component.getInitialProps(ctx);</span>
+<span class="hljs-addition">+      let props =  { pageProps};</span>
+<span class="hljs-addition">+      if (typeof window == 'undefined') {//后台获取用赋值状态</span>
+<span class="hljs-addition">+       props.initialState=store.getState();</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+      return props;</span>
+<span class="hljs-addition">+   }</span>
+    render() {
+        let { Component,pageProps} = this.props;
+<span class="hljs-addition">+       let state = this.store.getState();</span>
+        return (
+<span class="hljs-addition">+           &lt;Provider store={this.store}&gt;</span>
+                &lt;style jsx&gt;
+                     {
+                     `li{
+                         display:inline-block;
+                         margin-left:10px;
+                         line-height:31px;
+                       }`
+                     }
+                &lt;/style&gt;
+                &lt;div&gt;
+                    &lt;header&gt;
+                        &lt;img src="/images/jglogo.png" className={_appStyle.logo}/&gt;
+                        &lt;ul&gt;
+                            &lt;li&gt;&lt;Link href="/"&gt;&lt;a&gt;首页&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;Link href="/user/list" &gt;&lt;a&gt;用户管理&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;Link href="/profile"&gt;&lt;a&gt;个人中心&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+<span class="hljs-addition">+                            &lt;li&gt;</span>
+<span class="hljs-addition">+                                {</span>
+<span class="hljs-addition">+                                 state.currentUser ? &lt;span&gt;{state.currentUser.name}&lt;/span&gt;:&lt;Link href="/login"&gt;登录&lt;/Link&gt;</span>
+<span class="hljs-addition">+                                }</span>
+<span class="hljs-addition">+                            &lt;/li&gt;</span>
+                        &lt;/ul&gt;
+                        {
+
+                        }
+                    &lt;/header&gt;
+                    &lt;Component {...pageProps} /&gt;
+                    &lt;footer style={{ textAlign: 'center' }} &gt;@copyright 珠峰架构&lt;/footer&gt;
+                &lt;/div&gt;
+<span class="hljs-addition">+           &lt;/Provider&gt;</span>
+        )
+    }
+}
+export default LayoutApp;
+</code></pre>
+<h3 id="t419.3 store\action-types.js">9.3 store\action-types.js <a href="#t419.3 store\action-types.js"> # </a></h3>
+<p>store\action-types.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> SET_USER_INFO = <span class="hljs-string">'SET_USER_INFO'</span>;<span class="hljs-comment">//设置用户信息</span>
+</code></pre>
+<h3 id="t429.4 store\reducer.js">9.4 store\reducer.js <a href="#t429.4 store\reducer.js"> # </a></h3>
+<p>store\reducer.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'./action-types'</span>;
+<span class="hljs-keyword">let</span> initState = {
+    <span class="hljs-attr">currentUser</span>: <span class="hljs-literal">null</span>
+}
+<span class="hljs-keyword">const</span> reducer = <span class="hljs-function">(<span class="hljs-params">state = initState, action</span>) =&gt;</span> {
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> types.SET_USER_INFO:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">currentUser</span>: action.payload }
+        <span class="hljs-attr">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> reducer;
+</code></pre>
+<h3 id="t439.5 store\index.js">9.5 store\index.js <a href="#t439.5 store\index.js"> # </a></h3>
+<p>store\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">import</span> reducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducer'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">initialState</span>) </span>{
+    <span class="hljs-keyword">return</span> createStore(reducer, initialState);
+}
+</code></pre>
+<h2 id="t4410.loading效果">10.loading效果 <a href="#t4410.loading效果"> # </a></h2>
+<ul>
+<li><a href="https://nextjs.frontendx.cn/docs/#%E8%B7%AF%E7%94%B1">路由事件</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">事件</th>
+<th style="text-align:left">触发时机</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">routeChangeStart(url)</td>
+<td style="text-align:left">路由开始切换时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">routeChangeComplete(url)</td>
+<td style="text-align:left">完成路由切换时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">routeChangeError(err, url)</td>
+<td style="text-align:left">路由切换报错时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">beforeHistoryChange(url)</td>
+<td style="text-align:left">浏览器 history 模式开始切换时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">hashChangeStart(url)</td>
+<td style="text-align:left">开始切换 hash 值但是没有切换页面路由时触发</td>
+</tr>
+<tr>
+<td style="text-align:left">hashChangeComplete(url)</td>
+<td style="text-align:left">完成切换 hash 值但是没有切换页面路由时触发</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t4511.1 pages_app.js">11.1 pages_app.js <a href="#t4511.1 pages_app.js"> # </a></h3>
+<pre><code class="lang-diff">import App from 'next/app';
+import Link from 'next/link';
+import _appStyle from './_app.module.css';
+import '../styles/global.css';
+import { Provider } from 'react-redux';
+import axios from '../utils/axios';
+import createStore from '../store';
+import * as types from '../store/action-types';
+<span class="hljs-addition">+import router from 'next/router';</span>
+function getStore(initialState) {
+    if (typeof window == 'undefined') {
+        return createStore(initialState);//如果是服务器端,每次都返回新的仓库
+    } else {
+        if (!window._REDUX_STORE_) {
+            window._REDUX_STORE_ = createStore(initialState);
+        }
+        return window._REDUX_STORE_;
+    }
+}
+class LayoutApp extends App{
+<span class="hljs-addition">+    state = { loading: false }</span>
+    constructor(props){
+        super(props);
+        this.store = getStore(props.initialState);//3.后台用新状重新创建新仓库
+        //4.初始状态序列化后发给了客户端，在客户端重新创建新的仓库
+    }
+    static async getInitialProps({ Component, ctx }) {
+        let store = getStore();//1.后台创建新仓库  5.每次切换路由都会执行此方法获取老仓库
+        if (typeof window == 'undefined') {//2.后台获取用户信息
+            let options = { url: '/api/currentUser' };
+            if (ctx.req&amp;&amp;ctx.req.headers.cookie) {
+                options.headers = options.headers || {};
+                options.headers.cookie = ctx.req.headers.cookie;
+            }
+            let response = await axios(options).then(res=&gt;res.data);
+            if (response.success) {
+                store.dispatch({ type: types.SET_USER_INFO, payload: response.data });
+            }
+        }
+       let pageProps = {};
+       if (Component.getInitialProps)
+          pageProps = await Component.getInitialProps(ctx);
+       let props =  { pageProps};
+       if (typeof window == 'undefined') {//后台获取用赋值状态
+        props.initialState=store.getState();
+       }
+       return props;
+    }
+<span class="hljs-addition">+   componentDidMount() {</span>
+<span class="hljs-addition">+       this.routeChangeStart = (url) =&gt; {</span>
+<span class="hljs-addition">+           this.setState({ loading: true });</span>
+<span class="hljs-addition">+       };</span>
+<span class="hljs-addition">+       router.events.on('routeChangeStart', this.routeChangeStart);</span>
+<span class="hljs-addition">+       this.routeChangeComplete = (url) =&gt; {</span>
+<span class="hljs-addition">+           this.setState({ loading: false });</span>
+<span class="hljs-addition">+       };</span>
+<span class="hljs-addition">+       router.events.on('routeChangeComplete', this.routeChangeComplete);</span>
+<span class="hljs-addition">+   }</span>
+<span class="hljs-addition">+   componentWillUnmount() {</span>
+<span class="hljs-addition">+       router.events.off('routeChangeStart', this.routeChangeStart)</span>
+<span class="hljs-addition">+       router.events.off('routeChangeStart', this.routeChangeComplete)</span>
+<span class="hljs-addition">+   }</span>
+    render() {
+        let { Component,pageProps} = this.props;
+        let state = this.store.getState();
+        return (
+            &lt;Provider store={this.store}&gt;
+                &lt;style jsx&gt;
+                     {
+                     `li{
+                         display:inline-block;
+                         margin-left:10px;
+                         line-height:31px;
+                       }`
+                     }
+                &lt;/style&gt;
+                &lt;div&gt;
+                    &lt;header&gt;
+                        &lt;img src="/images/jglogo.png" className={_appStyle.logo}/&gt;
+                        &lt;ul&gt;
+                            &lt;li&gt;&lt;Link href="/"&gt;&lt;a&gt;首页&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;Link href="/user/list" &gt;&lt;a&gt;用户管理&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;Link href="/profile"&gt;&lt;a&gt;个人中心&lt;/a&gt;&lt;/Link&gt;&lt;/li&gt;
+                            &lt;li&gt;
+                                {
+                                 state.currentUser ? &lt;span&gt;{state.currentUser.name}&lt;/span&gt;:&lt;Link href="/login"&gt;登录&lt;/Link&gt;
+                                }
+                            &lt;/li&gt;
+                        &lt;/ul&gt;
+                        {
+
+                        }
+                    &lt;/header&gt;
+<span class="hljs-addition">+                    {</span>
+<span class="hljs-addition">+                        this.state.loading ? &lt;div&gt;切换中......&lt;/div&gt; : &lt;Component {...pageProps} /&gt;</span>
+<span class="hljs-addition">+                    }                   </span>
+                    &lt;footer style={{ textAlign: 'center' }} &gt;@copyright 珠峰架构&lt;/footer&gt;
+                &lt;/div&gt;
+            &lt;/Provider&gt;
+        )
+    }
+}
+export default LayoutApp;
+</code></pre>
+<h2 id="t4611.受保护路由">11.受保护路由 <a href="#t4611.受保护路由"> # </a></h2>
+<h3 id="t4711.1 pages\profile.js">11.1 pages\profile.js <a href="#t4711.1 pages\profile.js"> # </a></h3>
+<p>pages\profile.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import router from 'next/router';</span>
+<span class="hljs-addition">+import { connect } from 'react-redux';</span>
+<span class="hljs-addition">+import axios from '../utils/axios';</span>
+<span class="hljs-addition">+function Profile(props) {</span>
+<span class="hljs-addition">+    let { currentUser } = props;</span>
+<span class="hljs-addition">+    return (</span>
+<span class="hljs-addition">+        &lt;div&gt;</span>
+<span class="hljs-addition">+            &lt;p&gt;当前登录用户:{currentUser.name}&lt;/p&gt;</span>
+<span class="hljs-addition">+            &lt;button onClick={() =&gt; router.back()}&gt;返回&lt;/button&gt;</span>
+<span class="hljs-addition">+        &lt;/div&gt;</span>
+<span class="hljs-addition">+    )</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+Profile.getInitialProps = async function (ctx) {</span>
+<span class="hljs-addition">+    let options = { url: '/api/currentUser' };</span>
+<span class="hljs-addition">+    if (ctx.req &amp;&amp; ctx.req.headers.cookie) {</span>
+<span class="hljs-addition">+        options.headers = options.headers || {};</span>
+<span class="hljs-addition">+        options.headers.cookie = ctx.req.headers.cookie;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    let response = await axios(options).then(res=&gt;res.data);</span>
+<span class="hljs-addition">+    if (response.success) {</span>
+<span class="hljs-addition">+        return {currentUser:response.data};</span>
+<span class="hljs-addition">+    } else {</span>
+<span class="hljs-addition">+        if (ctx.req) {</span>
+<span class="hljs-addition">+            ctx.res.writeHead(303, { Location: '/login' })</span>
+<span class="hljs-addition">+            ctx.res.end()</span>
+<span class="hljs-addition">+        } else {</span>
+<span class="hljs-addition">+            router.push('/login');</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        return {};</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+const WrappedProfile = connect(</span>
+<span class="hljs-addition">+    state =&gt; state</span>
+<span class="hljs-addition">+)(Profile);</span>
+<span class="hljs-addition">+export default WrappedProfile;</span>
+</code></pre>
+<h2 id="t4812.自定义Document">12.自定义Document <a href="#t4812.自定义Document"> # </a></h2>
+<h3 id="t4912.1 pages_document.js">12.1 pages_document.js <a href="#t4912.1 pages_document.js"> # </a></h3>
+<p>pages_document.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Document, { Html, Head, Main, NextScript } <span class="hljs-keyword">from</span> <span class="hljs-string">'next/document'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomDocument</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Document</span> </span>{
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">async</span> getInitialProps(ctx) {
+        <span class="hljs-keyword">const</span> props = <span class="hljs-keyword">await</span> Document.getInitialProps(ctx);
+        <span class="hljs-keyword">return</span> { ...props };
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Html</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">Head</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span>
+                        {
+                            `
+                            *{
+                                padding:0;
+                                margin:0;
+                            }
+                            `
+                        }
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">Head</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">Main</span> /&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">NextScript</span> /&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Html</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> CustomDocument;
+</code></pre>
+<h3 id="t5013.2 pages\index.js">13.2 pages\index.js <a href="#t5013.2 pages\index.js"> # </a></h3>
+<p>pages\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Head <span class="hljs-keyword">from</span> <span class="hljs-string">'next/head'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">Head</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>首页<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"description"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"这是首页"</span> /&gt;</span>
+             <span class="hljs-tag">&lt;/<span class="hljs-name">Head</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h2 id="t5113. 新版初始化函数">13. 新版初始化函数 <a href="#t5113. 新版初始化函数"> # </a></h2>
+<ul>
+<li><a href="https://nextjs.org/docs/basic-features/data-fetching">data-fetching</a><ul>
+<li>getStaticProps (Static Generation): Fetch data at build time</li>
+<li>getStaticPaths (Static Generation): Specify dynamic routes to pre-render based on data</li>
+<li>getServerSideProps (Server-side Rendering): Fetch data on each request</li>
+</ul>
+</li>
+</ul>
+<h3 id="t5213.1 pages\user.js">13.1 pages\user.js <a href="#t5213.1 pages\user.js"> # </a></h3>
+<p>pages\user.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">{users}</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+              {
+                  users.map(user=&gt;(
+                      <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{user.id}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">{</span>`/<span class="hljs-attr">user</span>/<span class="hljs-attr">detail</span>/${<span class="hljs-attr">user.id</span>}`}&gt;</span>{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                  ))
+              }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+    )
+}
+<span class="hljs-comment">//每个请求都会调用</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getServerSideProps</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:4000/api/users'</span>).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.json());
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">props</span>: {
+        <span class="hljs-attr">users</span>:res.data
+      },
+    }
+  }
+</code></pre>
+<h3 id="t5313.2 pages\user\list.js">13.2 pages\user\list.js <a href="#t5313.2 pages\user\list.js"> # </a></h3>
+<p>pages\user\list.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Link <span class="hljs-keyword">from</span> <span class="hljs-string">'next/link'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">{users}</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+              {
+                  users.map(user=&gt;(
+                      <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{user.id}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">{</span>`/<span class="hljs-attr">user</span>/<span class="hljs-attr">detail</span>/${<span class="hljs-attr">user.id</span>}`}&gt;</span>{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                  ))
+              }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+    )
+}
+<span class="hljs-comment">// 这个函数在编译阶段被调用</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStaticProps</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:4000/api/users'</span>).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.json());
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">props</span>: {
+        <span class="hljs-attr">users</span>:res.data
+      },
+    }
+}
+</code></pre>
+<h3 id="t5413.3 pages\user\detail[id].js">13.3 pages\user\detail[id].js <a href="#t5413.3 pages\user\detail[id].js"> # </a></h3>
+<p>pages\user\detail[id].js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">{user}</span>) </span>{
+    <span class="hljs-keyword">return</span> (
+       <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>ID:{user.id}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+           <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>name:{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+       <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStaticPaths</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:4000/api/users'</span>).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.json());
+    <span class="hljs-keyword">const</span> users = res.data;
+    <span class="hljs-keyword">const</span> paths = users.map(<span class="hljs-function"><span class="hljs-params">user</span>=&gt;</span><span class="hljs-string">`/user/detail/<span class="hljs-subst">${user.id}</span>`</span>);
+    <span class="hljs-keyword">return</span> {paths,<span class="hljs-attr">fallback</span>:<span class="hljs-literal">false</span>}
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStaticProps</span>(<span class="hljs-params">{params}</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'params'</span>,params,<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toTimeString());
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`http://localhost:4000/api/users/<span class="hljs-subst">${params.id}</span>`</span>).then(<span class="hljs-function"><span class="hljs-params">res</span>=&gt;</span>res.json());
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">props</span>: {
+        <span class="hljs-attr">user</span>:res.data
+      }
+    }
+}
+</code></pre>
+<h2 id="t5514. 布署">14. 布署 <a href="#t5514. 布署"> # </a></h2>
+<h3 id="t5614.1 直接布署">14.1 直接布署 <a href="#t5614.1 直接布署"> # </a></h3>
+<pre><code class="lang-js">npm run build
+npm run start
+</code></pre>
+<h3 id="t5714.2 集成express布署">14.2 集成express布署 <a href="#t5714.2 集成express布署"> # </a></h3>
+<pre><code class="lang-js">npm run build
+</code></pre>
+<h4 id="t5814.2.1 start.js">14.2.1 start.js <a href="#t5814.2.1 start.js"> # </a></h4>
+<p>start.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> next = <span class="hljs-built_in">require</span>(<span class="hljs-string">'next'</span>);
+<span class="hljs-keyword">const</span> app = next({ <span class="hljs-attr">dev</span>:<span class="hljs-literal">false</span> });
+<span class="hljs-keyword">const</span> handler = app.getRequestHandler();
+app.prepare().then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express"</span>);
+    <span class="hljs-keyword">let</span> bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">"body-parser"</span>);
+    <span class="hljs-keyword">let</span> {UserModel} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./model'</span>);
+    <span class="hljs-keyword">let</span> session = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express-session"</span>);
+    <span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+    <span class="hljs-keyword">let</span> MongoStore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connect-mongo'</span>)(session);
+    <span class="hljs-keyword">let</span> app = express();
+    app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+    app.use(bodyParser.json());
+    app.use(
+        session({
+            <span class="hljs-attr">secret</span>: config.secret,
+            <span class="hljs-attr">resave</span>: <span class="hljs-literal">false</span>,
+            <span class="hljs-attr">saveUninitialized</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">store</span>: <span class="hljs-keyword">new</span> MongoStore({
+                <span class="hljs-attr">url</span>: config.dbUrl,
+                <span class="hljs-attr">mongoOptions</span>: {
+                    <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>,
+                    <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span>
+                }
+            })
+        })
+    );
+    app.get(<span class="hljs-string">'/api/users'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+        <span class="hljs-keyword">let</span> users = <span class="hljs-keyword">await</span> UserModel.find();
+        users = users.map(<span class="hljs-function"><span class="hljs-params">user</span>=&gt;</span>user.toJSON());
+        res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: users });
+    });
+    app.get(<span class="hljs-string">'/api/users/:id'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> UserModel.findById(req.params.id);
+        res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: user.toJSON() });
+    });
+    app.post(<span class="hljs-string">'/api/register'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+        <span class="hljs-keyword">let</span> user = req.body;
+        user = <span class="hljs-keyword">await</span> UserModel.create(user);
+        res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: user.toJSON() });
+    });
+    app.post(<span class="hljs-string">'/api/login'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+        <span class="hljs-keyword">let</span> user = req.body;
+        <span class="hljs-keyword">let</span> dbUser = <span class="hljs-keyword">await</span> UserModel.findOne(user);
+        <span class="hljs-keyword">if</span> (dbUser) {
+            req.session.currentUser = dbUser.toJSON();
+            res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: dbUser.toJSON() });
+        } <span class="hljs-keyword">else</span> {
+            res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">false</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'登录失败'</span> });
+        }
+    });
+
+    app.get(<span class="hljs-string">'/api/currentUser'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+        <span class="hljs-keyword">let</span> currentUser = req.session.currentUser;
+        <span class="hljs-keyword">if</span> (currentUser) {
+            res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: currentUser });
+        } <span class="hljs-keyword">else</span> {
+            res.send({ <span class="hljs-attr">success</span>:<span class="hljs-literal">false</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'当前用户未登录'</span> });
+        }
+    });
+    app.get(<span class="hljs-string">'*'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+        <span class="hljs-keyword">await</span> handler(req, res);
+    })
+    app.listen(<span class="hljs-number">3000</span>, () =&gt; {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'服务器在3000端口启动!'</span>);
+    });
+});
+</code></pre>
+<h4 id="t5914.2.2 config.js">14.2.2 config.js <a href="#t5914.2.2 config.js"> # </a></h4>
+<p>config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">dbUrl</span>: <span class="hljs-string">"mongodb://127.0.0.1/zhufengnext2"</span>
+}
+</code></pre>
+<h4 id="t6014.2.3 model.js">14.2.3 model.js <a href="#t6014.2.3 model.js"> # </a></h4>
+<p>model.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+<span class="hljs-keyword">const</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+<span class="hljs-keyword">const</span> conn = mongoose.createConnection(config.dbUrl, { <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span> });
+<span class="hljs-keyword">const</span> UserModel = conn.model(<span class="hljs-string">'User'</span>, <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">name</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },
+    <span class="hljs-attr">password</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },
+},{ <span class="hljs-attr">timestamps</span>: <span class="hljs-literal">true</span> ,    <span class="hljs-attr">toJSON</span>: {
+    <span class="hljs-attr">transform</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_doc, result</span>) </span>{
+        result.id = result._id;
+        <span class="hljs-keyword">delete</span> result._id;
+        <span class="hljs-keyword">return</span> result;
+    }
+}}));
+<span class="hljs-built_in">module</span>.exports = {
+    UserModel
+}
+</code></pre>
+<h2 id="t6113.服务端">13.服务端 <a href="#t6113.服务端"> # </a></h2>
+<h3 id="t6213.1  安装">13.1  安装 <a href="#t6213.1  安装"> # </a></h3>
+<pre><code class="lang-js">yarn add express  body-parser  cors express-session connect-mongo mongoose
+</code></pre>
+<h3 id="t6313.2 接口文档">13.2 接口文档 <a href="#t6313.2 接口文档"> # </a></h3>
+<h4 id="t6413.2.1 注册">13.2.1 注册 <a href="#t6413.2.1 注册"> # </a></h4>
+<h5 id="t6513.2.1.1 接口地址">13.2.1.1 接口地址 <a href="#t6513.2.1.1 接口地址"> # </a></h5>
+<pre><code class="lang-js">POST /api/register
+</code></pre>
+<h5 id="t6613.2.1.2 参数">13.2.1.2 参数 <a href="#t6613.2.1.2 参数"> # </a></h5>
+<h4 id="t67JSON请求体参数">JSON请求体参数 <a href="#t67JSON请求体参数"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">字符串</td>
+<td style="text-align:left">用户名</td>
+</tr>
+<tr>
+<td style="text-align:left">password</td>
+<td style="text-align:left">字符串</td>
+<td style="text-align:left">密码</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t6813.2.1.3 返回值">13.2.1.3 返回值 <a href="#t6813.2.1.3 返回值"> # </a></h5>
+<h5 id="t6913.2.1.4 返回结果">13.2.1.4 返回结果 <a href="#t6913.2.1.4 返回结果"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">success</td>
+<td style="text-align:left">布尔值</td>
+<td style="text-align:left">是否成功</td>
+</tr>
+<tr>
+<td style="text-align:left">data</td>
+<td style="text-align:left">对象</td>
+<td style="text-align:left">注册成功之后的对象</td>
+</tr>
+</tbody>
+</table>
+<p>示例</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"success"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"data"</span>: {
+            <span class="hljs-attr">"id"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"张三"</span>,
+            <span class="hljs-attr">"password"</span>: <span class="hljs-string">"123456"</span>
+    }
+}
+</code></pre>
+<h4 id="t7013.2.2 登录">13.2.2 登录 <a href="#t7013.2.2 登录"> # </a></h4>
+<h5 id="t7113.2.2.1 接口地址">13.2.2.1 接口地址 <a href="#t7113.2.2.1 接口地址"> # </a></h5>
+<pre><code class="lang-js">POST /api/login
+</code></pre>
+<h5 id="t7213.2.2.2 参数">13.2.2.2 参数 <a href="#t7213.2.2.2 参数"> # </a></h5>
+<h4 id="t73JSON请求体参数">JSON请求体参数 <a href="#t73JSON请求体参数"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">字符串</td>
+<td style="text-align:left">用户名</td>
+</tr>
+<tr>
+<td style="text-align:left">password</td>
+<td style="text-align:left">字符串</td>
+<td style="text-align:left">密码</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t7413.2.2.3 返回值">13.2.2.3 返回值 <a href="#t7413.2.2.3 返回值"> # </a></h5>
+<h5 id="t7513.2.2.4 返回结果">13.2.2.4 返回结果 <a href="#t7513.2.2.4 返回结果"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">success</td>
+<td style="text-align:left">布尔值</td>
+<td style="text-align:left">是否成功</td>
+</tr>
+<tr>
+<td style="text-align:left">data</td>
+<td style="text-align:left">对象</td>
+<td style="text-align:left">登录成功之后的对象</td>
+</tr>
+</tbody>
+</table>
+<p>示例</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"success"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"data"</span>: {
+            <span class="hljs-attr">"id"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"张三"</span>,
+            <span class="hljs-attr">"password"</span>: <span class="hljs-string">"123456"</span>
+    }
+}
+</code></pre>
+<h4 id="t7613.2.3 查看当前登录的用户信息">13.2.3 查看当前登录的用户信息 <a href="#t7613.2.3 查看当前登录的用户信息"> # </a></h4>
+<h5 id="t7713.2.3.1 接口地址">13.2.3.1 接口地址 <a href="#t7713.2.3.1 接口地址"> # </a></h5>
+<pre><code class="lang-js">GET /api/currentUser
+</code></pre>
+<h5 id="t7813.2.3.2 参数">13.2.3.2 参数 <a href="#t7813.2.3.2 参数"> # </a></h5>
+<h5 id="t7913.2.3.3 返回值">13.2.3.3 返回值 <a href="#t7913.2.3.3 返回值"> # </a></h5>
+<h5 id="t8013.2.3.4 返回结果">13.2.3.4 返回结果 <a href="#t8013.2.3.4 返回结果"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">success</td>
+<td style="text-align:left">布尔值</td>
+<td style="text-align:left">是否成功</td>
+</tr>
+<tr>
+<td style="text-align:left">data</td>
+<td style="text-align:left">对象</td>
+<td style="text-align:left">当前用户对象</td>
+</tr>
+</tbody>
+</table>
+<p>示例</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"success"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"data"</span>: {
+            <span class="hljs-attr">"id"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"张三"</span>,
+            <span class="hljs-attr">"password"</span>: <span class="hljs-string">"123456"</span>
+    }
+}
+</code></pre>
+<h4 id="t8113.2.4 查看用户列表">13.2.4 查看用户列表 <a href="#t8113.2.4 查看用户列表"> # </a></h4>
+<h5 id="t8213.2.4.1 接口地址">13.2.4.1 接口地址 <a href="#t8213.2.4.1 接口地址"> # </a></h5>
+<pre><code class="lang-js">GET /api/users
+</code></pre>
+<h5 id="t8313.2.4.2 参数">13.2.4.2 参数 <a href="#t8313.2.4.2 参数"> # </a></h5>
+<h5 id="t8413.2.4.3 返回值">13.2.4.3 返回值 <a href="#t8413.2.4.3 返回值"> # </a></h5>
+<h5 id="t8513.2.4.4 返回结果">13.2.4.4 返回结果 <a href="#t8513.2.4.4 返回结果"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">success</td>
+<td style="text-align:left">布尔值</td>
+<td style="text-align:left">是否成功</td>
+</tr>
+<tr>
+<td style="text-align:left">data</td>
+<td style="text-align:left">对象数组</td>
+<td style="text-align:left">用户对象数组</td>
+</tr>
+</tbody>
+</table>
+<p>示例</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"success"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"data"</span>: [
+        {
+            <span class="hljs-attr">"id"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"张三"</span>,
+            <span class="hljs-attr">"password"</span>: <span class="hljs-string">"123456"</span>
+        },
+         {
+            <span class="hljs-attr">"id"</span>: <span class="hljs-number">2</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"李四"</span>,
+            <span class="hljs-attr">"password"</span>: <span class="hljs-string">"123456"</span>
+        }
+    ]
+}
+</code></pre>
+<h4 id="t8613.2.5 查看某个用户信息">13.2.5 查看某个用户信息 <a href="#t8613.2.5 查看某个用户信息"> # </a></h4>
+<h5 id="t8713.2.5.1 接口地址">13.2.5.1 接口地址 <a href="#t8713.2.5.1 接口地址"> # </a></h5>
+<pre><code class="lang-js">GET /api/users/:id
+</code></pre>
+<h5 id="t8813.2.5.2 参数">13.2.5.2 参数 <a href="#t8813.2.5.2 参数"> # </a></h5>
+<h5 id="t8913.2.5.3 返回值">13.2.5.3 返回值 <a href="#t8913.2.5.3 返回值"> # </a></h5>
+<h5 id="t9013.2.5.4 返回结果">13.2.5.4 返回结果 <a href="#t9013.2.5.4 返回结果"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">变量名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">success</td>
+<td style="text-align:left">布尔值</td>
+<td style="text-align:left">是否成功</td>
+</tr>
+<tr>
+<td style="text-align:left">data</td>
+<td style="text-align:left">对象</td>
+<td style="text-align:left">用户对象</td>
+</tr>
+</tbody>
+</table>
+<p>示例</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"success"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"data"</span>: {
+            <span class="hljs-attr">"id"</span>: <span class="hljs-number">1</span>,
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"张三"</span>,
+            <span class="hljs-attr">"password"</span>: <span class="hljs-string">"123456"</span>
+    }
+}
+</code></pre>
+<h3 id="t9113.1 api\index.js">13.1 api\index.js <a href="#t9113.1 api\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express"</span>);
+<span class="hljs-keyword">let</span> bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">"body-parser"</span>);
+<span class="hljs-keyword">let</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">"cors"</span>);
+<span class="hljs-keyword">let</span> {UserModel} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./model'</span>);
+<span class="hljs-keyword">let</span> session = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express-session"</span>);
+<span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+<span class="hljs-keyword">let</span> MongoStore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connect-mongo'</span>)(session);
+<span class="hljs-keyword">let</span> app = express();
+app.use(
+    cors({
+        <span class="hljs-attr">origin</span>: [<span class="hljs-string">'http://localhost:3000'</span>],
+        <span class="hljs-attr">credentials</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">allowedHeaders</span>: <span class="hljs-string">"Content-Type,Authorization"</span>,
+        <span class="hljs-attr">methods</span>: <span class="hljs-string">"GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"</span>
+    })
+);
+app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+app.use(bodyParser.json());
+app.use(
+    session({
+        <span class="hljs-attr">secret</span>: config.secret,
+        <span class="hljs-attr">resave</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">saveUninitialized</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">store</span>: <span class="hljs-keyword">new</span> MongoStore({
+            <span class="hljs-attr">url</span>: config.dbUrl,
+            <span class="hljs-attr">mongoOptions</span>: {
+                <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span>
+            }
+        })
+    })
+);
+app.get(<span class="hljs-string">'/api/users'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> users = <span class="hljs-keyword">await</span> UserModel.find();
+    users = users.map(<span class="hljs-function"><span class="hljs-params">user</span>=&gt;</span>user.toJSON());
+    res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: users });
+});
+app.get(<span class="hljs-string">'/api/users/:id'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> UserModel.findById(req.params.id);
+    res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: user.toJSON() });
+});
+app.post(<span class="hljs-string">'/api/register'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> user = req.body;
+    user = <span class="hljs-keyword">await</span> UserModel.create(user);
+    res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: user.toJSON() });
+});
+app.post(<span class="hljs-string">'/api/login'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> user = req.body;
+    <span class="hljs-keyword">let</span> dbUser = <span class="hljs-keyword">await</span> UserModel.findOne(user);
+    <span class="hljs-keyword">if</span> (dbUser) {
+        req.session.currentUser = dbUser.toJSON();
+        res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: dbUser.toJSON() });
+    } <span class="hljs-keyword">else</span> {
+        res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'登录失败'</span> });
+    }
+});
+
+app.get(<span class="hljs-string">'/api/currentUser'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> currentUser = req.session.currentUser;
+    <span class="hljs-keyword">if</span> (currentUser) {
+        res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: currentUser });
+    } <span class="hljs-keyword">else</span> {
+        res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'当前用户未登录'</span> });
+    }
+});
+app.listen(<span class="hljs-number">4000</span>, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'服务器在4000端口启动!'</span>);
+});
+</code></pre>
+<h3 id="t9213.2 api\config.js">13.2 api\config.js <a href="#t9213.2 api\config.js"> # </a></h3>
+<p>api\config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">dbUrl</span>: <span class="hljs-string">"mongodb://127.0.0.1/zhufengnext2"</span>
+}
+</code></pre>
+<h3 id="t9313.3 server\model.js">13.3 server\model.js <a href="#t9313.3 server\model.js"> # </a></h3>
+<p>server\model.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+<span class="hljs-keyword">const</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+<span class="hljs-keyword">const</span> conn = mongoose.createConnection(config.dbUrl, { <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span> });
+<span class="hljs-keyword">const</span> UserModel = conn.model(<span class="hljs-string">'User'</span>, <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">name</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },
+    <span class="hljs-attr">password</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> }
+},{ <span class="hljs-attr">timestamps</span>: <span class="hljs-literal">true</span> ,    <span class="hljs-attr">toJSON</span>: {
+    <span class="hljs-attr">transform</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_doc, result</span>) </span>{
+        result.id = result._id;
+        <span class="hljs-keyword">delete</span> result._id;
+        <span class="hljs-keyword">return</span> result;
+    }
+}}));
+
+<span class="hljs-built_in">module</span>.exports = {
+    UserModel
+}
+</code></pre>
+
+    

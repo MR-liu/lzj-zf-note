@@ -1,0 +1,554 @@
+
+        <h2 id="t01.初始化项目">1.初始化项目 <a href="#t01.初始化项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app zhufeng-react-state-examples
+cd zhufeng-react-state-examples
+cnpm start
+</code></pre>
+<h2 id="t12.Context">2.Context <a href="#t12.Context"> # </a></h2>
+<ul>
+<li><code>Context</code> 通过组件树提供了一个传递数据的方法，从而避免了在每一个层级手动的传递 <code>props</code> 属性</li>
+</ul>
+<h3 id="t22.1 使用">2.1 使用 <a href="#t22.1 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useState, createContext, useContext } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">const</span> TodosContext = createContext();
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> [todoList, setTodoList] = useState([])
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addTodo</span>(<span class="hljs-params">text</span>) </span>{
+    setTodoList([...todoList, text])
+  }
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">TodosContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">todoList</span>, <span class="hljs-attr">addTodo</span> }}&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">TodoApp</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">TodosContext.Provider</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">TodoApp</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> { todoList, addTodo } = useContext(TodosContext);
+  <span class="hljs-keyword">const</span> [text, setText] = useState(<span class="hljs-string">''</span>)
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> { addTodo(text); setText('') }}&gt;增加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{text}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{event</span> =&gt;</span> setText(event.target.value)} /&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        {
+          todoList.map(item =&gt; <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>)
+        }
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h2 id="t33.Recoil">3.Recoil <a href="#t33.Recoil"> # </a></h2>
+<ul>
+<li><a href="https://recoiljs.org/docs/introduction/motivation">recoil]</a>解决<code>React</code>全局数据流管理的问题，采用分散管理原子状态的设计模式，支持派生数据。</li>
+</ul>
+<h3 id="t43.1 安装">3.1 安装 <a href="#t43.1 安装"> # </a></h3>
+<pre><code class="lang-js">npm install recoil --save
+</code></pre>
+<h3 id="t53.2 使用">3.2 使用 <a href="#t53.2 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { RecoilRoot, atom, useRecoilState } <span class="hljs-keyword">from</span> <span class="hljs-string">'./recoil'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-comment">//Recoil采用atom以分散方式定义数据</span>
+<span class="hljs-comment">//其中 key 必须在 RecoilRoot 作用域内唯一，也可以认为是 state 树打平时 key 必须唯一的要求</span>
+<span class="hljs-keyword">const</span> todoListState = atom({
+  <span class="hljs-attr">key</span>: <span class="hljs-string">'todoList'</span>,
+  <span class="hljs-attr">default</span>: [],
+});
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">TodoApp</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">//Recoil 采用 Hooks 方式读取数据</span>
+  <span class="hljs-keyword">const</span> [todoList, setTodoList] = useRecoilState(todoListState);
+  <span class="hljs-keyword">const</span> [input, setInput] = useState(<span class="hljs-string">''</span>)
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addTodo</span>(<span class="hljs-params"></span>) </span>{
+    setTodoList([...todoList, input]);
+    setInput(<span class="hljs-string">''</span>);
+  }
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{addTodo}</span>&gt;</span>添加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{input}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{event</span> =&gt;</span> setInput(event.target.value)} /&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        {
+          todoList.map(item =&gt; <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>) 
+        }
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+ReactDOM.render(
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">RecoilRoot</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">TodoApp</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">RecoilRoot</span>&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t63.3 实现">3.3 实现 <a href="#t63.3 实现"> # </a></h3>
+<h4 id="t73.3.1 recoil\index.js">3.3.1 recoil\index.js <a href="#t73.3.1 recoil\index.js"> # </a></h4>
+<p>src\recoil\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>  RecoilRoot <span class="hljs-keyword">from</span> <span class="hljs-string">'./RecoilRoot'</span>;
+<span class="hljs-keyword">import</span>  atom <span class="hljs-keyword">from</span> <span class="hljs-string">'./atom'</span>;
+<span class="hljs-keyword">import</span>  useRecoilState <span class="hljs-keyword">from</span> <span class="hljs-string">'./useRecoilState'</span>;
+<span class="hljs-keyword">export</span> {
+    RecoilRoot,
+    atom,
+    useRecoilState
+}
+</code></pre>
+<h4 id="t83.3.2 RecoilRoot.js">3.3.2 RecoilRoot.js <a href="#t83.3.2 RecoilRoot.js"> # </a></h4>
+<p>src\recoil\RecoilRoot.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React,{useRef} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> AppContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./AppContext'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">RecoilRoot</span>(<span class="hljs-params">{ children }</span>) </span>{
+    <span class="hljs-keyword">const</span> state={};
+    <span class="hljs-keyword">const</span> store = {<span class="hljs-attr">getState</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>state};
+    <span class="hljs-keyword">const</span> storeRef = useRef(store);
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">AppContext.Provider</span> <span class="hljs-attr">value</span>= <span class="hljs-string">{storeRef}</span>&gt;</span>
+            {children}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">AppContext.Provider</span>&gt;</span></span>
+    )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> RecoilRoot;
+</code></pre>
+<h4 id="t93.3.3 atom.js">3.3.3 atom.js <a href="#t93.3.3 atom.js"> # </a></h4>
+<p>src\recoil\atom.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> nodes = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">atom</span>(<span class="hljs-params">options</span>) </span>{
+  <span class="hljs-keyword">let</span> value = options.default;
+  <span class="hljs-keyword">let</span> node =  {
+    <span class="hljs-attr">key</span>:options.key,
+    <span class="hljs-attr">get</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+      <span class="hljs-keyword">return</span> value;
+    },
+    <span class="hljs-attr">set</span>:<span class="hljs-function">(<span class="hljs-params">newValue</span>)=&gt;</span>{
+      value = newValue;
+    }
+  }
+  nodes.set(node.key, node);
+  <span class="hljs-keyword">return</span> node;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getNode</span>(<span class="hljs-params">key</span>) </span>{
+  <span class="hljs-keyword">return</span> nodes.get(key);
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> atom;
+
+<span class="hljs-keyword">export</span> {
+  getNode
+}
+</code></pre>
+<h4 id="t103.3.4 useRecoilState.js">3.3.4 useRecoilState.js <a href="#t103.3.4 useRecoilState.js"> # </a></h4>
+<p>src\recoil\useRecoilState.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {useState} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {getNode} <span class="hljs-keyword">from</span> <span class="hljs-string">'./atom'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useRecoilState</span>(<span class="hljs-params">recoilState</span>)</span>{
+   <span class="hljs-keyword">return</span> [recoilState.get(),useSetRecoilState(recoilState)];
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useSetRecoilState</span>(<span class="hljs-params">recoilState</span>)</span>{
+   <span class="hljs-keyword">let</span> [,forceUpdate] = useState(<span class="hljs-number">0</span>);
+   <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">newValue</span>=&gt;</span> {
+      getNode(recoilState.key).set(newValue);
+      forceUpdate(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">1</span>);
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useRecoilState;
+</code></pre>
+<h2 id="t114.xstate">4.xstate <a href="#t114.xstate"> # </a></h2>
+<ul>
+<li><a href="https://xstate.js.org/">XState</a>是一个状态管理的库，用来描述、控制各种状态</li>
+<li><code>Xstate</code>以不同的状态为切入点，通过状态切换去处理数据</li>
+<li>XState 提供的<a href="https://xstate.js.org/viz/">图形化工具</a>可以把程序转换为图片</li>
+</ul>
+<h3 id="t124.1 有限状态机">4.1 有限状态机 <a href="#t124.1 有限状态机"> # </a></h3>
+<ul>
+<li><code>XState</code> 整个核心源自于<code>StateCharts</code></li>
+<li>也就是说我们需要定义好整个程序会有哪些状态，和每个状态能转换到哪种状态以及如何转换</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/togglestatechart.png" alt="togglestatechart.png"></p>
+<h3 id="t134.2 安装">4.2 安装 <a href="#t134.2 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm install xstate @xstate/react --save
+</code></pre>
+<h3 id="t144.3 toggle">4.3 toggle <a href="#t144.3 toggle"> # </a></h3>
+<h4 id="t154.3.1 使用">4.3.1 使用 <a href="#t154.3.1 使用"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Machine, interpret } <span class="hljs-keyword">from</span> <span class="hljs-string">'./xstate'</span>;
+<span class="hljs-keyword">const</span> lightMachine = Machine({
+  <span class="hljs-attr">id</span>: <span class="hljs-string">'toggle'</span>,
+  <span class="hljs-attr">initial</span>: <span class="hljs-string">'close'</span>,
+  <span class="hljs-attr">states</span>: {
+      <span class="hljs-attr">close</span>: {
+          <span class="hljs-attr">on</span>: {<span class="hljs-attr">CLICK</span>: <span class="hljs-string">'open'</span>}
+      },
+      <span class="hljs-attr">open</span>: {
+          <span class="hljs-attr">on</span>: {<span class="hljs-attr">CLICK</span>: <span class="hljs-string">'close'</span>}
+      }
+  }
+});
+
+<span class="hljs-keyword">const</span> lightService = interpret(lightMachine).onTransition(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span>
+  <span class="hljs-built_in">console</span>.log(state.value)
+);
+
+lightService.start();
+lightService.send({<span class="hljs-attr">type</span>:<span class="hljs-string">'CLICK'</span>});
+lightService.send({<span class="hljs-attr">type</span>:<span class="hljs-string">'CLICK'</span>});
+</code></pre>
+<h4 id="t164.3.2 实现">4.3.2 实现 <a href="#t164.3.2 实现"> # </a></h4>
+<h5 id="t174.3.2.1 xstate1\index.js">4.3.2.1 xstate1\index.js <a href="#t174.3.2.1 xstate1\index.js"> # </a></h5>
+<p>xstate1\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> Machine <span class="hljs-keyword">from</span> <span class="hljs-string">'./Machine'</span>;
+<span class="hljs-keyword">import</span> interpret <span class="hljs-keyword">from</span> <span class="hljs-string">'./interpret'</span>;
+
+<span class="hljs-keyword">export</span> {
+    Machine,
+    interpret,
+}
+</code></pre>
+<h5 id="t184.3.2.2 Machine.js">4.3.2.2 Machine.js <a href="#t184.3.2.2 Machine.js"> # </a></h5>
+<p>src\xstate1\Machine.js</p>
+<pre><code class="lang-js">
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Machine</span>(<span class="hljs-params">config</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> StateNode(config);
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StateNode</span></span>{
+    <span class="hljs-keyword">constructor</span>(config,machine,value){
+        <span class="hljs-keyword">this</span>.config = config;
+        <span class="hljs-keyword">this</span>.initial = config.initial
+        <span class="hljs-keyword">this</span>.value = value||config.initial;
+        <span class="hljs-keyword">this</span>.machine = machine||<span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">this</span>.on = config.on;
+        <span class="hljs-keyword">let</span> states = {};
+        <span class="hljs-keyword">if</span>(config.states){
+            <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> key <span class="hljs-keyword">in</span> config.states){
+                states[key]=<span class="hljs-keyword">new</span> StateNode(config.states[key],<span class="hljs-keyword">this</span>.machine,key);
+            }
+        }
+        <span class="hljs-keyword">this</span>.states = states;
+    }
+    next=<span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{
+        <span class="hljs-keyword">let</span> {type} = event;
+        <span class="hljs-keyword">let</span> nextState =  <span class="hljs-keyword">this</span>.on[type];
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.getStateNode(nextState);
+    }
+    getStateNode =  <span class="hljs-function">(<span class="hljs-params">stateKey</span>) =&gt;</span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.machine.states[stateKey];
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span>  Machine;
+</code></pre>
+<h5 id="t194.3.2.3 interpret.js">4.3.2.3 interpret.js <a href="#t194.3.2.3 interpret.js"> # </a></h5>
+<p>src\xstate1\interpret.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> InterpreterStatus = {
+    <span class="hljs-attr">NotStarted</span>:<span class="hljs-number">0</span>,
+    <span class="hljs-attr">Running</span>:<span class="hljs-number">1</span>,
+    <span class="hljs-attr">Stopped</span>:<span class="hljs-number">2</span>
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Interpreter</span></span>{
+    listeners=[]
+    <span class="hljs-keyword">constructor</span>(machine){
+        <span class="hljs-keyword">this</span>.machine = machine;
+        <span class="hljs-keyword">this</span>.listeners = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();
+        <span class="hljs-keyword">this</span>.status = InterpreterStatus.NotStarted;
+        <span class="hljs-keyword">this</span>.state = machine.states[machine.initial];
+    }
+    send = <span class="hljs-function">(<span class="hljs-params">event</span>)=&gt;</span>{<span class="hljs-keyword">debugger</span>
+        <span class="hljs-keyword">this</span>.state = <span class="hljs-keyword">this</span>.state.next(event);
+        <span class="hljs-keyword">this</span>.listeners.forEach(<span class="hljs-function"><span class="hljs-params">l</span>=&gt;</span>l(<span class="hljs-keyword">this</span>.state));
+    }
+    onTransition(listener) {
+        <span class="hljs-keyword">this</span>.listeners.add(listener);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+    start() {
+        <span class="hljs-keyword">this</span>._status = InterpreterStatus.Running;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">interpret</span>(<span class="hljs-params">machine, options</span>) </span>{
+    <span class="hljs-keyword">var</span> interpreter = <span class="hljs-keyword">new</span> Interpreter(machine, options);
+    <span class="hljs-keyword">return</span> interpreter;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span>  interpret;
+</code></pre>
+<h3 id="t204.4 todos">4.4 todos <a href="#t204.4 todos"> # </a></h3>
+<h4 id="t214.4.1 使用">4.4.1 使用 <a href="#t214.4.1 使用"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Machine, assign, interpret } <span class="hljs-keyword">from</span> <span class="hljs-string">'./xstate1'</span>;
+<span class="hljs-keyword">const</span> todosMachine = Machine({
+  <span class="hljs-attr">id</span>: <span class="hljs-string">'todos'</span>,
+  <span class="hljs-attr">initial</span>: <span class="hljs-string">'ready'</span>,
+  <span class="hljs-comment">//context指的是数据，指页面上显示的内容</span>
+  <span class="hljs-attr">context</span>: {
+    <span class="hljs-attr">todoList</span>: [],
+    <span class="hljs-attr">text</span>: <span class="hljs-string">''</span>
+  },
+  <span class="hljs-attr">states</span>: {
+    <span class="hljs-attr">ready</span>: {
+      <span class="hljs-attr">on</span>: {
+        <span class="hljs-string">"CHANGE"</span>: {
+          <span class="hljs-attr">actions</span>: [
+            assign({
+              <span class="hljs-attr">text</span>: <span class="hljs-function">(<span class="hljs-params">_, event</span>) =&gt;</span> event.value
+            })
+          ]
+        },
+        <span class="hljs-string">"ADD_TODO"</span>: {
+          <span class="hljs-attr">actions</span>: [
+            assign({
+              <span class="hljs-attr">text</span>: <span class="hljs-string">""</span>,
+              <span class="hljs-attr">todoList</span>: <span class="hljs-function"><span class="hljs-params">context</span> =&gt;</span> [...context.todoList, context.text]
+            })
+          ]
+        }
+      }
+    }
+  }
+})
+
+<span class="hljs-keyword">const</span> todoService = interpret(todosMachine).onTransition(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span>
+  <span class="hljs-built_in">console</span>.log(state.context)
+);
+todoService.start();
+todoService.send({ <span class="hljs-attr">type</span>: <span class="hljs-string">'CHANGE'</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">'eat'</span> })
+todoService.send({ <span class="hljs-attr">type</span>: <span class="hljs-string">'ADD_TODO'</span> });
+</code></pre>
+<h4 id="t224.4.2 实现">4.4.2 实现 <a href="#t224.4.2 实现"> # </a></h4>
+<h5 id="t234.4.2.1 xstate\index.js">4.4.2.1 xstate\index.js <a href="#t234.4.2.1 xstate\index.js"> # </a></h5>
+<p>src\xstate1\index.js</p>
+<pre><code class="lang-diff">import Machine from './Machine';
+import interpret from './interpret';
+<span class="hljs-addition">+import assign from './assign';</span>
+export {
+    Machine,
+    interpret,
+<span class="hljs-addition">+   assign</span>
+}
+</code></pre>
+<h5 id="t244.4.2.2 Machine.js">4.4.2.2 Machine.js <a href="#t244.4.2.2 Machine.js"> # </a></h5>
+<p>src\xstate1\Machine.js</p>
+<pre><code class="lang-diff">
+function Machine(config) {
+    return new StateNode(config);
+}
+
+class StateNode{
+    constructor(config,machine,value){
+        this.config = config;
+        this.initial = config.initial
+        this.value = value||config.initial;
+        this.machine = machine||this;
+<span class="hljs-addition">+       this.context = config.context||this.machine.context;</span>
+        this.on = config.on;
+        let states = {};
+        if(config.states){
+            for(let key in config.states){
+                states[key]=new StateNode(config.states[key],this.machine,key);
+            }
+        }
+        this.states = states;
+    }
+    next=(event)=&gt;{
+        let {type} = event;
+        let nextState =  this.on[type];
+<span class="hljs-addition">+        if(typeof nextState === 'string'){</span>
+<span class="hljs-addition">+            return this.getStateNode(nextState);</span>
+<span class="hljs-addition">+        }else{</span>
+<span class="hljs-addition">+            let actions = nextState.actions;</span>
+<span class="hljs-addition">+            if(Array.isArray(actions)){</span>
+<span class="hljs-addition">+                let context = this.context;</span>
+<span class="hljs-addition">+                let newContext = {};</span>
+<span class="hljs-addition">+                actions.forEach(action=&gt;{</span>
+<span class="hljs-addition">+                    let assignment = action.assignment;</span>
+<span class="hljs-addition">+                    for(let key in assignment){</span>
+<span class="hljs-addition">+                        if(typeof assignment[key] === 'function'){</span>
+<span class="hljs-addition">+                            newContext[key] = assignment[key](context,event);</span>
+<span class="hljs-addition">+                        }else{</span>
+<span class="hljs-addition">+                            newContext[key] = assignment[key];</span>
+<span class="hljs-addition">+                        }</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                });</span>
+<span class="hljs-addition">+                Object.assign(context,newContext);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            return this;</span>
+        }
+    }
+    getStateNode =  (stateKey) =&gt;{
+        return this.machine.states[stateKey];
+    }
+}
+export default  Machine;
+</code></pre>
+<h5 id="t254.4.2.3 assign.js">4.4.2.3 assign.js <a href="#t254.4.2.3 assign.js"> # </a></h5>
+<p>src\xstate\assign.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> assign = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">assignment</span>) </span>{
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'assign'</span>,
+      <span class="hljs-attr">assignment</span>: assignment
+    };
+};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> assign;
+
+</code></pre>
+<h3 id="t264.5 在React中使用">4.5 在React中使用 <a href="#t264.5 在React中使用"> # </a></h3>
+<h4 id="t274.5.1 使用">4.5.1 使用 <a href="#t274.5.1 使用"> # </a></h4>
+<pre><code class="lang-diff"><span class="hljs-addition">+import React from 'react'</span>
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import { Machine, assign, interpret,useService } from './xstate';</span>
+const todosMachine = Machine({
+  id: 'todos',
+  initial: 'ready',
+  context: {
+    todoList: [],
+    text: ''
+  },
+  states: {
+    ready: {
+      on: {
+        "CHANGE": {
+          actions: [
+            assign({
+              text: (_, event) =&gt; event.value
+            })
+          ]
+        },
+        "ADD_TODO": {
+          actions: [
+            assign({
+              text: "",
+              todoList: context =&gt; [...context.todoList, context.text]
+            })
+          ]
+        }
+      }
+    }
+  }
+})
+
+<span class="hljs-addition">+const service = interpret(todosMachine).start();</span>
+<span class="hljs-addition">+function TodoApp() {</span>
+<span class="hljs-addition">+  const [state, send] = useService(service)</span>
+<span class="hljs-addition">+  const { context: { text, todoList } } = state</span>
+<span class="hljs-addition">+  return (</span>
+<span class="hljs-addition">+    &lt;div&gt;</span>
+<span class="hljs-addition">+      &lt;button onClick={() =&gt; send({ type: 'ADD_TODO' })}&gt;添加&lt;/button&gt;</span>
+<span class="hljs-addition">+      &lt;input value={text} onChange={e =&gt; send({ type: 'CHANGE', value: e.target.value })} /&gt;</span>
+<span class="hljs-addition">+      &lt;ul&gt;</span>
+<span class="hljs-addition">+        {</span>
+<span class="hljs-addition">+          todoList.map(item =&gt; &lt;li key={item}&gt;{item}&lt;/li&gt;)</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+      &lt;/ul&gt;</span>
+<span class="hljs-addition">+    &lt;/div&gt;</span>
+<span class="hljs-addition">+  );</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+ReactDOM.render(&lt;TodoApp /&gt;, document.getElementById('root'));</span>
+</code></pre>
+<h4 id="t284.5.2 实现">4.5.2 实现 <a href="#t284.5.2 实现"> # </a></h4>
+<h5 id="t294.5.2.1 useService.js">4.5.2.1 useService.js <a href="#t294.5.2.1 useService.js"> # </a></h5>
+<p>src\xstate1\useService.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {useState} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useService</span>(<span class="hljs-params">service</span>) </span>{
+    <span class="hljs-keyword">let</span> [,forceUpdate] = useState(<span class="hljs-number">0</span>);
+    <span class="hljs-keyword">return</span> [service.state, (event)=&gt;{
+        service.send(event);
+        forceUpdate(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">1</span>);
+    }];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useService;
+</code></pre>
+<h2 id="t305.redux">5.redux <a href="#t305.redux"> # </a></h2>
+<h3 id="t315.1 安装">5.1 安装 <a href="#t315.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm install @reduxjs-toolkit react-redux --save
+</code></pre>
+<h3 id="t325.2 使用">5.2 使用 <a href="#t325.2 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> { Provider, useDispatch, useSelector } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>
+<span class="hljs-keyword">import</span> { configureStore, createReducer, combineReducers } <span class="hljs-keyword">from</span> <span class="hljs-string">'@reduxjs/toolkit'</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> [text, setText] = useState(<span class="hljs-string">''</span>)
+  <span class="hljs-keyword">const</span> todoList = useSelector(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state.todos)
+  <span class="hljs-keyword">const</span> dispatch = useDispatch();
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addTodo</span>(<span class="hljs-params"></span>) </span>{
+    dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'ADD_TODO'</span>, text })
+    setText(<span class="hljs-string">''</span>)
+  }
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{addTodo}</span>&gt;</span>增加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{text}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{e</span> =&gt;</span> setText(e.target.value)} /&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        {
+          todoList.map(item =&gt; <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>)
+        }
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">const</span> todosReducer = createReducer([], {
+  <span class="hljs-string">'ADD_TODO'</span>: <span class="hljs-function">(<span class="hljs-params">state, action</span>) =&gt;</span> [...state, action.text]
+})
+
+<span class="hljs-keyword">const</span> reducers = combineReducers({ <span class="hljs-attr">todos</span>: todosReducer })
+<span class="hljs-keyword">const</span> store = configureStore({ <span class="hljs-attr">reducer</span>: reducers })
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h2 id="t336.mobx">6.mobx <a href="#t336.mobx"> # </a></h2>
+<h3 id="t346.1 安装">6.1 安装 <a href="#t346.1 安装"> # </a></h3>
+<pre><code class="lang-js">npm install mobx mobx-react-lite --save
+</code></pre>
+<h3 id="t356.2 使用">6.2 使用 <a href="#t356.2 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> { observer } <span class="hljs-keyword">from</span> <span class="hljs-string">"mobx-react-lite"</span>
+<span class="hljs-keyword">import</span> { makeAutoObservable } <span class="hljs-keyword">from</span> <span class="hljs-string">'mobx'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoStore</span> </span>{
+  todoList = []
+  addTodo(text) {
+    <span class="hljs-keyword">this</span>.todoList = [...this.todoList, text]
+  }
+  <span class="hljs-keyword">constructor</span>() {
+    makeAutoObservable(<span class="hljs-keyword">this</span>)
+  }
+}
+
+<span class="hljs-keyword">const</span> todoStore = <span class="hljs-keyword">new</span> TodoStore()
+
+<span class="hljs-keyword">const</span> App = observer(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> [input, setInput] = useState(<span class="hljs-string">''</span>)
+  <span class="hljs-keyword">const</span> { todoList } = todoStore
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addTodo</span>(<span class="hljs-params"></span>) </span>{
+    todoStore.addTodo(input)
+    setInput(<span class="hljs-string">''</span>)
+  }
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{addTodo}</span>&gt;</span>添加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{input}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{event</span> =&gt;</span> setInput(event.target.value)} /&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        {
+          todoList.map(item =&gt; <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>) 
+        }
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  )
+})
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+
+    

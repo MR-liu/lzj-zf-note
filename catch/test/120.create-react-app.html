@@ -1,0 +1,464 @@
+
+        <p><img src="../C:\Users\83687\Desktop\temp\下载.png" alt=""></p>
+<h2 id="t01.create-react-app">1.create-react-app <a href="#t01.create-react-app"> # </a></h2>
+<ul>
+<li><a href="https://www.html.cn/create-react-app/docs/getting-started/">Create React App</a>是一个官方支持的创建 React 单页应用程序的方法。它提供了一个零配置的现代构建设置</li>
+<li><a href="https://github.com/facebook/create-react-app">create-react-app</a></li>
+</ul>
+<h3 id="t11.1 下载">1.1 下载 <a href="#t11.1 下载"> # </a></h3>
+<pre><code class="lang-js">git clone https:<span class="hljs-comment">//github.com/facebook/create-react-app.git --depth=1</span>
+cd create-react-app
+yarn install
+</code></pre>
+<h3 id="t21.2 package.json">1.2 package.json <a href="#t21.2 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-diff">"scripts": {
+<span class="hljs-addition">+  "create": "node ./packages/create-react-app/index.js",</span>
+}
+</code></pre>
+<h3 id="t31.3 重要步骤">1.3 重要步骤 <a href="#t31.3 重要步骤"> # </a></h3>
+<ul>
+<li>将命令行参数发送到npm脚本 <code>npm run [command] [-- &lt;args&gt;]</code><pre><code class="lang-js">yarn install  #安装项止依赖和软链接
+npm run create -- aaa  #执行创建命令
+Installing packages. This might take a couple of minutes. #安装依赖包
+Installing react, react-dom, and react-scripts with cra-template... #安装依赖包
+Installing template dependencies using yarnpkg... #安装模板依赖
+Removing template package using yarnpkg... #移除模板模块
+Removing module cra-template...  #移除cra-template模块
+Success! Created aaa at C:\aprepare\create-react-app\aaa #成功创建
+Inside that directory, you can run several commands: #执行命令
+cd aaa
+yarn start
+</code></pre>
+</li>
+</ul>
+<h3 id="t41.4 .vscode\launch.json">1.4 .vscode\launch.json <a href="#t41.4 .vscode\launch.json"> # </a></h3>
+<p>.vscode\launch.json</p>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.2.0"</span>,
+    <span class="hljs-attr">"configurations"</span>: [
+        {
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Launch via NPM"</span>,
+            <span class="hljs-attr">"request"</span>: <span class="hljs-string">"launch"</span>,
+            <span class="hljs-attr">"runtimeArgs"</span>: [
+                <span class="hljs-string">"run-script"</span>,
+                <span class="hljs-string">"create"</span>
+            ],
+            <span class="hljs-attr">"runtimeExecutable"</span>: <span class="hljs-string">"npm"</span>,
+            <span class="hljs-attr">"skipFiles"</span>: [
+                <span class="hljs-string">"&lt;node_internals&gt;/**"</span>
+            ],
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"pwa-node"</span>
+        }
+    ]
+}
+</code></pre>
+<h2 id="t52.实现init方法">2.实现init方法 <a href="#t52.实现init方法"> # </a></h2>
+<h3 id="t62.1 package.json">2.1 package.json <a href="#t62.1 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-diff">  "scripts": {
+<span class="hljs-addition">+    "version": "node ./packages/create-react-app3/index.js --version",</span>
+<span class="hljs-addition">+    "create": "node ./packages/create-react-app3/index.js aaa"</span>
+  }
+</code></pre>
+<h3 id="t72.2 create-react-app3\package.json">2.2 create-react-app3\package.json <a href="#t72.2 create-react-app3\package.json"> # </a></h3>
+<p>packages\create-react-app3\package.json</p>
+<pre><code class="lang-diff">{
+<span class="hljs-addition">+ "main": "./index.js"</span>
+}
+</code></pre>
+<h3 id="t82.3  create-react-app3\index.js">2.3  create-react-app3\index.js <a href="#t82.3  create-react-app3\index.js"> # </a></h3>
+<p>packages\create-react-app3\index.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">const</span> { init } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./createReactApp'</span>);
+init();
+</code></pre>
+<h3 id="t92.4 createReactApp.js">2.4 createReactApp.js <a href="#t92.4 createReactApp.js"> # </a></h3>
+<p>packages\create-react-app3\createReactApp.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> {Command} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'commander'</span>);
+<span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>);
+<span class="hljs-keyword">const</span> packageJson = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./package.json'</span>);
+<span class="hljs-keyword">let</span> appName;
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">new</span> Command(packageJson.name)
+        .version(packageJson.version)
+        .arguments(<span class="hljs-string">'&lt;project-directory&gt;'</span>)
+        .usage(<span class="hljs-string">`<span class="hljs-subst">${chalk.green(<span class="hljs-string">'&lt;project-directory&gt;'</span>)}</span> [options]`</span>)
+        .action(<span class="hljs-function"><span class="hljs-params">projectDirectory</span> =&gt;</span> {
+            appName = projectDirectory;
+        })
+        .parse(process.argv);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'appName='</span>, appName);
+}
+<span class="hljs-built_in">module</span>.exports = {
+    init
+}
+</code></pre>
+<h3 id="t102.5 执行命令">2.5 执行命令 <a href="#t102.5 执行命令"> # </a></h3>
+<pre><code class="lang-js">npm run create
+</code></pre>
+<h2 id="t113.实现createApp方法">3.实现createApp方法 <a href="#t113.实现createApp方法"> # </a></h2>
+<h3 id="t123.1 createReactApp.js">3.1 createReactApp.js <a href="#t123.1 createReactApp.js"> # </a></h3>
+<p>packages\create-react-app3\createReactApp.js</p>
+<pre><code class="lang-diff">const {Command} = require('commander');
+const chalk = require('chalk');
+<span class="hljs-addition">+const fs = require('fs-extra');</span>
+<span class="hljs-addition">+const path = require('path');</span>
+const packageJson = require('./package.json');
+let appName;
+async function init() {
+    new Command(packageJson.name)
+        .version(packageJson.version)
+        .arguments('&lt;project-directory&gt;')
+        .usage(`${chalk.green('&lt;project-directory&gt;')} [options]`)
+        .action(projectDirectory =&gt; {
+            appName = projectDirectory;
+        })
+        .parse(process.argv);
+    console.log('appName=', appName);
+<span class="hljs-addition">+   await createApp(appName);</span>
+}
+<span class="hljs-addition">+async function createApp(appName) {</span>
+<span class="hljs-addition">+    const root = path.resolve(appName);</span>
+<span class="hljs-addition">+    fs.ensureDirSync(appName);</span>
+<span class="hljs-addition">+    console.log(`Creating a new React app in ${chalk.green(root)}.`);</span>
+<span class="hljs-addition">+    const packageJson = {</span>
+<span class="hljs-addition">+      name: appName,</span>
+<span class="hljs-addition">+      version: '0.1.0',</span>
+<span class="hljs-addition">+      private: true,</span>
+<span class="hljs-addition">+    };</span>
+<span class="hljs-addition">+    fs.writeFileSync(</span>
+<span class="hljs-addition">+      path.join(root, 'package.json'),</span>
+<span class="hljs-addition">+      JSON.stringify(packageJson, null, 2)</span>
+<span class="hljs-addition">+    );</span>
+<span class="hljs-addition">+    const originalDirectory = process.cwd();</span>
+<span class="hljs-addition">+    process.chdir(root);</span>
+<span class="hljs-addition">+    console.log('root',root);</span>
+<span class="hljs-addition">+    console.log('appName',appName);</span>
+<span class="hljs-addition">+    console.log('originalDirectory',originalDirectory);</span>
+<span class="hljs-addition">+  }</span>
+module.exports = {
+    init
+}
+
+</code></pre>
+<h2 id="t134.实现run方法">4.实现run方法 <a href="#t134.实现run方法"> # </a></h2>
+<h3 id="t144.1 createReactApp.js">4.1 createReactApp.js <a href="#t144.1 createReactApp.js"> # </a></h3>
+<p>packages\create-react-app3\createReactApp.js</p>
+<pre><code class="lang-diff">const {Command} = require('commander');
+const chalk = require('chalk');
+const fs = require('fs-extra');
+const path = require('path');
+<span class="hljs-addition">+const spawn = require('cross-spawn');</span>
+const packageJson = require('./package.json');
+let appName;
+async function init() {
+    new Command(packageJson.name)
+        .version(packageJson.version)
+        .arguments('&lt;project-directory&gt;')
+        .usage(`${chalk.green('&lt;project-directory&gt;')} [options]`)
+        .action(projectDirectory =&gt; {
+            appName = projectDirectory;
+        })
+        .parse(process.argv);
+    console.log('appName=', appName);
+    await createApp(appName);
+}
+async function createApp(appName) {
+    const root = path.resolve(appName);
+    fs.ensureDirSync(appName);
+    console.log(`Creating a new React app in ${chalk.green(root)}.`);
+    const packageJson = {
+      name: appName,
+      version: '0.1.0',
+      private: true,
+    };
+    fs.writeFileSync(
+      path.join(root, 'package.json'),
+      JSON.stringify(packageJson, null, 2)
+    );
+    const originalDirectory = process.cwd();
+    process.chdir(root);
+    console.log('root',root);
+    console.log('appName',appName);
+    console.log('originalDirectory',originalDirectory);
+<span class="hljs-addition">+   await run(</span>
+<span class="hljs-addition">+        root,</span>
+<span class="hljs-addition">+        appName,</span>
+<span class="hljs-addition">+        originalDirectory</span>
+<span class="hljs-addition">+   );</span>
+}
+<span class="hljs-addition">+async function run(root,appName,originalDirectory) {</span>
+<span class="hljs-addition">+    const scriptName = 'react-scripts';</span>
+<span class="hljs-addition">+    const templateName = 'cra-template';</span>
+<span class="hljs-addition">+    const allDependencies = ['react', 'react-dom', scriptName, templateName];</span>
+<span class="hljs-addition">+    console.log('Installing packages. This might take a couple of minutes.');</span>
+<span class="hljs-addition">+    console.log(</span>
+<span class="hljs-addition">+      `Installing ${chalk.cyan('react')}, ${chalk.cyan(</span>
+<span class="hljs-addition">+        'react-dom'</span>
+<span class="hljs-addition">+      )}, and ${chalk.cyan(scriptName)} with ${chalk.cyan(templateName)}`</span>
+<span class="hljs-addition">+    );</span>
+<span class="hljs-addition">+    await install(root, allDependencies);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function install(root, allDependencies) {</span>
+<span class="hljs-addition">+    return new Promise((resolve) =&gt; {</span>
+<span class="hljs-addition">+      const command = 'yarnpkg';</span>
+<span class="hljs-addition">+      const args = ['add', '--exact', ...allDependencies, '--cwd', root];</span>
+<span class="hljs-addition">+      console.log('command:',command,args);</span>
+<span class="hljs-addition">+      const child = spawn(command, args, { stdio: 'inherit' });</span>
+<span class="hljs-addition">+      child.on('close', resolve);</span>
+<span class="hljs-addition">+    });</span>
+<span class="hljs-addition">+}</span>
+module.exports = {
+    init
+}
+
+command: yarnpkg [
+  'add',
+  '--exact',
+  'react',
+  'react-dom',
+  'react-scripts',
+  'cra-template',
+  '--cwd',
+  'C:\\aprepare\\create-react-app3\\aaa'
+]
+
+yarnpkg add --exact react react-dom react-scripts cra-template --cwd C:\\aprepare\\create-react-app3\\aaa
+</code></pre>
+<h2 id="t155.执行init初始化命令">5.执行init初始化命令 <a href="#t155.执行init初始化命令"> # </a></h2>
+<h3 id="t165.1 createReactApp.js">5.1 createReactApp.js <a href="#t165.1 createReactApp.js"> # </a></h3>
+<p>packages\create-react-app3\createReactApp.js</p>
+<pre><code class="lang-diff">const {Command} = require('commander');
+const chalk = require('chalk');
+const fs = require('fs-extra');
+const path = require('path');
+const spawn = require('cross-spawn');
+const packageJson = require('./package.json');
+let appName;
+async function init() {
+    new Command(packageJson.name)
+        .version(packageJson.version)
+        .arguments('&lt;project-directory&gt;')
+        .usage(`${chalk.green('&lt;project-directory&gt;')} [options]`)
+        .action(projectDirectory =&gt; {
+            appName = projectDirectory;
+        })
+        .parse(process.argv);
+    console.log('appName=', appName);
+    await createApp(appName);
+}
+async function createApp(appName) {
+    const root = path.resolve(appName);
+    fs.ensureDirSync(appName);
+    console.log(`Creating a new React app in ${chalk.green(root)}.`);
+    const packageJson = {
+      name: appName,
+      version: '0.1.0',
+      private: true,
+    };
+    fs.writeFileSync(
+      path.join(root, 'package.json'),
+      JSON.stringify(packageJson, null, 2)
+    );
+    const originalDirectory = process.cwd();
+    process.chdir(root);
+    console.log('root',root);
+    console.log('appName',appName);
+    console.log('originalDirectory',originalDirectory);
+    await run(
+        root,
+        appName,
+        originalDirectory
+    );
+}
+async function run(root,appName,originalDirectory) {
+    const scriptName = 'react-scripts';
+    const templateName = 'cra-template';
+    const allDependencies = ['react', 'react-dom', scriptName, templateName];
+    console.log('Installing packages. This might take a couple of minutes.');
+    console.log(
+      `Installing ${chalk.cyan('react')}, ${chalk.cyan(
+        'react-dom'
+      )}, and ${chalk.cyan(scriptName)} with ${chalk.cyan(templateName)}`
+    );
+    await install(root, allDependencies);
+<span class="hljs-addition">+    let data = [root, appName, true, originalDirectory, templateName];</span>
+<span class="hljs-addition">+    let source = `</span>
+<span class="hljs-addition">+    var init = require('react-scripts/scripts/init.js');</span>
+<span class="hljs-addition">+    init.apply(null, JSON.parse(process.argv[1]));</span>
+<span class="hljs-addition">+  `</span>
+<span class="hljs-addition">+    await executeNodeScript({ cwd: process.cwd() }, data, source);</span>
+<span class="hljs-addition">+    console.log('Done.');</span>
+<span class="hljs-addition">+    process.exit(0);</span>
+}
+<span class="hljs-addition">+function executeNodeScript({ cwd }, data, source) {</span>
+<span class="hljs-addition">+  return new Promise((resolve) =&gt; {</span>
+<span class="hljs-addition">+    const child = spawn( </span>
+<span class="hljs-addition">+      process.execPath,</span>
+<span class="hljs-addition">+      ['-e', source, '--', JSON.stringify(data)],</span>
+<span class="hljs-addition">+      { cwd, stdio: 'inherit' }</span>
+<span class="hljs-addition">+    );</span>
+<span class="hljs-addition">+    child.on('close', resolve);</span>
+<span class="hljs-addition">+  });</span>
+<span class="hljs-addition">+}</span>
+function install(root, allDependencies) {
+    return new Promise((resolve) =&gt; {
+      const command = 'yarnpkg';
+      const args = ['add', '--exact', ...allDependencies, '--cwd', root];
+      console.log('command:',command,args);
+      const child = spawn(command, args, { stdio: 'inherit' });
+      child.on('close', resolve);
+    });
+}
+module.exports = {
+    init
+}
+</code></pre>
+<h2 id="t171. monorepo管理">1. monorepo管理 <a href="#t171. monorepo管理"> # </a></h2>
+<ul>
+<li>Monorepo 是管理项目代码的一个方式，指在一个项目仓库(repo)中管理多个模块/包(package)</li>
+<li>monorepo 最主要的好处是统一的工作流和代码共享</li>
+<li><a href="https://github.com/lerna/lerna">Lerna</a>是一个管理多个 npm 模块的工具,优化维护多包的工作流，解决多个包互相依赖，且发布需要手动维护多个包的问题</li>
+<li><a href="https://classic.yarnpkg.com/en/docs/cli/">yarn</a></li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/1609568943612" alt="1609568943612"></p>
+<h3 id="t181.1 安装">1.1 安装 <a href="#t181.1 安装"> # </a></h3>
+<pre><code class="lang-js">npm i lerna -g
+</code></pre>
+<h3 id="t191.2 初始化">1.2 初始化 <a href="#t191.2 初始化"> # </a></h3>
+<pre><code class="lang-js">lerna init
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/1609568698164" alt="lerna-init"></p>
+<h4 id="t201.2.1 package.json">1.2.1 package.json <a href="#t201.2.1 package.json"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"root"</span>,
+  <span class="hljs-attr">"private"</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"lerna"</span>: <span class="hljs-string">"^3.22.1"</span>
+  }
+}
+</code></pre>
+<h4 id="t211.2.2 lerna.json">1.2.2 lerna.json <a href="#t211.2.2 lerna.json"> # </a></h4>
+<p>lerna.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"packages"</span>: [
+    <span class="hljs-string">"packages/*"</span>
+  ],
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.0.0"</span>
+}
+</code></pre>
+<h3 id="t221.3 yarn workspace">1.3 yarn workspace <a href="#t221.3 yarn workspace"> # </a></h3>
+<ul>
+<li><code>yarn workspace</code>允许我们使用 <code>monorepo</code> 的形式来管理项目</li>
+<li>在安装 node_modules 的时候它不会安装到每个子项目的 node_modules 里面，而是直接安装到根目录下面，这样每个子项目都可以读取到根目录的 node_modules</li>
+<li>整个项目只有根目录下面会有一份 <code>yarn.lock</code> 文件。子项目也会被 <code>link</code> 到 <code>node_modules</code> 里面，这样就允许我们就可以直接用 import 导入对应的项目</li>
+<li><code>yarn.lock</code>文件是自动生成的,也完全Yarn来处理.<code>yarn.lock</code>锁定你安装的每个依赖项的版本，这可以确保你不会意外获得不良依赖</li>
+</ul>
+<h4 id="t231.3.1 开启workspace">1.3.1 开启workspace <a href="#t231.3.1 开启workspace"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+  "name": "root",
+  "private": true, // 私有的,用来管理整个项目,不会被发布到npm
+<span class="hljs-addition">+  "workspaces": [</span>
+<span class="hljs-addition">+    "packages/*"</span>
+<span class="hljs-addition">+  ],</span>
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  }
+}
+</code></pre>
+<h4 id="t241.3.2 创建子项目">1.3.2 创建子项目 <a href="#t241.3.2 创建子项目"> # </a></h4>
+<pre><code class="lang-js">lerna create create-react-app3
+lerna create react-scripts3
+lerna create cra-template3
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/1609571583709" alt="1609571583709"></p>
+<h4 id="t251.3.3 添加依赖">1.3.3 添加依赖 <a href="#t251.3.3 添加依赖"> # </a></h4>
+<ul>
+<li><a href="https://classic.yarnpkg.com/en/docs/cli">yarnpkg</a></li>
+<li><a href="https://github.com/lerna/lerna#readme">lerna</a></li>
+</ul>
+<p>设置加速镜像</p>
+<pre><code class="lang-js">yarn config <span class="hljs-keyword">get</span> registry
+yarn config <span class="hljs-keyword">set</span> registry http://registry.npm.taobao.org/
+yarn config <span class="hljs-keyword">set</span> registry http://registry.npmjs.org/
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">作用</th>
+<th style="text-align:left">命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">查看工作空间信息</td>
+<td style="text-align:left">yarn workspaces info</td>
+</tr>
+<tr>
+<td style="text-align:left">给根空间添加依赖</td>
+<td style="text-align:left">yarn add chalk cross-spawn fs-extra --ignore-workspace-root-check</td>
+</tr>
+<tr>
+<td style="text-align:left">给某个项目添加依赖</td>
+<td style="text-align:left">yarn workspace create-react-app3 add commander</td>
+</tr>
+<tr>
+<td style="text-align:left">删除所有的 node_modules</td>
+<td style="text-align:left">lerna clean 等于 yarn workspaces run clean</td>
+</tr>
+<tr>
+<td style="text-align:left">安装和link</td>
+<td style="text-align:left">yarn install 等于 lerna bootstrap --npm-client yarn --use-workspaces</td>
+</tr>
+<tr>
+<td style="text-align:left">重新获取所有的 node_modules</td>
+<td style="text-align:left">yarn install --force</td>
+</tr>
+<tr>
+<td style="text-align:left">查看缓存目录</td>
+<td style="text-align:left">yarn cache dir</td>
+</tr>
+<tr>
+<td style="text-align:left">清除本地缓存</td>
+<td style="text-align:left">yarn cache clean</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t262. commander">2. commander <a href="#t262. commander"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/chalk">chalk</a>可以在终端显示颜色</li>
+<li><a href="https://github.com/tj/commander.js/blob/HEAD/Readme_zh-CN.md">commander</a>是一个完整的<code>node.js</code>命令行解决方案</li>
+<li>version方法可以设置版本，其默认选项为<code>-V</code>和<code>--version</code></li>
+<li>通过.arguments可以为最顶层命令指定参数，对子命令而言，参数都包括在.command调用之中了。尖括号（例如<required>）意味着必选，而方括号（例如[optional]）则代表可选</required></li>
+<li>通过<code>usage</code>选项可以修改帮助信息的首行提示</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>);
+<span class="hljs-keyword">const</span> {Command} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'commander'</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'process.argv'</span>,process.argv);
+<span class="hljs-keyword">new</span> Command(<span class="hljs-string">'create-react-app'</span>)
+    .version(<span class="hljs-string">'1.0.0'</span>)
+    .arguments(<span class="hljs-string">'&lt;must1&gt; &lt;must2&gt; [optional]'</span>)
+    .usage(<span class="hljs-string">`<span class="hljs-subst">${chalk.green(<span class="hljs-string">'&lt;must1&gt; &lt;must2&gt;'</span>)}</span> [optional]`</span>)
+    .action(<span class="hljs-function">(<span class="hljs-params">must1,must2,optional,...args</span>) =&gt;</span> {
+       <span class="hljs-built_in">console</span>.log(must1,must2,optional,args);
+    })
+    .parse(process.argv);
+</code></pre>
+<h2 id="t273. cross-spawn">3. cross-spawn <a href="#t273. cross-spawn"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/cross-spawn">cross-spawn</a>是node的<code>spawn</code>和<code>spawnSync</code>的跨平台解决方案</li>
+<li><a href="https://nodejs.org/dist/latest-v15.x/docs/api/child_process.html">inherit</a>表示将相应的<code>stdio</code>流传给父进程或从父进程传入</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> spawn = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cross-spawn'</span>);
+<span class="hljs-keyword">const</span> child = spawn(<span class="hljs-string">'node'</span>, [<span class="hljs-string">'script.js'</span>,<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>], { <span class="hljs-attr">stdio</span>: <span class="hljs-string">'inherit'</span> });
+child.on(<span class="hljs-string">'close'</span>,()=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'child is done!'</span>);
+});
+<span class="hljs-keyword">const</span> result = spawn.sync(<span class="hljs-string">'node'</span>, [<span class="hljs-string">'script.js'</span>,<span class="hljs-string">'one'</span>,<span class="hljs-string">'two'</span>,<span class="hljs-string">'three'</span>], { <span class="hljs-attr">stdio</span>: <span class="hljs-string">'inherit'</span> });
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+
+    

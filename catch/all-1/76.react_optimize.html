@@ -1,0 +1,1011 @@
+
+        <h2 id="t01. 使用Fragment">1. 使用Fragment <a href="#t01. 使用Fragment"> # </a></h2>
+<ul>
+<li><code>Fragment</code>可以让你聚合一个子元素列表,并且不在DOM中增加额外节点</li>
+<li><code>Fragment</code> 看起来像空的 <code>JSX</code> 标签</li>
+</ul>
+<h3 id="t11.1 index.js">1.1 index.js <a href="#t11.1 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Table <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Table'</span>;
+<span class="hljs-keyword">let</span> data = [
+    {<span class="hljs-attr">id</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">name</span>:<span class="hljs-string">'zhufeng'</span>,<span class="hljs-attr">age</span>:<span class="hljs-number">10</span>},
+    {<span class="hljs-attr">id</span>:<span class="hljs-number">2</span>,<span class="hljs-attr">name</span>:<span class="hljs-string">'jiagou'</span>,<span class="hljs-attr">age</span>:<span class="hljs-number">10</span>}
+]
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Table</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{data}</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t21.2 Table.js">1.2 Table.js <a href="#t21.2 Table.js"> # </a></h3>
+<p>src\components\Table.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Columns</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">let</span> data = <span class="hljs-keyword">this</span>.props.data;  
+    <span class="hljs-comment">//Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment &lt;&gt;...&lt;/&gt;</span>
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{data.id}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{data.name}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{data.age}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;/&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Table</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">table</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>ID<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>Name<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>Age<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">tbody</span>&gt;</span>
+          {
+            this.props.data.map((item, index) =&gt; (
+             <span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">Columns</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{item}</span> /&gt;</span>
+             <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            ))
+          }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">tbody</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span></span>
+    );
+  }
+}
+</code></pre>
+<h2 id="t32. PureComponent">2. PureComponent <a href="#t32. PureComponent"> # </a></h2>
+<ul>
+<li>当一个组件的<code>props</code>或<code>state</code>变更，<code>React</code>会将最新返回的元素与之前渲染的元素进行对比，以此决定是否有必要更新真实的 DOM，当它们不相同时 React 会更新该 DOM</li>
+<li>如果渲染的组件非常多时可以通过覆盖生命周期方法 <code>shouldComponentUpdate</code> 来进行优化</li>
+<li><code>shouldComponentUpdate</code> 方法会在重新渲染前被触发。其默认实现是返回 true,如果组件不需要更新，可以在<code>shouldComponentUpdate</code>中返回 <code>false</code> 来跳过整个渲染过程。其包括该组件的 <code>render</code> 调用以及之后的操作</li>
+</ul>
+<h3 id="t42.1 重复渲染">2.1 重复渲染 <a href="#t42.1 重复渲染"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+  state = {<span class="hljs-attr">counter</span>:{<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>}}
+  add = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+      <span class="hljs-keyword">let</span> oldState = <span class="hljs-keyword">this</span>.state;
+      <span class="hljs-keyword">let</span> amount = <span class="hljs-built_in">parseInt</span>(<span class="hljs-keyword">this</span>.amount.value);
+      <span class="hljs-keyword">let</span> newState = {...oldState,<span class="hljs-attr">counter</span>:amount==<span class="hljs-number">0</span>?oldState.counter:{<span class="hljs-attr">number</span>:oldState.counter.number+amount}};
+      <span class="hljs-keyword">this</span>.setState(newState);
+  }
+  render(){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'App render'</span>);
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> <span class="hljs-attr">counter</span>=<span class="hljs-string">{this.state.counter}/</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{inst</span>=&gt;</span>this.amount = inst}/&gt;
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.add}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+  render(){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Counter render'</span>);
+    <span class="hljs-keyword">return</span> (
+     <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.props.counter.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+    )
+  }
+}
+
+ReactDOM.render(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>,
+    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+)
+</code></pre>
+<h3 id="t52.2 PureComponent">2.2 PureComponent <a href="#t52.2 PureComponent"> # </a></h3>
+<ul>
+<li>React15.3 中新加了一个类<code>PureComponent</code>,它会在<code>render</code>之前帮组件自动执行一次<code>shallowEqual</code>（浅比较），来决定是否更新组件</li>
+<li><code>PureComponent</code>通过<code>prop</code>和<code>state</code>的浅比较来实现<code>shouldComponentUpdate</code></li>
+</ul>
+<pre><code class="lang-diff">import React, { Component } from "react";
+import ReactDOM from "react-dom";
+<span class="hljs-addition">+class PureComponent extends Component {</span>
+<span class="hljs-addition">+  shouldComponentUpdate(newProps) {</span>
+<span class="hljs-addition">+    return !shallowEqual(this.props, newProps);</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function shallowEqual(obj1, obj2) {</span>
+<span class="hljs-addition">+  if (obj1 === obj2) {</span>
+<span class="hljs-addition">+    return true;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  if (typeof obj1 != "object" ||obj1 === null ||typeof obj2 != "object" ||obj2 === null) {</span>
+<span class="hljs-addition">+    return false;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  let keys1 = Object.keys(obj1);</span>
+<span class="hljs-addition">+  let keys2 = Object.keys(obj2);</span>
+<span class="hljs-addition">+  if (keys1.length != keys2.length) {</span>
+<span class="hljs-addition">+    return false;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  for (let key of keys1) {</span>
+<span class="hljs-addition">+    if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {</span>
+<span class="hljs-addition">+      return false;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return true;</span>
+<span class="hljs-addition">+}</span>
+class App extends Component {
+  state = { counter: { number: 0 } };
+  add = () =&gt; {
+    let oldState = this.state;
+    let amount = parseInt(this.amount.value);
+    let newState = {
+      ...oldState,
+      counter:
+        amount == 0
+          ? oldState.counter
+          : { number: oldState.counter.number + amount }
+    };
+    this.setState(newState);
+  };
+  render() {
+    console.log("App render");
+    return (
+      &lt;div&gt;
+        &lt;Counter counter={this.state.counter} /&gt;
+        &lt;input ref={inst =&gt; (this.amount = inst)} /&gt;
+        &lt;button onClick={this.add}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+<span class="hljs-addition">+class Counter extends PureComponent {</span>
+  render() {
+    console.log("Counter render");
+    return &lt;p&gt;{this.props.counter.number}&lt;/p&gt;;
+  }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById("root"));
+
+</code></pre>
+<h3 id="t62.3 PureComponent+Immutable.js">2.3 PureComponent+Immutable.js <a href="#t62.3 PureComponent+Immutable.js"> # </a></h3>
+<ul>
+<li><a href="https://immutable-js.github.io/immutable-js/">Immutable.js</a>是 Facebook 在 2014 年出的持久性数据结构的库</li>
+<li><code>Immutable Data</code> 就是一旦创建，就不能再被更改的数据。对 Immutable 对象的任何修改或添加删除操作都会返回一个新的 Immutable 对象一个新的 <code>Immutable</code> 对象</li>
+<li>Immutable 实现的原理是 <code>Persistent Data Structure</code>（持久化数据结构），也就是使用旧数据创建新数据时，要保证旧数据同时可用且不变,同时为了避免 <code>deepCopy</code> 把所有节点都复制一遍带来的性能损耗</li>
+<li>Immutable 使用了 Structural Sharing（结构共享），即如果对象树中一个节点发生变化，只修改这个节点和受它影响的父节点，其它节点则进行共享</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/immutablejs.gif" alt="immutablejs"></p>
+<h4 id="t72.4.1 immutable">2.4.1 immutable <a href="#t72.4.1 immutable"> # </a></h4>
+<ul>
+<li><a href="https://immutable-js.github.io/immutable-js/">immutable-js</a>内部实现了一套完整的 Persistent Data Structure,还有很多易用的数据类型。像 <code>Collection</code>、<code>List</code>、<code>Map</code>、<code>Set</code>、<code>Record</code>、<code>Seq</code></li>
+</ul>
+<h5 id="t82.4.1.1 安装">2.4.1.1 安装 <a href="#t82.4.1.1 安装"> # </a></h5>
+<pre><code class="lang-js">cnpm install immutable -S
+</code></pre>
+<h5 id="t92.4.1.2 使用">2.4.1.2 使用 <a href="#t92.4.1.2 使用"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { <span class="hljs-built_in">Map</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"immutable"</span>);
+<span class="hljs-keyword">const</span> map1 = <span class="hljs-built_in">Map</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-attr">aa</span>: <span class="hljs-number">1</span> }, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> });
+<span class="hljs-keyword">const</span> map2 = map1.set(<span class="hljs-string">'b'</span>, <span class="hljs-number">50</span>);
+<span class="hljs-built_in">console</span>.log(map1 !== map2); <span class="hljs-comment">// true</span>
+<span class="hljs-built_in">console</span>.log(map1.get(<span class="hljs-string">'b'</span>)); <span class="hljs-comment">// 2</span>
+<span class="hljs-built_in">console</span>.log(map2.get(<span class="hljs-string">'b'</span>)); <span class="hljs-comment">// 50</span>
+<span class="hljs-built_in">console</span>.log(map1.get(<span class="hljs-string">'a'</span>) === map2.get(<span class="hljs-string">'a'</span>)); <span class="hljs-comment">// true</span>
+</code></pre>
+<h5 id="t102.4.1.3 重构">2.4.1.3 重构 <a href="#t102.4.1.3 重构"> # </a></h5>
+<pre><code class="lang-diff">import React, { Component } from "react";
+import ReactDOM from "react-dom";
+<span class="hljs-addition">+ import { Map,is } from "immutable";</span>
+class PureComponent extends Component {
+  shouldComponentUpdate(newProps) {
+    return !shallowEqual(this.props, newProps);
+  }
+}
+function shallowEqual(obj1, obj2) {
+  if (obj1 <span class="hljs-comment">=== obj2) {</span>
+    return true;
+  }
+  if (typeof obj1 != "object" ||obj1 <span class="hljs-comment">=== null ||typeof obj2 != "object" ||obj2 === null) {</span>
+    return false;
+  }
+  let keys1 = Object.keys(obj1);
+  let keys2 = Object.keys(obj2);
+  if (keys1.length != keys2.length) {
+    return false;
+  }
+  for (let key of keys1) {
+<span class="hljs-addition">+     if (!obj2.hasOwnProperty(key) || !is(obj1[key],obj2[key])) {</span>
+      return false;
+    }
+  }
+  return true;
+}
+class App extends Component {
+<span class="hljs-addition">+   state = { counter: Map({ number: 0 }) };</span>
+  add = () =&gt; {
+    /**
+    let oldState = this.state;
+    let amount = parseInt(this.amount.value);
+    this.setState({counter:{ number: oldState.counter.number + amount }});
+    */
+<span class="hljs-addition">+     this.state.counter = this.state.counter.set('number',this.state.counter.get('number') + parseInt(this.amount.value));</span>
+<span class="hljs-addition">+     this.setState(this.state); </span>
+  };
+  render() {
+    console.log("App render");
+    return (
+      &lt;div&gt;
+        &lt;Counter counter={this.state.counter} /&gt;
+        &lt;input ref={inst =&gt; (this.amount = inst)} /&gt;
+        &lt;button onClick={this.add}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+class Counter extends PureComponent {
+  render() {
+    console.log("Counter render");
+    return &lt;p&gt;{this.props.counter.number}&lt;/p&gt;;
+  }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById("root"));
+
+</code></pre>
+<h2 id="t113. memo">3. memo <a href="#t113. memo"> # </a></h2>
+<ul>
+<li><code>React.memo()</code>是一个高阶函数，它与 <code>React.PureComponent</code>类似，但是一个函数组件而非一个类</li>
+</ul>
+<h3 id="t123.1 memoization(memorization)方案">3.1 memoization(memorization)方案 <a href="#t123.1 memoization(memorization)方案"> # </a></h3>
+<ul>
+<li><code>memoization</code>(memorization)方案是一种将函数执行结果用变量缓存起来的方法</li>
+<li>当函数进行计算之前，先看缓存对象中是否有次计算结果，如果有，就直接从缓存对象中获取结果；如果没有，就进行计算，并将结果保存到缓存对象中</li>
+</ul>
+<h3 id="t133.2 优化">3.2 优化 <a href="#t133.2 优化"> # </a></h3>
+<pre><code class="lang-diff">import React, { Component } from "react";
+import ReactDOM from "react-dom";
+import { Map,is } from "immutable";
+class PureComponent extends Component {
+  isPureReactComponent = true;
+  shouldComponentUpdate(newProps, newState) {
+    return (
+      !shallowEqual(this.props, newProps)
+    );
+  }
+}
+class App extends Component {
+  state = { title:'计数器',counter: Map({ number: 0 }) };
+  add = () =&gt; {
+    this.state.counter = this.state.counter.set('number',this.state.counter.get('number') + parseInt(this.amount.value));
+    this.setState(this.state);
+  };
+  render() {
+    console.log("App render");
+    return (
+      &lt;div&gt;
+<span class="hljs-addition">+        &lt;Title title={this.props.title}/&gt;</span>
+        &lt;Counter counter={this.state.counter} /&gt;
+        &lt;input ref={inst =&gt; (this.amount = inst)} /&gt;
+        &lt;button onClick={this.add}&gt;+&lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+<span class="hljs-addition">+function memo(Func){</span>
+<span class="hljs-addition">+  class Proxy extends PureComponent{</span>
+<span class="hljs-addition">+    render(){</span>
+<span class="hljs-addition">+      return &lt;Func {...this.props}/&gt;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return Proxy;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+const Title = memo(props=&gt;{</span>
+<span class="hljs-addition">+  console.log('Title render');</span>
+<span class="hljs-addition">+  return  &lt;p&gt;{props.title}&lt;/p&gt;;</span>
+<span class="hljs-addition">+});</span>
+
+class Counter extends PureComponent {
+  render() {
+    console.log("Counter render");
+    return &lt;p&gt;{this.props.counter.get('number')}&lt;/p&gt;;
+  }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById("root"));
+
+function shallowEqual(obj1, obj2) {
+  if (obj1 <span class="hljs-comment">=== obj2) {</span>
+    return true;
+  }
+  if (
+    typeof obj1 != "object" ||
+    obj1 <span class="hljs-comment">=== null ||</span>
+    typeof obj2 != "object" ||
+    obj2 <span class="hljs-comment">=== null</span>
+  ) {
+    return false;
+  }
+  let keys1 = Object.keys(obj1);
+  let keys2 = Object.keys(obj2);
+  if (keys1.length != keys2.length) {
+    return false;
+  }
+  for (let key of keys1) {
+    if (!obj2.hasOwnProperty(key) || !is(obj1[key],obj2[key])) {
+      return false;
+    }
+  }
+  return true;
+}
+</code></pre>
+<h2 id="t144. Lazy+Error Boundaries">4. Lazy+Error Boundaries <a href="#t144. Lazy+Error Boundaries"> # </a></h2>
+<h3 id="t154.1 React.Lazy">4.1 React.Lazy <a href="#t154.1 React.Lazy"> # </a></h3>
+<ul>
+<li>React.Lazy帮助我们按需加载组件，从而减少我们应用程序的加载时间，因为只加载我们所需的组件。</li>
+<li>React.lazy 接受一个函数，这个函数内部调用 import() 动态导入。它必须返回一个 Promise，该 Promise 需要 resolve 一个 <code>default export</code> 的 React 组件</li>
+<li>React.Suspense 用于包装延迟组件以在加载组件时显示后备内容</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Loading <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Loading'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">lazy</span>(<span class="hljs-params">loadFunction</span>)</span>{
+   <span class="hljs-keyword">return</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LazyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+       state = {<span class="hljs-attr">Comp</span>:<span class="hljs-literal">null</span>}
+       componentDidMount(){
+           loadFunction().then(<span class="hljs-function"><span class="hljs-params">result</span>=&gt;</span>{
+               <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">Comp</span>:result.default});
+           });
+       }
+       render(){
+           <span class="hljs-keyword">let</span> Comp = <span class="hljs-keyword">this</span>.state.Comp;
+           <span class="hljs-keyword">return</span> Comp?<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Comp</span> {<span class="hljs-attr">...this.props</span>}/&gt;</span></span>:<span class="hljs-literal">null</span>;
+       }
+   }
+}
+<span class="hljs-keyword">const</span> AppTitle  = React.lazy(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-comment">/* webpackChunkName: "title" */</span><span class="hljs-string">'./components/Title'</span>))
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span>{
+    state = {<span class="hljs-attr">visible</span>:<span class="hljs-literal">false</span>}
+    show = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">visible</span>:<span class="hljs-literal">true</span>});
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+             {this.state.visible&amp;&amp;(
+                 <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Loading</span>/&gt;</span>}&gt;
+                    <span class="hljs-tag">&lt;<span class="hljs-name">AppTitle</span>/&gt;</span>
+                 <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+             )}
+             <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.show}</span>&gt;</span>加载<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/&gt;</span></span>
+        )
+    }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#root'</span>));
+</code></pre>
+<h3 id="t164.2 错误边界(Error Boundaries)">4.2 错误边界(Error Boundaries) <a href="#t164.2 错误边界(Error Boundaries)"> # </a></h3>
+<ul>
+<li>如果当一个组件异步加载下载js文件时，网络错误，无法下载 js 文件
+Suspense 无法处理这种错误情况， 在 react 中有一个 错误边界 （Error Boundaries）的概念，用来解决这种问题，它是利用了 react 生命周期的 <code>componentDidCatch</code> 方法来处理</li>
+<li>有两种方式，一种是 生命周期 componentDidCatch 来处理错误，还有一种 是 静态方法 static getDerivedStateFromError 来处理错误，</li>
+<li>请使用<code>static getDerivedStateFromError()</code>渲染备用 UI ，使用 <code>componentDidCatch()</code> 打印错误信息。</li>
+</ul>
+<pre><code class="lang-diff">import React, { Component, Suspense } from 'react'
+import ReactDOM from 'react-dom';
+import Loading from './components/Loading';
+<span class="hljs-addition">+ const AppTitle  = React.lazy(()=&gt;import(/* webpackChunkName: "title" */'./components/Title'))</span>
+
+class App extends Component{
+<span class="hljs-addition">+    state = {visible:false,isError: false}</span>
+    show = ()=&gt;{
+        this.setState({visible:true});
+    }
+
+<span class="hljs-addition">+    static getDerivedStateFromError(error) {</span>
+<span class="hljs-addition">+      return { isError: true };</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    componentDidCatch (err, info) {</span>
+<span class="hljs-addition">+      console.log(err, info)</span>
+<span class="hljs-addition">+    }</span>
+    render() {
+        if (this.state.isError) {
+            return (&lt;div&gt;error&lt;/div&gt;)
+        }
+        return (
+            &lt;&gt;
+             {this.state.visible&amp;&amp;(
+                 &lt;Suspense fallback={&lt;Loading/&gt;}&gt;
+                    &lt;AppTitle/&gt;
+                 &lt;/Suspense&gt;
+             )}
+             &lt;button onClick={this.show}&gt;加载&lt;/button&gt;
+            &lt;/&gt;
+        )
+    }
+}
+ReactDOM.render(&lt;App /&gt;, document.querySelector('#root'));
+</code></pre>
+<h2 id="t175. 骨架屏">5. 骨架屏 <a href="#t175. 骨架屏"> # </a></h2>
+<ul>
+<li>Skeleton Screen(骨架屏)就是在页面数据尚未加载前先给用户展示出页面的大致结构，直到请求数据返回后再渲染页面，补充进需要显示的数据内容。常用于文章列表、动态列表页。</li>
+<li><a href="https://www.npmjs.com/package/react-content-loader">react-content-loader</a> SVG-Powered component to easily create placeholder loadings</li>
+<li><a href="http://danilowoz.com/create-content-loader/">create-content-loader</a></li>
+<li><a href="https://github.com/lavas-project/react-skeleton-webpack-plugin">react-skeleton-webpack-plugin</a>  is a Webpack plugin based on React which generates Skeleton Screen for SPA</li>
+</ul>
+<pre><code class="lang-js">cnpm i @babel/core @babel/plugin-proposal-<span class="hljs-class"><span class="hljs-keyword">class</span>-<span class="hljs-title">properties</span> @<span class="hljs-title">babel</span>/<span class="hljs-title">plugin</span>-<span class="hljs-title">proposal</span>-<span class="hljs-title">decorators</span> @<span class="hljs-title">babel</span>/<span class="hljs-title">preset</span>-<span class="hljs-title">env</span> @<span class="hljs-title">babel</span>/<span class="hljs-title">preset</span>-<span class="hljs-title">react</span> <span class="hljs-title">babel</span>-<span class="hljs-title">loader</span>  <span class="hljs-title">html</span>-<span class="hljs-title">webpack</span>-<span class="hljs-title">plugin</span> <span class="hljs-title">webpack</span> <span class="hljs-title">webpack</span>-<span class="hljs-title">cli</span> <span class="hljs-title">webpack</span>-<span class="hljs-title">dev</span>-<span class="hljs-title">server</span> <span class="hljs-title">webpack</span>-<span class="hljs-title">merge</span> <span class="hljs-title">webpack</span>-<span class="hljs-title">node</span>-<span class="hljs-title">externals</span> <span class="hljs-title">memory</span>-<span class="hljs-title">fs</span> <span class="hljs-title">require</span>-<span class="hljs-title">from</span>-<span class="hljs-title">string</span>   <span class="hljs-title">react</span>-<span class="hljs-title">content</span>-<span class="hljs-title">loader</span> <span class="hljs-title">react</span>-<span class="hljs-title">router</span>-<span class="hljs-title">dom</span> <span class="hljs-title">prerender</span>-<span class="hljs-title">spa</span>-<span class="hljs-title">plugin</span> <span class="hljs-title">react</span>-<span class="hljs-title">lazyload</span> <span class="hljs-title">react</span>-<span class="hljs-title">window</span> <span class="hljs-title">immutable</span> -<span class="hljs-title">D</span>
+
+<span class="hljs-title">npx</span> <span class="hljs-title">webpack</span> --<span class="hljs-title">config</span> <span class="hljs-title">webpack</span>.<span class="hljs-title">skeleton</span>.<span class="hljs-title">js</span>
+<span class="hljs-title">npx</span> <span class="hljs-title">webpack</span>
+</span></code></pre>
+<p><img src="http://img.zhufengpeixun.cn/webpackflowes.png" alt="webpackflowes"></p>
+<h3 id="t185.1 skeleton.js">5.1 skeleton.js <a href="#t185.1 skeleton.js"> # </a></h3>
+<p>src\skeleton.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> ReactDOMServer <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom/server'</span>;
+<span class="hljs-keyword">import</span> ContentLoader <span class="hljs-keyword">from</span> <span class="hljs-string">'react-content-loader'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ReactDOMServer.renderToStaticMarkup(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ContentLoader</span> /&gt;</span></span>);
+</code></pre>
+<h3 id="t195.2 index.js">5.2 index.js <a href="#t195.2 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">let</span> style = { <span class="hljs-attr">width</span>: <span class="hljs-string">"100%"</span>, <span class="hljs-attr">height</span>: <span class="hljs-string">"300px"</span>, <span class="hljs-attr">backgroundColor</span>: <span class="hljs-string">"orange"</span> };
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{style}</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+}, <span class="hljs-number">2000</span>);
+</code></pre>
+<h3 id="t205.3 index.html">5.3 index.html <a href="#t205.3 index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"ie=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Document<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t215.4 webpack.base.js">5.4 webpack.base.js <a href="#t215.4 webpack.base.js"> # </a></h3>
+<p>webpack.base.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+  <span class="hljs-attr">devtool</span>:<span class="hljs-string">"none"</span>,
+  <span class="hljs-attr">context</span>: process.cwd(),
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">"dist"</span>)
+  },
+  <span class="hljs-attr">module</span>: {
+    <span class="hljs-attr">rules</span>: [
+      {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>,
+        <span class="hljs-attr">use</span>: {
+          <span class="hljs-attr">loader</span>: <span class="hljs-string">"babel-loader"</span>,
+          <span class="hljs-attr">options</span>: {
+            <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-env"</span>,<span class="hljs-string">"@babel/preset-react"</span>],
+            <span class="hljs-attr">plugins</span>: [
+              [<span class="hljs-string">"@babel/plugin-proposal-decorators"</span>, { <span class="hljs-attr">legacy</span>: <span class="hljs-literal">true</span> }],
+              [<span class="hljs-string">"@babel/plugin-proposal-class-properties"</span>, { <span class="hljs-attr">loose</span>: <span class="hljs-literal">true</span> }]
+            ]
+          }
+        },
+        <span class="hljs-attr">include</span>: path.join(__dirname, <span class="hljs-string">"src"</span>),
+        <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>
+      }
+    ]
+  }
+};
+</code></pre>
+<h3 id="t225.5 webpack.skeleton.js">5.5 webpack.skeleton.js <a href="#t225.5 webpack.skeleton.js"> # </a></h3>
+<p>webpack.skeleton.js</p>
+<ul>
+<li><a href="https://webpack.docschina.org/concepts/targets/">targets</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> { smart } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack-merge"</span>);
+<span class="hljs-keyword">const</span> base = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.base"</span>);
+<span class="hljs-keyword">const</span> nodeExternals = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack-node-externals'</span>);
+<span class="hljs-built_in">module</span>.exports = smart(base, {
+  <span class="hljs-attr">target</span>: <span class="hljs-string">'node'</span>,
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">context</span>: process.cwd(),
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/skeleton.js"</span>,
+  <span class="hljs-attr">output</span>:{
+    <span class="hljs-attr">filename</span>:<span class="hljs-string">'skeleton.js'</span>,
+    <span class="hljs-attr">libraryTarget</span>: <span class="hljs-string">'commonjs2'</span>
+  },
+  <span class="hljs-attr">externals</span>: nodeExternals()
+});
+</code></pre>
+<h3 id="t235.6  webpack.config.js">5.6  webpack.config.js <a href="#t235.6  webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> { smart } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack-merge"</span>);
+<span class="hljs-keyword">const</span> base = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.base"</span>);
+<span class="hljs-keyword">const</span> SkeletonWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./SkeletonWebpackPlugin'</span>);
+<span class="hljs-built_in">module</span>.exports = smart(base, {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">context</span>: process.cwd(),
+  <span class="hljs-attr">entry</span>: {<span class="hljs-attr">main</span>:<span class="hljs-string">"./src/index.js"</span>},
+  <span class="hljs-attr">output</span>:{
+    <span class="hljs-attr">filename</span>:<span class="hljs-string">'main.js'</span>
+  },
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+      <span class="hljs-attr">template</span>: <span class="hljs-string">"./src/index.html"</span>, <span class="hljs-comment">//指定模板文件</span>
+      <span class="hljs-attr">filename</span>: <span class="hljs-string">"index.html"</span> <span class="hljs-comment">//产出后的文件名</span>
+    }),
+    <span class="hljs-keyword">new</span> SkeletonWebpackPlugin({
+        <span class="hljs-attr">webpackConfig</span>: <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack.skeleton'</span>)
+    })
+  ]
+});
+</code></pre>
+<h3 id="t245.7   SkeletonWebpackPlugin.js">5.7   SkeletonWebpackPlugin.js <a href="#t245.7   SkeletonWebpackPlugin.js"> # </a></h3>
+<p>SkeletonWebpackPlugin.js</p>
+<ul>
+<li><a href="https://www.npmjs.com/package/memory-fs">memory-fs</a> is a simple <code>in-memory</code> filesystem</li>
+<li><a href="https://www.npmjs.com/package/require-from-string">require-from-string</a> Load module from string in Node.</li>
+<li><a href="https://www.npmjs.com/package/html-webpack-plugin">html-webpack-plugin</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> requireFromString = <span class="hljs-built_in">require</span>(<span class="hljs-string">'require-from-string'</span>);
+<span class="hljs-keyword">let</span> result = requireFromString(<span class="hljs-string">'module.exports = "hello"'</span>);
+<span class="hljs-built_in">console</span>.log(result);<span class="hljs-comment">// hello</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> MFS = <span class="hljs-built_in">require</span>(<span class="hljs-string">"memory-fs"</span>);
+<span class="hljs-keyword">var</span> requireFromString = <span class="hljs-built_in">require</span>(<span class="hljs-string">"require-from-string"</span>);
+<span class="hljs-keyword">let</span> mfs = <span class="hljs-keyword">new</span> MFS();
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SkeletonPlugin</span> </span>{
+  <span class="hljs-keyword">constructor</span>(options) {
+    <span class="hljs-keyword">this</span>.options = options;
+  }
+  apply(compiler) {
+    <span class="hljs-keyword">let</span> { webpackConfig } = <span class="hljs-keyword">this</span>.options;
+    compiler.hooks.compilation.tap(<span class="hljs-string">"SkeletonPlugin"</span>, compilation =&gt; {
+      compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing.tapAsync(
+        <span class="hljs-string">"SkeletonPlugin"</span>,
+        (htmlPluginData, callback) =&gt; {
+          <span class="hljs-keyword">let</span> outputPath = path.join(webpackConfig.output.path,webpackConfig.output.filename);
+          <span class="hljs-keyword">let</span> childCompiler = webpack(webpackConfig);
+          childCompiler.outputFileSystem = mfs;
+          childCompiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> skeleton= mfs.readFileSync(outputPath, <span class="hljs-string">"utf8"</span>);
+            <span class="hljs-keyword">let</span> skeletonHtml = requireFromString(skeleton);
+            <span class="hljs-keyword">if</span> (skeletonHtml.default) {
+              skeletonHtml = skeletonHtml.default;
+            }
+            htmlPluginData.html=htmlPluginData.html.replace(<span class="hljs-string">`&lt;div id="root"&gt;&lt;/div&gt;`</span>,<span class="hljs-string">`&lt;div id="root"&gt;<span class="hljs-subst">${skeletonHtml}</span>&lt;/div&gt;`</span>);
+            callback(<span class="hljs-literal">null</span>, htmlPluginData);
+          });
+        }
+      );
+    });
+  }
+}
+<span class="hljs-built_in">module</span>.exports = SkeletonPlugin;
+</code></pre>
+<h2 id="t256. 预渲染">6. 预渲染 <a href="#t256. 预渲染"> # </a></h2>
+<ul>
+<li>由于SPA项目普通的爬虫无法爬取项目的静态文本的内容，通过预渲染插件[prerender-spa-plugin(<a href="https://github.com/chrisvfritz/prerender-spa-plugin)解决SPA项目的SEO问题">https://github.com/chrisvfritz/prerender-spa-plugin)解决SPA项目的SEO问题</a></li>
+<li><code>prerender-spa-plugin</code> 利用了 <code>Puppeteer</code> 的爬取页面的功能。</li>
+<li><code>Puppeteer</code> 是一个 Chrome官方出品的 <code>headless Chrome node</code> 库。它提供了一系列的 API, 可以在无 UI 的情况下调用 Chrome 的功能, 适用于爬虫、自动化处理等各种场景</li>
+<li>原理是在 <code>Webpack</code> 构建阶段的最后，在本地启动一个 <code>Puppeteer</code> 的服务，访问配置了预渲染的路由，然后将 <code>Puppeteer</code> 中渲染的页面输出到 HTML 文件中，并建立路由对应的目录</li>
+</ul>
+<h3 id="t266.1 src\index.js">6.1 src\index.js <a href="#t266.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js">import React from 'react';
+import ReactDOM from 'react-dom';
+import {BrowserRouter as Router,Route,Link} from 'react-router-dom';
+let  Home = props=&gt;&lt;div&gt;Home&lt;/div&gt;
+let User = props=&gt;&lt;div&gt;User&lt;/div&gt;
+let Profile = props=&gt;&lt;div&gt;Profile&lt;/div&gt;
+ReactDOM.render(
+    &lt;Router&gt;
+        &lt;&gt;
+          &lt;Link to="/"&gt;home&lt;/Link&gt;
+          &lt;Link to="/user"&gt;user&lt;/Link&gt;
+          &lt;Link to="/profile"&gt;profile&lt;/Link&gt;
+          &lt;Route path="/" exact={true} component={Home} /&gt;
+          &lt;Route path="/user" component={User} /&gt;
+          &lt;Route path="/profile" component={Profile}/&gt;
+        &lt;/&gt;
+    &lt;/Router&gt;
+,document.getElementById('root'));
+</code></pre>
+<h3 id="t276.2 src\index.html">6.2 src\index.html <a href="#t276.2 src\index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"ie=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Document<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t286.3 webpack.config.js">6.3 webpack.config.js <a href="#t286.3 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> PrerenderSPAPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./prerender-spa-plugin"</span>);
+
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">context</span>: process.cwd(),
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"bundle.js"</span>
+  },
+  <span class="hljs-attr">module</span>: {
+    <span class="hljs-attr">rules</span>: [
+      {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>,
+        <span class="hljs-attr">use</span>: {
+          <span class="hljs-attr">loader</span>: <span class="hljs-string">"babel-loader"</span>,
+          <span class="hljs-attr">options</span>: {
+            <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-env"</span>, <span class="hljs-string">"@babel/preset-react"</span>],
+            <span class="hljs-attr">plugins</span>: [
+              [<span class="hljs-string">"@babel/plugin-proposal-decorators"</span>, { <span class="hljs-attr">legacy</span>: <span class="hljs-literal">true</span> }],
+              [<span class="hljs-string">"@babel/plugin-proposal-class-properties"</span>, { <span class="hljs-attr">loose</span>: <span class="hljs-literal">true</span> }]
+            ]
+          }
+        },
+        <span class="hljs-attr">include</span>: path.join(__dirname, <span class="hljs-string">"src"</span>),
+        <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>
+      }
+    ]
+  },
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+      <span class="hljs-attr">template</span>: <span class="hljs-string">"./src/index.html"</span>, <span class="hljs-comment">//指定模板文件</span>
+      <span class="hljs-attr">filename</span>: <span class="hljs-string">"index.html"</span> <span class="hljs-comment">//产出后的文件名</span>
+    }),
+     <span class="hljs-keyword">new</span> PrerenderSPAPlugin({
+      <span class="hljs-attr">staticDir</span>: path.join(__dirname, <span class="hljs-string">"dist"</span>),
+      <span class="hljs-attr">routes</span>: [<span class="hljs-string">"/"</span>,<span class="hljs-string">"/user"</span>,<span class="hljs-string">"/profile"</span>]
+    }) 
+  ]
+};
+</code></pre>
+<h3 id="t296.4 prerender-spa-plugin.js">6.4 prerender-spa-plugin.js <a href="#t296.4 prerender-spa-plugin.js"> # </a></h3>
+<p>prerender-spa-plugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> Prerenderer = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@prerenderer/prerenderer"</span>);
+<span class="hljs-keyword">const</span> PuppeteerRenderer = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@prerenderer/renderer-puppeteer"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PrerenderSPAPlugin</span> </span>{
+  <span class="hljs-keyword">constructor</span>(options) {
+    <span class="hljs-keyword">this</span>._options = options;
+    <span class="hljs-keyword">this</span>._options.renderer = <span class="hljs-keyword">new</span> PuppeteerRenderer({ <span class="hljs-attr">headless</span>: <span class="hljs-literal">true</span> });
+  }
+  apply(compiler) {
+    <span class="hljs-keyword">let</span> _this = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">const</span> compilerFS = compiler.outputFileSystem;
+    <span class="hljs-keyword">const</span> afterEmit = <span class="hljs-function">(<span class="hljs-params">compilation, done</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> PrerendererInstance = <span class="hljs-keyword">new</span> Prerenderer(_this._options);
+      PrerendererInstance.initialize()
+        .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+          <span class="hljs-keyword">return</span> PrerendererInstance.renderRoutes(_this._options.routes || []);
+        })
+        .then(<span class="hljs-function"><span class="hljs-params">renderedRoutes</span> =&gt;</span> {
+          <span class="hljs-keyword">let</span> promises = renderedRoutes.map(<span class="hljs-function"><span class="hljs-params">rendered</span> =&gt;</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">resolve</span>) </span>{
+              rendered.outputPath = path.join(
+                _this._options.staticDir,
+                rendered.route,
+                <span class="hljs-string">"index.html"</span>
+              );
+              <span class="hljs-keyword">let</span> dir = path.dirname(rendered.outputPath);
+              compilerFS.mkdirp(dir, (err, made) =&gt; {
+                compilerFS.writeFile(
+                  rendered.outputPath,
+                  rendered.html,
+                  err =&gt; {
+                    resolve();
+                  }
+                );
+              });
+            });
+          });
+          <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(promises);
+        })
+        .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+          PrerendererInstance.destroy();
+          done();
+        });
+    };
+    compiler.hooks.afterEmit.tapAsync(<span class="hljs-string">"PrerenderSPAPlugin"</span>, afterEmit);
+  }
+}
+<span class="hljs-built_in">module</span>.exports = PrerenderSPAPlugin;
+</code></pre>
+<blockquote>
+<p> 不适合不同的用户看都会不同的页面，这种类型的页面不适用预渲染
+ 对于一些经常发生变化的页面，如体育比赛等，会导致编译后的数据不是实时更新的</p>
+</blockquote>
+<h2 id="t307. 图片懒加载">7. 图片懒加载 <a href="#t307. 图片懒加载"> # </a></h2>
+<ul>
+<li><a href="https://github.com/twobin/react-lazyload">react-lazyload</a></li>
+<li><a href="http://img.zhufengpeixun.cn/lazyimages.zip">lazyimages.zip</a></li>
+</ul>
+<h3 id="t317.1 webpack.config.js">7.1 webpack.config.js <a href="#t317.1 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin=<span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+  <span class="hljs-attr">context</span>: process.cwd(),
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"bundle.js"</span>
+  },
+  <span class="hljs-attr">module</span>: {
+    <span class="hljs-attr">rules</span>: [
+      {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>,
+        <span class="hljs-attr">use</span>: {
+          <span class="hljs-attr">loader</span>: <span class="hljs-string">"babel-loader"</span>,
+          <span class="hljs-attr">options</span>: {
+            <span class="hljs-attr">presets</span>: [<span class="hljs-string">"@babel/preset-env"</span>,<span class="hljs-string">"@babel/preset-react"</span>],
+            <span class="hljs-attr">plugins</span>: [
+              [<span class="hljs-string">"@babel/plugin-proposal-decorators"</span>, { <span class="hljs-attr">legacy</span>: <span class="hljs-literal">true</span> }],
+              [<span class="hljs-string">"@babel/plugin-proposal-class-properties"</span>, { <span class="hljs-attr">loose</span>: <span class="hljs-literal">true</span> }]
+            ]
+          }
+        },
+        <span class="hljs-attr">include</span>: path.join(__dirname, <span class="hljs-string">"src"</span>),
+        <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>
+      },
+      {
+        <span class="hljs-attr">test</span>:<span class="hljs-regexp">/\.(jpg|png|gif)$/</span>,
+        <span class="hljs-attr">use</span>:{<span class="hljs-attr">loader</span>:<span class="hljs-string">'url-loader'</span>,<span class="hljs-attr">options</span>:{<span class="hljs-attr">limit</span>:<span class="hljs-number">0</span>}}
+      },
+      {
+        <span class="hljs-attr">test</span>:<span class="hljs-regexp">/\.css$/</span>,
+        <span class="hljs-attr">use</span>:[<span class="hljs-string">"style-loader"</span>,<span class="hljs-string">'css-loader'</span>]
+      }
+    ]
+  },
+  <span class="hljs-attr">plugins</span>: [
+       <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>:<span class="hljs-string">'./src/index.html'</span>,<span class="hljs-comment">//指定模板文件</span>
+            <span class="hljs-attr">filename</span>:<span class="hljs-string">'index.html'</span>,<span class="hljs-comment">//产出后的文件名</span>
+        })
+  ]
+};
+</code></pre>
+<h3 id="t327.2 index.js">7.2 index.js <a href="#t327.2 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./index.css'</span>;
+<span class="hljs-keyword">import</span> LazyLoad <span class="hljs-keyword">from</span> <span class="hljs-string">"./react-lazyload"</span>;
+<span class="hljs-keyword">const</span> App = <span class="hljs-function">(<span class="hljs-params">props</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{overflow:</span>'<span class="hljs-attr">auto</span>'}}&gt;</span>
+     {
+        props.images.map((image,index)=&gt;(
+            <span class="hljs-tag">&lt;<span class="hljs-name">LazyLoad</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">height</span>=<span class="hljs-string">{200}</span> &gt;</span>
+               <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{image}</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">LazyLoad</span>&gt;</span>
+        ))
+     }
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+  );
+};
+<span class="hljs-keyword">let</span> images = [
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/1.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/2.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/3.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/4.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/5.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/6.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/7.jpg'</span>),
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'./images/8.jpg'</span>),
+]
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> <span class="hljs-attr">images</span>=<span class="hljs-string">{images}/</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+</code></pre>
+<h3 id="t337.3 index.css">7.3 index.css <a href="#t337.3 index.css"> # </a></h3>
+<p>src\index.css</p>
+<pre><code class="lang-css">*{
+    <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span>;
+    <span class="hljs-attribute">padding</span>: <span class="hljs-number">0</span>;
+}
+<span class="hljs-selector-tag">ul</span>,<span class="hljs-selector-tag">li</span>{
+    <span class="hljs-attribute">list-style</span>: none;
+}
+<span class="hljs-selector-tag">li</span> <span class="hljs-selector-tag">img</span>{
+    <span class="hljs-attribute">width</span>:<span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">height</span>:<span class="hljs-number">100%</span>;
+}
+</code></pre>
+<h3 id="t347.4 react-lazyload.js">7.4 react-lazyload.js <a href="#t347.4 react-lazyload.js"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect">getBoundingClientRect</a>返回值是一个 DOMRect 对象，这个对象是由该元素的 <code>getClientRects()</code> 方法返回的一组矩形的集合, 即：是与该元素相关的CSS 边框集合</li>
+<li>DOMRect 对象包含了一组用于描述边框的只读属性——left、top、right和bottom，单位为像素。除了 width 和 height 外的属性都是相对于视口的左上角位置而言的</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/getBoundingClientRect.png" alt="getBoundingClientRect"></p>
+<p>src\react-lazyload.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">let</span> listeners = [];
+<span class="hljs-keyword">let</span> lazyLoadHandler = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; listeners.length; ++i) {
+    <span class="hljs-keyword">var</span> listener = listeners[i];
+    checkVisible(listener);
+  }
+};
+<span class="hljs-keyword">let</span> checkVisible = <span class="hljs-function"><span class="hljs-params">component</span> =&gt;</span> {
+  <span class="hljs-keyword">let</span> node = ReactDOM.findDOMNode(component);
+  <span class="hljs-keyword">let</span> { top } = node.getBoundingClientRect();
+  <span class="hljs-keyword">let</span> visible = top &lt;= (<span class="hljs-built_in">window</span>.innerHeight || <span class="hljs-built_in">document</span>.documentElement.clientHeight);
+  <span class="hljs-keyword">if</span> (visible) {
+    listeners = listeners.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item != component);
+    component.setState({visible});
+  }
+};
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LazyLoad</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  state = {<span class="hljs-attr">visible</span>:<span class="hljs-literal">false</span>}
+  <span class="hljs-keyword">constructor</span>(props) {
+    <span class="hljs-keyword">super</span>(props);
+    <span class="hljs-keyword">this</span>.divRef = React.createRef();
+  }
+  componentDidMount() {
+    <span class="hljs-keyword">if</span> (listeners.length == <span class="hljs-number">0</span>) {
+      <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">"scroll"</span>, lazyLoadHandler);
+    }
+    listeners.push(<span class="hljs-keyword">this</span>);
+    checkVisible(<span class="hljs-keyword">this</span>);
+  }
+  render() {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.state.visible ? (
+      <span class="hljs-keyword">this</span>.props.children
+    ) : (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+        <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">height:</span> <span class="hljs-attr">this.props.height</span> }}
+        <span class="hljs-attr">className</span>=<span class="hljs-string">"lazyload-placeholder"</span>
+        <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.divRef}</span>
+      /&gt;</span></span>
+    );
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> LazyLoad;
+</code></pre>
+<h2 id="t358. 长列表优化">8. 长列表优化 <a href="#t358. 长列表优化"> # </a></h2>
+<ul>
+<li>用数组保存所有列表元素的位置，只渲染可视区内的列表元素，当可视区滚动时，根据滚动的offset大小以及所有列表元素的位置，计算在可视区应该渲染哪些元素</li>
+<li><a href="https://www.npmjs.com/package/react-window">react-window</a></li>
+<li><a href="https://react-window.now.sh/#/examples/list/fixed-size">fixed-size</a></li>
+<li><a href="https://www.npmjs.com/package/react-virtualized">react-virtualized</a></li>
+</ul>
+<h3 id="t368.1 index.js">8.1 index.js <a href="#t368.1 index.js"> # </a></h3>
+<p>index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component, lazy, Suspense } <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> { FixedSizeList <span class="hljs-keyword">as</span> List } <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-window'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./index.css'</span>
+<span class="hljs-keyword">const</span> Row = <span class="hljs-function">(<span class="hljs-params">{ index, style }</span>) =&gt;</span> {
+  <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{...style,backgroundColor:getRandomColor(),lineHeight:</span>'<span class="hljs-attr">30px</span>',<span class="hljs-attr">textAlign:</span>'<span class="hljs-attr">center</span>'}}&gt;</span>Row {index+1}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+};
+
+<span class="hljs-keyword">const</span> Container = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">List</span>
+    <span class="hljs-attr">height</span>=<span class="hljs-string">{150}</span>
+    <span class="hljs-attr">itemCount</span>=<span class="hljs-string">{100}</span>
+    <span class="hljs-attr">itemSize</span>=<span class="hljs-string">{30}</span>
+    <span class="hljs-attr">width</span>=<span class="hljs-string">{</span>'<span class="hljs-attr">100</span>%'}
+  &gt;</span>
+    {Row}
+  <span class="hljs-tag">&lt;/<span class="hljs-name">List</span>&gt;</span></span>
+);
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Container</span>/&gt;</span></span>, <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"#root"</span>));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRandomColor</span>(<span class="hljs-params"> </span>) </span>{
+    <span class="hljs-keyword">var</span> rand = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random( ) * <span class="hljs-number">0xFFFFFF</span>).toString(<span class="hljs-number">16</span>).toUpperCase();
+    <span class="hljs-keyword">if</span>(rand.length == <span class="hljs-number">6</span>){
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'#'</span>+rand;
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">return</span> getRandomColor();
+    }
+}
+</code></pre>
+<h3 id="t378.2 index.css">8.2 index.css <a href="#t378.2 index.css"> # </a></h3>
+<p>index.css</p>
+<pre><code class="lang-js">*{
+    <span class="hljs-attr">margin</span>: <span class="hljs-number">0</span>;
+    padding: <span class="hljs-number">0</span>;
+}
+ul,li{
+    list-style: none;
+}
+</code></pre>
+<h3 id="t388.3 react-window.js">8.3 react-window.js <a href="#t388.3 react-window.js"> # </a></h3>
+<p>react-window.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component} <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FixedSizeList</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    state = {<span class="hljs-attr">start</span>:<span class="hljs-number">0</span>}
+    <span class="hljs-keyword">constructor</span>(){
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.containerRef = React.createRef();
+    }
+    componentDidMount(){
+        <span class="hljs-keyword">this</span>.containerRef.current.addEventListener(<span class="hljs-string">'scroll'</span>,()=&gt;{
+            <span class="hljs-keyword">let</span> scrollTop = <span class="hljs-keyword">this</span>.containerRef.current.scrollTop;
+            <span class="hljs-keyword">let</span> start = <span class="hljs-built_in">Math</span>.floor(scrollTop/<span class="hljs-keyword">this</span>.props.itemSize);<span class="hljs-comment">//起始的索引</span>
+            <span class="hljs-keyword">this</span>.setState({start});
+        });
+    }
+    render(){
+        <span class="hljs-keyword">let</span> {width,height,itemCount,itemSize} = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">let</span> children = [];
+        <span class="hljs-keyword">let</span> size = <span class="hljs-built_in">Math</span>.floor(height/itemSize)+<span class="hljs-number">1</span>;<span class="hljs-comment">//每页的条数</span>
+        <span class="hljs-keyword">let</span> itemStyle = {<span class="hljs-attr">height</span>:itemSize,<span class="hljs-attr">width</span>:<span class="hljs-string">'100%'</span>,<span class="hljs-attr">position</span>:<span class="hljs-string">'absolute'</span>,<span class="hljs-attr">left</span>:<span class="hljs-number">0</span>,<span class="hljs-attr">top</span>:<span class="hljs-number">0</span>};
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> index=<span class="hljs-keyword">this</span>.state.start;index&lt;<span class="hljs-keyword">this</span>.state.start+size;index++){
+            <span class="hljs-keyword">let</span> style = {...itemStyle,<span class="hljs-attr">top</span>:(index)*itemSize};
+            children.push(<span class="hljs-keyword">this</span>.props.children({index,style}));
+        }
+        <span class="hljs-keyword">let</span> containerStyle = {height,<span class="hljs-attr">width</span>:width||<span class="hljs-string">'100%'</span>,<span class="hljs-attr">position</span>:<span class="hljs-string">'relative'</span>,<span class="hljs-attr">overflow</span>:<span class="hljs-string">'auto'</span>};
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{containerStyle}</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.containerRef}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{width:</span>'<span class="hljs-attr">100</span>%',<span class="hljs-attr">height:itemSize</span>*<span class="hljs-attr">itemCount</span>}}&gt;</span>
+                    {children}
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h2 id="t399. key的优化">9. key的优化 <a href="#t399. key的优化"> # </a></h2>
+<h3 id="t409.1 diff策略">9.1 diff策略 <a href="#t409.1 diff策略"> # </a></h3>
+<ul>
+<li>DOM节点跨节点层级移动可以忽略</li>
+<li>相同类型的组件生成相似的结构，不同类型的组件生成不同的结构</li>
+<li>对于同一层次的子节点可以通过唯一的key进行区分</li>
+</ul>
+<h3 id="t419.2 tree diff">9.2 tree diff <a href="#t419.2 tree diff"> # </a></h3>
+<ul>
+<li>对树进行分层比较，两棵树只会对同一层次节点进行比较</li>
+<li>当出现跨层级移动时，并不会出现移动操作，而是直接删除重建</li>
+</ul>
+<h3 id="t429.3 组件diff">9.3 组件diff <a href="#t429.3 组件diff"> # </a></h3>
+<ul>
+<li>如果是同一个类型的组件，会向下继续比较子节点</li>
+<li>如果类型不同，则替换组件下的所有子节点</li>
+</ul>
+<h3 id="t439.4 element diff">9.4 element diff <a href="#t439.4 element diff"> # </a></h3>
+<p>当节点处于同一层级时，<code>React diff</code> 提供了三种节点操作,分别为：INSERT(插入)、MOVE(移动)和 REMOVE(删除)</p>
+<ul>
+<li>INSERT: 新的 <code>component</code> 类型不在老集合里， 即是全新的节点，需要对新节点执行插入操作</li>
+<li>MOVE: 在老集合有新 <code>component</code> 类型，就需要做移动操作，可以复用以前的 DOM 节点</li>
+<li>REMOVE: 老 <code>component</code> 不在新集合里的，也需要执行删除操作</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/domdiff.png" alt="domdiff"></p>
+<h2 id="t4410. React 性能分析器">10. React 性能分析器 <a href="#t4410. React 性能分析器"> # </a></h2>
+<ul>
+<li><a href="http://react.html.cn/blog/2018/09/10/introducing-the-react-profiler.html">introducing-the-react-profiler</a></li>
+<li>React 16.5 增加了对新的开发者工具 DevTools 性能分析插件的支持</li>
+<li>此插件使用 React 实验性的 Profiler API 来收集有关每个组件渲染的用时信息，以便识别 React 应用程序中的性能瓶颈</li>
+</ul>
+<h2 id="t4510.1 分析解析">10.1 分析解析 <a href="#t4510.1 分析解析"> # </a></h2>
+<ul>
+<li>分析一个应用程序的性能（Profiling an application）</li>
+<li>查看性能数据(render(渲染)阶段和commit(提交)阶段)</li>
+<li>过滤 commits（Filtering commits）</li>
+<li>火焰图表（Flame chart）</li>
+<li>排序图表（Ranked chart）</li>
+<li>组件图表（Component chart）</li>
+<li>交互（Interactions）</li>
+</ul>
+<h2 id="t4610.2 react-flame-graph">10.2 react-flame-graph <a href="#t4610.2 react-flame-graph"> # </a></h2>
+<ul>
+<li><a href="https://github.com/bvaughn/react-flame-graph">react-flame-graph</a>是用来可视化性能数据的React组件</li>
+</ul>
+
+    

@@ -1,0 +1,617 @@
+
+        <h2 id="t01. 什么是DLL">1. 什么是DLL <a href="#t01. 什么是DLL"> # </a></h2>
+<ul>
+<li><code>DllPlugin</code>和<code>DllReferencePlugin</code>提供了拆分包的方法，可以极大地提高构建时性能。术语<code>DLL</code>代表动态链接库，它最初是由Microsoft引入的。</li>
+<li><code>.dll</code>为后缀的文件称为动态链接库，在一个动态链接库中可以包含给其他模块调用的函数和数据</li>
+<li>把基础模块独立出来打包到单独的动态连接库里</li>
+<li>当需要导入的模块在动态连接库里的时候，模块不能再次被打包，而是去动态连接库里获取</li>
+</ul>
+<h3 id="t11.1 DllPlugin">1.1 DllPlugin <a href="#t11.1 DllPlugin"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/DllPlugin5.jpg" alt="DllPlugin5.jpg"></p>
+<h3 id="t21.2 DllReferencePlugin">1.2 DllReferencePlugin <a href="#t21.2 DllReferencePlugin"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/DllReferencePlugin5.jpg" alt="DllReferencePlugin5.jpg"></p>
+<h3 id="t31.3 WebpackClassDiagram">1.3 WebpackClassDiagram <a href="#t31.3 WebpackClassDiagram"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/WebpackClassDiagram6.jpg" alt="WebpackClassDiagram5.jpg"></p>
+<h2 id="t42. 使用DLL">2. 使用DLL <a href="#t42. 使用DLL"> # </a></h2>
+<h3 id="t52.1 安装依赖">2.1 安装依赖 <a href="#t52.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cnpm i webpack webpack-cli html-webpack-plugin isarray is-promise -D
+</code></pre>
+<h3 id="t62.2 定义Dll">2.2 定义Dll <a href="#t62.2 定义Dll"> # </a></h3>
+<ul>
+<li><a href="https://webpack.js.org/plugins/dll-plugin/">dll-plugin</a></li>
+<li>DllPlugin插件： 用于打包出一个个动态连接库</li>
+<li>DllReferencePlugin: 在配置文件中引入DllPlugin插件打包好的动态连接库</li>
+</ul>
+<p>webpack.dll.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> DllPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/DllPlugin"</span>);
+<span class="hljs-keyword">const</span> DllPlugin2 = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./plugins/DllPlugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">devtool</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">entry</span>: {
+    <span class="hljs-attr">utils</span>:[<span class="hljs-string">"isarray"</span>,<span class="hljs-string">"is-promise"</span>]
+  },
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"utils.dll.js"</span>, <span class="hljs-comment">//react.dll.js</span>
+    <span class="hljs-attr">library</span>: <span class="hljs-string">"_dll_utils"</span>,
+  },
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> DllPlugin2({
+      <span class="hljs-comment">//暴露出去的dll函数</span>
+      <span class="hljs-attr">name</span>: <span class="hljs-string">"_dll_utils"</span>,
+      <span class="hljs-comment">//输出的manifest json文件的绝对路径</span>
+      <span class="hljs-attr">path</span>: path.join(__dirname, <span class="hljs-string">"dist"</span>, <span class="hljs-string">"utils.manifest.json"</span>)
+    }),
+  ],
+};
+</code></pre>
+<h3 id="t72.3 使用动态链接库文件">2.3 使用动态链接库文件 <a href="#t72.3 使用动态链接库文件"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> DllReferencePlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/DllReferencePlugin.js"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">devtool</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">'dist'</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">'bundle.js'</span>
+  },
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> DllReferencePlugin({
+      <span class="hljs-attr">manifest</span>: <span class="hljs-built_in">require</span>(<span class="hljs-string">"./dist/utils.manifest.json"</span>),
+    }),
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+      <span class="hljs-attr">template</span>: <span class="hljs-string">'./src/index.html'</span>
+    })
+  ],
+};
+</code></pre>
+<h3 id="t82.4 html中使用">2.4 html中使用 <a href="#t82.4 html中使用"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>dll<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"utils.dll.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t92.5 index.js">2.5 index.js <a href="#t92.5 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> isarray = <span class="hljs-built_in">require</span>(<span class="hljs-string">"isarray"</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'isarray([1, 2, 3])='</span>,isarray([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]));
+</code></pre>
+<h3 id="t102.6 package.json">2.6 package.json <a href="#t102.6 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">  "scripts": {
+    "dll": "webpack --config webpack.dll.config.js",
+    "build": "webpack --config webpack.config.js"
+  }
+</code></pre>
+<h3 id="t112.7 dll.js">2.7 dll.js <a href="#t112.7 dll.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.dll.config"</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+<span class="hljs-keyword">debugger</span>
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(
+    stats.toJson({})
+  );
+});
+</code></pre>
+<h3 id="t122.8 build.js">2.8 build.js <a href="#t122.8 build.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.config"</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(
+    stats.toJson({})
+  );
+});
+</code></pre>
+<h2 id="t133.打包文件分析">3.打包文件分析 <a href="#t133.打包文件分析"> # </a></h2>
+<h3 id="t143.1 index.html">3.1 index.html <a href="#t143.1 index.html"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>dll<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"utils.dll.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"bundle.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t153.2 utils.dll.js">3.2 utils.dll.js <a href="#t153.2 utils.dll.js"> # </a></h3>
+<p>dist\utils.dll.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> _dll_utils =
+  (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+    <span class="hljs-keyword">var</span> installedModules = {};
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+      <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+        <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+      }
+      <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+        <span class="hljs-attr">i</span>: moduleId,
+        <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">exports</span>: {}
+      };
+      modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+      <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+    }
+    <span class="hljs-keyword">return</span> __webpack_require__(__webpack_require__.s = <span class="hljs-number">0</span>);
+  })
+    ({
+      <span class="hljs-string">"./node_modules/_is-promise@4.0.0@is-promise/index.js"</span>:
+        (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports</span>) </span>{
+          <span class="hljs-built_in">module</span>.exports = isPromise;
+          <span class="hljs-built_in">module</span>.exports.default = isPromise;
+          <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isPromise</span>(<span class="hljs-params">obj</span>) </span>{
+            <span class="hljs-keyword">return</span> !!obj &amp;&amp; (<span class="hljs-keyword">typeof</span> obj === <span class="hljs-string">'object'</span> || <span class="hljs-keyword">typeof</span> obj === <span class="hljs-string">'function'</span>) &amp;&amp; <span class="hljs-keyword">typeof</span> obj.then === <span class="hljs-string">'function'</span>;
+          }
+        }),
+      <span class="hljs-string">"./node_modules/_isarray@2.0.5@isarray/index.js"</span>:
+        (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports</span>) </span>{
+          <span class="hljs-keyword">var</span> toString = {}.toString;
+          <span class="hljs-built_in">module</span>.exports = <span class="hljs-built_in">Array</span>.isArray || <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">arr</span>) </span>{
+            <span class="hljs-keyword">return</span> toString.call(arr) == <span class="hljs-string">'[object Array]'</span>;
+          };
+        }),
+      <span class="hljs-number">0</span>:
+        (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+          <span class="hljs-built_in">module</span>.exports = __webpack_require__;
+        })
+    });
+</code></pre>
+<h3 id="t163.3 utils.manifest.json">3.3 utils.manifest.json <a href="#t163.3 utils.manifest.json"> # </a></h3>
+<p>dist\utils.manifest.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"_dll_utils"</span>,
+  <span class="hljs-attr">"content"</span>: {
+    <span class="hljs-attr">"./node_modules/_is-promise@4.0.0@is-promise/index.js"</span>: {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./node_modules/_is-promise@4.0.0@is-promise/index.js"</span>,
+      <span class="hljs-attr">"buildMeta"</span>: { <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">true</span> }
+    },
+    <span class="hljs-attr">"./node_modules/_isarray@2.0.5@isarray/index.js"</span>: {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./node_modules/_isarray@2.0.5@isarray/index.js"</span>,
+      <span class="hljs-attr">"buildMeta"</span>: {
+        <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">true</span>
+      }
+    }
+  }
+}
+
+</code></pre>
+<h3 id="t173.4 bundle.js">3.4 bundle.js <a href="#t173.4 bundle.js"> # </a></h3>
+<p>dist\bundle.js</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+  <span class="hljs-keyword">var</span> installedModules = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+      <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+      <span class="hljs-attr">i</span>: moduleId,
+      <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+    <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-keyword">return</span> __webpack_require__(__webpack_require__.s = <span class="hljs-string">"./src/index.js"</span>);
+})
+  ({
+    <span class="hljs-string">"./node_modules/_isarray@2.0.5@isarray/index.js"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+        <span class="hljs-built_in">module</span>.exports = (__webpack_require__(<span class="hljs-string">"dll-reference _dll_utils"</span>))(<span class="hljs-string">"./node_modules/_isarray@2.0.5@isarray/index.js"</span>);
+      }),
+    <span class="hljs-string">"./src/index.js"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+        <span class="hljs-keyword">let</span> isarray = __webpack_require__(<span class="hljs-string">"./node_modules/_isarray@2.0.5@isarray/index.js"</span>);
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'isarray([1, 2, 3])='</span>, isarray([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]));
+      }),
+    <span class="hljs-string">"dll-reference _dll_utils"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports</span>) </span>{
+        <span class="hljs-built_in">module</span>.exports = _dll_utils;
+      })
+  });
+</code></pre>
+<h2 id="t184.实现DllPlugin.js">4.实现DllPlugin.js <a href="#t184.实现DllPlugin.js"> # </a></h2>
+<h3 id="t194.1 DllPlugin.js">4.1 DllPlugin.js <a href="#t194.1 DllPlugin.js"> # </a></h3>
+<p>plugins\DllPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> DllEntryPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./DllEntryPlugin"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DllPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+    apply(compiler) {
+        compiler.hooks.entryOption.tap(<span class="hljs-string">"DllPlugin"</span>, (context, entry) =&gt; {
+            <span class="hljs-built_in">Object</span>.keys(entry).forEach(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> {
+                <span class="hljs-keyword">new</span> DllEntryPlugin(context, entry[name],name).apply(compiler);
+            });
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DllPlugin;
+</code></pre>
+<h3 id="t204.2 DllEntryPlugin.js">4.2 DllEntryPlugin.js <a href="#t204.2 DllEntryPlugin.js"> # </a></h3>
+<p>plugins\DllEntryPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> SingleEntryDependency = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/dependencies/SingleEntryDependency"</span>);
+<span class="hljs-keyword">const</span> DllEntryDependency = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./dependencies/DllEntryDependency"</span>);
+<span class="hljs-keyword">const</span> DllModuleFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./DllModuleFactory"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DllEntryPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(context, entries, name) {
+        <span class="hljs-keyword">this</span>.context = context;<span class="hljs-comment">// c:/aprepare/zhufeng_dll_prepare</span>
+        <span class="hljs-keyword">this</span>.entries = entries;<span class="hljs-comment">// ['isarray', 'is-promise']</span>
+        <span class="hljs-keyword">this</span>.name = name; <span class="hljs-comment">// utils</span>
+    }
+    apply(compiler) {
+        compiler.hooks.compilation.tap(
+            <span class="hljs-string">"DllEntryPlugin"</span>,
+            (compilation, { normalModuleFactory }) =&gt; {
+                <span class="hljs-keyword">const</span> dllModuleFactory = <span class="hljs-keyword">new</span> DllModuleFactory();
+                compilation.dependencyFactories.set(
+                    DllEntryDependency,
+                    dllModuleFactory
+                );
+                compilation.dependencyFactories.set(
+                    SingleEntryDependency,
+                    normalModuleFactory
+                );
+            }
+        );
+        compiler.hooks.make.tapAsync(<span class="hljs-string">"DllEntryPlugin"</span>, (compilation, callback) =&gt; {
+            compilation.addEntry(
+                <span class="hljs-keyword">this</span>.context,
+                <span class="hljs-keyword">new</span> DllEntryDependency(
+                    <span class="hljs-keyword">this</span>.entries.map(<span class="hljs-function">(<span class="hljs-params">entry</span>) =&gt;</span> <span class="hljs-keyword">new</span> SingleEntryDependency(entry)),
+                    <span class="hljs-keyword">this</span>.name<span class="hljs-comment">//utils</span>
+                ),
+                <span class="hljs-keyword">this</span>.name,<span class="hljs-comment">//utils</span>
+                callback
+            );
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DllEntryPlugin;
+</code></pre>
+<h3 id="t214.3 DllModuleFactory.js">4.3 DllModuleFactory.js <a href="#t214.3 DllModuleFactory.js"> # </a></h3>
+<p>plugins\DllModuleFactory.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { Tapable } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"tapable"</span>);
+<span class="hljs-keyword">const</span> DllModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./DllModule"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DllModuleFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Tapable</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.hooks = {};
+    }
+    create(data, callback) {
+        <span class="hljs-keyword">const</span> dependency = data.dependencies[<span class="hljs-number">0</span>];
+        callback(
+            <span class="hljs-literal">null</span>,
+            <span class="hljs-keyword">new</span> DllModule(
+                data.context,
+                dependency.dependencies,<span class="hljs-comment">// [SingleEntryDependency, SingleEntryDependency]</span>
+                dependency.name,<span class="hljs-comment">//utils</span>
+                dependency.type<span class="hljs-comment">//'dll entry'</span>
+            )
+        );
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DllModuleFactory;
+</code></pre>
+<h3 id="t224.4 DllEntryDependency.js">4.4 DllEntryDependency.js <a href="#t224.4 DllEntryDependency.js"> # </a></h3>
+<p>plugins\dependencies\DllEntryDependency.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Dependency = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/Dependency"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DllEntryDependency</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Dependency</span> </span>{
+    <span class="hljs-keyword">constructor</span>(dependencies, name) {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.dependencies = dependencies;<span class="hljs-comment">//[SingleEntryDependency,SingleEntryDependency ]</span>
+        <span class="hljs-keyword">this</span>.name = name;<span class="hljs-comment">//utils</span>
+    }
+    <span class="hljs-keyword">get</span> type() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"dll entry"</span>;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DllEntryDependency;
+</code></pre>
+<h3 id="t234.5 DllModule.js">4.5 DllModule.js <a href="#t234.5 DllModule.js"> # </a></h3>
+<p>plugins\DllModule.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { RawSource } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack-sources"</span>);
+<span class="hljs-keyword">const</span> Module = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/Module"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DllModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>{
+    <span class="hljs-keyword">constructor</span>(context, dependencies, name, type) {
+        <span class="hljs-keyword">super</span>(<span class="hljs-string">"javascript/dynamic"</span>, context);<span class="hljs-comment">//c:/aprepare/zhufeng_dll_prepare2</span>
+        <span class="hljs-keyword">this</span>.dependencies = dependencies;
+        <span class="hljs-keyword">this</span>.name = name;<span class="hljs-comment">//utils</span>
+        <span class="hljs-keyword">this</span>.type = type;<span class="hljs-comment">//dll entry</span>
+    }
+    identifier() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">`dll <span class="hljs-subst">${<span class="hljs-keyword">this</span>.name}</span>`</span>;
+    }
+    readableIdentifier() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">`dll <span class="hljs-subst">${<span class="hljs-keyword">this</span>.name}</span>`</span>;
+    }
+    build(options, compilation, resolver, fs, callback) {
+        <span class="hljs-keyword">this</span>.built = <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">this</span>.buildMeta = {};
+        <span class="hljs-keyword">this</span>.buildInfo = {};
+        <span class="hljs-keyword">return</span> callback();
+    }
+    source() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RawSource(<span class="hljs-string">"module.exports = __webpack_require__;"</span>);
+    }
+    size() {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">12</span>;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DllModule;
+
+</code></pre>
+<h2 id="t245.实现LibManifestPlugin.js">5.实现LibManifestPlugin.js <a href="#t245.实现LibManifestPlugin.js"> # </a></h2>
+<h3 id="t255.1 LibManifestPlugin.js">5.1 LibManifestPlugin.js <a href="#t255.1 LibManifestPlugin.js"> # </a></h3>
+<p>plugins\LibManifestPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> asyncLib = <span class="hljs-built_in">require</span>(<span class="hljs-string">"neo-async"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LibManifestPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+    apply(compiler) {
+        compiler.hooks.emit.tapAsync(
+            <span class="hljs-string">"LibManifestPlugin"</span>,
+            (compilation, callback) =&gt; {
+                asyncLib.forEach(
+                    compilation.chunks,
+                    (chunk, done) =&gt; {
+                        <span class="hljs-comment">// c:aprepare/zhufeng_dll_prepare/dist/utils.manifest.json</span>
+                        <span class="hljs-keyword">const</span> targetPath = <span class="hljs-keyword">this</span>.options.path;
+                        <span class="hljs-keyword">const</span> name =<span class="hljs-keyword">this</span>.options.name;<span class="hljs-comment">//_dll_utils</span>
+                        <span class="hljs-keyword">let</span> content ={};
+                        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> <span class="hljs-keyword">of</span> chunk.modulesIterable){
+                            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">module</span>.libIdent) {
+                                <span class="hljs-keyword">const</span> ident = <span class="hljs-built_in">module</span>.libIdent({<span class="hljs-attr">context</span>:compiler.options.context});
+                                content[ident]= {<span class="hljs-attr">id</span>: <span class="hljs-built_in">module</span>.id};
+                            }
+                        }
+                        <span class="hljs-keyword">const</span> manifest = {name,content};<span class="hljs-comment">//name=_dll_utils</span>
+                        compiler.outputFileSystem.mkdirp(path.dirname(targetPath), err =&gt; {
+                            compiler.outputFileSystem.writeFile(
+                                targetPath,
+                                <span class="hljs-built_in">JSON</span>.stringify(manifest),
+                                done
+                            );
+                        });
+                    },
+                    callback
+                );
+            }
+        );
+    }
+}
+<span class="hljs-built_in">module</span>.exports = LibManifestPlugin;
+</code></pre>
+<h3 id="t265.2 DllPlugin.js">5.2 DllPlugin.js <a href="#t265.2 DllPlugin.js"> # </a></h3>
+<p>plugins\DllPlugin.js</p>
+<pre><code class="lang-diff">const DllEntryPlugin = require("./DllEntryPlugin");
+<span class="hljs-addition">+const LibManifestPlugin = require("./LibManifestPlugin");</span>
+class DllPlugin {
+    constructor(options) {
+        this.options = options;
+    }
+    apply(compiler) {
+        compiler.hooks.entryOption.tap("DllPlugin", (context, entry) =&gt; {
+            Object.keys(entry).forEach(name =&gt; {
+                new DllEntryPlugin(context, entry[name],name).apply(compiler);
+            });
+            return true;
+        });
+<span class="hljs-addition">+        new LibManifestPlugin(this.options).apply(compiler);</span>
+    }
+}
+module.exports = DllPlugin;
+</code></pre>
+<h2 id="t276. 实现DllReferencePlugin.js">6. 实现DllReferencePlugin.js <a href="#t276. 实现DllReferencePlugin.js"> # </a></h2>
+<h3 id="t286.1 DllReferencePlugin.js">6.1 DllReferencePlugin.js <a href="#t286.1 DllReferencePlugin.js"> # </a></h3>
+<p>plugins\DllReferencePlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> DelegatedSourceDependency = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/dependencies/DelegatedSourceDependency"</span>);
+<span class="hljs-keyword">const</span> ExternalModuleFactoryPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./ExternalModuleFactoryPlugin"</span>);
+<span class="hljs-keyword">const</span> DelegatedModuleFactoryPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./DelegatedModuleFactoryPlugin"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DllReferencePlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+
+    apply(compiler) {
+        compiler.hooks.compilation.tap(
+            <span class="hljs-string">"DllReferencePlugin"</span>,
+            (compilation, { normalModuleFactory }) =&gt; {
+                compilation.dependencyFactories.set(
+                    DelegatedSourceDependency,
+                    normalModuleFactory
+                );
+            }
+        );
+
+        compiler.hooks.compile.tap(<span class="hljs-string">"DllReferencePlugin"</span>, ({normalModuleFactory}) =&gt; {
+            <span class="hljs-keyword">let</span> manifest = <span class="hljs-keyword">this</span>.options.manifest;
+            <span class="hljs-keyword">let</span> name = manifest.name;<span class="hljs-comment">//_dll_utils</span>
+            <span class="hljs-keyword">let</span> content = manifest.content;<span class="hljs-comment">//{'is-promise':'','isarray':''}</span>
+            <span class="hljs-comment">//外部模块  "dll-reference _dll_utils"引用window._dll_utils</span>
+            <span class="hljs-keyword">const</span> externals = {};
+            <span class="hljs-keyword">const</span> source = <span class="hljs-string">"dll-reference "</span> + name;<span class="hljs-comment">//dll-reference _dll_utils</span>
+            externals[source] = name;<span class="hljs-comment">//dll-reference _dll_utils=&gt;_dll_utils</span>
+      <span class="hljs-keyword">new</span> ExternalModuleFactoryPlugin(<span class="hljs-string">"var"</span>, externals).apply(normalModuleFactory);
+
+            <span class="hljs-keyword">new</span> DelegatedModuleFactoryPlugin({
+                source,
+                <span class="hljs-attr">context</span>: compiler.options.context,
+                content
+            }).apply(normalModuleFactory);
+        });
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = DllReferencePlugin;
+</code></pre>
+<h3 id="t296.2 ExternalModuleFactoryPlugin.js">6.2 ExternalModuleFactoryPlugin.js <a href="#t296.2 ExternalModuleFactoryPlugin.js"> # </a></h3>
+<p>plugins\ExternalModuleFactoryPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> ExternalModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack/lib/ExternalModule'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExternalModuleFactoryPlugin</span></span>{
+    <span class="hljs-keyword">constructor</span>(type, externals) {
+        <span class="hljs-keyword">this</span>.type = type;<span class="hljs-comment">//var</span>
+        <span class="hljs-keyword">this</span>.externals = externals;<span class="hljs-comment">//{"dll-reference _dll_utils":"_dll_utils"}</span>
+    }
+
+    apply(normalModuleFactory) {
+        <span class="hljs-comment">//const globalType = this.type;</span>
+        normalModuleFactory.hooks.factory.tap(
+            <span class="hljs-string">"ExternalModuleFactoryPlugin"</span>,
+            <span class="hljs-comment">//传进去老的工厂函数,返回新的工厂函数</span>
+            factory =&gt; <span class="hljs-function">(<span class="hljs-params">data, callback</span>) =&gt;</span> {
+         <span class="hljs-keyword">const</span> dependency = data.dependencies[<span class="hljs-number">0</span>];<span class="hljs-comment">//DelegatedSourceDependency</span>
+         <span class="hljs-keyword">let</span> request = dependency.request;<span class="hljs-comment">// "dll-reference _dll_utils"</span>
+         <span class="hljs-keyword">let</span> value = <span class="hljs-keyword">this</span>.externals[request];<span class="hljs-comment">//_dll_utils</span>
+         <span class="hljs-keyword">if</span>(value){<span class="hljs-comment">//如果是一个外部模块</span>
+             callback(
+                 <span class="hljs-literal">null</span>,
+                 <span class="hljs-keyword">new</span> ExternalModule(value, <span class="hljs-string">'var'</span>, dependency.request)<span class="hljs-comment">//_dll_utils</span>
+             );
+         }<span class="hljs-keyword">else</span>{<span class="hljs-comment">//否则 是个普通模块 走老的普通模块工厂的生产模块的逻辑</span>
+             factory(data, callback);
+         }
+            }
+        );
+    }
+}
+<span class="hljs-built_in">module</span>.exports = ExternalModuleFactoryPlugin;
+</code></pre>
+<h3 id="t306.3 DelegatedModuleFactoryPlugin.js">6.3 DelegatedModuleFactoryPlugin.js <a href="#t306.3 DelegatedModuleFactoryPlugin.js"> # </a></h3>
+<p>plugins\DelegatedModuleFactoryPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> DelegatedModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./DelegatedModule"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DelegatedModuleFactoryPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+        options.type = options.type || <span class="hljs-string">"require"</span>;
+    }
+    apply(normalModuleFactory) {
+        normalModuleFactory.hooks.module.tap(
+            <span class="hljs-string">"DelegatedModuleFactoryPlugin"</span>,
+            <span class="hljs-built_in">module</span> =&gt; {
+                <span class="hljs-keyword">if</span> (<span class="hljs-built_in">module</span>.libIdent) {
+                    <span class="hljs-keyword">const</span> request = <span class="hljs-built_in">module</span>.libIdent(<span class="hljs-keyword">this</span>.options);
+                    <span class="hljs-keyword">if</span> (request &amp;&amp; request <span class="hljs-keyword">in</span> <span class="hljs-keyword">this</span>.options.content) {
+                        <span class="hljs-keyword">const</span> resolved = <span class="hljs-keyword">this</span>.options.content[request];
+                        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> DelegatedModule(
+                            <span class="hljs-keyword">this</span>.options.source,<span class="hljs-comment">//dll-reference _dll_utils</span>
+                            resolved,<span class="hljs-comment">//{"id":"./node_modules/_is-promise@4.0.0@is-promise/index.js"}</span>
+                            <span class="hljs-built_in">module</span><span class="hljs-comment">//老模块</span>
+                        );
+                    }
+                }
+                <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>;
+            }
+        );
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DelegatedModuleFactoryPlugin;
+</code></pre>
+<h3 id="t316.4 DelegatedModule.js">6.4 DelegatedModule.js <a href="#t316.4 DelegatedModule.js"> # </a></h3>
+<p>plugins\DelegatedModule.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { RawSource } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack-sources"</span>);
+<span class="hljs-keyword">const</span> DelegatedSourceDependency = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/dependencies/DelegatedSourceDependency"</span>);
+<span class="hljs-keyword">const</span> Module = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack/lib/Module"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DelegatedModule</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Module</span> </span>{
+    <span class="hljs-keyword">constructor</span>(sourceRequest, data,originalRequest) {
+        <span class="hljs-keyword">super</span>(<span class="hljs-string">"javascript/dynamic"</span>, <span class="hljs-literal">null</span>);
+        <span class="hljs-keyword">this</span>.sourceRequest = sourceRequest;<span class="hljs-comment">//dll-reference _dll_utils</span>
+        <span class="hljs-keyword">this</span>.request = data.id;<span class="hljs-comment">//{"id":"./node_modules/_is-promise@4.0.0@is-promise/index.js"}</span>
+        <span class="hljs-keyword">this</span>.originalRequest = originalRequest;<span class="hljs-comment">//老模块</span>
+    }
+    libIdent(options) {<span class="hljs-comment">//模块ID还是老的模块ID</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.originalRequest.libIdent(options);
+    }
+    identifier() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">`delegated <span class="hljs-subst">${<span class="hljs-keyword">this</span>.request}</span> from <span class="hljs-subst">${<span class="hljs-keyword">this</span>.sourceRequest}</span>`</span>;
+    }
+
+    readableIdentifier() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">`delegated <span class="hljs-subst">${<span class="hljs-keyword">this</span>.request}</span> from <span class="hljs-subst">${<span class="hljs-keyword">this</span>.sourceRequest}</span>`</span>;
+    }
+    size(){
+        <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>;
+    }
+    build(options, compilation, resolver, fs, callback) {
+        <span class="hljs-keyword">this</span>.built = <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">this</span>.buildMeta = {};
+        <span class="hljs-keyword">this</span>.buildInfo = {};
+        <span class="hljs-keyword">this</span>.delegatedSourceDependency = <span class="hljs-keyword">new</span> DelegatedSourceDependency(
+            <span class="hljs-keyword">this</span>.sourceRequest
+        );
+        <span class="hljs-keyword">this</span>.addDependency(<span class="hljs-keyword">this</span>.delegatedSourceDependency);
+        callback();
+    }
+    source() {
+        <span class="hljs-keyword">let</span> str = <span class="hljs-string">`module.exports = (__webpack_require__("<span class="hljs-subst">${<span class="hljs-keyword">this</span>.sourceRequest}</span>"))(<span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(<span class="hljs-keyword">this</span>.request)}</span>);`</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> RawSource(str);
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DelegatedModule;
+</code></pre>
+<h2 id="t327. autodll-webpack-plugin">7. autodll-webpack-plugin <a href="#t327. autodll-webpack-plugin"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/autodll-webpack-plugin">autodll-webpack-plugin</a></li>
+</ul>
+<h3 id="t337.1 webpack.config.js">7.1 webpack.config.js <a href="#t337.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> AutodllWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'autodll-webpack-plugin'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">entry</span>:<span class="hljs-string">'./src/index.js'</span>,
+    <span class="hljs-attr">output</span>:{
+        <span class="hljs-attr">path</span>:path.resolve(__dirname,<span class="hljs-string">'dist'</span>),<span class="hljs-comment">//输出目录</span>
+        <span class="hljs-attr">filename</span>:<span class="hljs-string">'bundle.js'</span>,               <span class="hljs-comment">//打包后的文件名</span>
+        <span class="hljs-attr">publicPath</span>:<span class="hljs-string">''</span>                       <span class="hljs-comment">//访问路径 </span>
+    },
+    <span class="hljs-attr">plugins</span>:[
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">inject</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">template</span>: <span class="hljs-string">'./src/index.html'</span>,
+        }),
+        <span class="hljs-keyword">new</span> AutodllWebpackPlugin({
+            <span class="hljs-attr">inject</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name].dll.js'</span>,
+            <span class="hljs-attr">entry</span>:{
+                <span class="hljs-attr">utils</span>:[<span class="hljs-string">'isarray'</span>,<span class="hljs-string">'is-promise'</span>]
+            }
+        })
+    ]
+}
+</code></pre>
+<h3 id="t347.2 plugin.js">7.2 plugin.js <a href="#t347.2 plugin.js"> # </a></h3>
+<p>node_modules_<a href="mailto:autodll-webpack-plugin@0.4.2">autodll-webpack-plugin@0.4.2</a>@autodll-webpack-plugin\lib\plugin.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+const HtmlWebpackPlugin = require("html-webpack-plugin");</span>
+<span class="hljs-addition">+        compiler.hooks.compilation.tap('AutoDllPlugin', function (compilation) {</span>
+<span class="hljs-addition">+          if (compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration) {</span>
+<span class="hljs-addition">+            compilation.hooks.htmlWebpackPluginBeforeHtmlGeneration.tapAsync('AutoDllPlugin', doCompilation);</span>
+<span class="hljs-addition">+          } else if (HtmlWebpackPlugin.getHooks &amp;&amp; HtmlWebpackPlugin.getHooks(compilation)) {</span>
+<span class="hljs-addition">+            HtmlWebpackPlugin.getHooks(compilation).beforeAssetTagGeneration.tapAsync('AutoDllPlugin', doCompilation);</span>
+<span class="hljs-addition">+          }</span>
+<span class="hljs-addition">+        });</span>
+</code></pre>
+
+    

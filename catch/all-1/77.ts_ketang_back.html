@@ -1,0 +1,360 @@
+
+        <h2 id="t01.app.js">1.app.js <a href="#t01.app.js"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express"</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">"body-parser"</span>);
+<span class="hljs-keyword">let</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">"cors"</span>);
+<span class="hljs-keyword">let</span> session = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express-session"</span>);
+<span class="hljs-keyword">var</span> multer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'multer'</span>);
+<span class="hljs-keyword">var</span> upload = multer({ <span class="hljs-attr">dest</span>: path.resolve(__dirname, <span class="hljs-string">'public'</span>) });
+<span class="hljs-keyword">let</span> MongoStore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connect-mongo'</span>)(session);
+<span class="hljs-keyword">let</span> { dbUrl } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./settings'</span>);
+<span class="hljs-keyword">let</span> { md5 } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./utils'</span>);
+<span class="hljs-keyword">let</span> { UserModel, SliderModel, LessonModel } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./db'</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(express.static(path.resolve(__dirname, <span class="hljs-string">'public'</span>)));
+app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+app.use(bodyParser.json());
+app.use(
+  cors({
+    <span class="hljs-attr">origin</span>: [<span class="hljs-string">"http://localhost:8080"</span>, <span class="hljs-string">"http://localhost:8081"</span>],
+    <span class="hljs-attr">credentials</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">allowedHeaders</span>: <span class="hljs-string">"Content-Type,x-requested-with"</span>,
+    <span class="hljs-attr">methods</span>: <span class="hljs-string">"GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"</span>
+  })
+);
+app.use(<span class="hljs-function">(<span class="hljs-params">req, res, next</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (req.method === <span class="hljs-string">'OPTIONS'</span>) {
+    res.sendStatus(<span class="hljs-number">200</span>);
+  } <span class="hljs-keyword">else</span> {
+    next();
+  }
+});
+app.use(
+  session({
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">"zhufeng"</span>,
+    <span class="hljs-attr">resave</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">saveUninitialized</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">store</span>: <span class="hljs-keyword">new</span> MongoStore({
+      <span class="hljs-attr">url</span>: dbUrl,
+      <span class="hljs-attr">mongoOptions</span>: {
+        <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span>
+      }
+    })
+  })
+);
+app.post(<span class="hljs-string">'/uploadAvatar'</span>, upload.single(<span class="hljs-string">'avatar'</span>), <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res, next</span>) </span>{
+  <span class="hljs-keyword">let</span> { userId } = req.body;
+  <span class="hljs-keyword">let</span> avatar = <span class="hljs-string">`<span class="hljs-subst">${req.protocol}</span>://<span class="hljs-subst">${req.headers.host}</span>/<span class="hljs-subst">${req.file.filename}</span>`</span>;
+  <span class="hljs-keyword">await</span> UserModel.updateOne({ <span class="hljs-attr">_id</span>: userId }, { avatar });
+  setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    res.send({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: avatar });
+  }, <span class="hljs-number">3000</span>);
+})
+app.post(<span class="hljs-string">'/register'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+  <span class="hljs-keyword">let</span> user = req.body;<span class="hljs-comment">//username password email phone avatar</span>
+  user.avatar = <span class="hljs-string">`https://secure.gravatar.com/avatar/<span class="hljs-subst">${md5(user.email)}</span>?s=48`</span>;
+  user = <span class="hljs-keyword">await</span> UserModel.create(user);
+  req.session.user = user;
+  res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, user });
+});
+
+app.post(<span class="hljs-string">'/login'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+  <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> UserModel.findOne(req.body);
+  <span class="hljs-keyword">if</span> (user) {
+    req.session.user = user;
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: user });
+  } <span class="hljs-keyword">else</span> {
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'用户未登录'</span> });
+  }
+});
+app.get(<span class="hljs-string">"/validate"</span>, (req, res) =&gt; {
+  <span class="hljs-keyword">let</span> user = req.session.user;
+  <span class="hljs-keyword">if</span> (user) {
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: user });
+  } <span class="hljs-keyword">else</span> {
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'当前用户未登录'</span> });
+  }
+});
+app.get(<span class="hljs-string">"/logout"</span>, (req, res) =&gt; {
+  req.session.user = <span class="hljs-literal">null</span>;
+  res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: <span class="hljs-string">"退出登录成功"</span> });
+});
+
+app.get(<span class="hljs-string">'/sliders'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+  <span class="hljs-keyword">let</span> sliders = <span class="hljs-keyword">await</span> SliderModel.find();
+  res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: sliders });
+});
+app.get(<span class="hljs-string">'/getlesson'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+  <span class="hljs-keyword">let</span> { id } = req.query;
+  <span class="hljs-keyword">let</span> lessons = <span class="hljs-keyword">await</span> LessonModel.findById(id);
+  res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: lessons });
+});
+<span class="hljs-comment">// http://getLessons/vue?offset=0&amp;limit=5</span>
+app.get(<span class="hljs-string">'/getLessons/:category'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+  <span class="hljs-keyword">let</span> category = req.params.category;
+  <span class="hljs-keyword">let</span> { offset, limit } = req.query;
+  offset = <span class="hljs-built_in">isNaN</span>(offset) ? <span class="hljs-number">0</span> : <span class="hljs-built_in">parseInt</span>(offset);<span class="hljs-comment">//偏移量 </span>
+  limit = <span class="hljs-built_in">isNaN</span>(limit) ? <span class="hljs-number">5</span> : <span class="hljs-built_in">parseInt</span>(limit); <span class="hljs-comment">//每页条数</span>
+  <span class="hljs-keyword">let</span> query = {};
+  <span class="hljs-keyword">if</span> (category &amp;&amp; category != <span class="hljs-string">'all'</span>)
+    query.category = category;
+  <span class="hljs-keyword">let</span> total = <span class="hljs-keyword">await</span> LessonModel.count(query);
+  <span class="hljs-keyword">let</span> list = <span class="hljs-keyword">await</span> LessonModel.find(query).sort({ <span class="hljs-attr">order</span>: <span class="hljs-number">1</span> }).skip(offset).limit(limit);
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log({ list, <span class="hljs-attr">hasMore</span>: total &gt; offset + limit });
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: { list, <span class="hljs-attr">hasMore</span>: total &gt; offset + limit } });
+  }, <span class="hljs-number">1000</span>);
+});
+app.listen(<span class="hljs-number">8000</span>);
+</code></pre>
+<h2 id="t12. settings.js">2. settings.js <a href="#t12. settings.js"> # </a></h2>
+<p>server\settings.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">cookieSecret</span>: <span class="hljs-string">'zhufeng'</span>,<span class="hljs-comment">// 用于 Cookie 加密与数据库无关</span>
+  <span class="hljs-attr">dbUrl</span>: <span class="hljs-string">"mongodb://127.0.0.1:27017/zhufengketang"</span>
+}
+</code></pre>
+<h2 id="t23. utils.js">3. utils.js <a href="#t23. utils.js"> # </a></h2>
+<p>server\utils.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">md5</span>(<span class="hljs-params">val</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>).createHash(<span class="hljs-string">'md5'</span>).update(val).digest(<span class="hljs-string">'hex'</span>);
+}
+<span class="hljs-built_in">module</span>.exports = {
+  md5
+}
+</code></pre>
+<h2 id="t34. db\index.js">4. db\index.js <a href="#t34. db\index.js"> # </a></h2>
+<p>server\db\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+<span class="hljs-keyword">const</span> ObjectId = Schema.Types.ObjectId;
+<span class="hljs-keyword">const</span> { dbUrl } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../settings'</span>);
+<span class="hljs-keyword">const</span> conn = mongoose.createConnection(dbUrl, { <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span> });
+<span class="hljs-keyword">const</span> UserModel = conn.model(<span class="hljs-string">'User'</span>, <span class="hljs-keyword">new</span> Schema({
+  <span class="hljs-attr">username</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//用户名</span>
+  <span class="hljs-attr">password</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//密码</span>
+  <span class="hljs-attr">email</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//邮箱</span>
+  <span class="hljs-attr">phone</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//手机号</span>
+  <span class="hljs-attr">avatar</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> }<span class="hljs-comment">//头像</span>
+}));
+<span class="hljs-keyword">const</span> SliderModel = conn.model(<span class="hljs-string">'Slider'</span>, <span class="hljs-keyword">new</span> Schema({
+  <span class="hljs-attr">url</span>: <span class="hljs-built_in">String</span>
+}));
+<span class="hljs-keyword">const</span> LessonModel = conn.model(<span class="hljs-string">'Lesson'</span>, <span class="hljs-keyword">new</span> Schema({
+  <span class="hljs-attr">order</span>: <span class="hljs-built_in">Number</span>,<span class="hljs-comment">//顺序</span>
+  <span class="hljs-attr">title</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//标题</span>
+  <span class="hljs-attr">video</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//视频</span>
+  <span class="hljs-attr">poster</span>: <span class="hljs-built_in">String</span>, <span class="hljs-comment">//海报</span>
+  <span class="hljs-attr">url</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//url地址</span>
+  <span class="hljs-attr">price</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//价格</span>
+  <span class="hljs-attr">category</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//分类</span>
+}));
+
+<span class="hljs-built_in">module</span>.exports = {
+  UserModel,
+  SliderModel,
+  LessonModel
+}
+
+  ; (<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> sliderList = <span class="hljs-keyword">await</span> SliderModel.find();
+    <span class="hljs-keyword">if</span> (sliderList.length == <span class="hljs-number">0</span>) {
+      SliderModel.create([
+        { <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/reactnative.png'</span> },
+        { <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span> },
+        { <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span> },
+        { <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/wechat.png'</span> },
+        { <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/architect.jpg'</span> }
+      ]);
+    }
+    <span class="hljs-keyword">let</span> lessonList = <span class="hljs-keyword">await</span> LessonModel.find();
+    <span class="hljs-keyword">if</span> (lessonList.length == <span class="hljs-number">0</span>) {
+      LessonModel.create([
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'1.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥100.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">2</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'2.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥200.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">3</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'3.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥300.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">4</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'4.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥400.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">5</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'5.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥500.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">6</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'6.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥100.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">7</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'7.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥200.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">8</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'8.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥300.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">9</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'9.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥400.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">10</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'10.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥500.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">11</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'11.React全栈架构'</span>,
+          <span class="hljs-string">"video"</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥600.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">12</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'12.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥700.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">13</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'13.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥800.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">14</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'14.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥900.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">15</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'15.React全栈架构'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/react/img/react.jpg"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥1000.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'react'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">16</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'16.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥600.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">17</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'17.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥700.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">18</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'18.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥800.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">19</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'19.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥900.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        },
+        {
+          <span class="hljs-attr">order</span>: <span class="hljs-number">20</span>,
+          <span class="hljs-attr">title</span>: <span class="hljs-string">'20.Vue从入门到项目实战'</span>,
+          <span class="hljs-attr">video</span>: <span class="hljs-string">"http://img.zhufengpeixun.cn/gee2.mp4"</span>,
+          <span class="hljs-attr">poster</span>: <span class="hljs-string">"http://www.zhufengpeixun.cn/vue/img/vue.png"</span>,
+          <span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png'</span>,
+          <span class="hljs-attr">price</span>: <span class="hljs-string">'¥1000.00元'</span>,
+          <span class="hljs-attr">category</span>: <span class="hljs-string">'vue'</span>
+        }
+      ]);
+    }
+  })();
+</code></pre>
+
+    

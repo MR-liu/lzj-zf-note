@@ -1,0 +1,248 @@
+
+        <h2 id="t0vue路由使用详解">vue路由使用详解 <a href="#t0vue路由使用详解"> # </a></h2>
+<h2 id="t1基础的路由配置">基础的路由配置 <a href="#t1基础的路由配置"> # </a></h2>
+<pre><code>import Vue from 'vue'
+import Router from 'vue-router'
+import routes from './routes';
+Vue.use(Router)
+
+export default new Router({
+  mode: 'history', // 不使用#方式
+  base: process.env.BASE_URL,
+  routes
+});
+
+// routes.js文件是专门处理路由的 配置影射关系
+export default  [
+    {
+        path:'/',
+        redirect: {name:'home'} // 默认访问根路径时 可以重定向到home路由
+    },
+    {
+        name:'home',
+        path:'/home', //  实现了路由的懒加载
+        component:()=&gt;import('../views/Home.vue')
+    },
+    {
+        path:'/profile',
+        name:'profile',
+        component:()=&gt;import('../views/Profile.vue')
+    },
+    {
+        path:'/user',
+        name:'user',
+        component:()=&gt;import('../views/User.vue')
+    },
+    {
+        path:'/login',
+        name:'login',
+        component:()=&gt;import('../views/Login.vue')
+    },
+    {
+        path:'*',
+        component:()=&gt;import('../views/404.vue')
+    }
+]
+</code></pre><h3 id="t2路由的导航应用">路由的导航应用 <a href="#t2路由的导航应用"> # </a></h3>
+<p>引入bootstrap,进行安装</p>
+<pre><code>yarn add bootstrap@3
+import 'bootstrap/dist/css/bootstrap.css'
+</code></pre><pre><code>&lt;template&gt;
+&lt;div&gt;
+    &lt;nav class="navbar navbar-default"&gt;
+        &lt;div class="container-fluid"&gt;
+            &lt;div class="navbar-header"&gt;
+                &lt;a class="navbar-brand" href="#"&gt;
+                管理系统
+                &lt;/a&gt;
+            &lt;/div&gt;
+            &lt;ul class="navbar-nav nav"&gt;
+                    &lt;li&gt;
+                        &lt;router-link :to="{name:'home'}"&gt;首页&lt;/router-link&gt;
+                    &lt;/li&gt;
+                    &lt;li&gt;
+                        &lt;router-link :to="{name:'profile'}"&gt;个人中心&lt;/router-link&gt;
+                    &lt;/li&gt;
+                    &lt;li&gt;
+                        &lt;router-link :to="{path:'/user'}"&gt;用户管理&lt;/router-link&gt;
+                    &lt;/li&gt;
+                    &lt;li&gt;
+                        &lt;router-link :to="{name:'login'}"&gt;登录&lt;/router-link&gt;
+                    &lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+&lt;/div&gt;
+&lt;/template&gt;
+</code></pre><h3 id="t3配置命名视图 (一个路径匹配多个路由)">配置命名视图 (一个路径匹配多个路由) <a href="#t3配置命名视图 (一个路径匹配多个路由)"> # </a></h3>
+<p>在项目中一般情况是不使用命名视图的</p>
+<pre><code>{
+    name:'home',
+    path:'/home', //  实现了路由的懒加载
+    components:{ // 当前路径 匹配对个router-view
+        default:()=&gt;import('../views/Home.vue'),
+        name:()=&gt;import('../components/Name.vue'),
+        version:()=&gt;import('../components/Version.vue')
+    }
+}
+</code></pre><h3 id="t4二级路由配置">二级路由配置 <a href="#t4二级路由配置"> # </a></h3>
+<p>父路径跳转必须使用路径跳转使用nam, 不显示默认孩子</p>
+<pre><code>{
+        path:'/user',
+        name:'user',
+        component:()=&gt;import('../views/User.vue'),
+        children:[ //  子路由配置
+            {
+                path:'', // 如果渲染默认路由 必须使用path跳转
+                redirect:{name:'userAdd'}
+            },
+            {
+                name:'userAdd',
+                path:'userAdd',
+                component:()=&gt;import('../views/UserAdd')
+            },
+            {
+                name:'userList',
+                path:'userList',
+                component:()=&gt;import('../views/UserList')
+            }
+        ]
+},
+</code></pre><h3 id="t5二级路由跳转">二级路由跳转 <a href="#t5二级路由跳转"> # </a></h3>
+<pre><code>// user.vue
+&lt;template&gt;
+&lt;div class="row"&gt;
+    &lt;div class="col-md-3"&gt;
+        &lt;nav class="nav nav-stacked"&gt;
+            &lt;li&gt;
+                &lt;router-link :to="{name:'userAdd'}"&gt;用户添加&lt;/router-link&gt;
+            &lt;/li&gt;
+            &lt;li&gt;
+                &lt;router-link :to="{name:'userList'}"&gt;用户列表&lt;/router-link&gt;
+            &lt;/li&gt;
+        &lt;/nav&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-9"&gt;
+        &lt;router-view&gt;&lt;/router-view&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/template&gt;
+</code></pre><h3 id="t6编程式导航">编程式导航 <a href="#t6编程式导航"> # </a></h3>
+<pre><code>&lt;template&gt;
+    &lt;div&gt;
+        &lt;button class="btn btn-primary" @click="login"&gt;登录&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+    methods: {
+        login(){
+            this.$router.push({name:'login'})
+        }
+    },
+}
+&lt;/script&gt;
+</code></pre><h3 id="t7组件内的钩子">组件内的钩子 <a href="#t7组件内的钩子"> # </a></h3>
+<pre><code> beforeRouteLeave (to, from, next) {
+        if(this.username){
+            let confirm = window.confirm('确认离开吗');
+            if(confirm) return next();
+        }else{
+            next();
+        }
+ }
+beforeRouteEnter(to,from,next){
+       // 在进入路由之前可以对数据校验 ajax获取
+       let user = JSON.parse(localStorage.getItem('user')) || [];
+       if(user.length){
+           next();
+       }else{
+           next({name:'userAdd'})
+       }
+},
+</code></pre><h3 id="t8带参数跳转">带参数跳转 <a href="#t8带参数跳转"> # </a></h3>
+<pre><code>{
+    name:'userDetail',
+    path:'userDetail',
+    component:()=&gt;import('../views/UserDetail')
+},
+{
+    name:'detail',
+    path:'userDetail/:name', // 路径参数 必须通过name跳转
+    component:()=&gt;import('../views/UserDetail')
+}
+// 不同方式的传递参数
+&lt;td&gt;&lt;router-link :to="{name:'userDetail',query:{id:u.id}}"&gt;{{u.id}}&lt;/router-link&gt;&lt;/td&gt;
+&lt;td&gt;&lt;router-link :to="{name:'detail',params:{name:u.username}}"&gt; {{u.username}}&lt;/router-link&gt;&lt;/td&gt;
+
+// 取值方式
+ 查询字符串 {{this.$route.query &amp;&amp; this.$route.query.id}} &lt;br&gt;
+ 查询参数 {{this.$route.params &amp;&amp; this.$route.params.name}} &lt;br&gt;
+</code></pre><h3 id="t9权限校验">权限校验 <a href="#t9权限校验"> # </a></h3>
+<pre><code>router.beforeEach((to,from,next)=&gt;{
+  let needLogin = to.matched &amp;&amp; to.matched.some(({meta})=&gt;{
+   return meta &amp;&amp; meta.needLogin
+  });
+  let isLogin = localStorage.getItem('login')
+  if(needLogin){
+    if(isLogin){
+      next();
+    }else{
+      next({name:'login'});
+    }
+  }else{
+    // 如果不需要登录 并且是登录页面
+    if(!(to.name == 'login' &amp;&amp; isLogin)){
+      next();
+    }
+  }
+});
+</code></pre><h3 id="t10路由更新变化">路由更新变化 <a href="#t10路由更新变化"> # </a></h3>
+<pre><code>// watch:{
+//    $route(){
+          alert('参数变化')
+      }
+// }
+beforeRouteUpdate(){ // 如果组件被复用 唯一的方式 就是监听路由的更新方法
+    console.log('路由更新了')
+}
+</code></pre><h3 id="t11钩子执行属性">钩子执行属性 <a href="#t11钩子执行属性"> # </a></h3>
+<ul>
+<li>导航被触发。</li>
+<li>在失活的组件里调用离开守卫。</li>
+<li>调用全局的 beforeEach 守卫。</li>
+<li>在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。</li>
+<li>在路由配置里调用 beforeEnter。</li>
+<li>解析异步路由组件。</li>
+<li>在被激活的组件里调用 beforeRouteEnter。</li>
+<li>调用全局的 beforeResolve 守卫 (2.5+)。</li>
+<li>导航被确认。</li>
+<li>调用全局的 afterEach 钩子。</li>
+<li>触发 DOM 更新。</li>
+<li>用创建好的实例调用 beforeRouteEnter 守卫中传给 next 的回调函数。</li>
+</ul>
+<h3 id="t12导航激活样式">导航激活样式 <a href="#t12导航激活样式"> # </a></h3>
+<pre><code>.router-link-active{
+  color:red!important
+}
+.nav-stacked .router-link-active{
+  color:blue !important
+}
+</code></pre><h3 id="t13路由动画">路由动画 <a href="#t13路由动画"> # </a></h3>
+<pre><code>&lt;div class="container"&gt;
+      &lt;transition-group name="fade" &gt;
+        &lt;router-view key="1"&gt;&lt;/router-view&gt;
+        &lt;router-view key="2" name="name"&gt;&lt;/router-view&gt;
+        &lt;router-view key="3" name="version"&gt;&lt;/router-view&gt;
+      &lt;/transition-group&gt;
+&lt;/div&gt;
+.fade-enter{ opacity:0}
+.fade-enter-active{ transition:all 0.2s linear;}
+.fade-enter-to{opacity:1}
+.fade-leave{opacity:1}
+.fade-leave-active{transition:all .2s linear}
+.fade-leave-to{opacity:0}
+</code></pre><p><a href="https://github.com/wakeupmypig/vue-router-apply">https://github.com/wakeupmypig/vue-router-apply</a></p>
+
+    

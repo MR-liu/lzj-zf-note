@@ -1,0 +1,573 @@
+
+        <h2 id="t01.抽象语法树(Abstract Syntax Tree)">1.抽象语法树(Abstract Syntax Tree) <a href="#t01.抽象语法树(Abstract Syntax Tree)"> # </a></h2>
+<p><code>webpack</code>和<code>Lint</code>等很多的工具和库的核心都是通过<code>Abstract Syntax Tree</code>抽象语法树这个概念来实现对代码的检查、分析等操作的</p>
+<ul>
+<li>通过了解抽象语法树这个概念，你也可以随手编写类似的工具</li>
+</ul>
+<h2 id="t12.抽象语法树用途">2.抽象语法树用途 <a href="#t12.抽象语法树用途"> # </a></h2>
+<ul>
+<li>代码语法的检查、代码风格的检查、代码的格式化、代码的高亮、代码错误提示、代码自动补全等等<ul>
+<li>如JSLint、JSHint对代码错误或风格的检查，发现一些潜在的错误</li>
+<li>IDE的错误提示、格式化、高亮、自动补全等等</li>
+</ul>
+</li>
+<li>代码混淆压缩<ul>
+<li>UglifyJS2等</li>
+</ul>
+</li>
+<li>优化变更代码，改变代码结构使达到想要的结构<ul>
+<li>代码打包工具webpack、rollup等等</li>
+<li>CommonJS、AMD、CMD、UMD等代码规范之间的转化</li>
+<li>CoffeeScript、TypeScript、JSX等转化为原生Javascript</li>
+</ul>
+</li>
+</ul>
+<h2 id="t23.抽象语法树定义">3.抽象语法树定义 <a href="#t23.抽象语法树定义"> # </a></h2>
+<p>这些工具的原理都是通过<code>JavaScript Parser</code>把代码转化为一颗抽象语法树（AST），这颗树定义了代码的结构，通过操纵这颗树，我们可以精准的定位到声明语句、赋值语句、运算语句等等，实现对代码的分析、优化、变更等操作</p>
+<blockquote>
+<p>在计算机科学中，抽象语法树（abstract syntax tree或者缩写为AST），或者语法树（syntax tree），是源代码的抽象语法结构的树状表现形式，这里特指编程语言的源代码。</p>
+</blockquote>
+<blockquote>
+<p>Javascript的语法是为了给开发者更好的编程而设计的，但是不适合程序的理解。所以需要转化为AST来使之更适合程序分析，浏览器编译器一般会把源码转化为AST来进行进一步的分析等其他操作。</p>
+</blockquote>
+<p><img src="http://img.zhufengpeixun.cn/ast.jpg" alt="ast"></p>
+<h2 id="t34.JavaScript Parser">4.JavaScript Parser <a href="#t34.JavaScript Parser"> # </a></h2>
+<ul>
+<li><p>JavaScript Parser，把js源码转化为抽象语法树的解析器。</p>
+</li>
+<li><p>浏览器会把js源码通过解析器转为抽象语法树，再进一步转化为字节码或直接生成机器码。</p>
+</li>
+<li><p>一般来说每个js引擎都会有自己的抽象语法树格式，Chrome的v8引擎，firefox的SpiderMonkey引擎等等，MDN提供了详细SpiderMonkey AST format的详细说明，算是业界的标准。</p>
+</li>
+</ul>
+<h3 id="t44.1 常用的JavaScript Parser">4.1 常用的JavaScript Parser <a href="#t44.1 常用的JavaScript Parser"> # </a></h3>
+<ul>
+<li>esprima</li>
+<li>traceur</li>
+<li>acorn</li>
+<li>shift</li>
+</ul>
+<h3 id="t54.2 esprima">4.2 esprima <a href="#t54.2 esprima"> # </a></h3>
+<ul>
+<li>通过 <a href="https://www.npmjs.com/package/esprima">esprima</a> 把源码转化为AST</li>
+<li>通过 <a href="https://www.npmjs.com/package/estraverse">estraverse</a> 遍历并更新AST</li>
+<li>通过 <a href="https://www.npmjs.com/package/escodegen">escodegen</a> 将AST重新生成源码</li>
+<li><a href="https://astexplorer.net/">astexplorer</a> AST的可视化工具</li>
+</ul>
+<pre><code class="lang-js">mkdir zhufengast
+cd zhufengast
+
+cnpm i esprima estraverse escodegen- S
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> esprima = <span class="hljs-built_in">require</span>(<span class="hljs-string">'esprima'</span>);
+<span class="hljs-keyword">var</span> estraverse = <span class="hljs-built_in">require</span>(<span class="hljs-string">'estraverse'</span>);
+<span class="hljs-keyword">var</span> escodegen = <span class="hljs-built_in">require</span>(<span class="hljs-string">"escodegen"</span>);
+<span class="hljs-keyword">let</span> code = <span class="hljs-string">'function ast(){}'</span>;
+<span class="hljs-keyword">let</span> ast=esprima.parse(code);
+<span class="hljs-keyword">let</span> indent=<span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pad</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">' '</span>.repeat(indent);
+}
+estraverse.traverse(ast,{
+    enter(node) {
+        <span class="hljs-built_in">console</span>.log(pad()+node.type);
+        <span class="hljs-keyword">if</span>(node.type == <span class="hljs-string">'FunctionDeclaration'</span>){
+            node.id.name = <span class="hljs-string">'ast_rename'</span>;
+        }
+        indent+=<span class="hljs-number">2</span>;
+     },
+    leave(node) {
+        indent-=<span class="hljs-number">2</span>;
+        <span class="hljs-built_in">console</span>.log(pad()+node.type);
+
+     }
+ });
+<span class="hljs-keyword">let</span> generated = escodegen.generate(ast);
+<span class="hljs-built_in">console</span>.log(generated);
+</code></pre>
+<pre><code>Program
+  FunctionDeclaration
+    Identifier
+    Identifier
+    BlockStatement
+    BlockStatement
+  FunctionDeclaration
+Program
+</code></pre><h2 id="t65.babel插件">5.babel插件 <a href="#t65.babel插件"> # </a></h2>
+<ul>
+<li>访问者模式Visitor 对于某个对象或者一组对象，不同的访问者，产生的结果不同，执行操作也不同</li>
+<li><a href="https://www.npmjs.com/package/@babel/core">@babel/core</a> Babel 的编译器，核心 API 都在这里面，比如常见的 transform、parse</li>
+<li><a href="">babylon</a> Babel 的解析器</li>
+<li><a href="https://github.com/babel/babel/tree/master/packages/babel-types">babel-types</a> 用于 AST 节点的 Lodash 式工具库, 它包含了构造、验证以及变换 AST 节点的方法，对编写处理 AST 逻辑非常有用</li>
+<li><a href="https://www.npmjs.com/package/babel-traverse">babel-traverse</a>用于对 AST 的遍历，维护了整棵树的状态，并且负责替换、移除和添加节点</li>
+<li><a href="https://babeljs.io/docs/en/next/babel-types.html">babel-types-api</a></li>
+<li><a href="https://github.com/brigand/babel-plugin-handbook/blob/master/translations/zh-Hans/README.md#asts">Babel 插件手册</a></li>
+<li><a href="https://babeljs.io/en/repl.html">babeljs.io</a> babel可视化编译器</li>
+</ul>
+<h3 id="t75.1 转换箭头函数">5.1 转换箭头函数 <a href="#t75.1 转换箭头函数"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/babel-plugin-transform-es2015-arrow-functions">babel-plugin-transform-es2015-arrow-functions</a></li>
+</ul>
+<p>转换前</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> sum = <span class="hljs-function">(<span class="hljs-params">a,b</span>)=&gt;</span>a+b
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/arrow-left.png" alt="arrow-left"></p>
+<p>转换后</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> sum = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sum</span>(<span class="hljs-params">a, b</span>) </span>{
+  <span class="hljs-keyword">return</span> a + b;
+};
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/arrow-right.png" alt="arrow-right"></p>
+<pre><code class="lang-js">npm i @babel/core babel-types -D
+</code></pre>
+<p>实现</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-keyword">let</span> t = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">const</span> code = <span class="hljs-string">`const sum = (a,b)=&gt;a+b`</span>;
+<span class="hljs-keyword">let</span> transformArrowFunctions = {
+    <span class="hljs-attr">visitor</span>: {
+        <span class="hljs-attr">ArrowFunctionExpression</span>: <span class="hljs-function">(<span class="hljs-params">path</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> node = path.node;
+            <span class="hljs-keyword">let</span> id = path.parent.id;
+            <span class="hljs-keyword">let</span> params = node.params;
+            <span class="hljs-keyword">let</span> body=t.blockStatement([
+                t.returnStatement(node.body)
+            ]);
+            <span class="hljs-keyword">let</span> functionExpression = t.functionExpression(id,params,body,<span class="hljs-literal">false</span>,<span class="hljs-literal">false</span>);
+            path.replaceWith(functionExpression);
+        }
+    }
+}
+<span class="hljs-keyword">const</span> result = babel.transform(code, {
+    <span class="hljs-attr">plugins</span>: [transformArrowFunctions]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+</code></pre>
+<h3 id="t85.2. 预计算babel插件">5.2. 预计算babel插件 <a href="#t85.2. 预计算babel插件"> # </a></h3>
+<ul>
+<li>path.parentPath 父路径</li>
+</ul>
+<p>转换前</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> result = <span class="hljs-number">1</span> + <span class="hljs-number">2</span>;
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/precalcleft.png" alt="precalcleft"></p>
+<p>转换后</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> result = <span class="hljs-number">3</span>;
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/precalcright.png" alt="precalcright"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-keyword">let</span> t=<span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">let</span> preCalculator={
+    <span class="hljs-attr">visitor</span>: {
+        BinaryExpression(path) {
+            <span class="hljs-keyword">let</span> node=path.node;
+            <span class="hljs-keyword">let</span> left=node.left;
+            <span class="hljs-keyword">let</span> operator=node.operator;
+            <span class="hljs-keyword">let</span> right=node.right;
+            <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">isNaN</span>(left.value) &amp;&amp; !<span class="hljs-built_in">isNaN</span>(right.value)) {
+                <span class="hljs-keyword">let</span> result=<span class="hljs-built_in">eval</span>(left.value+operator+right.value);
+                path.replaceWith(t.numericLiteral(result));
+                <span class="hljs-keyword">if</span> (path.parent&amp;&amp; path.parent.type == <span class="hljs-string">'BinaryExpression'</span>) {
+                    preCalculator.visitor.BinaryExpression.call(<span class="hljs-literal">null</span>,path.parentPath);
+                }
+            }
+        }
+    }
+}
+
+
+<span class="hljs-keyword">const</span> result = babel.transform(<span class="hljs-string">'const sum = 1+2+3'</span>,{
+    <span class="hljs-attr">plugins</span>:[
+        preCalculator
+    ]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+</code></pre>
+<h3 id="t95.3. 把类编译为Function">5.3. 把类编译为Function <a href="#t95.3. 把类编译为Function"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/babel-plugin-transform-es2015-classes">babel-plugin-transform-es2015-classes</a></li>
+</ul>
+<p>es6</p>
+<pre><code class="lang-js">    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Person</span> </span>{
+        <span class="hljs-keyword">constructor</span>(name) {
+            <span class="hljs-keyword">this</span>.name=name;
+        }
+        getName() {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.name;
+        }
+    }
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/classast.png" alt="classast"></p>
+<p>es5</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">this</span>.name=name;
+}
+Person.prototype.getName=<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.name;
+}
+
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/es5class1.png" alt="es5class1">
+<img src="http://img.zhufengpeixun.cn/es5class2.png" alt="es5class2"></p>
+<p>实现</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-keyword">let</span> t=<span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">let</span> source=<span class="hljs-string">`
+    class Person {
+        constructor(name) {
+            this.name=name;
+        }
+        getName() {
+            return this.name;
+        }
+    }
+`</span>;
+<span class="hljs-keyword">let</span> ClassPlugin={
+    <span class="hljs-attr">visitor</span>: {
+        ClassDeclaration(path) {
+            <span class="hljs-keyword">let</span> node=path.node;
+            <span class="hljs-keyword">let</span> id=node.id;
+            <span class="hljs-keyword">let</span> constructorFunction = t.functionDeclaration(id,[],t.blockStatement([]),<span class="hljs-literal">false</span>,<span class="hljs-literal">false</span>);
+            <span class="hljs-keyword">let</span> methods=node.body.body;
+            <span class="hljs-keyword">let</span> functions = [];
+            methods.forEach(<span class="hljs-function"><span class="hljs-params">method</span> =&gt;</span> {
+                <span class="hljs-keyword">if</span> (method.kind == <span class="hljs-string">'constructor'</span>) {
+                    constructorFunction = t.functionDeclaration(id,method.params,method.body,<span class="hljs-literal">false</span>,<span class="hljs-literal">false</span>);
+                    functions.push(constructorFunction);
+                } <span class="hljs-keyword">else</span> {
+                    <span class="hljs-keyword">let</span> memberObj=t.memberExpression(t.memberExpression(id,t.identifier(<span class="hljs-string">'prototype'</span>)),method.key);
+                    <span class="hljs-keyword">let</span> memberFunction = t.functionExpression(id,method.params,method.body,<span class="hljs-literal">false</span>,<span class="hljs-literal">false</span>);
+                    <span class="hljs-keyword">let</span> assignment = t.assignmentExpression(<span class="hljs-string">'='</span>,memberObj,memberFunction);
+                    functions.push(assignment);
+                }
+            });
+            <span class="hljs-keyword">if</span> (functions.length ==<span class="hljs-number">0</span>) {
+                path.replaceWith(constructorFunction);
+            }<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (functions.length ==<span class="hljs-number">1</span>) {
+                path.replaceWith(functions[<span class="hljs-number">0</span>]);
+            } <span class="hljs-keyword">else</span> {
+                path.replaceWithMultiple(functions);
+            }
+        }
+    }
+}
+
+
+<span class="hljs-keyword">const</span> result = babel.transform(source,{
+    <span class="hljs-attr">plugins</span>:[
+        ClassPlugin
+    ]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+</code></pre>
+<h2 id="t106. webpack babel插件">6. webpack babel插件 <a href="#t106. webpack babel插件"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">let</span> { transform } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+</code></pre>
+<h3 id="t116.1 实现按需加载">6.1 实现按需加载 <a href="#t116.1 实现按需加载"> # </a></h3>
+<ul>
+<li><a href="https://www.lodashjs.com/docs/4.17.5.html#concat">lodashjs</a></li>
+<li><a href="https://babeljs.io/docs/en/babel-core">babel-core</a></li>
+<li><a href="https://www.npmjs.com/package/babel-plugin-import">babel-plugin-import</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { flatten,concat } <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash"</span>
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/treeshakingleft.png" alt="treeshakingleft"></p>
+<p>转换为</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> flatten <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash/flatten"</span>;
+<span class="hljs-keyword">import</span> concat <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash/flatten"</span>;
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/treeshakingright.png" alt="treeshakingright"></p>
+<h3 id="t126.2 webpack配置">6.2 webpack配置 <a href="#t126.2 webpack配置"> # </a></h3>
+<pre><code class="lang-js">cnpm i webpack webpack-cli -D
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path=<span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-built_in">module</span>.exports={
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">'./src/index.js'</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>: path.resolve(<span class="hljs-string">'dist'</span>),
+        <span class="hljs-attr">filename</span>:<span class="hljs-string">'bundle.js'</span>
+    },
+    <span class="hljs-attr">module</span>: {
+        <span class="hljs-attr">rules</span>: [
+            {
+                <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+                <span class="hljs-attr">use</span>: {
+                    <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>,
+                    <span class="hljs-attr">options</span>: {
+                        <span class="hljs-attr">plugins</span>:[[<span class="hljs-string">'import'</span>,{<span class="hljs-attr">library</span>:<span class="hljs-string">'lodash'</span>}]]
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre>
+<blockquote>
+<p>编译顺序为首先<code>plugins</code>从左往右,然后<code>presets</code>从右往左</p>
+</blockquote>
+<h3 id="t136.3 babel插件">6.3 babel插件 <a href="#t136.3 babel插件"> # </a></h3>
+<ul>
+<li><code>babel-plugin-import.js</code>放置在node_modules目录下</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-keyword">let</span> types = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">const</span> visitor = {
+    <span class="hljs-attr">ImportDeclaration</span>:{
+        enter(path,state={opts}){
+            <span class="hljs-keyword">const</span> specifiers = path.node.specifiers;
+            <span class="hljs-keyword">const</span> source = path.node.source;
+            <span class="hljs-keyword">if</span>(state.opts.library == source.value &amp;&amp; !types.isImportDefaultSpecifier(specifiers[<span class="hljs-number">0</span>])){
+                <span class="hljs-keyword">const</span> declarations = specifiers.map(<span class="hljs-function">(<span class="hljs-params">specifier,index</span>)=&gt;</span>{
+                    <span class="hljs-keyword">return</span> types.ImportDeclaration(
+                        [types.importDefaultSpecifier(specifier.local)],
+                        types.stringLiteral(<span class="hljs-string">`<span class="hljs-subst">${source.value}</span>/<span class="hljs-subst">${specifier.local.name}</span>`</span>)
+                    )
+                });
+                path.replaceWithMultiple(declarations);
+            }
+        }
+    }
+}
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">babel</span>)</span>{
+    <span class="hljs-keyword">return</span> {
+        visitor
+    }
+}
+</code></pre>
+<h2 id="t149. AST">9. AST <a href="#t149. AST"> # </a></h2>
+<h3 id="t159.1 解析过程">9.1 解析过程 <a href="#t159.1 解析过程"> # </a></h3>
+<p>AST整个解析过程分为两个步骤</p>
+<ul>
+<li>分词：将整个代码字符串分割成语法单元数组</li>
+<li>语法分析：建立分析语法单元之间的关系</li>
+</ul>
+<h3 id="t169.2 语法单元">9.2 语法单元 <a href="#t169.2 语法单元"> # </a></h3>
+<p>Javascript 代码中的语法单元主要包括以下这么几种</p>
+<ul>
+<li>关键字：<code>const</code>、<code>let</code>、<code>var</code>等</li>
+<li>标识符：可能是一个变量，也可能是 if、else 这些关键字，又或者是 true、false 这些常量</li>
+<li>运算符</li>
+<li>数字</li>
+<li>空格</li>
+<li>注释</li>
+</ul>
+<h3 id="t179.3 词法分析">9.3 词法分析 <a href="#t179.3 词法分析"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> jsx = <span class="hljs-string">`let element=&lt;h1&gt;hello&lt;/h1&gt;`</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">lexical</span>(<span class="hljs-params">code</span>) </span>{
+    <span class="hljs-keyword">const</span> tokens=[];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;code.length;i++){
+        <span class="hljs-keyword">let</span> char=code.charAt(i);
+        <span class="hljs-keyword">if</span> (char == <span class="hljs-string">'='</span>) {
+            tokens.push({
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'operator'</span>,
+                <span class="hljs-attr">value</span>:char
+            });
+        }
+        <span class="hljs-keyword">if</span> (char==<span class="hljs-string">'&lt;'</span>) {
+            <span class="hljs-keyword">const</span> token={
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'JSXElement'</span>,
+                <span class="hljs-attr">value</span>:char
+            }
+            tokens.push(token);
+            <span class="hljs-keyword">let</span> isClose = <span class="hljs-literal">false</span>;
+            <span class="hljs-keyword">for</span> (i++;i&lt;code.length;i++){
+                char=code.charAt(i);
+                token.value+=char;
+                <span class="hljs-keyword">if</span> (char==<span class="hljs-string">'&gt;'</span>) {
+                    <span class="hljs-keyword">if</span> (isClose) {
+                        <span class="hljs-keyword">break</span>;
+                    } <span class="hljs-keyword">else</span> {
+                        isClose=<span class="hljs-literal">true</span>;
+                    }
+                }
+            }
+            <span class="hljs-keyword">continue</span>;
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/[a-zA-Z\$\_]/</span>.test(char)) {
+            <span class="hljs-keyword">const</span> token={
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'Identifier'</span>,
+                <span class="hljs-attr">value</span>:char
+            }
+            tokens.push(token);
+            <span class="hljs-keyword">for</span> (i++;i&lt;code.length;i++){
+                char=code.charAt(i);
+                <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/[a-zA-Z\$\_]/</span>.test(char)) {
+                    token.value+=char;
+                } <span class="hljs-keyword">else</span> {
+                    i--;
+                    <span class="hljs-keyword">break</span>;
+                }
+            }
+            <span class="hljs-keyword">continue</span>;
+        }
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/\s/</span>.test(char)) {
+            <span class="hljs-keyword">const</span> token={
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'whitespace'</span>,
+                <span class="hljs-attr">value</span>:char
+            }
+            tokens.push(token);
+            <span class="hljs-keyword">for</span> (i++;i&lt;code.length;i++){
+                char=code.charAt[i];
+                <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/\s/</span>.test(char)) {
+                    token.value+=char;
+                } <span class="hljs-keyword">else</span> {
+                    i--;
+                    <span class="hljs-keyword">break</span>;
+                }
+            }
+            <span class="hljs-keyword">continue</span>;
+        }
+    }
+    <span class="hljs-keyword">return</span>  tokens;
+}
+<span class="hljs-keyword">let</span> result=lexical(jsx);
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+<pre><code class="lang-js">[
+  { <span class="hljs-attr">type</span>: <span class="hljs-string">'Identifier'</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">'let'</span> },
+  { <span class="hljs-attr">type</span>: <span class="hljs-string">'whitespace'</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">' '</span> },
+  { <span class="hljs-attr">type</span>: <span class="hljs-string">'Identifier'</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">'element'</span> },
+  { <span class="hljs-attr">type</span>: <span class="hljs-string">'operator'</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">'='</span> },
+  { <span class="hljs-attr">type</span>: <span class="hljs-string">'JSXElement'</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">'&lt;h1&gt;hello&lt;/h1&gt;'</span> }
+]
+</code></pre>
+<h3 id="t189.4 语法分析">9.4 语法分析 <a href="#t189.4 语法分析"> # </a></h3>
+<ul>
+<li>语义分析则是将得到的词汇进行一个立体的组合，确定词语之间的关系</li>
+<li>简单来说语法分析是对语句和表达式识别，这是个递归过程</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// babylon7 https://astexplorer.net/</span>
+<span class="hljs-comment">// babylon7 https://astexplorer.net/</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">parse</span>(<span class="hljs-params">tokens</span>) </span>{
+    <span class="hljs-keyword">const</span> ast={
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'Program'</span>,
+        <span class="hljs-attr">body</span>: [],
+        <span class="hljs-attr">sourceType</span>:<span class="hljs-string">'script'</span>
+    }
+    <span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;<span class="hljs-comment">//标示当前位置</span>
+    <span class="hljs-keyword">let</span> currentToken;<span class="hljs-comment">//当前的符号</span>
+    <span class="hljs-keyword">while</span> ((currentToken = tokens[i])) {
+        <span class="hljs-keyword">if</span> (currentToken.type == <span class="hljs-string">'Identifier'</span> &amp;&amp; (currentToken.value == <span class="hljs-string">'let'</span>||currentToken.value == <span class="hljs-string">'var'</span>)) {
+            <span class="hljs-keyword">const</span> VariableDeclaration={
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'VariableDeclaration'</span>,
+                <span class="hljs-attr">declarations</span>:[]
+            }
+            i+=<span class="hljs-number">2</span>;
+            currentToken=tokens[i];
+            <span class="hljs-keyword">let</span> VariableDeclarator = {
+                <span class="hljs-attr">type</span>: <span class="hljs-string">'VariableDeclarator'</span>,
+                <span class="hljs-attr">id</span>: {
+                    <span class="hljs-attr">type</span>: <span class="hljs-string">'Identifier'</span>,
+                    <span class="hljs-attr">name</span>:currentToken.value
+                }
+            };
+            VariableDeclaration.declarations.push(VariableDeclarator);
+            i+=<span class="hljs-number">2</span>;
+            currentToken=tokens[i];
+            <span class="hljs-keyword">if</span> (currentToken.type==<span class="hljs-string">'JSXElement'</span>) {
+                <span class="hljs-keyword">let</span> value=currentToken.value;
+                <span class="hljs-keyword">let</span> [,type,children]=value.match(<span class="hljs-regexp">/([^&lt;]+?)&gt;([^&lt;]+)&lt;\/\1&gt;/</span>);
+                VariableDeclarator.init={
+                    <span class="hljs-attr">type</span>: <span class="hljs-string">'JSXElement'</span>,
+                    <span class="hljs-attr">openingElement</span>:{
+                       <span class="hljs-attr">type</span>:<span class="hljs-string">'JSXOpeningElement'</span>,
+                       <span class="hljs-attr">name</span>:{
+                           <span class="hljs-attr">type</span>:<span class="hljs-string">'JSXIdentifier'</span>,
+                           <span class="hljs-attr">name</span>:<span class="hljs-string">'h1'</span>
+                       }
+                    },
+                    <span class="hljs-attr">closingElement</span>:{
+                       <span class="hljs-attr">type</span>:<span class="hljs-string">'JSXClosingElement'</span>,
+                       <span class="hljs-attr">name</span>:{
+                           <span class="hljs-attr">type</span>:<span class="hljs-string">'JSXIdentifier'</span>,
+                           <span class="hljs-attr">name</span>:<span class="hljs-string">'h1'</span>
+                       }
+                    },
+                    <span class="hljs-attr">name</span>: type,
+                    <span class="hljs-attr">children</span>:[
+                        {
+                            <span class="hljs-attr">type</span>:<span class="hljs-string">'JSXText'</span>,
+                            <span class="hljs-attr">value</span>:<span class="hljs-string">'hello'</span>
+                        }
+                    ]
+                }
+            } <span class="hljs-keyword">else</span> {
+                VariableDeclarator.init={
+                    <span class="hljs-attr">type</span>: <span class="hljs-string">'Literal'</span>,
+                    <span class="hljs-attr">value</span>:currentToken.value
+                }
+            }
+            ast.body.push(VariableDeclaration);
+        }
+        i++;
+    }
+    <span class="hljs-keyword">return</span> ast;
+}
+
+<span class="hljs-keyword">let</span> tokens=[
+    {<span class="hljs-attr">type</span>: <span class="hljs-string">'Identifier'</span>,<span class="hljs-attr">value</span>: <span class="hljs-string">'let'</span>},
+    {<span class="hljs-attr">type</span>: <span class="hljs-string">'whitespace'</span>,<span class="hljs-attr">value</span>: <span class="hljs-string">' '</span>},
+    {<span class="hljs-attr">type</span>: <span class="hljs-string">'Identifier'</span>,<span class="hljs-attr">value</span>: <span class="hljs-string">'element'</span>},
+    {<span class="hljs-attr">type</span>: <span class="hljs-string">'operator'</span>,<span class="hljs-attr">value</span>: <span class="hljs-string">'='</span>},
+    {<span class="hljs-attr">type</span>: <span class="hljs-string">'JSXElement'</span>,<span class="hljs-attr">value</span>: <span class="hljs-string">'&lt;h1&gt;hello&lt;/h1&gt;'</span>}
+];
+<span class="hljs-keyword">let</span> result = parse(tokens);
+<span class="hljs-built_in">console</span>.log(result);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(result));
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"Program"</span>,
+    <span class="hljs-attr">"body"</span>: [{
+        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"VariableDeclaration"</span>,
+        <span class="hljs-attr">"declarations"</span>: [{
+            <span class="hljs-attr">"type"</span>: <span class="hljs-string">"VariableDeclarator"</span>,
+            <span class="hljs-attr">"id"</span>: {
+                <span class="hljs-attr">"type"</span>: <span class="hljs-string">"Identifier"</span>,
+                <span class="hljs-attr">"name"</span>: <span class="hljs-string">"element"</span>
+            },
+            <span class="hljs-attr">"init"</span>: {
+                <span class="hljs-attr">"type"</span>: <span class="hljs-string">"JSXElement"</span>,
+                <span class="hljs-attr">"openingElement"</span>: {
+                    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"JSXOpeningElement"</span>,
+                    <span class="hljs-attr">"name"</span>: {
+                        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"JSXIdentifier"</span>,
+                        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"h1"</span>
+                    }
+                },
+                <span class="hljs-attr">"closingElement"</span>: {
+                    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"JSXClosingElement"</span>,
+                    <span class="hljs-attr">"name"</span>: {
+                        <span class="hljs-attr">"type"</span>: <span class="hljs-string">"JSXIdentifier"</span>,
+                        <span class="hljs-attr">"name"</span>: <span class="hljs-string">"h1"</span>
+                    }
+                },
+                <span class="hljs-attr">"name"</span>: <span class="hljs-string">"h1"</span>,
+                <span class="hljs-attr">"children"</span>: [{
+                    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"JSXText"</span>,
+                    <span class="hljs-attr">"value"</span>: <span class="hljs-string">"hello"</span>
+                }]
+            }
+        }]
+    }],
+    <span class="hljs-attr">"sourceType"</span>: <span class="hljs-string">"script"</span>
+}
+</code></pre>
+<h2 id="t199. 参考">9. 参考 <a href="#t199. 参考"> # </a></h2>
+<ul>
+<li><a href="https://github.com/brigand/babel-plugin-handbook/blob/master/translations/zh-Hans/README.md#asts">Babel 插件手册</a></li>
+<li><a href="https://github.com/babel/babel/tree/master/packages/babel-types">babel-types</a></li>
+<li><a href="https://astexplorer.net/">不同的parser解析js代码后得到的AST</a></li>
+<li><a href="http://resources.jointjs.com/demos/javascript-ast">在线可视化的看到AST</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/28143410">babel从入门到入门的知识归纳</a></li>
+<li><a href="https://octman.com/blog/2016-08-27-babel-notes/">Babel 内部原理分析</a></li>
+<li><a href="https://github.com/chikara-chan/babel-plugin-react-scope-binding">babel-plugin-react-scope-binding</a></li>
+<li><a href="https://www.npmjs.com/package/babel-plugin-transform-runtime">transform-runtime</a>  Babel 默认只转换新的 JavaScript 语法，而不转换新的 API。例如，Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise 等全局对象，以及一些定义在全局对象上的方法（比如 Object.assign）都不会转译,启用插件 <code>babel-plugin-transform-runtime</code> 后，Babel 就会使用 babel-runtime 下的工具函数</li>
+<li><a href="https://github.com/babel/babylon/blob/master/ast/spec.md">ast-spec</a></li>
+<li><a href="https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md">babel-handbook</a></li>
+</ul>
+
+    

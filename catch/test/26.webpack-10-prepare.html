@@ -1,0 +1,262 @@
+
+        <h2 id="t01. yargs">1. yargs <a href="#t01. yargs"> # </a></h2>
+<ul>
+<li><a href="http://yargs.js.org/">yargs</a>模块能够解决如何处理命令行参数</li>
+</ul>
+<h3 id="t11.1 安装">1.1 安装 <a href="#t11.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm install yargs --save
+</code></pre>
+<h3 id="t21.2 读取命令行参数">1.2 读取命令行参数 <a href="#t21.2 读取命令行参数"> # </a></h3>
+<ul>
+<li>yargs模块提供了argv对象，用来读取命令行参数</li>
+</ul>
+<p>hello.js</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>)
+    .alias(<span class="hljs-string">'n'</span>, <span class="hljs-string">'name'</span>)<span class="hljs-comment">//还可以指定参数别名  -n的别名是--name</span>
+    .demand([<span class="hljs-string">'n'</span>])<span class="hljs-comment">//是否必填</span>
+    .default({ <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> })<span class="hljs-comment">//默认值</span>
+    .describe({ <span class="hljs-attr">name</span>: <span class="hljs-string">'你的姓名'</span> })<span class="hljs-comment">// 参数描述</span>
+    .boolean([<span class="hljs-string">'private'</span>])
+    .argv;
+<span class="hljs-built_in">console</span>.log(process.argv);
+<span class="hljs-built_in">console</span>.log(argv);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>, argv.name);
+<span class="hljs-built_in">console</span>.log(argv._);<span class="hljs-comment">//argv对象有一个下划线属性，可以获取非连词线开头的参数</span>
+
+<span class="hljs-string">``</span><span class="hljs-string">`js
+node hello.js --private  A B C
+[
+  'C:\\Program Files\\nodejs\\node.exe',
+  'C:\\vipdata\\prepare6\\zhufeng_loader\\5.js',
+  '--private',
+  'A',
+  'B',
+  'C'
+]
+{
+  _: [ 'A', 'B', 'C' ],
+  private: true,
+  name: 'zhufeng',
+  n: 'zhufeng',
+  '$0': '5.js'
+}
+hello zhufeng
+[ 'A', 'B', 'C' ]
+</span></code></pre>
+<pre><code class="lang-js"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-keyword">let</span> argv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'yargs'</span>)
+    .option(<span class="hljs-string">'n'</span>,<span class="hljs-comment">//参数n</span>
+        {
+            <span class="hljs-attr">alias</span>: <span class="hljs-string">'name'</span>,<span class="hljs-comment">//别名name</span>
+            <span class="hljs-attr">demand</span>: <span class="hljs-literal">true</span>,<span class="hljs-comment">//必填</span>
+            <span class="hljs-attr">default</span>: <span class="hljs-string">'zhufeng'</span>,<span class="hljs-comment">//默认值</span>
+            <span class="hljs-attr">describe</span>: <span class="hljs-string">'你的姓名'</span>,<span class="hljs-comment">//描述</span>
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'string'</span>,<span class="hljs-comment">//参数类型</span>
+        }).usage(<span class="hljs-string">'Usage: hello [options]'</span>)<span class="hljs-comment">// 用法格式</span>
+    .example(<span class="hljs-string">'hello -n zhufeng'</span>, <span class="hljs-string">'hello zhufeng'</span>)<span class="hljs-comment">//示例</span>
+    .help(<span class="hljs-string">'h'</span>)<span class="hljs-comment">//显示帮助 信息</span>
+    .alias(<span class="hljs-string">'h'</span>, <span class="hljs-string">'help'</span>)<span class="hljs-comment">//显示帮助信息</span>
+    .epilog(<span class="hljs-string">'copyright 2019'</span>)<span class="hljs-comment">//出现在帮助信息的结尾</span>
+    .argv
+<span class="hljs-built_in">console</span>.log(process.argv);
+<span class="hljs-built_in">console</span>.log(argv);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>, argv.name);
+<span class="hljs-built_in">console</span>.log(argv._);<span class="hljs-comment">//argv对象有一个下划线属性，可以获取非连词线开头的参数</span>
+
+<span class="hljs-string">``</span><span class="hljs-string">`js
+node hello.js -n jiagou
+[
+  'C:\\Program Files\\nodejs\\node.exe',
+  'C:\\vipdata\\prepare6\\zhufeng_loader\\6.js',
+  '-n',
+  'jiagou'
+]
+{ _: [], n: 'jiagou', name: 'jiagou', '$0': '6.js' }
+hello jiagou
+[]
+</span></code></pre>
+<h2 id="t32. Semaphore">2. Semaphore <a href="#t32. Semaphore"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Compilation.js#L857-L971">this.semaphore</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/94929a59a79bc79cab789804d5592c3ec0605cc4/lib/util/Semaphore.js">Semaphore.js</a></li>
+<li><a href="https://www.npmjs.com/package/semaphore">Semaphore</a></li>
+<li>Semaphore(信号量)控制并发访问量</li>
+</ul>
+<h3 id="t42.1 使用Semaphore">2.1 使用Semaphore <a href="#t42.1 使用Semaphore"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> Semaphore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'semaphore'</span>);
+<span class="hljs-keyword">let</span> semaphore = <span class="hljs-keyword">new</span> Semaphore(<span class="hljs-number">2</span>);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+semaphore.take(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+        semaphore.leave();
+    }, <span class="hljs-number">1000</span>);
+});
+semaphore.take(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+        semaphore.leave();
+    }, <span class="hljs-number">2000</span>);
+});
+semaphore.take(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+    semaphore.leave();
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h3 id="t52.2 实现Semaphore">2.2 实现Semaphore <a href="#t52.2 实现Semaphore"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Semaphore</span> </span>{
+    <span class="hljs-keyword">constructor</span>(available) {
+        <span class="hljs-keyword">this</span>.available = available;
+        <span class="hljs-keyword">this</span>.waiters = [];
+        <span class="hljs-keyword">this</span>._continue = <span class="hljs-keyword">this</span>._continue.bind(<span class="hljs-keyword">this</span>);
+    }
+
+    take(callback) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.available &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">this</span>.available--;
+            callback();
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">this</span>.waiters.push(callback);
+        }
+    }
+
+    leave() {
+        <span class="hljs-keyword">this</span>.available++;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.waiters.length &gt; <span class="hljs-number">0</span>) {
+            process.nextTick(<span class="hljs-keyword">this</span>._continue);
+        }
+    }
+
+    _continue() {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.available &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.waiters.length &gt; <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">this</span>.available--;
+                <span class="hljs-keyword">const</span> callback = <span class="hljs-keyword">this</span>.waiters.pop();
+                callback();
+            }
+        }
+    }
+}
+</code></pre>
+<h3 id="t62.3 webpack中的Semaphore">2.3 webpack中的Semaphore <a href="#t62.3 webpack中的Semaphore"> # </a></h3>
+<pre><code class="lang-diff">class Semaphore {
+    constructor(available) {
+        this.available = available;
+        this.waiters = [];
+        this._continue = this._continue.bind(this);
+    }
+
+<span class="hljs-addition">+    acquire(callback) {</span>
+        if (this.available &gt; 0) {
+            this.available--;
+            callback();
+        } else {
+            this.waiters.push(callback);
+        }
+    }
+
+<span class="hljs-addition">+    release() {</span>
+        this.available++;
+        if (this.waiters.length &gt; 0) {
+            process.nextTick(this._continue);
+        }
+    }
+
+    _continue() {
+        if (this.available &gt; 0) {
+            if (this.waiters.length &gt; 0) {
+                this.available--;
+                const callback = this.waiters.pop();
+                callback();
+            }
+        }
+    }
+}
+</code></pre>
+<h2 id="t73. neo-async">3. neo-async <a href="#t73. neo-async"> # </a></h2>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Compilation.js#L836">webpack\lib\Compilation.js</a></li>
+<li><a href="https://www.npmjs.com/package/neo-async">neo-async</a></li>
+<li>neo-async库和async库类似，都是为异步编程提供一些工具方法，但是会比async库更快</li>
+</ul>
+<h3 id="t83.1 使用">3.1 使用 <a href="#t83.1 使用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {forEach} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'neo-async'</span>);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+<span class="hljs-keyword">let</span> array = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+forEach(array, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">num, done</span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(num);
+        done();
+    }, num * <span class="hljs-number">1000</span>);
+}, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<h3 id="t93.2 实现">3.2 实现 <a href="#t93.2 实现"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forEach</span>(<span class="hljs-params">array, iterator, callback</span>) </span>{
+    <span class="hljs-keyword">let</span> length = array.length;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">done</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">if</span> (--length == <span class="hljs-number">0</span>)
+            callback();
+    }
+    array.forEach(<span class="hljs-function">(<span class="hljs-params">item, index</span>) =&gt;</span> {
+        iterator(item, done);
+    });
+}
+</code></pre>
+<h2 id="t104.acorn">4.acorn <a href="#t104.acorn"> # </a></h2>
+<h3 id="t114.1 介绍">4.1 介绍 <a href="#t114.1 介绍"> # </a></h3>
+<ul>
+<li><a href="https://astexplorer.net/">astexplorer</a>可以把代码转成语法树</li>
+<li><a href="https://github.com/acornjs/acorn">acorn</a>  A small, fast, JavaScript-based JavaScript parser</li>
+<li><code>acorn</code> 解析结果符合<a href="https://github.comb/estree/estree">The Estree Spec</a>规范(（这是 Mozilla 的工程师给出的 SpiderMonkey 引擎输出的 JavaScript AST 的规范文档<a href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API">SpiderMonkey</a>)</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ast.jpg" alt="ast"></p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> ast = acorn.parse(code, options);
+</code></pre>
+<h3 id="t124.2 配置项">4.2 配置项 <a href="#t124.2 配置项"> # </a></h3>
+<ul>
+<li>ecmaVersion 你要解析的 JavaScript 的 ECMA 版本,默认是 ES7</li>
+<li>sourceType 这个配置项有两个值：module 和 script，默认是 script.主要是严格模式和 import/export 的区别.</li>
+<li>locations 默认值是 false，设置为 true 之后会在 AST 的节点中携带多一个 loc 对象来表示当前的开始和结束的行数和列数。</li>
+<li>onComment 传入一个回调函数，每当解析到代码中的注释时会触发，可以获取当年注释内容，参数列表是：[block, text, start, end],block 表示是否是块注释，text 是注释内容，start 和 end 是注释开始和结束的位置</li>
+</ul>
+<h3 id="t134.2 查找依赖">4.2 查找依赖 <a href="#t134.2 查找依赖"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> acorn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"acorn"</span>)
+<span class="hljs-keyword">const</span> walk = <span class="hljs-built_in">require</span>(<span class="hljs-string">"acorn-walk"</span>);
+<span class="hljs-keyword">const</span> escodegen = <span class="hljs-built_in">require</span>(<span class="hljs-string">'escodegen'</span>);
+<span class="hljs-keyword">const</span> ast = acorn.parse(<span class="hljs-string">`
+import $ from 'jquery';
+let _ = require('lodash');
+`</span>, { <span class="hljs-attr">locations</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">ranges</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">sourceType</span>: <span class="hljs-string">'module'</span>, <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">8</span> });
+<span class="hljs-keyword">let</span> resources = [];
+walk.simple(ast, {
+    CallExpression(node) {
+        <span class="hljs-keyword">if</span> (
+            node.type === <span class="hljs-string">'CallExpression'</span> &amp;&amp;
+            node.callee.type === <span class="hljs-string">'Identifier'</span> &amp;&amp;
+            node.callee.name === <span class="hljs-string">'require'</span> &amp;&amp;
+            node.arguments.length === <span class="hljs-number">1</span> &amp;&amp;
+            node.arguments[<span class="hljs-number">0</span>].type === <span class="hljs-string">'Literal'</span>
+        ) {
+            <span class="hljs-keyword">const</span> args = node.arguments;
+            resources.push({
+                <span class="hljs-attr">module</span>: args[<span class="hljs-number">0</span>].value
+            })
+        }
+    },
+    ImportDeclaration(node) {
+        node.specifiers[<span class="hljs-number">0</span>].local.name = <span class="hljs-string">'jQuery'</span>;
+        resources.push({
+            <span class="hljs-attr">module</span>: node.source.value
+        })
+    }
+})
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resources'</span>, resources);
+<span class="hljs-keyword">let</span> result = escodegen.generate(ast);
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+
+    

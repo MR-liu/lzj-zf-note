@@ -1,0 +1,313 @@
+
+        <h2 id="t01.初始化项目">1.初始化项目 <a href="#t01.初始化项目"> # </a></h2>
+<pre><code class="lang-js">mkdir zhufeng-jsx-transformer
+cd zhufeng-jsx-transformer
+yarn add @babel/core @babel/plugin-syntax-jsx @babel/plugin-transform-react-jsx @babel/types  --dev
+yarn add react
+</code></pre>
+<h2 id="t12.JSX">2.JSX <a href="#t12.JSX"> # </a></h2>
+<ul>
+<li>React使用JSX来描述用户界面</li>
+<li>JSX是一种JavaScript的语法扩展</li>
+<li><a href="https://babeljs.io/repl">repl</a>可以在线转换代码</li>
+<li><a href="https://astexplorer.net/">astexplorer</a>可以把代码转换成AST树</li>
+</ul>
+<pre><code class="lang-js">&lt;h1 id="title" key="title" ref="title"&gt;hello&lt;/h1&gt;
+</code></pre>
+<h2 id="t23. AST抽象语法树">3. AST抽象语法树 <a href="#t23. AST抽象语法树"> # </a></h2>
+<ul>
+<li>抽象语法树（Abstract Syntax Tree，AST）是源代码语法结构的一种抽象表示。它以树状的形式表现编程语言的语法结构，树上的每个节点都表示源代码中的一种结构</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ast.jpg" alt="ast.jpg"></p>
+<h3 id="t33.1 babel工作流">3.1 babel工作流 <a href="#t33.1 babel工作流"> # </a></h3>
+<ul>
+<li>Parse(解析) 将源代码转换成抽象语法树，树上有很多的节点</li>
+<li>Transform(转换) 对抽象语法树进行转换</li>
+<li>Generate(代码生成) 将上一步经过转换过的抽象语法树生成新的代码</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/ast-compiler-flow.jpg" alt="ast-compiler-flow.jpg"></p>
+<h3 id="t43.2 babel处理语法树">3.2 babel处理语法树 <a href="#t43.2 babel处理语法树"> # </a></h3>
+<ul>
+<li><a href="https://babeljs.io">babeljs</a>是一个JavaScript编译器</li>
+<li><a href="https://babeljs.io/docs/en/babel-core">@babel/core</a>是Babel编译器的核心</li>
+<li><a href="https://www.npmjs.com/package/babylon">babylon</a>是<a href="https://github.com/babel/babel">Babel</a>使用的JavaScript解析器</li>
+<li><a href="https://babeljs.io/docs/en/babel-types">@babel/types</a> 用于 AST 节点的 Lodash 式工具库</li>
+<li><a href="https://babeljs.io/docs/en/babel-traverse">@babel/traverse</a>用于对 AST 的遍历，维护了整棵树的状态，并且负责替换、移除和添加节点</li>
+<li><a href="https://babeljs.io/docs/en/babel-generator">@babel/generator</a>把AST转成代码</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/core'</span>);
+<span class="hljs-keyword">let</span> types = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/types'</span>);
+<span class="hljs-keyword">let</span> traverse = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/traverse"</span>).default;
+<span class="hljs-keyword">let</span> generate = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/generator"</span>).default;
+<span class="hljs-keyword">const</span> code = <span class="hljs-string">`function ast() {}`</span>;
+<span class="hljs-keyword">const</span> ast = babel.parse(code);
+<span class="hljs-keyword">let</span> indent = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">const</span> padding = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-string">" "</span>.repeat(indent);
+traverse(ast, {
+    enter(path){
+        <span class="hljs-built_in">console</span>.log(padding()+path.node.type+<span class="hljs-string">'进入'</span>);
+        indent+=<span class="hljs-number">2</span>;
+        <span class="hljs-keyword">if</span>(types.isFunctionDeclaration(path.node)){
+            path.node.id.name = <span class="hljs-string">'newAst'</span>;
+        }
+    },
+    exit(path){
+        indent-=<span class="hljs-number">2</span>;
+        <span class="hljs-built_in">console</span>.log(padding()+path.node.type+<span class="hljs-string">'离开'</span>);
+    }
+});
+<span class="hljs-keyword">const</span> output = generate(ast,{},code);
+<span class="hljs-built_in">console</span>.log(output.code);
+</code></pre>
+<h3 id="t53.2 旧转换">3.2 旧转换 <a href="#t53.2 旧转换"> # </a></h3>
+<h4 id="t63.2.1 jsx.js">3.2.1 jsx.js <a href="#t63.2.1 jsx.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">const</span> sourceCode = <span class="hljs-string">`&lt;h1 id="title" key="title" ref="title"&gt;hello&lt;/h1&gt;`</span>;
+<span class="hljs-keyword">const</span> result = babel.transform(sourceCode, {
+    <span class="hljs-attr">plugins</span>: [[<span class="hljs-string">'@babel/plugin-transform-react-jsx'</span>,{<span class="hljs-attr">runtime</span>:<span class="hljs-string">'classic'</span>}]]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+</code></pre>
+<h4 id="t73.2.2 转译结果">3.2.2 转译结果 <a href="#t73.2.2 转译结果"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+React.createElement(<span class="hljs-string">"h1"</span>, {
+  <span class="hljs-attr">id</span>: <span class="hljs-string">"title"</span>,
+  <span class="hljs-attr">key</span>: <span class="hljs-string">"title"</span>,
+  <span class="hljs-attr">ref</span>: <span class="hljs-string">"title"</span>
+}, <span class="hljs-string">"hello"</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(element,replacer,<span class="hljs-number">2</span>));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">replacer</span>(<span class="hljs-params">key,value</span>)</span>{
+    <span class="hljs-keyword">if</span>(![<span class="hljs-string">'_owner'</span>,<span class="hljs-string">'_store'</span>].includes(key))
+        <span class="hljs-keyword">return</span> value;
+}
+</code></pre>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"h1"</span>,
+  <span class="hljs-attr">"key"</span>: <span class="hljs-string">"title"</span>,
+  <span class="hljs-attr">"ref"</span>: <span class="hljs-string">"title"</span>,
+  <span class="hljs-attr">"props"</span>: {
+    <span class="hljs-attr">"id"</span>: <span class="hljs-string">"title"</span>,
+    <span class="hljs-attr">"children"</span>: <span class="hljs-string">"hello"</span>
+  }
+}
+</code></pre>
+<h3 id="t83.3 新转换">3.3 新转换 <a href="#t83.3 新转换"> # </a></h3>
+<h4 id="t93.3.1 jsx.js">3.3.1 jsx.js <a href="#t93.3.1 jsx.js"> # </a></h4>
+<pre><code class="lang-diff">const babel = require("@babel/core");
+const sourceCode = `&lt;h1 id="title" key="title" ref="title"&gt;hello&lt;/h1&gt;`;
+const result = babel.transform(sourceCode, {
+<span class="hljs-addition">+   plugins: [['@babel/plugin-transform-react-jsx',{runtime:'automatic'}]]</span>
+});
+console.log(result.code);
+</code></pre>
+<h4 id="t103.3.2 转译结果">3.3.2 转译结果 <a href="#t103.3.2 转译结果"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {<span class="hljs-attr">jsx</span>:_jsx} = <span class="hljs-built_in">require</span>(<span class="hljs-string">"react/jsx-runtime"</span>);
+<span class="hljs-comment">//import { jsx as _jsx } from "react/jsx-runtime";</span>
+<span class="hljs-keyword">let</span> element = _jsx(<span class="hljs-string">"h1"</span>, {<span class="hljs-attr">id</span>: <span class="hljs-string">"title"</span>,<span class="hljs-attr">key</span>:<span class="hljs-string">"title"</span>,<span class="hljs-attr">ref</span>:<span class="hljs-string">"title"</span>,<span class="hljs-attr">children</span>: <span class="hljs-string">"hello"</span>}, <span class="hljs-string">"title"</span>);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(element,replacer,<span class="hljs-number">2</span>));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">replacer</span>(<span class="hljs-params">key,value</span>)</span>{
+    <span class="hljs-keyword">if</span>(![<span class="hljs-string">'_owner'</span>,<span class="hljs-string">'_store'</span>].includes(key))
+        <span class="hljs-keyword">return</span> value;
+}
+</code></pre>
+<pre><code class="lang-json">{
+    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"h1"</span>,
+    <span class="hljs-attr">"key"</span>: <span class="hljs-string">"title"</span>,
+    <span class="hljs-attr">"ref"</span>: <span class="hljs-string">"title"</span>,
+    <span class="hljs-attr">"props"</span>: {
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"title"</span>,
+      <span class="hljs-attr">"children"</span>: <span class="hljs-string">"hello"</span>
+    }
+}
+</code></pre>
+<h2 id="t114.实现插件">4.实现插件 <a href="#t114.实现插件"> # </a></h2>
+<ul>
+<li><a href="https://babeljs.io/docs/en/babel-types.html">babel-types文档</a></li>
+<li><a href="https://github.com/brigand/babel-plugin-handbook/blob/master/translations/zh-Hans/README.md">babel插件开发指南</a></li>
+<li><a href="https://babeljs.io/docs/en/babel-plugin-syntax-jsx/">@babel/plugin-syntax-jsx</a>允许解析JSX</li>
+<li><a href="https://github.com/jamiebuilds/babel-handbook/blob/master/translations/en/plugin-handbook.md#babel-traverse">babel-traverse</a>可用于遍历语法树</li>
+<li>Visitors(访问者)是一个用于 AST 遍历的模式,用于定义某个节点的操作方法</li>
+<li>Paths(路径) 是一个对象，它表示两个节点之间的连接<ul>
+<li><code>replaceWith</code>可以用于替换节点</li>
+<li><code>get</code>用于查找特定类型的子路径</li>
+<li><code>find</code> 用于向上查找一个指定条件的路径</li>
+<li><code>unshiftContainer</code>用于把AST节点插入到类似于body这样的数组中</li>
+</ul>
+</li>
+<li>Scope(作用域)<ul>
+<li><code>generateUidIdentifier</code>会生成一个不会和任何本地定义的变量冲突的标识符</li>
+</ul>
+</li>
+</ul>
+<h3 id="t124.1 jsx.js">4.1 jsx.js <a href="#t124.1 jsx.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">const</span> pluginTransformReactJsx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./plugin-transform-react-jsx'</span>);
+<span class="hljs-keyword">const</span> sourceCode = <span class="hljs-string">`&lt;h1 id="title" key="title" ref="title"&gt;hello&lt;/h1&gt;`</span>;
+<span class="hljs-keyword">const</span> result = babel.transform(sourceCode, {
+    <span class="hljs-attr">plugins</span>: [pluginTransformReactJsx]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+</code></pre>
+<h3 id="t134.2 plugin-transform-react-jsx.js">4.2 plugin-transform-react-jsx.js <a href="#t134.2 plugin-transform-react-jsx.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> types = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/types'</span>);
+<span class="hljs-keyword">const</span> pluginSyntaxJsx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/plugin-syntax-jsx'</span>).default;
+<span class="hljs-keyword">const</span> pluginTransformReactJsx = {
+  <span class="hljs-attr">inherits</span>:pluginSyntaxJsx,
+  <span class="hljs-attr">visitor</span>: {
+      JSXElement(path) {
+      <span class="hljs-keyword">let</span> callExpression = buildJSXElementCall(path);
+      path.replaceWith(callExpression);
+    }
+  }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">buildJSXElementCall</span>(<span class="hljs-params">path</span>) </span>{
+  <span class="hljs-keyword">const</span> args = [];  
+  <span class="hljs-keyword">return</span> call(path,<span class="hljs-string">"jsx"</span>, args);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">call</span>(<span class="hljs-params">path,name, args</span>) </span>{
+  <span class="hljs-keyword">const</span> callee = types.identifier(<span class="hljs-string">'_jsx'</span>);
+  <span class="hljs-keyword">const</span> node = types.callExpression(callee, args);
+  <span class="hljs-keyword">return</span> node;
+}
+<span class="hljs-built_in">module</span>.exports = pluginTransformReactJsx;
+</code></pre>
+<h2 id="t145.支持属性">5.支持属性 <a href="#t145.支持属性"> # </a></h2>
+<p>plugin-transform-react-jsx.js</p>
+<pre><code class="lang-diff">const types = require('@babel/types');
+const pluginSyntaxJsx = require('@babel/plugin-syntax-jsx').default;
+const pluginTransformReactJsx = {
+  inherits:pluginSyntaxJsx,
+  visitor: {
+    JSXElement(path) {
+      let callExpression = buildJSXElementCall(path);
+      path.replaceWith(callExpression);
+    }
+  }
+}
+function buildJSXElementCall(path) {
+<span class="hljs-addition">+ const openingPath = path.get("openingElement");</span>
+<span class="hljs-addition">+ const {name} = openingPath.node.name;</span>
+<span class="hljs-addition">+ const tag = types.stringLiteral(name);</span>
+<span class="hljs-addition">+ const args = [tag];</span>
+<span class="hljs-addition">+ let attributes = [];</span>
+<span class="hljs-addition">+ for (const attrPath of openingPath.get("attributes")) {</span>
+<span class="hljs-addition">+   attributes.push(attrPath.node);</span>
+<span class="hljs-addition">+ }</span>
+<span class="hljs-addition">+ const children = buildChildren(path.node);</span>
+<span class="hljs-addition">+ const props = attributes.map(convertAttribute);</span>
+<span class="hljs-addition">+ if (children.length &gt; 0) {</span>
+<span class="hljs-addition">+   props.push(buildChildrenProperty(children));</span>
+<span class="hljs-addition">+ }</span>
+<span class="hljs-addition">+ const attributesObject = types.objectExpression(props);</span>
+<span class="hljs-addition">+ args.push(attributesObject);</span>
+  return call(path,"jsx", args);
+}
+<span class="hljs-addition">+function buildChildren(node) {</span>
+<span class="hljs-addition">+  const elements = [];</span>
+<span class="hljs-addition">+  for (let i = 0; i &lt; node.children.length; i++) {</span>
+<span class="hljs-addition">+    let child = node.children[i];</span>
+<span class="hljs-addition">+    if (types.isJSXText(child)) {</span>
+<span class="hljs-addition">+      elements.push(types.stringLiteral(child.value));</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return elements;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function buildChildrenProperty(children) {</span>
+<span class="hljs-addition">+  let childrenNode;</span>
+<span class="hljs-addition">+  if (children.length === 1) {</span>
+<span class="hljs-addition">+    childrenNode = children[0];</span>
+<span class="hljs-addition">+  } else if (children.length &gt; 1) {</span>
+<span class="hljs-addition">+    childrenNode = types.arrayExpression(children);</span>
+<span class="hljs-addition">+  } else {</span>
+<span class="hljs-addition">+    return undefined;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return types.objectProperty(types.identifier("children"), childrenNode);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function convertAttribute(node) {</span>
+<span class="hljs-addition">+  const value = node.value;</span>
+<span class="hljs-addition">+  node.name.type = "Identifier";</span>
+<span class="hljs-addition">+  return types.objectProperty(node.name, value);</span>
+<span class="hljs-addition">+}</span>
+function call(path,name, args) {
+  const callee = types.identifier('_jsx');
+  const node = types.callExpression(callee, args);
+  return node;
+}
+module.exports = pluginTransformReactJsx;
+</code></pre>
+<h2 id="t156.引入runtime模块">6.引入runtime模块 <a href="#t156.引入runtime模块"> # </a></h2>
+<p>plugin-transform-react-jsx.js</p>
+<pre><code class="lang-diff">const types = require('@babel/types');
+const pluginSyntaxJsx = require('@babel/plugin-syntax-jsx').default;
+const pluginTransformReactJsx = {
+  inherits:pluginSyntaxJsx,
+  visitor: {
+    JSXElement(path) {
+      let callExpression = buildJSXElementCall(path);
+      path.replaceWith(callExpression);
+    }
+  }
+}
+function buildJSXElementCall(path) {
+  const openingPath = path.get("openingElement");
+  const {name} = openingPath.node.name;
+  const tag = types.stringLiteral(name);
+  const args = [tag];
+  let attributes = [];
+  for (const attrPath of openingPath.get("attributes")) {
+    attributes.push(attrPath.node);
+  }
+  const children = buildChildren(path.node);
+  const props = attributes.map(convertAttribute);
+  if (children.length &gt; 0) {
+    props.push(buildChildrenProperty(children));
+  }
+  const attributesObject = types.objectExpression(props);
+  args.push(attributesObject);
+  return call(path,"jsx", args);
+}
+function buildChildren(node) {
+  const elements = [];
+  for (let i = 0; i &lt; node.children.length; i++) {
+    let child = node.children[i];
+    if (types.isJSXText(child)) {
+      elements.push(types.stringLiteral(child.value));
+    }
+  }
+  return elements;
+}
+function buildChildrenProperty(children) {
+  let childrenNode;
+  if (children.length <span class="hljs-comment">=== 1) {</span>
+    childrenNode = children[0];
+  } else if (children.length &gt; 1) {
+    childrenNode = types.arrayExpression(children);
+  } else {
+    return undefined;
+  }
+  return types.objectProperty(types.identifier("children"), childrenNode);
+}
+function convertAttribute(node) {
+  const value = node.value;
+  node.name.type = "Identifier";
+  return types.objectProperty(node.name, value);
+}
+function call(path,name, args) {
+<span class="hljs-addition">+ const importedSource = 'react/jsx-runtime';</span>
+<span class="hljs-addition">+ const callee = addImport(path,name,importedSource);</span>
+  const node = types.callExpression(callee, args);
+  return node;
+}
+<span class="hljs-addition">+function addImport(path,importName,importedSource){</span>
+<span class="hljs-addition">+  const programPath = path.find(p =&gt; p.isProgram());</span>
+<span class="hljs-addition">+  const scope = programPath.scope;</span>
+<span class="hljs-addition">+  const localName = scope.generateUidIdentifier(importName);</span>
+<span class="hljs-addition">+  const specifiers  = [types.importSpecifier(localName, types.identifier(importName))];</span>
+<span class="hljs-addition">+  let statement = types.importDeclaration(specifiers, types.stringLiteral(importedSource));</span>
+<span class="hljs-addition">+  programPath.unshiftContainer("body", [statement]);</span>
+<span class="hljs-addition">+  return localName;</span>
+<span class="hljs-addition">+}</span>
+module.exports = pluginTransformReactJsx;
+</code></pre>
+
+    

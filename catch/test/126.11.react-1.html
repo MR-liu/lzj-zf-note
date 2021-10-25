@@ -1,0 +1,1613 @@
+
+        <h2 id="t01.请说一下你对React的理解?">1.请说一下你对React的理解? <a href="#t01.请说一下你对React的理解?"> # </a></h2>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/">官方文档</a></li>
+<li>题目分析 本题属于概念题</li>
+<li>解题思路<ul>
+<li>是什么? 一句话说直达本质</li>
+<li>能干什么? 用途和应用场景</li>
+<li>如何干的? 核心的工作原理</li>
+<li>干的怎么样? 优缺点</li>
+</ul>
+</li>
+</ul>
+<h3 id="t11.1 React是什么?">1.1 React是什么? <a href="#t11.1 React是什么?"> # </a></h3>
+<ul>
+<li><code>React</code>是一个用于构建用户界面的 JavaScript 库</li>
+</ul>
+<h3 id="t21.2 React能干什么?">1.2 React能干什么? <a href="#t21.2 React能干什么?"> # </a></h3>
+<ul>
+<li>可以通过组件化的方式构建 构建快速响应的大型<code>Web</code>应用程序</li>
+</ul>
+<h3 id="t31.3 React如何干的?">1.3 React如何干的? <a href="#t31.3 React如何干的?"> # </a></h3>
+<h4 id="t41.3.1 声明式">1.3.1 声明式 <a href="#t41.3.1 声明式"> # </a></h4>
+<ul>
+<li>声明式 使用声明式的编写用户界面,代码可行方便调试</li>
+<li>声明式渲染和命令式渲染<ul>
+<li>命令式渲染 命令我们的程序去做什么,程序就会跟着你的命令去一步一步执行</li>
+<li>声明式渲染 我们只需要告诉程序我们想要什么效果，其他的交给程序来做</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+<span class="hljs-comment">//声明式</span>
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>console.log('hello')}&gt;hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>,root);
+
+<span class="hljs-comment">//命令式</span>
+<span class="hljs-keyword">let</span> h1 = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'h1'</span>);
+h1.innerHTML = <span class="hljs-string">'hello'</span>;
+h1.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>));
+root.appendChild(h1);
+</code></pre>
+<h4 id="t51.3.2 组件化">1.3.2 组件化 <a href="#t51.3.2 组件化"> # </a></h4>
+<ul>
+<li>组件化 把页面拆分为一个个组件，方便视图的拆分和复用，还可以做到高内聚和低耦合</li>
+</ul>
+<h4 id="t61.3.3 一次学习，随处编写">1.3.3 一次学习，随处编写 <a href="#t61.3.3 一次学习，随处编写"> # </a></h4>
+<ul>
+<li>可以使用React开发Web、Android、IOS、VR和命令行程序</li>
+<li>ReactNative 使用 React 来创建 Android 和 iOS 的原生应用</li>
+<li>React 360是一个创建3D和VR用户交互的框架</li>
+</ul>
+<h3 id="t71.4 React干的怎么样?">1.4 React干的怎么样? <a href="#t71.4 React干的怎么样?"> # </a></h3>
+<h4 id="t81.4.1 优点">1.4.1 优点 <a href="#t81.4.1 优点"> # </a></h4>
+<ul>
+<li>开发团队和社区强大</li>
+<li>一次学习，随处编写</li>
+<li>API比较简洁</li>
+</ul>
+<h4 id="t91.4.2 缺点">1.4.2 缺点 <a href="#t91.4.2 缺点"> # </a></h4>
+<ul>
+<li>没有官方系统解决方案，选型成本高</li>
+<li>过于灵活，不容易写出高质量的应用</li>
+</ul>
+<h3 id="t101.5 其它扩展">1.5 其它扩展 <a href="#t101.5 其它扩展"> # </a></h3>
+<ul>
+<li>JSX实现声明式</li>
+<li>虚拟DOM可以实现跨平台</li>
+<li>React使用的设计模式</li>
+<li>自己React大型架构经验</li>
+</ul>
+<h2 id="t112.为什么React会引入JSX?">2.为什么React会引入JSX? <a href="#t112.为什么React会引入JSX?"> # </a></h2>
+<ul>
+<li>题目分析 方案选型，考察知识广度</li>
+<li>解题思路<ul>
+<li>解释概念?</li>
+<li>想实现什么目的? </li>
+<li>有哪些可选方案，为什么这个方案最好</li>
+<li>JSX的工作原理?</li>
+</ul>
+</li>
+</ul>
+<h3 id="t122.1 JSX是什么">2.1 JSX是什么 <a href="#t122.1 JSX是什么"> # </a></h3>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/introducing-jsx.html">jsx</a></li>
+<li>JSX是一个<code>JavaScript</code>的语法扩展,JSX 可以很好地描述 UI 应该呈现出它应有交互的本质形式</li>
+<li>JSX其实是<code>React.createElement</code>的语法糖</li>
+</ul>
+<h3 id="t132.2 React想实现什么目的?">2.2 React想实现什么目的? <a href="#t132.2 React想实现什么目的?"> # </a></h3>
+<ul>
+<li>需要实现声明式</li>
+<li>代码结构需要非常清晰和简洁，可读性强</li>
+<li>结构、样式和事件等能够实现高内聚低耦合,方便重用和组合</li>
+<li>不想引入新的的概念和语法,只写JavaScript</li>
+</ul>
+<h3 id="t142.3 为什么JSX最好">2.3 为什么JSX最好 <a href="#t142.3 为什么JSX最好"> # </a></h3>
+<h4 id="t152.3.1 模板">2.3.1 模板 <a href="#t152.3.1 模板"> # </a></h4>
+<ul>
+<li>Vue.js 使用了基于 HTML 的模板语法，允许开发者声明式地将 DOM 绑定至底层 Vue 实例的数据</li>
+<li>引入太多概念，比如Angular就引入了控制器、作用域、服务等概念</li>
+</ul>
+<pre><code class="lang-js">&lt;button v-on:click="counter += 1"&gt;增加 1&lt;/button&gt;
+</code></pre>
+<h3 id="t162.4 JSX工作原理">2.4 JSX工作原理 <a href="#t162.4 JSX工作原理"> # </a></h3>
+<ul>
+<li><a href="https://www.babeljs.cn/repl">babeljs</a></li>
+<li><a href="https://astexplorer.net">astexplorer</a></li>
+</ul>
+<h4 id="t172.4.1 安装">2.4.1 安装 <a href="#t172.4.1 安装"> # </a></h4>
+<pre><code class="lang-js">npm install @babel/core @babel/plugin-syntax-jsx @babel/plugin-transform-react-jsx @babel/types --save
+</code></pre>
+<h4 id="t182.4.2 AST抽象语法树">2.4.2 AST抽象语法树 <a href="#t182.4.2 AST抽象语法树"> # </a></h4>
+<ul>
+<li>抽象语法树（Abstract Syntax Tree，AST）是源代码语法结构的一种抽象表示。它以树状的形式表现编程语言的语法结构，树上的每个节点都表示源代码中的一种结构</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ast.jpg" alt="ast.jpg"></p>
+<h4 id="t192.4.3 babel工作流">2.4.3 babel工作流 <a href="#t192.4.3 babel工作流"> # </a></h4>
+<p><img src="https://img.zhufengpeixun.com/ast-compiler-flow.jpg" alt="ast-compiler-flow"></p>
+<h4 id="t202.4.4 旧转换">2.4.4 旧转换 <a href="#t202.4.4 旧转换"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">const</span> sourceCode = <span class="hljs-string">`&lt;h1 id="title"&gt;hello&lt;/h1&gt;`</span>;
+<span class="hljs-keyword">const</span> result = babel.transform(sourceCode, {
+    <span class="hljs-attr">plugins</span>: [[<span class="hljs-string">'@babel/plugin-transform-react-jsx'</span>,{<span class="hljs-attr">runtime</span>:<span class="hljs-string">'classic'</span>}]]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+<span class="hljs-comment">/**
+React.createElement("h1", {
+    id: "title",
+  }, "hello");
+*/</span>
+</code></pre>
+<h4 id="t212.4.5 新转换">2.4.5 新转换 <a href="#t212.4.5 新转换"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> babel = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@babel/core"</span>);
+<span class="hljs-keyword">const</span> sourceCode = <span class="hljs-string">`&lt;h1 id="title" key="title"&gt;hello&lt;/h1&gt;`</span>;
+<span class="hljs-keyword">const</span> result = babel.transform(sourceCode, {
+    <span class="hljs-attr">plugins</span>: [[<span class="hljs-string">'@babel/plugin-transform-react-jsx'</span>,{<span class="hljs-attr">runtime</span>:<span class="hljs-string">'automatic'</span>}]]
+});
+<span class="hljs-built_in">console</span>.log(result.code);
+<span class="hljs-comment">/**
+import { jsx as _jsx } from "react/jsx-runtime";
+_jsx("h1", {
+  id: "title",
+  children: "hello"
+}, "title");
+*/</span>
+</code></pre>
+<h2 id="t223. 请说一下你对Virtual DOM的理解?">3. 请说一下你对Virtual DOM的理解? <a href="#t223. 请说一下你对Virtual DOM的理解?"> # </a></h2>
+<ul>
+<li>题目分析 本题属于概念题</li>
+<li>解题思路<ul>
+<li>是什么? 一句话说直达本质</li>
+<li>能干什么? 用途和应用场景</li>
+<li>如何干的? 核心的工作原理</li>
+<li>干的怎么样? 优缺点</li>
+</ul>
+</li>
+</ul>
+<h3 id="t233.1 创建项目">3.1 创建项目 <a href="#t233.1 创建项目"> # </a></h3>
+<h4 id="t243.1.1 安装">3.1.1 安装 <a href="#t243.1.1 安装"> # </a></h4>
+<pre><code class="lang-js">npm install @babel/core @babel/plugin-proposal-<span class="hljs-class"><span class="hljs-keyword">class</span>-<span class="hljs-title">properties</span> @<span class="hljs-title">babel</span>/<span class="hljs-title">plugin</span>-<span class="hljs-title">proposal</span>-<span class="hljs-title">decorators</span> @<span class="hljs-title">babel</span>/<span class="hljs-title">preset</span>-<span class="hljs-title">env</span>  @<span class="hljs-title">babel</span>/<span class="hljs-title">preset</span>-<span class="hljs-title">react</span>  <span class="hljs-title">babel</span>-<span class="hljs-title">loader</span> <span class="hljs-title">html</span>-<span class="hljs-title">webpack</span>-<span class="hljs-title">plugin</span> <span class="hljs-title">webpack</span> <span class="hljs-title">webpack</span>-<span class="hljs-title">cli</span>  <span class="hljs-title">webpack</span>-<span class="hljs-title">dev</span>-<span class="hljs-title">server</span> --<span class="hljs-title">save</span>-<span class="hljs-title">dev</span>
+</span></code></pre>
+<pre><code class="lang-js">npm install react@experimental react-dom@experimental --save
+</code></pre>
+<h4 id="t253.1.2 webpack.config.js">3.1.2 webpack.config.js <a href="#t253.1.2 webpack.config.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">'development'</span>,
+  <span class="hljs-attr">devtool</span>: <span class="hljs-string">'source-map'</span>,
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">'./src/index.js'</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">'dist'</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name].js'</span>,
+    <span class="hljs-attr">publicPath</span>: <span class="hljs-string">'/'</span>
+  },
+  <span class="hljs-attr">module</span>: {
+    <span class="hljs-attr">rules</span>: [
+      {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js?$/</span>,
+        <span class="hljs-attr">use</span>: {
+          <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>,
+          <span class="hljs-attr">options</span>: {
+            <span class="hljs-attr">presets</span>: [[<span class="hljs-string">"@babel/preset-env"</span>], <span class="hljs-string">'@babel/preset-react'</span>],
+            <span class="hljs-attr">plugins</span>: [
+              [<span class="hljs-string">'@babel/plugin-proposal-decorators'</span>, { <span class="hljs-attr">legacy</span>: <span class="hljs-literal">true</span> }],
+              [<span class="hljs-string">'@babel/plugin-proposal-class-properties'</span>, { <span class="hljs-attr">loose</span>: <span class="hljs-literal">true</span> }],
+            ],
+          },
+        },
+        <span class="hljs-attr">exclude</span>:<span class="hljs-regexp">/node_modules/</span>
+      }
+    ]
+  },
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({ <span class="hljs-attr">template</span>: <span class="hljs-string">'./public/index.html'</span> })
+  ]
+};
+</code></pre>
+<h4 id="t263.1.3 package.json">3.1.3 package.json <a href="#t263.1.3 package.json"> # </a></h4>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"scripts"</span>: {
+   <span class="hljs-attr">"start"</span>: <span class="hljs-string">"webpack serve"</span>
+  },
+}
+</code></pre>
+<h3 id="t273.2 实现虚拟DOM">3.2 实现虚拟DOM <a href="#t273.2 实现虚拟DOM"> # </a></h3>
+<ul>
+<li><code>React.createElement</code> 函数所返回的就是一个虚拟DOM</li>
+<li>虚拟DOM就是一个描述真实DOM的纯JS对象</li>
+</ul>
+<h4 id="t283.2.1 src\index.js">3.2.1 src\index.js <a href="#t283.2.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">let</span> virtualDOM = (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"A1"</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"A1"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"B1"</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"B1"</span>&gt;</span>B1<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"B2"</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"B2"</span>&gt;</span>B2<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+<span class="hljs-built_in">console</span>.log(virtualDOM);
+</code></pre>
+<h4 id="t293.2.2 src\react.js">3.2.2 src\react.js <a href="#t293.2.2 src\react.js"> # </a></h4>
+<ul>
+<li><a href="https://gitee.com/mirrors/react/blob/v17.0.1/packages/react/src/React.js#L101">src\react.js</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {createElement} <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactElement'</span>;
+<span class="hljs-keyword">const</span> React = {
+    createElement,
+};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React;
+</code></pre>
+<h4 id="t303.2.3 src\ReactSymbols.js">3.2.3 src\ReactSymbols.js <a href="#t303.2.3 src\ReactSymbols.js"> # </a></h4>
+<ul>
+<li><a href="//https://gitee.com/mirrors/react/blob/v17.0.1/packages/shared/ReactSymbols.js#L39">src\ReactSymbols.js</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> symbolFor = <span class="hljs-built_in">Symbol</span>.for;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span>  REACT_ELEMENT_TYPE = symbolFor(<span class="hljs-string">'react.element'</span>);
+</code></pre>
+<h4 id="t313.2.4 ReactElement.js">3.2.4 ReactElement.js <a href="#t313.2.4 ReactElement.js"> # </a></h4>
+<p>src\ReactElement.js</p>
+<ul>
+<li><a href="https://gitee.com/mirrors/react/blob/v17.0.1/packages/react/src/ReactElement.js#L348">src\ReactElement.js</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//https://gitee.com/mirrors/react/blob/v17.0.1/packages/react/src/ReactElement.js#L348</span>
+<span class="hljs-keyword">import</span> { REACT_ELEMENT_TYPE } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactSymbols'</span>;
+<span class="hljs-keyword">const</span> RESERVED_PROPS = {
+    <span class="hljs-attr">key</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">ref</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">_store</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">__self</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">__source</span>: <span class="hljs-literal">true</span>,
+};
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createElement</span>(<span class="hljs-params">type, config,children</span>) </span>{
+    <span class="hljs-keyword">const</span> props = {};
+    <span class="hljs-keyword">let</span> key = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">if</span> (config != <span class="hljs-literal">null</span>) {
+        key = config.key;
+    }
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> propName <span class="hljs-keyword">in</span> config) {
+        <span class="hljs-keyword">if</span> (!RESERVED_PROPS.hasOwnProperty(propName)) {
+            props[propName] = config[propName];
+        }
+    }
+    <span class="hljs-keyword">const</span> childrenLength = <span class="hljs-built_in">arguments</span>.length - <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">if</span> (childrenLength === <span class="hljs-number">1</span>) {
+      props.children = children;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (childrenLength &gt; <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">const</span> childArray = <span class="hljs-built_in">Array</span>(childrenLength);
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; childrenLength; i++) {
+        childArray[i] = <span class="hljs-built_in">arguments</span>[i + <span class="hljs-number">2</span>];
+      }
+      props.children = childArray;
+    }
+
+    <span class="hljs-keyword">const</span> element = {
+        <span class="hljs-attr">$$typeof</span>: REACT_ELEMENT_TYPE,
+        type,
+        key,
+        props
+    };
+    <span class="hljs-keyword">return</span> element;
+}
+</code></pre>
+<h3 id="t323.3 优缺点">3.3 优缺点 <a href="#t323.3 优缺点"> # </a></h3>
+<h4 id="t333.3.1 优点">3.3.1 优点 <a href="#t333.3.1 优点"> # </a></h4>
+<ul>
+<li>处理了浏览器兼容性问题，避免用户操作真实DOM，那么又麻烦又容易出错</li>
+<li>内容经过了XSS处理，可以防范XSS攻击</li>
+<li>容易实现跨平台开发Android、iOS、VR应用</li>
+<li>更新的时候可以实现差异化更新，减少更新DOM的操作</li>
+</ul>
+<h4 id="t343.3.2 缺点">3.3.2 缺点 <a href="#t343.3.2 缺点"> # </a></h4>
+<ul>
+<li>虚拟DOM需要消耗额外的内存</li>
+<li>首次渲染其实并不一定会更快</li>
+</ul>
+<h2 id="t354. 函数组件和类组件的相同点和不同点?">4. 函数组件和类组件的相同点和不同点? <a href="#t354. 函数组件和类组件的相同点和不同点?"> # </a></h2>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/components-and-props.html">组件 &amp; Props</a></li>
+<li><a href="https://zh-hans.reactjs.org/docs/composition-vs-inheritance.html">组合 vs 继承</a></li>
+<li>组件允许你将 UI 拆分为独立可复用的代码片段，并对每个片段进行独立构思</li>
+<li>题目分析 本题属于差异题</li>
+<li>解题思路<ul>
+<li>相同点</li>
+<li>不同点</li>
+</ul>
+</li>
+</ul>
+<h2 id="t364.1 实现组件">4.1 实现组件 <a href="#t364.1 实现组件"> # </a></h2>
+<h3 id="t374.1 实现函数组件">4.1 实现函数组件 <a href="#t374.1 实现函数组件"> # </a></h3>
+<h4 id="t384.1.1 src\index.js">4.1.1 src\index.js <a href="#t384.1.1 src\index.js"> # </a></h4>
+<pre><code class="lang-diff">import React from './react';
+let virtualDOM = (
+  &lt;div id="A1" key="A1" style={style}&gt;
+    &lt;div id="B1" key="B1" style={style}&gt;B1&lt;/div&gt;
+    &lt;div id="B2" key="B2" style={style}&gt;B2&lt;/div&gt;
+  &lt;/div&gt;
+)
+<span class="hljs-addition">+function FunctionComponent(){</span>
+<span class="hljs-addition">+  return virtualDOM;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let functionVirtualDOM = &lt;FunctionComponent/&gt;;</span>
+console.log(functionVirtualDOM);
+</code></pre>
+<h3 id="t394.2 实现类组件">4.2 实现类组件 <a href="#t394.2 实现类组件"> # </a></h3>
+<h4 id="t404.2.1 src\index.js">4.2.1 src\index.js <a href="#t404.2.1 src\index.js"> # </a></h4>
+<pre><code class="lang-diff">import React from './react';
+let virtualDOM = (
+  &lt;div id="A1" key="A1" style={style}&gt;
+    &lt;div id="B1" key="B1" style={style}&gt;B1&lt;/div&gt;
+    &lt;div id="B2" key="B2" style={style}&gt;B2&lt;/div&gt;
+  &lt;/div&gt;
+)
+<span class="hljs-addition">+class ClassComponent extends React.Component{</span>
+<span class="hljs-addition">+  render(){</span>
+<span class="hljs-addition">+      return virtualDOM;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let functionVirtualDOM = &lt;ClassComponent/&gt;;</span>
+console.log(functionVirtualDOM);
+</code></pre>
+<h4 id="t414.2.2 ReactBaseClasses.js">4.2.2 ReactBaseClasses.js <a href="#t414.2.2 ReactBaseClasses.js"> # </a></h4>
+<ul>
+<li><a href="[src\ReactBaseClasses.js](https://gitee.com/mirrors/react/blob/v17.0.1/packages/react/src/ReactBaseClasses.js#L20">src\ReactBaseClasses.js</a>)</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Component</span>(<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">this</span>.props = props;
+}
+
+Component.prototype.isReactComponent = {};
+</code></pre>
+<h4 id="t424.2.3 src\react.js">4.2.3 src\react.js <a href="#t424.2.3 src\react.js"> # </a></h4>
+<p>src\react.js</p>
+<pre><code class="lang-diff">import {createElement} from './ReactElement';
+<span class="hljs-addition">+import {Component} from './ReactBaseClasses';</span>
+const React = {
+    createElement,
+<span class="hljs-addition">+   Component</span>
+};
+export default React;
+</code></pre>
+<h3 id="t434.3 相同点和不同点">4.3 相同点和不同点 <a href="#t434.3 相同点和不同点"> # </a></h3>
+<h4 id="t444.3.1 相同点">4.3.1 相同点 <a href="#t444.3.1 相同点"> # </a></h4>
+<ul>
+<li>它们都可以接收属性并且返回React元素</li>
+</ul>
+<h4 id="t454.3.2 不同点">4.3.2 不同点 <a href="#t454.3.2 不同点"> # </a></h4>
+<ul>
+<li>编程思想不同: 类组件需要创建实例，是基于面向对象的方式编程，而函数式组件不需要创建实例，接收输入，返回输出，是基于函数式编程的思路来编写的</li>
+<li>内存占用：类组件需要创建并保存实例，会占用一定内存，函数组件不需要创建实例，可以节约内存占用</li>
+<li>捕获特性：函数组件具有值捕获特性</li>
+<li>可测试性: 函数式组件更方便编写单元测试</li>
+<li>状态: 类组件有自己的实例，可以定义状态，而且可以修改状态更新组件，函数式组件以前没有状态，现在可以使用useState使用状态</li>
+<li>生命周期: 类组件有自己完整的生命周期，可以在生命周期内编写逻辑，函数组件以前没有生命周期，现在可以使用useEffect实现类似生命周期的功能</li>
+<li>逻辑复用: 类组件可以通过继承实现逻辑的复用，但官方推荐组件优于继承，函数组件可以通过自定义Hooks实现逻辑的复用</li>
+<li>跳过更新: 类组件可以通过<code>shouldComponentUpdate</code>和<code>PureComponent</code>来跳过更新，而函数式组件可以使用<code>React.memo</code>来跳过更新</li>
+<li>发展前景: 未来函数式组件将会成为主流，因为它可以更好的屏蔽this问题、规范和复用逻辑、更好的适合时间分片和并发渲染</li>
+</ul>
+<h5 id="t464.3.2.1 捕获特性">4.3.2.1 捕获特性 <a href="#t464.3.2.1 捕获特性"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ClassComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+  state = {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>}
+  handleClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.state.number),<span class="hljs-number">3000</span>);<span class="hljs-comment">//1</span>
+      <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">number</span>:<span class="hljs-keyword">this</span>.state.number+<span class="hljs-number">1</span>});
+  }
+  render(){
+      <span class="hljs-keyword">return</span> (
+          <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.state.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.handleClick}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+      );
+  }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">FunctionComponent</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">let</span> [number,setNumber] = React.useState(<span class="hljs-number">0</span>);
+  <span class="hljs-keyword">let</span> handleClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+      setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-built_in">console</span>.log(number),<span class="hljs-number">3000</span>);
+      setNumber(number+<span class="hljs-number">1</span>);
+  }
+  <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleClick}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">let</span> virtualDOM = <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">FunctionComponent</span>/&gt;</span></span>;
+ReactDOM.render(
+  virtualDOM,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h5 id="t474.3.2.2 跳过更新">4.3.2.2 跳过更新 <a href="#t474.3.2.2 跳过更新"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PureComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  shouldComponentUpdate(newProps,nextState) {
+    <span class="hljs-keyword">return</span> !shallowEqual(<span class="hljs-keyword">this</span>.props, newProps)||!shallowEqual(<span class="hljs-keyword">this</span>.state, nextState);
+  }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">shallowEqual</span>(<span class="hljs-params">obj1, obj2</span>) </span>{
+  <span class="hljs-keyword">if</span> (obj1 === obj2) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+  }
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> obj1 != <span class="hljs-string">"object"</span> ||obj1 === <span class="hljs-literal">null</span> ||<span class="hljs-keyword">typeof</span> obj2 != <span class="hljs-string">"object"</span> ||obj2 === <span class="hljs-literal">null</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  }
+  <span class="hljs-keyword">let</span> keys1 = <span class="hljs-built_in">Object</span>.keys(obj1);
+  <span class="hljs-keyword">let</span> keys2 = <span class="hljs-built_in">Object</span>.keys(obj2);
+  <span class="hljs-keyword">if</span> (keys1.length != keys2.length) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  }
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> key <span class="hljs-keyword">of</span> keys1) {
+    <span class="hljs-keyword">if</span> (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+</code></pre>
+<h2 id="t485. 请说一下React中的渲染流程">5. 请说一下React中的渲染流程 <a href="#t485. 请说一下React中的渲染流程"> # </a></h2>
+<ul>
+<li>题目分析 本题属于原理题</li>
+<li>解题思路<ul>
+<li>宏观的设计理念</li>
+<li>关键原理清晰描述，抽象和具象相结合</li>
+<li>结合工程实践和工作成果</li>
+</ul>
+</li>
+</ul>
+<h3 id="t495.1 设计理念">5.1 设计理念 <a href="#t495.1 设计理念"> # </a></h3>
+<ul>
+<li>跨平台渲染=&gt;虚拟DOM</li>
+<li>快速响应=&gt;异步可中断+增量更新</li>
+</ul>
+<h3 id="t505.2 性能瓶颈">5.2 性能瓶颈 <a href="#t505.2 性能瓶颈"> # </a></h3>
+<ul>
+<li>JS任务执行时间过长<ul>
+<li>浏览器刷新频率为60Hz,大概16.6毫秒渲染一次，而JS线程和渲染线程是互斥的，所以如果JS线程执行任务时间超过16.6ms的话，就会导致掉帧，导致卡顿，解决方案就是React利用空闲的时间进行更新，不影响渲染进行的渲染</li>
+<li>把一个耗时任务切分成一个个小任务，分布在每一帧里的方式就叫时间切片</li>
+</ul>
+</li>
+</ul>
+<h3 id="t515.3 案例">5.3 案例 <a href="#t515.3 案例"> # </a></h3>
+<ul>
+<li><a href="https://zh-hans.reactjs.org/docs/concurrent-mode-intro.html">concurrent-mode</a></li>
+<li><a href="https://zh-hans.reactjs.org/docs/concurrent-mode-adoption.html">concurrent-mode-adoption</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+  state = {<span class="hljs-attr">list</span>:<span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(<span class="hljs-number">10000</span>).fill(<span class="hljs-number">0</span>)}
+  add = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">list</span>:[...this.state.list,<span class="hljs-number">1</span>]});
+  }
+  render(){
+      <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.add}</span>&gt;</span>add<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          {
+            this.state.list.map((item,index)=&gt;<span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>)
+          }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+      );
+  }
+}
+<span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+<span class="hljs-comment">//ReactDOM.render(&lt;App/&gt;,root);</span>
+ReactDOM.unstable_createRoot(root).render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span>/&gt;</span></span>);
+</code></pre>
+<h3 id="t525.4 屏幕刷新率">5.4 屏幕刷新率 <a href="#t525.4 屏幕刷新率"> # </a></h3>
+<ul>
+<li>目前大多数设备的屏幕刷新率为 60 次/秒</li>
+<li>浏览器渲染动画或页面的每一帧的速率也需要跟设备屏幕的刷新率保持一致</li>
+<li>页面是一帧一帧绘制出来的，当每秒绘制的帧数（FPS）达到 60 时，页面是流畅的,小于这个值时，用户会感觉到卡顿</li>
+<li>每个帧的预算时间是16.66 毫秒 (1秒/60)</li>
+<li>1s 60帧，所以每一帧分到的时间是 1000/60 ≈ 16 ms,所以我们书写代码时力求不让一帧的工作量超过 16ms</li>
+</ul>
+<h3 id="t535.5 帧">5.5 帧 <a href="#t535.5 帧"> # </a></h3>
+<ul>
+<li>每个帧的开头包括样式计算、布局和绘制</li>
+<li>JavaScript执行 Javascript引擎和页面渲染引擎在同一个渲染线程,GUI渲染和Javascript执行两者是互斥的</li>
+<li>如果某个任务执行时间过长，浏览器会推迟渲染</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/lifeofframe.jpg" alt="lifeofframe"></p>
+<h3 id="t545.6  requestIdleCallback">5.6  requestIdleCallback <a href="#t545.6  requestIdleCallback"> # </a></h3>
+<ul>
+<li>我们希望快速响应用户，让用户觉得够快，不能阻塞用户的交互</li>
+<li>requestIdleCallback使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应</li>
+<li>正常帧任务完成后没超过16 ms,说明时间有富余，此时就会执行 <code>requestIdleCallback</code> 里注册的任务</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/cooperativescheduling2.jpg" alt="cooperativescheduling2"></p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sleep</span>(<span class="hljs-params">d</span>) </span>{
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> t = <span class="hljs-built_in">Date</span>.now(); <span class="hljs-built_in">Date</span>.now() - t &lt;= d;);
+        }
+        <span class="hljs-keyword">const</span> works = [
+            <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第1个任务开始"</span>);
+                sleep(<span class="hljs-number">20</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第1个任务结束"</span>);
+            },
+            () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第2个任务开始"</span>);
+                sleep(<span class="hljs-number">20</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第2个任务结束"</span>);
+            },
+            () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第3个任务开始"</span>);
+                sleep(<span class="hljs-number">20</span>);<span class="hljs-comment">//sleep(20);</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"第3个任务结束"</span>);
+            },
+        ];
+
+        requestIdleCallback(workLoop);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">workLoop</span>(<span class="hljs-params">deadline</span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'本帧剩余时间'</span>, <span class="hljs-built_in">parseInt</span>(deadline.timeRemaining()));
+            <span class="hljs-keyword">while</span> ((deadline.timeRemaining() &gt; <span class="hljs-number">1</span>) &amp;&amp; works.length &gt; <span class="hljs-number">0</span>) {
+                performUnitOfWork();
+            }
+            <span class="hljs-keyword">if</span> (works.length &gt; <span class="hljs-number">0</span>) {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`只剩下<span class="hljs-subst">${<span class="hljs-built_in">parseInt</span>(deadline.timeRemaining())}</span>ms,时间片到了等待下次空闲时间的调度`</span>);
+                requestIdleCallback(workLoop);
+            }
+        }
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">performUnitOfWork</span>(<span class="hljs-params"></span>) </span>{
+            works.shift()();
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t555.7 React16+的渲染流程">5.7 React16+的渲染流程 <a href="#t555.7 React16+的渲染流程"> # </a></h3>
+<ul>
+<li><a href="https://gitee.com/mirrors/react/tree/v17.0.1/packages/scheduler">scheduler</a> 选择高优先级的任务进入reconciler</li>
+<li><a href="https://gitee.com/mirrors/react/tree/v17.0.1/packages/react-reconciler">reconciler</a> 计算变更的内容</li>
+<li><a href="https://gitee.com/mirrors/react/tree/v17.0.1/packages/react-dom">react-dom</a> 把变更的内容渲染到页面上</li>
+</ul>
+<h4 id="t565.7.1 index.js">5.7.1 index.js <a href="#t565.7.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+<span class="hljs-keyword">let</span> style = { <span class="hljs-attr">border</span>: <span class="hljs-string">'3px solid red'</span>, <span class="hljs-attr">margin</span>: <span class="hljs-string">'5px'</span> };
+<span class="hljs-keyword">let</span> virtualDOM = (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"A1"</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"A1"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{style}</span>&gt;</span>A1<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+<span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+ReactDOM.render(virtualDOM,root);
+</code></pre>
+<h4 id="t575.7.5 fiber">5.7.5 fiber <a href="#t575.7.5 fiber"> # </a></h4>
+<ul>
+<li>我们可以通过某些调度策略合理分配CPU资源，从而提高用户的响应速度</li>
+<li>通过Fiber架构，让自己的调和过程变成可被中断。 适时地让出CPU执行权，除了可以让浏览器及时地响应用户的交互</li>
+</ul>
+<h5 id="t585.7.5.1 Fiber是一个执行单元">5.7.5.1 Fiber是一个执行单元 <a href="#t585.7.5.1 Fiber是一个执行单元"> # </a></h5>
+<ul>
+<li>Fiber是一个执行单元,每次执行完一个执行单元, React 就会检查现在还剩多少时间，如果没有时间就将控制权让出去</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/fiberflow.jpg" alt="fiberflow"></p>
+<h5 id="t595.7.5.2 Fiber是一种数据结构">5.7.5.2 Fiber是一种数据结构 <a href="#t595.7.5.2 Fiber是一种数据结构"> # </a></h5>
+<ul>
+<li>React目前的做法是使用链表, 每个 VirtualDOM 节点内部表示为一个Fiber</li>
+<li>从顶点开始遍历</li>
+<li>如果有第一个儿子，先遍历第一个儿子</li>
+<li>如果没有第一个儿子，标志着此节点遍历完成</li>
+<li>如果有弟弟遍历弟弟</li>
+<li>如果有没有下一个弟弟，返回父节点标识完成父节点遍历，如果有叔叔遍历叔叔</li>
+<li>没有父节点遍历结束</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/fiberconstructor.jpg" alt="fiberconstructor.jpg"></p>
+<h3 id="t605.8 实现渲染">5.8 实现渲染 <a href="#t605.8 实现渲染"> # </a></h3>
+<p><img src="https://img.zhufengpeixun.com/8bed037dfa35a83bad852c6f3afa18fe" alt="8bed037dfa35a83bad852c6f3afa18fe"></p>
+<p><img src="https://img.zhufengpeixun.com/9b71de681e0eab51939d09f625b8ffe6" alt="9b71de681e0eab51939d09f625b8ffe6"></p>
+<h4 id="t615.8.1 定义JSX">5.8.1 定义JSX <a href="#t615.8.1 定义JSX"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> style = {<span class="hljs-attr">border</span>:<span class="hljs-string">'1px solid red'</span>,<span class="hljs-attr">color</span>:<span class="hljs-string">'red'</span>,<span class="hljs-attr">margin</span>:<span class="hljs-string">'5px'</span>};
+<span class="hljs-keyword">let</span> A = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>,
+  <span class="hljs-attr">key</span>: <span class="hljs-string">'A'</span>,
+  <span class="hljs-attr">props</span>: {
+      style,
+      <span class="hljs-attr">children</span>: [
+          <span class="hljs-string">'A文本'</span>,
+          { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'B1'</span>, <span class="hljs-attr">props</span>: { style,<span class="hljs-attr">children</span>: <span class="hljs-string">'B1文本'</span> } },
+          { <span class="hljs-attr">type</span>: <span class="hljs-string">'div'</span>, <span class="hljs-attr">key</span>: <span class="hljs-string">'B2'</span>, <span class="hljs-attr">props</span>: { style,<span class="hljs-attr">children</span>: <span class="hljs-string">'B2文本'</span> } }
+      ]
+  }
+}
+</code></pre>
+<h4 id="t625.8.2.workLoop">5.8.2.workLoop <a href="#t625.8.2.workLoop"> # </a></h4>
+<pre><code class="lang-diff">let style = {border:'1px solid red',color:'red',margin:'5px'};
+let A = {
+  type: 'div',
+  key: 'A',
+  props: {
+      style,
+      children: [
+          'A文本',
+          { type: 'div', key: 'B1', props: { style,children: 'B1文本' } },
+          { type: 'div', key: 'B2', props: { style,children: 'B2文本' } }
+      ]
+  }
+}
+<span class="hljs-addition">+let workInProgress;</span>
+<span class="hljs-addition">+const TAG_ROOT = 'TAG_ROOT';</span>
+<span class="hljs-addition">+function workLoop() {</span>
+<span class="hljs-addition">+  while (workInProgress) {</span>
+<span class="hljs-addition">+      workInProgress = performUnitOfWork(workInProgress);</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let rootFiber = {</span>
+<span class="hljs-addition">+  tag: TAG_ROOT,</span>
+<span class="hljs-addition">+  key: 'ROOT',</span>
+<span class="hljs-addition">+  stateNode: document.getElementById('root'),</span>
+<span class="hljs-addition">+  props: { children: [A] }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function performUnitOfWork(fiber) {</span>
+<span class="hljs-addition">+  console.log(fiber.key);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+workInProgress=rootFiber;</span>
+<span class="hljs-addition">+workLoop();</span>
+</code></pre>
+<h4 id="t635.8.3.beginWork">5.8.3.beginWork <a href="#t635.8.3.beginWork"> # </a></h4>
+<pre><code class="lang-diff">let style = {border:'1px solid red',color:'red',margin:'5px'};
+let A = {
+  type: 'div',
+  key: 'A',
+  props: {
+      style,
+      children: [
+          'A文本',
+          { type: 'div', key: 'B1', props: { style,children: 'B1文本' } },
+          { type: 'div', key: 'B2', props: { style,children: 'B2文本' } }
+      ]
+  }
+}
+let workInProgress;
+const TAG_ROOT = 'TAG_ROOT';
+const TAG_TEXT = 'TAG_TEXT';
+const TAG_HOST = 'TAG_HOST';
+function workLoop() {
+  while (workInProgress) {
+      workInProgress = performUnitOfWork(workInProgress);
+  }
+}
+let rootFiber = {
+  tag: TAG_ROOT,
+  key: 'ROOT',
+  stateNode: document.getElementById('root'),
+  props: { children: [A] }
+}
+
+workInProgress=rootFiber;
+workLoop();
+
+function performUnitOfWork(fiber) {
+<span class="hljs-addition">+  beginWork(fiber);</span>
+<span class="hljs-addition">+  if (fiber.child) {//如果子节点就返回第一个子节点</span>
+<span class="hljs-addition">+      return fiber.child;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  while (fiber) {//如果没有子节点说明当前节点已经完成了渲染工作</span>
+<span class="hljs-addition">+      if (fiber.sibling) {//如果它有弟弟就返回弟弟</span>
+<span class="hljs-addition">+          return fiber.sibling;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+      fiber = fiber.return;//如果没有弟弟让爸爸完成，然后找叔叔</span>
+<span class="hljs-addition">+  }</span>
+}
+<span class="hljs-addition">+/**</span>
+<span class="hljs-addition">+ * 根据当前的fiber和子JSX构建子fiber树</span>
+<span class="hljs-addition">+ * @param {*} fiber </span>
+<span class="hljs-addition">+ * @returns </span>
+<span class="hljs-addition">+ */</span>
+<span class="hljs-addition">+function beginWork(fiber) {</span>
+<span class="hljs-addition">+  console.log('beginWork', fiber.key);</span>
+<span class="hljs-addition">+  let nextChildren = fiber.props.children;</span>
+<span class="hljs-addition">+  if(typeof nextChildren === 'string'){</span>
+<span class="hljs-addition">+    nextChildren=null;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return reconcileChildren(fiber,nextChildren);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+</span>
+<span class="hljs-addition">+function reconcileChildren(returnFiber, nextChildren) {</span>
+<span class="hljs-addition">+  let firstChild = null;</span>
+<span class="hljs-addition">+  let previousNewFiber = null;</span>
+<span class="hljs-addition">+  let newChildren=[];</span>
+<span class="hljs-addition">+  if(Array.isArray(nextChildren)){</span>
+<span class="hljs-addition">+    newChildren = nextChildren;</span>
+<span class="hljs-addition">+  }else if(!!nextChildren){</span>
+<span class="hljs-addition">+    newChildren=[nextChildren];</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  for (let newIdx = 0; newIdx &lt; newChildren.length; newIdx++) {</span>
+<span class="hljs-addition">+      let newFiber = createFiber(newChildren[newIdx]);</span>
+<span class="hljs-addition">+      newFiber.return = returnFiber;</span>
+<span class="hljs-addition">+      if (!previousNewFiber) {</span>
+<span class="hljs-addition">+        firstChild = newFiber;</span>
+<span class="hljs-addition">+      } else {</span>
+<span class="hljs-addition">+          previousNewFiber.sibling = newFiber;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+      previousNewFiber = newFiber;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  returnFiber.child = firstChild;</span>
+<span class="hljs-addition">+  return firstChild;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function createFiber(element) {</span>
+<span class="hljs-addition">+  if (typeof element === 'string') {</span>
+<span class="hljs-addition">+      return { tag: TAG_TEXT, type: element.type, key: element, props: element };</span>
+<span class="hljs-addition">+  } else {</span>
+<span class="hljs-addition">+      return { tag: TAG_HOST, type: element.type, key: element.key, props: element.props };</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h4 id="t645.8.4. completeUnitOfWork">5.8.4. completeUnitOfWork <a href="#t645.8.4. completeUnitOfWork"> # </a></h4>
+<pre><code class="lang-diff"><span class="hljs-addition">+import {setInitialProperties} from './utils';</span>
+let style = {border:'1px solid red',color:'red',margin:'5px'};
+let A = {
+  type: 'div',
+  key: 'A',
+  props: {
+      style,
+      children: [
+          'A文本',
+          { type: 'div', key: 'B1', props: { style,children: 'B1文本' } },
+          { type: 'div', key: 'B2', props: { style,children: 'B2文本' } }
+      ]
+  }
+}
+let workInProgress;
+const TAG_ROOT = 'TAG_ROOT';
+const TAG_TEXT = 'TAG_TEXT';
+const TAG_HOST = 'TAG_HOST';
+<span class="hljs-addition">+const Placement = 'Placement';</span>
+
+function workLoop() {
+  while (workInProgress) {
+      workInProgress = performUnitOfWork(workInProgress);
+  }
+}
+let rootFiber = {
+  tag: TAG_ROOT,
+  key: 'ROOT',
+  stateNode: document.getElementById('root'),
+  props: { children: [A] }
+}
+
+workInProgress=rootFiber;
+workLoop();
+
+function performUnitOfWork(fiber) {
+  beginWork(fiber);
+  if (fiber.child) {//如果子节点就返回第一个子节点
+      return fiber.child;
+  }
+  while (fiber) {//如果没有子节点说明当前节点已经完成了渲染工作
+<span class="hljs-addition">+     completeUnitOfWork(fiber);//可以结束此fiber的渲染了</span>
+      if (fiber.sibling) {//如果它有弟弟就返回弟弟
+          return fiber.sibling;
+      }
+      fiber = fiber.return;//如果没有弟弟让爸爸完成，然后找叔叔
+  }
+}
+<span class="hljs-addition">+function completeUnitOfWork(workInProgress) {</span>
+<span class="hljs-addition">+  console.log('completeUnitOfWork', workInProgress.key);</span>
+<span class="hljs-addition">+  let stateNode;</span>
+<span class="hljs-addition">+  switch (workInProgress.tag) {</span>
+<span class="hljs-addition">+    case TAG_HOST:</span>
+<span class="hljs-addition">+      stateNode=createStateNode(workInProgress);</span>
+<span class="hljs-addition">+      setInitialProperties(stateNode, workInProgress.props);</span>
+<span class="hljs-addition">+      break;</span>
+<span class="hljs-addition">+    case TAG_TEXT:</span>
+<span class="hljs-addition">+      createStateNode(workInProgress);</span>
+<span class="hljs-addition">+      break;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  makeEffectList(workInProgress);</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function createStateNode(fiber){</span>
+<span class="hljs-addition">+  if (fiber.tag === TAG_TEXT) {</span>
+<span class="hljs-addition">+      let stateNode = document.createTextNode(fiber.props);</span>
+<span class="hljs-addition">+      fiber.stateNode = stateNode;</span>
+<span class="hljs-addition">+  } else if (fiber.tag === TAG_HOST) {</span>
+<span class="hljs-addition">+      let stateNode = document.createElement(fiber.type);</span>
+<span class="hljs-addition">+      if (typeof fiber.props.children === 'string') {</span>
+<span class="hljs-addition">+          stateNode.appendChild(document.createTextNode(fiber.props.children));</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+      fiber.stateNode = stateNode;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return fiber.stateNode;</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function makeEffectList(completedWork){</span>
+<span class="hljs-addition">+  const returnFiber = completedWork.return;</span>
+<span class="hljs-addition">+  if (returnFiber) {</span>
+<span class="hljs-addition">+    if (!returnFiber.firstEffect) {//父亲为空就指向儿子的子链表</span>
+<span class="hljs-addition">+      returnFiber.firstEffect = completedWork.firstEffect;</span>
+<span class="hljs-addition">+    } </span>
+<span class="hljs-addition">+    if (completedWork.lastEffect) {//父亲非空就父亲老尾下一个指向儿子子链表头,父亲尾指出儿子子链表头</span>
+<span class="hljs-addition">+      if (returnFiber.lastEffect) {</span>
+<span class="hljs-addition">+          returnFiber.lastEffect.nextEffect = completedWork.firstEffect;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+      returnFiber.lastEffect = completedWork.lastEffect;//父亲的尾指向自己的尾</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    if (completedWork.flags) {</span>
+<span class="hljs-addition">+          if (returnFiber.lastEffect) {//如果父亲有尾，尾巴下一个指向自己</span>
+<span class="hljs-addition">+              returnFiber.lastEffect.nextEffect = completedWork;</span>
+<span class="hljs-addition">+          } else {//如果父亲没有尾，父亲的头毛都指向自己</span>
+<span class="hljs-addition">+              returnFiber.firstEffect = completedWork;</span>
+<span class="hljs-addition">+          }</span>
+<span class="hljs-addition">+          returnFiber.lastEffect = completedWork;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+  }</span>
+}
+/**
+ * 根据当前的fiber和子JSX构建子fiber树
+ * @param {*} fiber 
+ * @returns 
+ */
+function beginWork(fiber) {
+  console.log('beginWork', fiber.key);
+  let nextChildren = fiber.props.children;
+  if(typeof nextChildren <span class="hljs-comment">=== 'string'){</span>
+    nextChildren=null;
+  }
+  return reconcileChildren(fiber,nextChildren);
+}
+
+function reconcileChildren(returnFiber, nextChildren) {
+  let firstChild = null;
+  let previousNewFiber = null;
+  let newChildren=[];
+  if(Array.isArray(nextChildren)){
+    newChildren = nextChildren;
+  }else if(!!nextChildren){
+    newChildren=[nextChildren];
+  }
+  for (let newIdx = 0; newIdx &lt; newChildren.length; newIdx++) {
+      let newFiber = createFiber(newChildren[newIdx]);
+      newFiber.return = returnFiber;
+      if (!previousNewFiber) {
+        firstChild = newFiber;
+      } else {
+          previousNewFiber.sibling = newFiber;
+      }
+      previousNewFiber = newFiber;
+  }
+  returnFiber.child = firstChild;
+  return firstChild;
+}
+function createFiber(element) {
+  if (typeof element <span class="hljs-comment">=== 'string') {</span>
+      return { tag: TAG_TEXT, type: element.type, key: element, props: element };
+  } else {
+      return { tag: TAG_HOST, type: element.type, key: element.key, props: element.props };
+  }
+}
+</code></pre>
+<h4 id="t655.8.5 commitRoot">5.8.5 commitRoot <a href="#t655.8.5 commitRoot"> # </a></h4>
+<pre><code class="lang-diff">import {setInitialProperties} from './utils';
+let style = {border:'1px solid red',color:'red',margin:'5px'};
+let A = {
+  type: 'div',
+  key: 'A',
+  props: {
+      style,
+      children: [
+          'A文本',
+          { type: 'div', key: 'B1', props: { style,children: 'B1文本' } },
+          { type: 'div', key: 'B2', props: { style,children: 'B2文本' } }
+      ]
+  }
+}
+let workInProgress;
+const TAG_ROOT = 'TAG_ROOT';
+const TAG_TEXT = 'TAG_TEXT';
+const TAG_HOST = 'TAG_HOST';
+const Placement = 'Placement';
+
+function workLoop() {
+  while (workInProgress) {
+      workInProgress = performUnitOfWork(workInProgress);
+  }
+<span class="hljs-addition">+ commitRoot(rootFiber);</span>
+}
+<span class="hljs-addition">+function commitRoot(rootFiber){</span>
+<span class="hljs-addition">+  let currentEffect = rootFiber.firstEffect;</span>
+<span class="hljs-addition">+  while(currentEffect){</span>
+<span class="hljs-addition">+    let flags = currentEffect.flags;</span>
+<span class="hljs-addition">+    switch (flags) {</span>
+<span class="hljs-addition">+      case Placement:</span>
+<span class="hljs-addition">+        commitPlacement(currentEffect);</span>
+<span class="hljs-addition">+        break;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    currentEffect=currentEffect.nextEffect;</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+function commitPlacement(currentFiber) {
+  let parent = currentFiber.return.stateNode;
+  parent.appendChild(currentFiber.stateNode);
+}
+let rootFiber = {
+  tag: TAG_ROOT,
+  key: 'ROOT',
+  stateNode: document.getElementById('root'),
+  props: { children: [A] }
+}
+
+workInProgress=rootFiber;
+workLoop();
+
+function performUnitOfWork(fiber) {
+  beginWork(fiber);
+  if (fiber.child) {//如果子节点就返回第一个子节点
+      return fiber.child;
+  }
+  while (fiber) {//如果没有子节点说明当前节点已经完成了渲染工作
+      completeUnitOfWork(fiber);//可以结束此fiber的渲染了
+      if (fiber.sibling) {//如果它有弟弟就返回弟弟
+          return fiber.sibling;
+      }
+      fiber = fiber.return;//如果没有弟弟让爸爸完成，然后找叔叔
+  }
+}
+function completeUnitOfWork(workInProgress) {
+  console.log('completeUnitOfWork', workInProgress.key);
+  let stateNode;
+  switch (workInProgress.tag) {
+    case TAG_HOST:
+      stateNode=createStateNode(workInProgress);
+      setInitialProperties(stateNode, workInProgress.props);
+      break;
+    case TAG_TEXT:
+      createStateNode(workInProgress);
+      break;
+  }
+  makeEffectList(workInProgress);
+}
+function createStateNode(fiber){
+  if (fiber.tag <span class="hljs-comment">=== TAG_TEXT) {</span>
+      let stateNode = document.createTextNode(fiber.props);
+      fiber.stateNode = stateNode;
+  } else if (fiber.tag <span class="hljs-comment">=== TAG_HOST) {</span>
+      let stateNode = document.createElement(fiber.type);
+      if (typeof fiber.props.children <span class="hljs-comment">=== 'string') {</span>
+          stateNode.appendChild(document.createTextNode(fiber.props.children));
+      }
+      fiber.stateNode = stateNode;
+  }
+  return fiber.stateNode;
+}
+function makeEffectList(completedWork){
+  const returnFiber = completedWork.return;
+  if (returnFiber) {
+    if (!returnFiber.firstEffect) {//父亲为空就指向儿子的子链表
+      returnFiber.firstEffect = completedWork.firstEffect;
+    } 
+    if (completedWork.lastEffect) {//父亲非空就父亲老尾下一个指向儿子子链表头,父亲尾指出儿子子链表头
+      if (returnFiber.lastEffect) {
+          returnFiber.lastEffect.nextEffect = completedWork.firstEffect;
+      }
+      returnFiber.lastEffect = completedWork.lastEffect;//父亲的尾指向自己的尾
+    }
+    if (completedWork.flags) {
+          if (returnFiber.lastEffect) {//如果父亲有尾，尾巴下一个指向自己
+              returnFiber.lastEffect.nextEffect = completedWork;
+          } else {//如果父亲没有尾，父亲的头毛都指向自己
+              returnFiber.firstEffect = completedWork;
+          }
+          returnFiber.lastEffect = completedWork;
+    }
+  }
+}
+/**
+ * 根据当前的fiber和子JSX构建子fiber树
+ * @param {*} fiber 
+ * @returns 
+ */
+function beginWork(fiber) {
+  console.log('beginWork', fiber.key);
+  let nextChildren = fiber.props.children;
+  if(typeof nextChildren <span class="hljs-comment">=== 'string'){</span>
+    nextChildren=null;
+  }
+  return reconcileChildren(fiber,nextChildren);
+}
+
+function reconcileChildren(returnFiber, nextChildren) {
+  let firstChild = null;
+  let previousNewFiber = null;
+  let newChildren=[];
+  if(Array.isArray(nextChildren)){
+    newChildren = nextChildren;
+  }else if(!!nextChildren){
+    newChildren=[nextChildren];
+  }
+  for (let newIdx = 0; newIdx &lt; newChildren.length; newIdx++) {
+      let newFiber = createFiber(newChildren[newIdx]);
+      newFiber.return = returnFiber;
+      newFiber.flags = Placement;
+      if (!previousNewFiber) {
+        firstChild = newFiber;
+      } else {
+          previousNewFiber.sibling = newFiber;
+      }
+      previousNewFiber = newFiber;
+  }
+  returnFiber.child = firstChild;
+  return firstChild;
+}
+function createFiber(element) {
+  if (typeof element <span class="hljs-comment">=== 'string') {</span>
+      return { tag: TAG_TEXT, type: element.type, key: element, props: element };
+  } else {
+      return { tag: TAG_HOST, type: element.type, key: element.key, props: element.props };
+  }
+}
+</code></pre>
+<h2 id="t666. 请说一下React中有DOM-DIFF算法?">6. 请说一下React中有DOM-DIFF算法? <a href="#t666. 请说一下React中有DOM-DIFF算法?"> # </a></h2>
+<ul>
+<li>在React17+中DOM-DIFF就是根据老的fiber树和最新的JSX对比生成新的fiber树的过程</li>
+</ul>
+<h3 id="t676.1 React优化原则">6.1 React优化原则 <a href="#t676.1 React优化原则"> # </a></h3>
+<ul>
+<li>只对同级节点进行对比，如果DOM节点跨层级移动，则React不会复用</li>
+<li>不同类型的元素会产出不同的结构 ，会销毁老结构，创建新结构</li>
+<li>可以通过key标识移动的元素</li>
+</ul>
+<h3 id="t686.2 单节点">6.2 单节点 <a href="#t686.2 单节点"> # </a></h3>
+<ul>
+<li>如果新的节点只有一个的话</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/31613f98e1387d52be6115dea88555df" alt="018b18574d27f40bc86cae775cc8d79a"></p>
+<ul>
+<li><p>type不同</p>
+<pre><code class="lang-js">&lt;div&gt;
+&lt;h1&gt;h1&lt;/h1&gt;
+&lt;/div&gt;
+/*************/
+&lt;div&gt;
+&lt;h2&gt;h2&lt;/h2&gt;
+&lt;/div&gt;
+</code></pre>
+</li>
+<li><p>key不同</p>
+<pre><code class="lang-js">&lt;div&gt;
+&lt;h1 key="h1"&gt;h1&lt;/h1&gt;
+&lt;/div&gt;
+/*************/
+&lt;div&gt;
+&lt;h2 key="h2"&gt;h2&lt;/h2&gt;
+&lt;/div&gt;
+</code></pre>
+</li>
+<li><p>type和key都相同</p>
+<pre><code class="lang-js">&lt;div&gt;
+&lt;h1 key="h1"&gt;h1&lt;/h1&gt;
+&lt;/div&gt;
+/*************/
+&lt;div&gt;
+&lt;h1 key="h1"&gt;h1-new&lt;/h1&gt;
+&lt;/div&gt;
+</code></pre>
+</li>
+<li><p>key相同但是type不同，直接删除所有老节点</p>
+<pre><code class="lang-js">&lt;div&gt;
+&lt;h1 key="h1"&gt;h1&lt;/h1&gt;
+&lt;h2 key="h2"&gt;h2&lt;/h2&gt;
+&lt;/div&gt;
+/*************/
+&lt;div&gt;
+&lt;p key="h1"&gt;p&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+</li>
+<li><p>key不同，删除当前老节点，接着对比下一个节点</p>
+<pre><code class="lang-js">&lt;div&gt;
+&lt;h1 key="h1"&gt;h1&lt;/h1&gt;
+&lt;h2 key="h2"&gt;h2&lt;/h2&gt;
+&lt;/div&gt;
+/*************/
+&lt;div&gt;
+&lt;h2 key="h2"&gt;h2&lt;/h2&gt;
+&lt;/div&gt;
+</code></pre>
+</li>
+</ul>
+<h3 id="t696.3 多节点">6.3 多节点 <a href="#t696.3 多节点"> # </a></h3>
+<ul>
+<li>如果新的节点有多个节点的话</li>
+<li>节点有可能更新、删除、新增</li>
+<li>多节点的时候会经历二轮遍历</li>
+<li>第一轮遍历主要是处理节点的更新,更新包括属性和类型的更新</li>
+<li>第二轮遍历主要处理节点的新增、删除和移动</li>
+<li><p>移动时的原则是尽量少量的移动，如果必须有一个要动，新地位高的不动，新地位低的动</p>
+</li>
+<li><p>一一对比，都可复用，只需更新</p>
+<pre><code class="lang-js">&lt;ul&gt;
+&lt;li key="A"&gt;A&lt;/li&gt;
+&lt;li key="B"&gt;B&lt;/li&gt;
+&lt;li key="C"&gt;C&lt;/li&gt;
+&lt;li key="D"&gt;D&lt;/li&gt;
+&lt;/ul&gt;
+/*************/
+&lt;ul&gt;
+&lt;li key="A"&gt;A-new&lt;/li&gt;
+&lt;li key="B"&gt;B-new&lt;/li&gt;
+&lt;li key="C"&gt;C-new&lt;/li&gt;
+&lt;li key="D"&gt;D-new&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+</li>
+<li><p>一一对比，key相同，type不同，删除老的，添新的</p>
+<pre><code class="lang-js">&lt;ul&gt;
+&lt;li key="A"&gt;A&lt;/li&gt;
+&lt;li key="B"&gt;B&lt;/li&gt;
+&lt;li key="C"&gt;C&lt;/li&gt;
+&lt;li key="D"&gt;D&lt;/li&gt;
+&lt;/ul&gt;
+/*************/
+&lt;ul&gt;
+&lt;div key="A"&gt;A-new&lt;/div&gt;
+&lt;li key="B"&gt;B-new&lt;/li&gt;
+&lt;li key="C"&gt;C-new&lt;/li&gt;
+&lt;li key="D"&gt;D-new&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+</li>
+</ul>
+<ul>
+<li>key不同退出第一轮循环<pre><code class="lang-js">&lt;ul&gt;
+&lt;li key="A"&gt;A&lt;/li&gt;
+&lt;li key="B"&gt;B&lt;/li&gt;
+&lt;li key="C"&gt;C&lt;/li&gt;
+&lt;li key="D"&gt;D&lt;/li&gt;
+&lt;/ul&gt;
+/*************/
+&lt;ul&gt;
+&lt;li key="A"&gt;A-new&lt;/li&gt;
+&lt;li key="C"&gt;C-new&lt;/li&gt;
+&lt;li key="D"&gt;D-new&lt;/li&gt;
+&lt;li key="B"&gt;B-new&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+</li>
+</ul>
+<p>移动</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">let</span> oldStyle = { <span class="hljs-attr">border</span>: <span class="hljs-string">'3px solid red'</span>, <span class="hljs-attr">margin</span>: <span class="hljs-string">'5px'</span> };
+<span class="hljs-keyword">let</span> newStyle = { <span class="hljs-attr">border</span>: <span class="hljs-string">'3px solid green'</span>, <span class="hljs-attr">margin</span>: <span class="hljs-string">'5px'</span> };
+<span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+<span class="hljs-keyword">let</span> oldVDOM = (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"A"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{oldStyle}</span>&gt;</span>A<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"B"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{oldStyle}</span>&gt;</span>B<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"C"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{oldStyle}</span>&gt;</span>C<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"D"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{oldStyle}</span>&gt;</span>D<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"E"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{oldStyle}</span>&gt;</span>E<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"F"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{oldStyle}</span>&gt;</span>F<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+)
+ReactDOM.render(oldVDOM,root);
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+  <span class="hljs-keyword">let</span> newVDOM = (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"A"</span>  <span class="hljs-attr">style</span>=<span class="hljs-string">{newStyle}</span>&gt;</span>A-new<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"C"</span>  <span class="hljs-attr">style</span>=<span class="hljs-string">{newStyle}</span>&gt;</span>C-new<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"E"</span>  <span class="hljs-attr">style</span>=<span class="hljs-string">{newStyle}</span>&gt;</span>E-new<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"B"</span>  <span class="hljs-attr">style</span>=<span class="hljs-string">{newStyle}</span>&gt;</span>B-new<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"G"</span>  <span class="hljs-attr">style</span>=<span class="hljs-string">{newStyle}</span>&gt;</span>G<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+   <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+  )
+  ReactDOM.render(newVDOM,root);
+},<span class="hljs-number">1000</span>);
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/81b92f5eeab21a3f37fe7c3728ec13d4" alt="81b92f5eeab21a3f37fe7c3728ec13d4"></p>
+<h2 id="t707. 请说一下你对React合成事件的理解？">7. 请说一下你对React合成事件的理解？ <a href="#t707. 请说一下你对React合成事件的理解？"> # </a></h2>
+<h3 id="t717.1 事件工作流">7.1 事件工作流 <a href="#t717.1 事件工作流"> # </a></h3>
+<ul>
+<li>事件捕获</li>
+<li>事件目标</li>
+<li>事件冒泡</li>
+<li>事件委托</li>
+<li>先绑定先执行</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/6f1dae04a2159507c0875343ca202169" alt="6f1dae04a2159507c0875343ca202169"></p>
+<h3 id="t727.2 事件差异">7.2 事件差异 <a href="#t727.2 事件差异"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">原生事件</th>
+<th style="text-align:left">合成事件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">命名方式</td>
+<td style="text-align:left">全小写</td>
+<td style="text-align:left">小驼峰命名</td>
+</tr>
+<tr>
+<td style="text-align:left">事件处理函数</td>
+<td style="text-align:left">字符串</td>
+<td style="text-align:left">函数对象</td>
+</tr>
+<tr>
+<td style="text-align:left">阻止默认行为</td>
+<td style="text-align:left">返回false</td>
+<td style="text-align:left">event.preventDefault()</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">const handleClick = (event)=&gt;{event.preventDefault();}
+// 原生事件
+&lt;a href="#" onclick="handleClick()"&gt;Button&lt;/a&gt;
+
+//合成事件
+&lt;a href="#" onClick={handleClick}&gt;Button&lt;/a&gt;
+</code></pre>
+<h3 id="t737.3 合成事件">7.3 合成事件 <a href="#t737.3 合成事件"> # </a></h3>
+<ul>
+<li>React把事件委托到document对象上</li>
+<li>当真实DOM元素触发事件,先处理原生事件，然后会冒泡到 document 对象后,再处理 React 事件</li>
+<li>React事件绑定的时刻是在reconciliation阶段,会在原生事件的绑定前执行</li>
+<li>目的和优势<ul>
+<li>进行浏览器兼容,React 采用的是顶层事件代理机制，能够保证冒泡一致性</li>
+<li>事件对象可能会被频繁创建和回收，因此 React 引入事件池,在事件池中获取或释放事件对象(React17中被废弃)</li>
+</ul>
+</li>
+</ul>
+<h4 id="t747.3.1 React17以前">7.3.1 React17以前 <a href="#t747.3.1 React17以前"> # </a></h4>
+<h5 id="t757.3.1.1 使用">7.3.1.1 使用 <a href="#t757.3.1.1 使用"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  parentRef=React.createRef();
+  childRef=React.createRef();
+  componentDidMount() {
+    <span class="hljs-keyword">this</span>.parentRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">this</span>.parentRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生冒泡"</span>);
+    });
+    <span class="hljs-keyword">this</span>.childRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">this</span>.childRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生冒泡"</span>);
+    });
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document冒泡"</span>);
+    });
+  }
+  parentBubble = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件冒泡"</span>);
+  };
+  childBubble = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件冒泡"</span>);
+  };
+  parentCapture = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件捕获"</span>);
+  };
+  childCapture = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件捕获"</span>);
+  };
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.parentRef}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.parentBubble}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{this.parentCapture}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.childRef}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.childBubble}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{this.childCapture}</span>&gt;</span>
+          事件执行顺序
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+<span class="hljs-comment">/**
+document捕获
+父元素原生捕获
+子元素原生捕获
+子元素原生冒泡
+父元素原生冒泡
+父元素React事件捕获
+子元素React事件捕获
+子元素React事件冒泡
+父元素React事件冒泡
+document冒泡
+ */</span>
+</code></pre>
+<h5 id="t767.3.1.2 实现">7.3.1.2 实现 <a href="#t767.3.1.2 实现"> # </a></h5>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>event<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"parent"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"child"</span>&gt;</span>
+              事件执行顺序
+            <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,dispatchEvent);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatchEvent</span>(<span class="hljs-params">event,isCapture</span>)</span>{
+            <span class="hljs-keyword">let</span> paths = [];
+            <span class="hljs-keyword">let</span> current = event.target;
+            <span class="hljs-keyword">while</span>(current){
+                paths.push(current);
+                current=current.parentNode;
+            }
+            <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=paths.length<span class="hljs-number">-1</span>;i&gt;=<span class="hljs-number">0</span>;i--){
+                <span class="hljs-keyword">let</span> eventHandler = paths[i].onClickCapture;
+                eventHandler&amp;&amp;eventHandler()
+            }
+            <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;paths.length;i++){
+                <span class="hljs-keyword">let</span> eventHandler = paths[i].onClick;
+                eventHandler&amp;&amp;eventHandler()
+            }
+        }
+        <span class="hljs-keyword">let</span> parent = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'parent'</span>);
+        <span class="hljs-keyword">let</span> child = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'child'</span>);
+        parent.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生捕获"</span>);
+        },<span class="hljs-literal">true</span>);
+        parent.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生冒泡"</span>);
+        });
+        child.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生捕获"</span>);
+        },<span class="hljs-literal">true</span>);
+        child.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生冒泡"</span>);
+        });
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document捕获"</span>);
+        },<span class="hljs-literal">true</span>);
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document冒泡"</span>);
+        });
+        parent.onClick=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件冒泡"</span>);
+        }
+        parent.onClickCapture=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件捕获"</span>);
+        }
+        child.onClick=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件冒泡"</span>);
+        }
+        child.onClickCapture=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件捕获"</span>);
+        }
+<span class="hljs-comment">/*
+父元素React事件捕获
+子元素React事件捕获
+父元素原生捕获
+子元素原生捕获
+子元素原生冒泡
+父元素原生冒泡
+子元素React事件冒泡
+父元素React事件冒泡
+*/</span>
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h4 id="t777.3.2 React17以后">7.3.2 React17以后 <a href="#t777.3.2 React17以后"> # </a></h4>
+<h5 id="t787.3.2.1 使用">7.3.2.1 使用 <a href="#t787.3.2.1 使用"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+  parentRef=React.createRef();
+  childRef=React.createRef();
+  componentDidMount() {
+    <span class="hljs-keyword">this</span>.parentRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">this</span>.parentRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生冒泡"</span>);
+    });
+    <span class="hljs-keyword">this</span>.childRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">this</span>.childRef.current.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生冒泡"</span>);
+    });
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document原生捕获"</span>);
+    },<span class="hljs-literal">true</span>);
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document原生冒泡"</span>);
+    });
+  }
+  parentBubble = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件冒泡"</span>);
+  };
+  childBubble = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件冒泡"</span>);
+  };
+  parentCapture = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件捕获"</span>);
+  };
+  childCapture = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件捕获"</span>);
+  };
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.parentRef}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.parentBubble}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{this.parentCapture}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.childRef}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.childBubble}</span> <span class="hljs-attr">onClickCapture</span>=<span class="hljs-string">{this.childCapture}</span>&gt;</span>
+          事件执行顺序
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+<span class="hljs-comment">/**
+document原生捕获
+父元素React事件捕获
+子元素React事件捕获
+父元素原生捕获
+子元素原生捕获
+子元素原生冒泡
+父元素原生冒泡
+子元素React事件冒泡
+父元素React事件冒泡
+document原生冒泡
+ */</span>
+</code></pre>
+<h5 id="t797.3.2.2 实现">7.3.2.2 实现 <a href="#t797.3.2.2 实现"> # </a></h5>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>event<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"parent"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"child"</span>&gt;</span>
+                  事件执行顺序
+                <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+              <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">let</span> root = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>);
+        <span class="hljs-keyword">let</span> parent = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'parent'</span>);
+        <span class="hljs-keyword">let</span> child = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'child'</span>);
+
+        root.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;dispatchEvent(event,<span class="hljs-literal">true</span>),<span class="hljs-literal">true</span>);
+        root.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;dispatchEvent(event,<span class="hljs-literal">false</span>));
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatchEvent</span>(<span class="hljs-params">event,isCapture</span>)</span>{
+            <span class="hljs-keyword">let</span> paths = [];
+            <span class="hljs-keyword">let</span> current = event.target;
+            <span class="hljs-keyword">while</span>(current){
+                paths.push(current);
+                current=current.parentNode;
+            }
+            <span class="hljs-keyword">if</span>(isCapture){
+              <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=paths.length<span class="hljs-number">-1</span>;i&gt;=<span class="hljs-number">0</span>;i--){
+                <span class="hljs-keyword">let</span> eventHandler = paths[i].onClickCapture;
+                eventHandler&amp;&amp;eventHandler()
+              }
+            }<span class="hljs-keyword">else</span>{
+              <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;paths.length;i++){
+                <span class="hljs-keyword">let</span> eventHandler = paths[i].onClick;
+                eventHandler&amp;&amp;eventHandler()
+               }
+            }
+        }
+
+        parent.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生捕获"</span>);
+        },<span class="hljs-literal">true</span>);
+        parent.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素原生冒泡"</span>);
+        });
+        child.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生捕获"</span>);
+        },<span class="hljs-literal">true</span>);
+        child.addEventListener(<span class="hljs-string">"click"</span>, () =&gt; {
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素原生冒泡"</span>);
+        });
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document原生捕获"</span>);
+        },<span class="hljs-literal">true</span>);
+        <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'click'</span>,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"document原生冒泡"</span>);
+        });
+        parent.onClick=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件冒泡"</span>);
+        }
+        parent.onClickCapture=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"父元素React事件捕获"</span>);
+        }
+        child.onClick=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件冒泡"</span>);
+        }
+        child.onClickCapture=<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"子元素React事件捕获"</span>);
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t807.4 事件系统变更">7.4 事件系统变更 <a href="#t807.4 事件系统变更"> # </a></h3>
+<ul>
+<li>更改事件委托<ul>
+<li>首先第一个修改点就是更改了事件委托绑定节点，在16版本中，React都会把事件绑定到页面的document元素上，这在多个React版本共存的情况下就会虽然某个节点上的函数调用了<code>event.stopPropagation()</code>,但还是会导致另外一个React版本上绑定的事件没有被阻止触发，所以在17版本中会把事件绑定到render函数的节点上</li>
+</ul>
+</li>
+<li>去除事件池<ul>
+<li>17版本中移除了事件对象池，这是因为 React 在旧浏览器中重用了不同事件的事件对象，以提高性能，并将所有事件字段在它们之前设置为 null。在 React 16 及更早版本中，使用者必须调用<code>event.persist()</code> 才能正确的使用该事件，或者正确读取需要的属性</li>
+</ul>
+</li>
+</ul>
+<h3 id="t817.5 案例">7.5 案例 <a href="#t817.5 案例"> # </a></h3>
+<p>React16</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dialog</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span></span>{
+    state = {<span class="hljs-attr">show</span>: <span class="hljs-literal">false</span>};
+    componentDidMount() {
+      <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">"click"</span>,  () =&gt; {
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">show</span>: <span class="hljs-literal">false</span>});
+      });
+    }
+    handleButtonClick = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+      <span class="hljs-comment">//event.stopPropagation();</span>
+      event.nativeEvent.stopImmediatePropagation();
+      <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">show</span>: <span class="hljs-literal">true</span>});
+    };
+
+    render() {
+      <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{this.handleButtonClick}</span>&gt;</span>显示<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          {this.state.show &amp;&amp; (
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{(event)</span> =&gt;</span> event.nativeEvent.stopImmediatePropagation()}&gt;
+              Modal
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+          )}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+      );
+    }
+  }
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Dialog</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<p>React17</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+class Dialog extends React.Component{
+  state = {show: false};
+  componentDidMount() {
+    document.addEventListener("click",  () =&gt; {
+      this.setState({show: false});
+    });
+  }
+  handleButtonClick = (event) =&gt; {
+<span class="hljs-addition">+   event.stopPropagation();</span>
+<span class="hljs-deletion">-   //event.nativeEvent.stopImmediatePropagation();</span>
+    this.setState({show: true});
+  };
+
+  render() {
+    return (
+      &lt;div&gt;
+        &lt;button onClick={this.handleButtonClick}&gt;显示&lt;/button&gt;
+        {this.state.show &amp;&amp; (
+<span class="hljs-addition">+         &lt;div onClick={(event) =&gt; event.stopPropagation()}&gt;</span>
+            Modal
+          &lt;/div&gt;
+        )}
+      &lt;/div&gt;
+    );
+  }
+}
+ReactDOM.render(&lt;Dialog /&gt;, document.getElementById('root'));
+</code></pre>
+
+    

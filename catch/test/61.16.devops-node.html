@@ -1,0 +1,90 @@
+
+        <h2 id="t01. Jenkins是什么?">1. Jenkins是什么? <a href="#t01. Jenkins是什么?"> # </a></h2>
+<ul>
+<li>Jenkins 是一款业界流行的开源持续集成工具，广泛用于项目开发，具有自动化构建、测试和部署等功能。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/cicd.jpg" alt="cicd"></p>
+<h2 id="t12.创建React项目">2.创建React项目 <a href="#t12.创建React项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app react-cicd
+</code></pre>
+<h2 id="t23. 安装JDK">3. 安装JDK <a href="#t23. 安装JDK"> # </a></h2>
+<pre><code class="lang-js">cd /usr/local/src
+wget http:<span class="hljs-comment">//img.zhufengpeixun.cn/jdk1.8.0_211.tar.gz</span>
+tar -xzvf jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211.tar.gz 
+mkdir /usr/java
+cp -r /usr/local/src/jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211 /usr/java
+ln -s /usr/java/jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_211/bin/java /usr/bin/java
+</code></pre>
+<h2 id="t34. 安装jenkins">4. 安装jenkins <a href="#t34. 安装jenkins"> # </a></h2>
+<ul>
+<li><a href="https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json">update-center</a></li>
+<li>1/etc/sysconfig/jenkins1 1JENKINS_USER="root"`</li>
+</ul>
+<pre><code class="lang-js">wget -O /etc/yum.repos.d/jenkins.repo https:<span class="hljs-comment">//pkg.jenkins.io/redhat-stable/jenkins.repo</span>
+rpm --<span class="hljs-keyword">import</span> https:<span class="hljs-comment">//pkg.jenkins.io/redhat-stable/jenkins.io.key</span>
+yum install -y jenkins
+</code></pre>
+<h2 id="t45. 安装插件">5. 安装插件 <a href="#t45. 安装插件"> # </a></h2>
+<ul>
+<li>Generic Webhook Trigger web触发器<ul>
+<li>http://<userid>:<api token="">@<jenkins ip地址="">:端口/generic-webhook-trigger/invoke</jenkins></api></userid></li>
+<li><a href="http://admin:115c4e982964ccd7fc6082635e9812bc20@115.29.64.253:8080/generic-webhook-trigger/invoke">http://admin:115c4e982964ccd7fc6082635e9812bc20@115.29.64.253:8080/generic-webhook-trigger/invoke</a>    </li>
+</ul>
+</li>
+<li>Publish Over SSH 通过SSH布署服务器</li>
+<li>nvm wrapper 提供node环境</li>
+</ul>
+<h2 id="t55. 关闭防火墙">5. 关闭防火墙 <a href="#t55. 关闭防火墙"> # </a></h2>
+<pre><code class="lang-js">systemctl stop firewalld.service
+systemctl disable firewalld.service
+</code></pre>
+<h2 id="t66. 配置webhook">6. 配置webhook <a href="#t66. 配置webhook"> # </a></h2>
+<ul>
+<li>添加远程仓库地址，配置登录名及密码及分支</li>
+<li>添加触发器</li>
+<li>添加和测试钩子</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/liblib.png" alt="liblib"></p>
+<p><img src="http://img.zhufengpeixun.cn/webhook.png" alt="webhook"></p>
+<h2 id="t77. 编写构建脚本">7. 编写构建脚本 <a href="#t77. 编写构建脚本"> # </a></h2>
+<pre><code class="lang-js">npm config <span class="hljs-keyword">set</span> registry http://registry.npm.taobao.org/ &amp;&amp;
+npm install &amp;&amp;
+npm -rf build &amp;&amp;
+npm run build 
+</code></pre>
+<h2 id="t89. 安装nginx">9. 安装nginx <a href="#t89. 安装nginx"> # </a></h2>
+<p>vi /etc/yum.repos.d/nginx.repo</p>
+<pre><code class="lang-js">[nginx]
+name=nginx repo
+baseurl=http:<span class="hljs-comment">//nginx.org/packages/centos/7/$basearch/</span>
+gpgcheck=<span class="hljs-number">0</span>
+enabled=<span class="hljs-number">1</span>
+安装nginx
+</code></pre>
+<pre><code class="lang-js">yum install nginx -y
+</code></pre>
+<h2 id="t910. 布署服务器">10. 布署服务器 <a href="#t910. 布署服务器"> # </a></h2>
+<ul>
+<li>Publish Over SSH</li>
+<li>系统管理-系统设置里找到 <code>Publish over SSH</code></li>
+<li>ssh-copy-id命令可以把本地主机的公钥复制到远程主机的authorized_keys文件上,实现免登录</li>
+</ul>
+<pre><code class="lang-js">ssh-keygen -t rsa
+ssh-copy-id <span class="hljs-number">192.168</span><span class="hljs-number">.1</span><span class="hljs-number">.2</span>
+</code></pre>
+<pre><code class="lang-js">npm config <span class="hljs-keyword">set</span> registry http://registry.npm.taobao.org/ &amp;&amp;
+npm install &amp;&amp;
+npm -rf build &amp;&amp;
+npm run build 
+cd build&amp;&amp;
+tar -zcvf build.tar.gz *
+</code></pre>
+<pre><code class="lang-js">cd /usr/share/nginx/html &amp;&amp;
+tar -xzvf build.tar.gz &amp;&amp;
+rm -rf build.tar.gz
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/publishssh.png" alt="publishssh"></p>
+<p><img src="http://img.zhufengpeixun.cn/snedssh.png" alt="snedssh"></p>
+<h2 id="t1011. 邮件提醒">11. 邮件提醒 <a href="#t1011. 邮件提醒"> # </a></h2>
+
+    

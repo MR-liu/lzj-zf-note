@@ -1,0 +1,1069 @@
+
+        <h2 id="t01.Redux Toolkit 是什么？">1.Redux Toolkit 是什么？ <a href="#t01.Redux Toolkit 是什么？"> # </a></h2>
+<ul>
+<li><a href="https://redux-toolkit.js.org">Redux Toolkit</a>是我们官方的，有观点的，开箱即用的高效 Redux 开发工具集</li>
+<li>Redux Toolkit解决的问题<ul>
+<li>配置 Redux store 过于复杂</li>
+<li>我必须添加很多软件包才能开始使用 Redux 做事情</li>
+<li>Redux 有太多样板代码</li>
+</ul>
+</li>
+</ul>
+<h2 id="t12. 安装">2. 安装 <a href="#t12. 安装"> # </a></h2>
+<pre><code class="lang-js">npm install redux redux-logger redux-thunk @reduxjs/toolkit   express cors  axios --save
+</code></pre>
+<h2 id="t23. 正常用法">3. 正常用法 <a href="#t23. 正常用法"> # </a></h2>
+<h3 id="t33.1 public\index.html">3.1 public\index.html <a href="#t33.1 public\index.html"> # </a></h3>
+<p>public\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"theme-color"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"#000000"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span>
+      <span class="hljs-attr">name</span>=<span class="hljs-string">"description"</span>
+      <span class="hljs-attr">content</span>=<span class="hljs-string">"Web site created using create-react-app"</span>
+    /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Redux Toolkit<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"value"</span>&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"add"</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"minus"</span>&gt;</span>-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t43.2 src\index.js">3.2 src\index.js <a href="#t43.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">const</span> ADD = <span class="hljs-string">'ADD'</span>
+<span class="hljs-keyword">const</span> MINUS = <span class="hljs-string">'MINUS'</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: ADD }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">minus</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: MINUS }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">counter</span>(<span class="hljs-params">state = { number: <span class="hljs-number">0</span> }, action</span>) </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> ADD:
+            <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>:state.number+<span class="hljs-number">1</span>}
+        <span class="hljs-keyword">case</span> MINUS:
+            <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>:state.number<span class="hljs-number">-1</span>}
+        <span class="hljs-attr">default</span>:
+            <span class="hljs-keyword">return</span> state
+    }
+}
+
+<span class="hljs-keyword">var</span> store = createStore(counter)
+<span class="hljs-keyword">var</span> valueEl = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'value'</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{
+    valueEl.innerHTML = store.getState().number;
+}
+
+render()
+store.subscribe(render)
+
+<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'add'</span>).addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    store.dispatch(add())
+})
+
+<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'minus'</span>).addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    store.dispatch(minus())
+})
+</code></pre>
+<h3 id="t53.3 问题">3.3 问题 <a href="#t53.3 问题"> # </a></h3>
+<ul>
+<li>action creator增加代码量</li>
+<li><code>const ADD = 'ADD'</code>冗余</li>
+<li><code>switch</code>结构不清晰</li>
+</ul>
+<h2 id="t64. configureStore">4. configureStore <a href="#t64. configureStore"> # </a></h2>
+<ul>
+<li>Redux工具包有一个 <code>configureStore()</code> 函数，其中覆盖了 <code>createStore()</code> 的功能</li>
+<li><code>configureStore() 函数</code> 提供简化的配置选项。它可以自动组合切片 slice 的 reducer，添加你提供的任何 Redux 中间件，默认
+情况下包含 redux-thunk，并启用<a href="https://github.com/zalmoxisus/redux-devtools-extension">Redux DevTools 扩展</a></li>
+</ul>
+<h3 id="t74.1 public\index.html">4.1 public\index.html <a href="#t74.1 public\index.html"> # </a></h3>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+    &lt;meta name="theme-color" content="#000000" /&gt;
+    &lt;meta
+      name="description"
+      content="Web site created using create-react-app"
+    /&gt;
+    &lt;title&gt;Redux Toolkit&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+      &lt;p id="value"&gt;0&lt;/p&gt;
+      &lt;button id="add"&gt;+&lt;/button&gt;
+      &lt;button id="minus"&gt;-&lt;/button&gt;
+<span class="hljs-addition">+     &lt;button id="async-add"&gt;async-add&lt;/button&gt;</span>
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="t84.2 src\index.js">4.2 src\index.js <a href="#t84.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff"><span class="hljs-deletion">-import { createStore } from 'redux';</span>
+<span class="hljs-addition">+import {configureStore} from '@reduxjs/toolkit';</span>
+<span class="hljs-addition">+import {configureStore} from './toolkit';</span>
+<span class="hljs-addition">+import thunk from 'redux-thunk';</span>
+<span class="hljs-addition">+import logger from 'redux-logger';</span>
+const ADD = 'ADD'
+const MINUS = 'MINUS'
+
+function add() {
+    return { type: ADD }
+}
+
+function minus() {
+    return { type: MINUS }
+}
+function counter(state = { number: 0 }, action) {
+    switch (action.type) {
+        case ADD:
+            return {number:state.number+1}
+        case MINUS:
+            return {number:state.number-1}
+        default:
+            return state
+    }
+}
+
+<span class="hljs-deletion">-let store = createStore(counter)</span>
+<span class="hljs-addition">+const store = configureStore({</span>
+<span class="hljs-addition">+  reducer: counter,</span>
+<span class="hljs-addition">+  middleware: [thunk, logger]</span>
+<span class="hljs-addition">+})</span>
+var valueEl = document.getElementById('value')
+
+function render() {
+    valueEl.innerHTML = store.getState().number;
+}
+
+render()
+store.subscribe(render)
+
+document.getElementById('add').addEventListener('click', function () {
+    store.dispatch(add())
+})
+
+document.getElementById('minus').addEventListener('click', function () {
+    store.dispatch(minus())
+})
+<span class="hljs-addition">+document.getElementById('async-add').addEventListener('click', function () {</span>
+<span class="hljs-addition">+  store.dispatch((dispatch)=&gt;{</span>
+<span class="hljs-addition">+    setTimeout(()=&gt;{</span>
+<span class="hljs-addition">+      dispatch(add())</span>
+<span class="hljs-addition">+    },1000)</span>
+<span class="hljs-addition">+  })</span>
+<span class="hljs-addition">+})</span>
+</code></pre>
+<h3 id="t94.3 toolkit\index.js">4.3 toolkit\index.js <a href="#t94.3 toolkit\index.js"> # </a></h3>
+<p>src\toolkit\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> { <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> configureStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'./configureStore'</span>;
+</code></pre>
+<h3 id="t104.4 configureStore.js">4.4 configureStore.js <a href="#t104.4 configureStore.js"> # </a></h3>
+<p>src\toolkit\configureStore.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { combineReducers,applyMiddleware,createStore,compose} <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isPlainObject</span>(<span class="hljs-params">value</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> value !== <span class="hljs-string">"object"</span> || value === <span class="hljs-literal">null</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.getPrototypeOf(value) === <span class="hljs-built_in">Object</span>.prototype;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">configureStore</span>(<span class="hljs-params">options = {}</span>) </span>{
+    <span class="hljs-keyword">let</span> { reducer, middleware, preloadedState } = options;
+    <span class="hljs-keyword">let</span> rootReducer;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reducer === <span class="hljs-string">"function"</span>) {
+        rootReducer = reducer;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (isPlainObject(reducer)) {
+        rootReducer = combineReducers(reducer);
+    }
+    <span class="hljs-keyword">const</span> composeEnhancers = <span class="hljs-built_in">window</span>.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+    <span class="hljs-keyword">return</span> createStore(rootReducer, preloadedState, composeEnhancers(enhancer));
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> configureStore;
+</code></pre>
+<p>compose</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add1</span>(<span class="hljs-params">str</span>)</span>{
+    <span class="hljs-keyword">return</span> str+<span class="hljs-number">1</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">str</span>)</span>{
+    <span class="hljs-keyword">return</span> str+<span class="hljs-number">2</span>;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">compose</span>(<span class="hljs-params">fn1,fn2</span>)</span>{
+ <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">str</span>)</span>{
+   <span class="hljs-keyword">return</span> fn1(fn2(str))
+ }
+}
+<span class="hljs-keyword">let</span> fn = compose(add1, add2);
+<span class="hljs-keyword">let</span> result = fn(<span class="hljs-string">'zhufeng'</span>);
+<span class="hljs-built_in">console</span>.log(result);<span class="hljs-comment">//zhufeng21</span>
+</code></pre>
+<h2 id="t115. createAction">5. createAction <a href="#t115. createAction"> # </a></h2>
+<ul>
+<li>createAction 接受一个 action 类型字符串作为参数，并返回一个使用该类型字符串的 action creator 函数</li>
+</ul>
+<h3 id="t125.1 src\index.js">5.1 src\index.js <a href="#t125.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import {configureStore,createAction} from './toolkit';</span>
+import thunk from 'redux-thunk';
+import logger from 'redux-logger';
+<span class="hljs-deletion">-const ADD = 'ADD'</span>
+<span class="hljs-deletion">-const MINUS = 'MINUS'</span>
+
+<span class="hljs-deletion">-function add() {</span>
+<span class="hljs-deletion">-    return { type: ADD }</span>
+<span class="hljs-deletion">-}</span>
+<span class="hljs-addition">+const add = createAction('ADD')</span>
+<span class="hljs-deletion">-function minus() {</span>
+<span class="hljs-deletion">-    return { type: MINUS }</span>
+<span class="hljs-deletion">-}</span>
+<span class="hljs-addition">+const minus = createAction('MINUS', (amount) =&gt; ({ payload: amount }))</span>
+<span class="hljs-addition">+console.log(minus.toString());</span>
+<span class="hljs-addition">+console.log(minus.type);</span>
+
+function counter(state = { number: 0 }, action) {
+    switch (action.type) {
+<span class="hljs-addition">+       case add.type:</span>
+          return {number:state.number+1}
+<span class="hljs-addition">+       case minus.type:</span>
+<span class="hljs-addition">+         return {number:state.number-action.payload}</span>
+        default:
+            return state
+    }
+}
+
+const store = configureStore({
+  reducer: counter,
+  middleware: [thunk, logger]
+})
+var valueEl = document.getElementById('value')
+
+function render() {
+    valueEl.innerHTML = store.getState().number;
+}
+
+render()
+store.subscribe(render)
+
+document.getElementById('add').addEventListener('click', function () {
+    store.dispatch(add())
+})
+
+document.getElementById('minus').addEventListener('click', function () {
+<span class="hljs-addition">+   store.dispatch(minus(2))</span>
+})
+document.getElementById('async-add').addEventListener('click', function () {
+  store.dispatch((dispatch)=&gt;{
+    setTimeout(()=&gt;{
+      dispatch(add())
+    },1000)
+  })
+})
+</code></pre>
+<h3 id="t135.2 toolkit\index.js">5.2 toolkit\index.js <a href="#t135.2 toolkit\index.js"> # </a></h3>
+<p>src\toolkit\index.js</p>
+<pre><code class="lang-diff">export { default as configureStore } from './configureStore';
+<span class="hljs-addition">+export { default as createAction } from './createAction';</span>
+</code></pre>
+<h3 id="t145.3 createAction.js">5.3 createAction.js <a href="#t145.3 createAction.js"> # </a></h3>
+<p>src\toolkit\createAction.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createAction</span>(<span class="hljs-params">type, prepareAction</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">actionCreator</span>(<span class="hljs-params">...args</span>) </span>{
+        <span class="hljs-keyword">if</span> (prepareAction) {
+            <span class="hljs-keyword">var</span> prepared = prepareAction.apply(<span class="hljs-literal">null</span>, args);
+            <span class="hljs-keyword">return</span> {
+                <span class="hljs-attr">type</span>: type,
+                <span class="hljs-attr">payload</span>: prepared.payload,
+                <span class="hljs-attr">error</span>: prepared.error
+            };
+        }
+        <span class="hljs-keyword">return</span> {
+            <span class="hljs-attr">type</span>: type,
+            <span class="hljs-attr">payload</span>: args[<span class="hljs-number">0</span>]
+        };
+    }
+    actionCreator.toString = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">""</span> + type;
+    }
+    actionCreator.type = type;
+    <span class="hljs-keyword">return</span> actionCreator;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createAction;
+</code></pre>
+<h2 id="t156. createReducer">6. createReducer <a href="#t156. createReducer"> # </a></h2>
+<ul>
+<li>Redux工具包 包含了一个 createReducer 函数 ，它让使用"查找表"对象的方式编写 reducer</li>
+<li>其中对象的每一个 key 都是一个 Redux action type 字符串，value 是 reducer 函数</li>
+</ul>
+<h3 id="t166.1 src\index.js">6.1 src\index.js <a href="#t166.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import {configureStore,createAction,createReducer} from './toolkit';
+import thunk from 'redux-thunk';
+import logger from 'redux-logger';
+const add = createAction('ADD')
+const minus = createAction('MINUS', (amount) =&gt; ({ payload: amount }))
+console.log(minus.toString());
+console.log(minus.type);
+
+<span class="hljs-deletion">-function counter(state = { number: 0 }, action) {</span>
+<span class="hljs-deletion">-    switch (action.type) {</span>
+<span class="hljs-deletion">-        case add.type:</span>
+<span class="hljs-deletion">-            return {number:state.number+1}</span>
+<span class="hljs-deletion">-        case minus.type:</span>
+<span class="hljs-deletion">-            return {number:state.number-action.payload}</span>
+<span class="hljs-deletion">-        default:</span>
+<span class="hljs-deletion">-            return state</span>
+<span class="hljs-deletion">-    }</span>
+<span class="hljs-deletion">-}</span>
+
+<span class="hljs-addition">+const counter = createReducer({number:0}, {</span>
+<span class="hljs-addition">+  [add]: state =&gt; ({number:state.number+1}),</span>
+<span class="hljs-addition">+  [minus]: state =&gt; ({number:state.number-1})</span>
+<span class="hljs-addition">+})</span>
+
+const store = configureStore({
+  reducer: counter,
+  middleware: [thunk, logger]
+})
+var valueEl = document.getElementById('value')
+
+function render() {
+    valueEl.innerHTML = store.getState().number;
+}
+
+render()
+store.subscribe(render)
+
+document.getElementById('add').addEventListener('click', function () {
+    store.dispatch(add())
+})
+
+document.getElementById('minus').addEventListener('click', function () {
+    store.dispatch(minus(2))
+})
+document.getElementById('async-add').addEventListener('click', function () {
+  store.dispatch((dispatch)=&gt;{
+    setTimeout(()=&gt;{
+      dispatch(add())
+    },1000)
+  })
+})
+</code></pre>
+<h3 id="t176.2 createReducer.js">6.2 createReducer.js <a href="#t176.2 createReducer.js"> # </a></h3>
+<p>src\toolkit\createReducer.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createReducer</span>(<span class="hljs-params">initialState, reducers</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state = initialState, action</span>) </span>{
+        <span class="hljs-keyword">let</span> reducer = reducers[action.type];
+        <span class="hljs-keyword">if</span> (reducer) <span class="hljs-keyword">return</span> reducer(state, action);
+        <span class="hljs-keyword">return</span> state;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createReducer;
+</code></pre>
+<h3 id="t186.3 toolkit\index.js">6.3 toolkit\index.js <a href="#t186.3 toolkit\index.js"> # </a></h3>
+<p>src\toolkit\index.js</p>
+<pre><code class="lang-diff">export { default as configureStore } from './configureStore';
+export { default as createAction } from './createAction';
+<span class="hljs-addition">+export { default as createReducer } from './createReducer';</span>
+</code></pre>
+<h2 id="t197. createSlice">7. createSlice <a href="#t197. createSlice"> # </a></h2>
+<ul>
+<li>createSlice函数允许我们提供一个带有reducer函数的对象，并且它将根据我们列出的 reducer 的名称自动生成 action type 字符串和 action creator 函数</li>
+<li>createSlice 返回一个<code>分片</code>对象，该对象包含生成的 reducer 函数作为一个名为 reducer 的字段，以及在一个名为 actions 的对象中生成的 action creator<ul>
+<li>reducers 一个包含case reducer函数的对象，它的key将被用来生成动作类型常量并在派发的时候可见</li>
+<li>prepare 可以用来自定义payload的值的创建</li>
+<li>extraReducers 允许createSlice去响应别的slice创建的动作类型，它们不会用来生成actions</li>
+</ul>
+</li>
+</ul>
+<h3 id="t207.1 src\index.js">7.1 src\index.js <a href="#t207.1 src\index.js"> # </a></h3>
+<pre><code class="lang-diff">//import {configureStore,createAction,createReducer,createSlice} from '@reduxjs/toolkit';
+import {configureStore,createAction,createReducer,createSlice} from './toolkit';
+import thunk from 'redux-thunk';
+import logger from 'redux-logger';
+<span class="hljs-deletion">-const add = createAction('ADD')</span>
+<span class="hljs-deletion">-const minus = createAction('MINUS', (amount) =&gt; ({ payload: amount }))</span>
+<span class="hljs-deletion">-const counter = createReducer({number:0}, {</span>
+<span class="hljs-deletion">-  [add]: state =&gt; ({number:state.number+1}),</span>
+<span class="hljs-deletion">-  [minus]: state =&gt; ({number:state.number-1})</span>
+<span class="hljs-deletion">-})</span>
+
+<span class="hljs-addition">+const counterSlice = createSlice({</span>
+<span class="hljs-addition">+  name: 'counter',</span>
+<span class="hljs-addition">+  initialState: {number:0},</span>
+<span class="hljs-addition">+  reducers: {</span>
+<span class="hljs-addition">+    add: (state)  =&gt;  ({number:state.number+1}),//派发的时候动作类型是 counter/add</span>
+<span class="hljs-addition">+    minus: (state,action) =&gt; ({number:state.number-action.payload})</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+})</span>
+const { actions, reducer } = counterSlice
+console.log(actions);
+const { add, minus } = actions
+console.log(add);
+
+const store = configureStore({
+  reducer: reducer,
+  middleware: [thunk, logger]
+})
+var valueEl = document.getElementById('value')
+
+function render() {
+    valueEl.innerHTML = store.getState().number;
+}
+
+render()
+store.subscribe(render)
+
+document.getElementById('add').addEventListener('click', function () {
+    store.dispatch(add())
+})
+
+document.getElementById('minus').addEventListener('click', function () {
+    store.dispatch(minus(2))
+})
+document.getElementById('async-add').addEventListener('click', function () {
+  store.dispatch((dispatch)=&gt;{
+    setTimeout(()=&gt;{
+      dispatch(add())
+    },1000)
+  })
+})
+</code></pre>
+<h3 id="t217.2 createSlice.js">7.2 createSlice.js <a href="#t217.2 createSlice.js"> # </a></h3>
+<p>src\toolkit\createSlice.js</p>
+<pre><code class="lang-diff">import { createReducer, createAction } from './'
+function createSlice(options) {
+    let { name, initialState, reducers={} } = options;
+    let actions = {};
+    const prefixReducers = {};
+    Object.keys(reducers).forEach(function (key) {
+        var type = getType(name, key);
+        actions[key] = createAction(type);
+        prefixReducers[type]=reducers[key];
+    })
+    let reducer = createReducer(initialState, prefixReducers);
+    return {
+        name,
+        reducer,
+        actions
+    };
+}
+function getType(slice, actionKey) {
+    return slice + "/" + actionKey;
+}
+export default createSlice;
+</code></pre>
+<h3 id="t227.3 toolkit\index.js">7.3 toolkit\index.js <a href="#t227.3 toolkit\index.js"> # </a></h3>
+<p>src\toolkit\index.js</p>
+<pre><code class="lang-diff">export { default as configureStore } from './configureStore';
+export { default as createAction } from './createAction';
+export { default as createReducer } from './createReducer';
+<span class="hljs-addition">+export { default as createSlice } from './createSlice';</span>
+</code></pre>
+<h2 id="t238. immer">8. immer <a href="#t238. immer"> # </a></h2>
+<h3 id="t248.1 基础">8.1 基础 <a href="#t248.1 基础"> # </a></h3>
+<h4 id="t258.1.1 介绍">8.1.1 介绍 <a href="#t258.1.1 介绍"> # </a></h4>
+<ul>
+<li><a href="https://immerjs.github.io/immer">immer</a>是 mobx 的作者写的一个 immutable 库</li>
+<li>核心实现是利用 ES6 的 proxy,几乎以最小的成本实现了 js 的不可变数据结构</li>
+</ul>
+<h4 id="t268.1.2 produce">8.1.2 produce <a href="#t268.1.2 produce"> # </a></h4>
+<ul>
+<li>对 draftState 的修改都会反应到 nextState 上</li>
+<li>而 immer 使用的结构是共享的，nextState 在结构上又与 currentState 共享未修改的部分<ul>
+<li>currentState 被操作对象的最初状态</li>
+<li>draftState 根据 currentState 生成的草稿状态，它是 currentState 的代理，对 draftState 所做的任何修改都将被记录并用于生成 nextState 。在此过程中，currentState 将不受影响</li>
+<li>nextState 根据 draftState 生成的最终状态</li>
+<li>produce 生产 用来生成 nextState的函数</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> produce = <span class="hljs-built_in">require</span>(<span class="hljs-string">'immer'</span>).default;
+<span class="hljs-keyword">let</span> baseState = {
+    <span class="hljs-attr">ids</span>: [<span class="hljs-number">1</span>],
+    <span class="hljs-attr">pos</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">1</span> 
+    }
+  }
+
+  <span class="hljs-keyword">let</span> nextState = produce(baseState, (draft) =&gt; {
+    draft.ids.push(<span class="hljs-number">2</span>);
+  })
+  <span class="hljs-built_in">console</span>.log(baseState.ids === nextState.ids);<span class="hljs-comment">//false</span>
+  <span class="hljs-built_in">console</span>.log(baseState.pos === nextState.pos);<span class="hljs-comment">//true</span>
+</code></pre>
+<h3 id="t278.2 使用">8.2 使用 <a href="#t278.2 使用"> # </a></h3>
+<h4 id="t288.2.1 src\index.js">8.2.1 src\index.js <a href="#t288.2.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-diff">//import {configureStore,createAction,createReducer,createSlice} from '@reduxjs/toolkit';
+import {configureStore,createAction,createReducer,createSlice} from './toolkit';
+import thunk from 'redux-thunk';
+import logger from 'redux-logger';
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: {number:0},
+  reducers: {
+<span class="hljs-addition">+   add: (state)  =&gt;  state.number+=1,//派发的时候动作类型是 counter/add</span>
+<span class="hljs-addition">+   minus: (state,action) =&gt; state.number-=action.payload</span>
+  }
+})
+const { actions, reducer } = counterSlice
+console.log(actions);
+const { add, minus } = actions
+console.log(add);
+
+const store = configureStore({
+  reducer: reducer,
+  middleware: [thunk, logger]
+})
+var valueEl = document.getElementById('value')
+
+function render() {
+    valueEl.innerHTML = store.getState().number;
+}
+
+render()
+store.subscribe(render)
+
+document.getElementById('add').addEventListener('click', function () {
+    store.dispatch(add())
+})
+
+document.getElementById('minus').addEventListener('click', function () {
+    store.dispatch(minus(2))
+})
+document.getElementById('async-add').addEventListener('click', function () {
+  store.dispatch((dispatch)=&gt;{
+    setTimeout(()=&gt;{
+      dispatch(add())
+    },1000)
+  })
+})
+</code></pre>
+<h4 id="t298.2.2 createReducer.js">8.2.2 createReducer.js <a href="#t298.2.2 createReducer.js"> # </a></h4>
+<p>src\toolkit\createReducer.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import produce from 'immer';</span>
+function createReducer(initialState, reducers) {
+    return function (state = initialState, action) {
+        let reducer = reducers[action.type];
+<span class="hljs-addition">+       if (reducer)</span>
+<span class="hljs-addition">+           return produce(state, draft =&gt; {</span>
+<span class="hljs-addition">+               reducer(draft, action);</span>
+<span class="hljs-addition">+           });</span>
+        return state;
+    }
+}
+export default createReducer;
+</code></pre>
+<h2 id="t309. reselect">9. reselect <a href="#t309. reselect"> # </a></h2>
+<h3 id="t319.1 基础">9.1 基础 <a href="#t319.1 基础"> # </a></h3>
+<ul>
+<li>reselect可以缓存运算结果，提升性能</li>
+<li>reselect的原理是，只要相关状态不变，即直接使用上一次的缓存结果</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">///const {createSelector} = require('reselect');</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createSelector</span>(<span class="hljs-params">selectors, reducer</span>) </span>{
+    <span class="hljs-keyword">let</span> lastState;
+    <span class="hljs-keyword">let</span> lastValue;
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state</span>) </span>{
+        <span class="hljs-keyword">if</span> (lastState === state) {
+            <span class="hljs-keyword">return</span> lastValue;
+        }
+        <span class="hljs-keyword">let</span> values = selectors.map(<span class="hljs-function"><span class="hljs-params">selector</span> =&gt;</span> selector(state));
+        lastValue = reducer(...values);
+        lastState = state;
+        <span class="hljs-keyword">return</span> lastValue;
+    }
+}
+<span class="hljs-keyword">const</span> selectCounter1 = <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state.counter1
+<span class="hljs-keyword">const</span> selectCounter2 = <span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state.counter2
+<span class="hljs-keyword">const</span> totalSelector = createSelector(
+    [selectCounter1, selectCounter2],
+    (counter1, counter2) =&gt; {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'计算结果'</span>);
+        <span class="hljs-keyword">return</span> counter1.number + counter2.number;
+    }
+)
+<span class="hljs-keyword">let</span> state = { <span class="hljs-attr">counter1</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">1</span> }, <span class="hljs-attr">counter2</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">2</span> } };
+<span class="hljs-keyword">let</span> state1 = totalSelector(state);
+<span class="hljs-built_in">console</span>.log(state1);
+<span class="hljs-keyword">let</span> state2 = totalSelector(state);
+<span class="hljs-built_in">console</span>.log(state2);
+</code></pre>
+<h3 id="t329.2 使用">9.2 使用 <a href="#t329.2 使用"> # </a></h3>
+<h4 id="t339.2.1 index.html">9.2.1 index.html <a href="#t339.2.1 index.html"> # </a></h4>
+<p>public\index.html</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+    &lt;meta name="theme-color" content="#000000" /&gt;
+    &lt;meta
+      name="description"
+      content="Web site created using create-react-app"
+    /&gt;
+    &lt;title&gt;Redux Toolkit&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div&gt;
+<span class="hljs-addition">+     &lt;p id="value1"&gt;0&lt;/p&gt;</span>
+<span class="hljs-addition">+     &lt;button id="add1"&gt;add1&lt;/button&gt;</span>
+<span class="hljs-addition">+     &lt;button id="minus1"&gt;minus1&lt;/button&gt;</span>
+<span class="hljs-addition">+     &lt;hr/&gt;</span>
+<span class="hljs-addition">+     &lt;p id="value2"&gt;0&lt;/p&gt;</span>
+<span class="hljs-addition">+     &lt;button id="add2"&gt;add2&lt;/button&gt;</span>
+<span class="hljs-addition">+     &lt;button id="minus2"&gt;minus2&lt;/button&gt;</span>
+<span class="hljs-addition">+     &lt;hr/&gt;</span>
+<span class="hljs-addition">+     &lt;p id="sum"&gt;0&lt;/p&gt;</span>
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+</code></pre>
+<h4 id="t349.2.2 src\index.js">9.2.2 src\index.js <a href="#t349.2.2 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-diff">//import {configureStore,createAction,createReducer,createSlice} from '@reduxjs/toolkit';
+import {configureStore,createAction,createReducer,createSlice,createSelector} from './toolkit';
+import thunk from 'redux-thunk';
+import logger from 'redux-logger';
+
+const counter1Slice = createSlice({
+  name: 'counter1',
+  initialState: { number: 0 },
+  reducers: {
+    add: state =&gt; { state.number += 1 },
+    minus: state =&gt; { state.number -= 1 }
+  }
+})
+const counter2Slice = createSlice({
+  name: 'counter2',
+  initialState: { number: 0 },
+  reducers: {
+    add: state =&gt; { state.number += 1 },
+    minus: state =&gt; { state.number -= 1 }
+  }
+})
+const { actions: { add: add1, minus: minus1 }, reducer: reducer1 } = counter1Slice
+const { actions: { add: add2, minus: minus2 }, reducer: reducer2 } = counter2Slice
+
+const store = configureStore({
+  reducer: { counter1: reducer1, counter2: reducer2 },
+  middleware: [thunk, logger]
+})
+var value1El = document.getElementById('value1')
+var value2El = document.getElementById('value2')
+var sumEl = document.getElementById('sum')
+const selectCounter1 = state =&gt; state.counter1
+const selectCounter2 = state =&gt; state.counter2
+const totalSelector = createSelector(
+  [selectCounter1, selectCounter2],
+  (counter1, counter2) =&gt; {
+    return counter1.number + counter2.number;
+  }
+)
+function render() {
+  value1El.innerHTML = store.getState().counter1.number;
+  value2El.innerHTML = store.getState().counter2.number;
+  sumEl.innerHTML = totalSelector(store.getState());
+}
+
+render()
+store.subscribe(render)
+
+document.getElementById('add1').addEventListener('click', function () {
+  store.dispatch(add1())
+})
+
+document.getElementById('minus1').addEventListener('click', function () {
+  store.dispatch(minus1())
+})
+
+document.getElementById('add2').addEventListener('click', function () {
+  store.dispatch(add2())
+})
+
+document.getElementById('minus2').addEventListener('click', function () {
+  store.dispatch(minus2())
+})
+</code></pre>
+<h4 id="t359.2.3 toolkit\index.js">9.2.3 toolkit\index.js <a href="#t359.2.3 toolkit\index.js"> # </a></h4>
+<p>src\toolkit\index.js</p>
+<pre><code class="lang-diff">export { default as configureStore } from './configureStore';
+export { default as createAction } from './createAction';
+export { default as createReducer } from './createReducer';
+export { default as createSlice } from './createSlice';
+<span class="hljs-addition">+export {createSelector } from '../reselect';</span>
+</code></pre>
+<h4 id="t369.2.4 reselect\index.js">9.2.4 reselect\index.js <a href="#t369.2.4 reselect\index.js"> # </a></h4>
+<p>src\reselect\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> createSelector} <span class="hljs-keyword">from</span> <span class="hljs-string">'./createSelector'</span>;
+</code></pre>
+<h4 id="t379.2.5 createSelector.js">9.2.5 createSelector.js <a href="#t379.2.5 createSelector.js"> # </a></h4>
+<p>src\reselect\createSelector.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createSelector</span>(<span class="hljs-params">selectors, reducer</span>) </span>{
+    <span class="hljs-keyword">let</span> lastState;
+    <span class="hljs-keyword">let</span> lastValue;
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state</span>) </span>{
+        <span class="hljs-keyword">if</span> (lastState === state) {
+            <span class="hljs-keyword">return</span> lastValue;
+        }
+        <span class="hljs-keyword">let</span> values = selectors.map(<span class="hljs-function"><span class="hljs-params">selector</span> =&gt;</span> selector(state));
+        lastValue = reducer(...values);
+        lastState = state;
+        <span class="hljs-keyword">return</span> lastValue;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createSelector;
+</code></pre>
+<h2 id="t3810. createAsyncThunk">10. createAsyncThunk <a href="#t3810. createAsyncThunk"> # </a></h2>
+<ul>
+<li>接收redux动作类型字符串和一个返回promise回调的函数</li>
+<li>它会基于你传递的动作类型前缀生成promise生命周期的动作类型</li>
+<li>并且返回一个thunk动作创建者，这个thunk动作创建者会运行promise回调并且派发生命周期动作</li>
+<li>它抽象了处理异步请求生命周期的标准推荐方法</li>
+</ul>
+<h3 id="t3910.1 src\index.js">10.1 src\index.js <a href="#t3910.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { configureStore, createSlice, createAsyncThunk } <span class="hljs-keyword">from</span> <span class="hljs-string">'./toolkit'</span>;
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'axios'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> getTodosList = createAsyncThunk(
+  <span class="hljs-string">"todos/list"</span>,  <span class="hljs-keyword">async</span> () =&gt;  <span class="hljs-keyword">await</span> axios.get(<span class="hljs-string">`http://localhost:8080/todos/list`</span>)
+);
+<span class="hljs-keyword">const</span> initialState = {
+  <span class="hljs-attr">todos</span>: [],
+  <span class="hljs-attr">loading</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span>,
+};
+
+<span class="hljs-keyword">const</span> todoSlice = createSlice({
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'todo'</span>,
+  initialState,
+  <span class="hljs-attr">reducers</span>: {},
+  <span class="hljs-attr">extraReducers</span>: {
+    [getTodosList.pending]: <span class="hljs-function">(<span class="hljs-params">state</span>) =&gt;</span> {
+      state.loading = <span class="hljs-literal">true</span>;
+    },
+    [getTodosList.fulfilled]: <span class="hljs-function">(<span class="hljs-params">state, action</span>) =&gt;</span> {
+      state.todos = action.payload.data;
+      state.loading = <span class="hljs-literal">false</span>;
+    },
+    [getTodosList.rejected]: <span class="hljs-function">(<span class="hljs-params">state, action</span>) =&gt;</span> {
+      state.todos = [];
+      <span class="hljs-built_in">console</span>.log(action);
+      state.error = action.error.message;
+      state.loading = <span class="hljs-literal">false</span>;
+    }
+  }
+})
+<span class="hljs-keyword">const</span> { reducer } = todoSlice;
+<span class="hljs-keyword">const</span> store = configureStore({
+  reducer
+})
+<span class="hljs-keyword">let</span> promise = store.dispatch(getTodosList());
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'请求开始'</span>,store.getState());
+promise.then(<span class="hljs-function">(<span class="hljs-params">response</span>)=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'成功'</span>,response);
+},error=&gt;{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'失败'</span>,error);
+});
+setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'请求结束'</span>,store.getState());
+},<span class="hljs-number">1500</span>);
+<span class="hljs-comment">//promise.abort();</span>
+</code></pre>
+<h3 id="t4010.2 configureStore.js">10.2 configureStore.js <a href="#t4010.2 configureStore.js"> # </a></h3>
+<p>src\toolkit\configureStore.js</p>
+<pre><code class="lang-diff">import { combineReducers,applyMiddleware,createStore,compose } from 'redux';
+<span class="hljs-addition">+import thunk from 'redux-thunk';</span>
+function isPlainObject(value) {
+    if (typeof value !== "object" || value <span class="hljs-comment">=== null)</span>
+        return false;
+    return Object.getPrototypeOf(value) <span class="hljs-comment">=== Object.prototype;</span>
+}
+function configureStore(options = {}) {
+<span class="hljs-addition">+   let { reducer, middleware=[thunk], preloadedState } = options;</span>
+    let rootReducer;
+    if (typeof reducer <span class="hljs-comment">=== "function") {</span>
+        rootReducer = reducer;
+    } else if (isPlainObject(reducer)) {
+        rootReducer = combineReducers(reducer);
+    }
+    const enhancer = applyMiddleware(...middleware);
+    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+    return createStore(rootReducer, preloadedState, composeEnhancers(enhancer));
+}
+export default configureStore;
+</code></pre>
+<h3 id="t4110.3 createReducer.js">10.3 createReducer.js <a href="#t4110.3 createReducer.js"> # </a></h3>
+<p>src\toolkit\createReducer.js</p>
+<pre><code class="lang-diff">import produce from 'immer';
+<span class="hljs-addition">+function createReducer(initialState, reducers, extraReducers) {</span>
+    return function (state = initialState, action) {
+        let reducer = reducers[action.type];
+        if (reducer)
+            return produce(state, draft =&gt; {
+                reducer(draft, action);
+            });
+<span class="hljs-addition">+       let extraReducer = extraReducers[action.type];</span>
+<span class="hljs-addition">+       if (extraReducer) {</span>
+<span class="hljs-addition">+           return produce(state, draft =&gt; {</span>
+<span class="hljs-addition">+               extraReducer(draft, action);</span>
+<span class="hljs-addition">+           });</span>
+<span class="hljs-addition">+       }</span>
+        return state;
+    }
+}
+export default createReducer;
+</code></pre>
+<h3 id="t4210.4 createSlice.js">10.4 createSlice.js <a href="#t4210.4 createSlice.js"> # </a></h3>
+<p>src\toolkit\createSlice.js</p>
+<pre><code class="lang-diff">import { createReducer, createAction } from './'
+function createSlice(options) {
+<span class="hljs-addition">+   let { name, initialState, reducers={},extraReducers={}  } = options;</span>
+    let actions = {};
+    const prefixReducers = {};
+    Object.keys(reducers).forEach(function (key) {
+        var type = getType(name, key);
+        actions[key] = createAction(type);
+        prefixReducers[type]=reducers[key];
+    })
+<span class="hljs-addition">+   let reducer = createReducer(initialState, prefixReducers,extraReducers);</span>
+    return {
+        name,
+        reducer,
+        actions
+    };
+}
+function getType(slice, actionKey) {
+    return slice + "/" + actionKey;
+}
+export default createSlice;
+</code></pre>
+<h3 id="t4310.5 createAsyncThunk.js">10.5 createAsyncThunk.js <a href="#t4310.5 createAsyncThunk.js"> # </a></h3>
+<p>src\toolkit\createAsyncThunk.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createAction } <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createAsyncThunk</span>(<span class="hljs-params">typePrefix, payloadCreator</span>) </span>{
+    <span class="hljs-keyword">let</span> pending = createAction(typePrefix + <span class="hljs-string">"/pending"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> ({ <span class="hljs-attr">payload</span>: <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> });
+    });
+    <span class="hljs-keyword">let</span> fulfilled = createAction(typePrefix + <span class="hljs-string">"/fulfilled"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">payload</span>) </span>{
+        <span class="hljs-keyword">return</span> ({ payload });
+    });
+    <span class="hljs-keyword">let</span> rejected = createAction(typePrefix + <span class="hljs-string">"/rejected"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+        <span class="hljs-keyword">return</span> ({ error });
+    });
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">actionCreator</span>(<span class="hljs-params">arg</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">dispatch</span>) </span>{
+            dispatch(pending());
+            <span class="hljs-keyword">const</span> promise = payloadCreator(arg);
+            <span class="hljs-keyword">let</span> abort;
+            <span class="hljs-keyword">const</span> abortedPromise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">_, reject</span>) =&gt;</span> {
+                abort = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                    reject({ <span class="hljs-attr">name</span>: <span class="hljs-string">"AbortError"</span>, <span class="hljs-attr">message</span>: <span class="hljs-string">"Aborted"</span> });
+                }
+            });
+            <span class="hljs-built_in">Promise</span>.race([promise, abortedPromise]).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+                <span class="hljs-keyword">return</span> dispatch(fulfilled(result));
+            }, (error) =&gt; {
+                <span class="hljs-keyword">return</span> dispatch(rejected(error));
+            });
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign(promise, { abort });
+        }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.assign(actionCreator, { pending, rejected, fulfilled });
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createAsyncThunk;
+</code></pre>
+<h3 id="t4410.6 toolkit\index.js">10.6 toolkit\index.js <a href="#t4410.6 toolkit\index.js"> # </a></h3>
+<p>src\toolkit\index.js</p>
+<pre><code class="lang-diff">export { default as configureStore } from './configureStore';
+export { default as createAction } from './createAction';
+export { default as createReducer } from './createReducer';
+export { default as createSlice } from './createSlice';
+export {createSelector } from '../reselect';
+<span class="hljs-addition">+export { default as createAsyncThunk } from "./createAsyncThunk";</span>
+</code></pre>
+<h3 id="t4510.7 api.js">10.7 api.js <a href="#t4510.7 api.js"> # </a></h3>
+<p>api.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">let</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cors'</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(cors());
+app.use(<span class="hljs-function">(<span class="hljs-params">req,res,next</span>)=&gt;</span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+      <span class="hljs-keyword">if</span>(<span class="hljs-built_in">Math</span>.random()&gt;<span class="hljs-number">.5</span>){
+        next();
+      }<span class="hljs-keyword">else</span>{
+        next(<span class="hljs-string">'接口出错'</span>);
+      }
+    },<span class="hljs-number">1000</span>);
+});
+<span class="hljs-keyword">let</span> todos = [{<span class="hljs-attr">id</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">"吃饭"</span>},{<span class="hljs-attr">id</span>:<span class="hljs-number">2</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">"睡觉"</span>}];
+app.get(<span class="hljs-string">'/todos/list'</span>,(_req,res)=&gt;{
+  res.json(todos);
+});
+app.get(<span class="hljs-string">'/todos/detail/:id'</span>,(req,res)=&gt;{
+  <span class="hljs-keyword">let</span> id = req.params.id;
+  <span class="hljs-keyword">let</span> todo = todos.find(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item.id === <span class="hljs-built_in">parseInt</span>(id));
+  res.json(todo);
+});
+app.listen(<span class="hljs-number">8080</span>,()=&gt;<span class="hljs-built_in">console</span>.log(<span class="hljs-string">`服务在端口8080启动`</span>));
+</code></pre>
+<h2 id="t4611.Redux Toolkit Query">11.Redux Toolkit Query <a href="#t4611.Redux Toolkit Query"> # </a></h2>
+<ul>
+<li><a href="https://redux-toolkit.js.org/rtk-query/overview">Redux Toolkit Query</a>是一种高级的数据获取和缓存工具，旨在简化在Web应用程序中加载数据的常见情况</li>
+<li>跟踪加载状态用来显示UI转圈组件</li>
+<li>避免对相同的数据进行重复请求</li>
+<li>优化UI的更新感觉更快</li>
+<li><p>根据用户的交互来管理缓存的生命周期</p>
+</li>
+<li><p>createApi() RTK Query的核心函数，它允许你定义endpoint的集合用来描述如何获取数据，包含如何获取和转换数据</p>
+</li>
+<li>fetchBaseQuery() 一个用来简化请求的对fetch的封装</li>
+</ul>
+<h3 id="t4711.1 src\index.js">11.1 src\index.js <a href="#t4711.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+    &lt;meta name="theme-color" content="#000000" /&gt;
+    &lt;meta
+      name="description"
+      content="Web site created using create-react-app"
+    /&gt;
+    &lt;title&gt;Redux Toolkit&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+<span class="hljs-addition">+    &lt;div id="root"&gt;&lt;/div&gt;</span>
+  &lt;/body&gt;
+&lt;/html&gt;
+
+</code></pre>
+<h3 id="t4811.2 src\index.js">11.2 src\index.js <a href="#t4811.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> store <span class="hljs-keyword">from</span> <span class="hljs-string">'./store'</span>;
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App'</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t4911.3 src\App.js">11.3 src\App.js <a href="#t4911.3 src\App.js"> # </a></h3>
+<p>src\App.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {useGetTodosQuery} <span class="hljs-keyword">from</span> <span class="hljs-string">'./todos'</span>
+<span class="hljs-comment">//使用自定义查询 hook可以自动获取数据并且返回查询结果</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> { data, error, isLoading } = useGetTodosQuery(<span class="hljs-number">1</span>)
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'isLoading='</span>, isLoading, <span class="hljs-string">'error='</span>, error, <span class="hljs-string">'data='</span>, data);
+    <span class="hljs-keyword">if</span>(isLoading){
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>加载中....<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">if</span>(error){
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{error.error}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
+        }<span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{data.text}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
+        }
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+</code></pre>
+<h3 id="t5011.4 src\store.js">11.4 src\store.js <a href="#t5011.4 src\store.js"> # </a></h3>
+<p>src\store.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { configureStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'@reduxjs/toolkit'</span>
+<span class="hljs-keyword">import</span> todosApi <span class="hljs-keyword">from</span> <span class="hljs-string">'./todos'</span>
+ <span class="hljs-comment">//API slice会包含自动生成的redux reducer和一个自定义中间件</span>
+<span class="hljs-keyword">const</span> store = configureStore({
+  <span class="hljs-attr">reducer</span>: {
+    [todosApi.reducerPath]: todosApi.reducer,
+  },
+  <span class="hljs-attr">middleware</span>: <span class="hljs-function">(<span class="hljs-params">getDefaultMiddleware</span>) =&gt;</span>
+    getDefaultMiddleware().concat(todosApi.middleware)
+})
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h3 id="t5111.5 src\todos.js">11.5 src\todos.js <a href="#t5111.5 src\todos.js"> # </a></h3>
+<p>src\todos.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">//React entry point 会自动根据endpoints生成hooks</span>
+<span class="hljs-keyword">import</span> { createApi, fetchBaseQuery } <span class="hljs-keyword">from</span> <span class="hljs-string">'@reduxjs/toolkit/query/react'</span>
+<span class="hljs-comment">//使用base URL 和endpoints 定义服务</span>
+<span class="hljs-keyword">const</span> todosApi = createApi({
+  <span class="hljs-attr">reducerPath</span>: <span class="hljs-string">'todosApi'</span>,
+  <span class="hljs-attr">baseQuery</span>: fetchBaseQuery({ <span class="hljs-attr">baseUrl</span>: <span class="hljs-string">'http://localhost:8080'</span> }),
+  <span class="hljs-attr">endpoints</span>: <span class="hljs-function">(<span class="hljs-params">builder</span>) =&gt;</span> ({
+    <span class="hljs-attr">getTodos</span>: builder.query({<span class="hljs-attr">query</span>: <span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> <span class="hljs-string">`/todos/detail/<span class="hljs-subst">${id}</span>`</span>}),
+  })
+})
+<span class="hljs-comment">//导出可在函数式组件使用的hooks,它是基于定义的endpoints自动生成的</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> { useGetTodosQuery } = todosApi
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> todosApi;
+</code></pre>
+<h2 id="t5212.axios-basequery">12.axios-basequery <a href="#t5212.axios-basequery"> # </a></h2>
+<ul>
+<li><a href="https://redux-toolkit.js.org/rtk-query/api/createApi#basequery">basequery</a></li>
+<li><a href="https://redux-toolkit.js.org/rtk-query/usage/customizing-queries">customizing-queries</a></li>
+<li><a href="https://redux-toolkit.js.org/rtk-query/usage/customizing-queries#axios-basequery">axios-basequery</a></li>
+</ul>
+<h4 id="t5311.4.1 src\todos.js">11.4.1 src\todos.js <a href="#t5311.4.1 src\todos.js"> # </a></h4>
+<p>src\todos.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">//React entry point 会自动根据endpoints生成hooks</span>
+<span class="hljs-comment">//fetchBaseQuery是一个轻量级的对fetch的封装</span>
+<span class="hljs-keyword">import</span> { createApi } <span class="hljs-keyword">from</span> <span class="hljs-string">'@reduxjs/toolkit/query/react'</span>
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'axios'</span>
+axios.interceptors.response.use(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+  <span class="hljs-keyword">return</span> {<span class="hljs-attr">data</span>:response.data};<span class="hljs-comment">//成功的响应体</span>
+},<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>)</span>{<span class="hljs-comment">//失败</span>
+  <span class="hljs-keyword">let</span> message = error.response.data;
+  <span class="hljs-keyword">return</span> {<span class="hljs-attr">error</span>:{<span class="hljs-attr">error</span>:message}};
+});
+<span class="hljs-keyword">const</span> axiosBaseQuery = <span class="hljs-function">(<span class="hljs-params">{ baseUrl }</span>) =&gt;</span> (
+  <span class="hljs-keyword">async</span> (options) =&gt; {
+    <span class="hljs-keyword">const</span> { url, method, data } = options;
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> axios({ <span class="hljs-attr">url</span>: baseUrl + url, method, data })
+      <span class="hljs-keyword">return</span> result;
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'catch'</span>,error);
+      <span class="hljs-keyword">return</span> error;
+    }
+  }
+)
+<span class="hljs-comment">//使用base URL和endpoints 定义服务</span>
+<span class="hljs-keyword">const</span> todosApi = createApi({
+  <span class="hljs-attr">reducerPath</span>: <span class="hljs-string">'todoApi'</span>,
+  <span class="hljs-attr">baseQuery</span>: axiosBaseQuery({ <span class="hljs-attr">baseUrl</span>: <span class="hljs-string">'http://localhost:8080'</span> }),
+  <span class="hljs-comment">//此处可以把你提供的endpoint名字映射为redux的核心逻辑(如thunk),用来触发数据获取和读取缓存数据</span>
+  endpoints(builder) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">getTodos</span>: builder.query({ <span class="hljs-attr">query</span>: <span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> ({ <span class="hljs-attr">url</span>: <span class="hljs-string">`/todos/detail/<span class="hljs-subst">${id}</span>`</span>, <span class="hljs-attr">method</span>: <span class="hljs-string">'get'</span> }) })
+    }
+  }
+})
+<span class="hljs-comment">//导出可在函数式组件使用的hooks,它是基于定义的endpoints自动生成的</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> { useGetTodosQuery } = todosApi
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> todosApi;
+</code></pre>
+<h2 id="t54参考">参考 <a href="#t54参考"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/zhufeng-redux-toolkit">toolkit</a></li>
+</ul>
+
+    

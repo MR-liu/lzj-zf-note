@@ -1,0 +1,1124 @@
+
+        <h2 id="t01. 初始化项目">1. 初始化项目 <a href="#t01. 初始化项目"> # </a></h2>
+<h3 id="t11.1 创建项目">1.1 创建项目 <a href="#t11.1 创建项目"> # </a></h3>
+<pre><code class="lang-js">mkdir zhufeng-react-typescript2020
+cd zhufeng-react-typescript2020
+cnpm init -y
+touch .gitignore  <span class="hljs-comment">//mac或linux</span>
+type nul &gt; .gitignore  <span class="hljs-comment">//window</span>
+</code></pre>
+<h3 id="t21.2.安装依赖">1.2.安装依赖 <a href="#t21.2.安装依赖"> # </a></h3>
+<ul>
+<li>@types开头的包都是typeScript的声明文件，可以进入node_modules/@types/XX/index.d.ts进行查看</li>
+<li><a href="https://github.com/DefinitelyTyped/DefinitelyTyped">声明文件</a></li>
+</ul>
+<pre><code class="lang-js">cnpm i react react-dom @types/react @types/react-dom react-router-dom @types/react-router-dom react-transition-group @types/react-transition-group react-swipe @types/react-swipe  -S
+cnpm i webpack webpack-cli webpack-dev-server html-webpack-plugin hoist-non-react-statics -D
+cnpm i typescript ts-loader source-map-loader -D
+cnpm i redux react-redux @types/react-redux redux-thunk  redux-logger @types/redux-logger -S
+cnpm i connected-react-router -S
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">包名</th>
+<th style="text-align:left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">react @types/react</td>
+<td style="text-align:left">react核心库</td>
+</tr>
+<tr>
+<td style="text-align:left">react-dom @types/react-dom</td>
+<td style="text-align:left">react操作DOM库</td>
+</tr>
+<tr>
+<td style="text-align:left">react-router-dom @types/react-router-dom</td>
+<td style="text-align:left">react路由库</td>
+</tr>
+<tr>
+<td style="text-align:left">react-transition-group @types/react-transition-group</td>
+<td style="text-align:left">react动画库</td>
+</tr>
+<tr>
+<td style="text-align:left">react-swipe @types/react-swipe</td>
+<td style="text-align:left">react轮播图组件库</td>
+</tr>
+<tr>
+<td style="text-align:left">webpack</td>
+<td style="text-align:left">webpack核心库</td>
+</tr>
+<tr>
+<td style="text-align:left">webpack-cli</td>
+<td style="text-align:left">webpack命令行文件</td>
+</tr>
+<tr>
+<td style="text-align:left">webpack-dev-server</td>
+<td style="text-align:left">webpack开发服务器</td>
+</tr>
+<tr>
+<td style="text-align:left">html-webpack-plugin</td>
+<td style="text-align:left">webpack用于生成html的插件</td>
+</tr>
+<tr>
+<td style="text-align:left">redux</td>
+<td style="text-align:left">全局状态管理库</td>
+</tr>
+<tr>
+<td style="text-align:left">react-redux @types/react-redux</td>
+<td style="text-align:left">连接react和redux的库</td>
+</tr>
+<tr>
+<td style="text-align:left">redux-thunk</td>
+<td style="text-align:left">可以让store派发一个函数的中间件</td>
+</tr>
+<tr>
+<td style="text-align:left">redux-logger @types/redux-logger</td>
+<td style="text-align:left">可以在状态改变前后打印状态的中间件</td>
+</tr>
+<tr>
+<td style="text-align:left">typescript</td>
+<td style="text-align:left">JavaScript语言扩展</td>
+</tr>
+<tr>
+<td style="text-align:left">ts-loader</td>
+<td style="text-align:left">可以让Webpack使用TypeScript的标准配置文件<code>tsconfig.json</code>编译TypeScript代码</td>
+</tr>
+<tr>
+<td style="text-align:left">source-map-loader</td>
+<td style="text-align:left">使用任意来自Typescript的sourcemap输出，以此通知webpack何时生成自己的sourcemaps,这让你在调试最终生成的文件时就好像在调试TypeScript源码一样</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>ts-loader可以让Webpack使用TypeScript的标准配置文件tsconfig.json编译TypeScript代码。</li>
+<li>source-map-loader使用任意来自Typescript的sourcemap输出，以此通知webpack何时生成自己的sourcemaps,这让你在调试最终生成的文件时就好像在调试TypeScript源码一样。</li>
+</ul>
+<h3 id="t31.3.支持typescript">1.3.支持typescript <a href="#t31.3.支持typescript"> # </a></h3>
+<p>需要生成一个tsconfig.json文件来告诉ts-loader如何编译代码TypeScript代码</p>
+<pre><code class="lang-js">tsc --init
+</code></pre>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"compilerOptions"</span>: {
+    <span class="hljs-attr">"outDir"</span>: <span class="hljs-string">"./dist"</span>,
+    <span class="hljs-attr">"sourceMap"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"strict"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"noImplicitAny"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"strictNullChecks"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"module"</span>: <span class="hljs-string">"commonjs"</span>,
+    <span class="hljs-attr">"target"</span>: <span class="hljs-string">"es5"</span>,
+    <span class="hljs-attr">"jsx"</span>: <span class="hljs-string">"react"</span>,
+    <span class="hljs-attr">"baseUrl"</span>: <span class="hljs-string">"."</span>,
+    <span class="hljs-attr">"paths"</span>: {
+      <span class="hljs-attr">"@/*"</span>: [
+        <span class="hljs-string">"src/*"</span>
+      ]
+    }
+  },
+  <span class="hljs-attr">"include"</span>: [
+    <span class="hljs-string">"./src/**/*"</span>
+  ]
+}
+</code></pre>
+<ul>
+<li>outDir 指定输出目录</li>
+<li>sourceMap：把 ts 文件编译成 js 文件的时候，同时生成对应的sourceMap文件</li>
+<li>noImplicitAny：如果为true的话，TypeScript 编译器无法推断出类型时，它仍然会生成 JavaScript 文件，但是它也会报告一个错误</li>
+<li>module：代码规范</li>
+<li>target：转换成es5</li>
+<li>jsx：react模式会生成React.createElement，在使用前不需要再进行转换操作了，输出文件的扩展名为.js</li>
+<li>include：需要编译的目录。</li>
+</ul>
+<h3 id="t41.4.编写webpack配置文件">1.4.编写webpack配置文件 <a href="#t41.4.编写webpack配置文件"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.tsx"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"bundle.js"</span>,
+    <span class="hljs-attr">path</span>: path.join(__dirname, <span class="hljs-string">"dist"</span>),
+  },
+  <span class="hljs-attr">devtool</span>: <span class="hljs-string">"source-map"</span>,
+  <span class="hljs-attr">devServer</span>: {
+    <span class="hljs-attr">hot</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">contentBase</span>: path.join(__dirname, <span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">historyApiFallback</span>: {
+      <span class="hljs-attr">index</span>: <span class="hljs-string">"./index.html"</span>,
+    },
+  },
+  <span class="hljs-attr">resolve</span>: {
+    <span class="hljs-attr">extensions</span>: [<span class="hljs-string">".ts"</span>, <span class="hljs-string">".tsx"</span>, <span class="hljs-string">".js"</span>, <span class="hljs-string">".json"</span>],
+    <span class="hljs-attr">alias</span>: {
+      <span class="hljs-string">"@"</span>: path.resolve(<span class="hljs-string">"src"</span>), <span class="hljs-comment">// 这样配置后 @ 可以指向 src 目录</span>
+    },
+  },
+
+  <span class="hljs-attr">module</span>: {
+    <span class="hljs-attr">rules</span>: [
+      {
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.tsx?$/</span>,
+        <span class="hljs-attr">loader</span>: <span class="hljs-string">"ts-loader"</span>,
+      },
+      {
+        <span class="hljs-attr">enforce</span>: <span class="hljs-string">"pre"</span>,
+        <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.tsx$/</span>,
+        <span class="hljs-attr">loader</span>: <span class="hljs-string">"source-map-loader"</span>,
+      },
+    ],
+  },
+
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+      <span class="hljs-attr">template</span>: <span class="hljs-string">"./src/index.html"</span>,
+    }),
+    <span class="hljs-keyword">new</span> webpack.HotModuleReplacementPlugin(),
+  ],
+};
+
+</code></pre>
+<h3 id="t51.5.入口文件">1.5.入口文件 <a href="#t51.5.入口文件"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js">
+</code></pre>
+<h3 id="t61.6.src\index.html">1.6.src\index.html <a href="#t61.6.src\index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-js">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;typescript&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="root"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="t71.7 package.json">1.7 package.json <a href="#t71.7 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">  {
+      <span class="hljs-attr">"scripts"</span>: {
+        <span class="hljs-attr">"build"</span>:<span class="hljs-string">"webpack"</span>,
+        <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"webpack-dev-server"</span>
+      }
+  }
+</code></pre>
+<h2 id="t82. 创建组件">2. 创建组件 <a href="#t82. 创建组件"> # </a></h2>
+<h3 id="t92.1 Counter.tsx">2.1 Counter.tsx <a href="#t92.1 Counter.tsx"> # </a></h3>
+<p>src\components\Counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">export</span> interface Props {
+    <span class="hljs-attr">number</span>: number
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt;</span>{
+    render() {
+        <span class="hljs-keyword">const</span> { number } = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t102.2 types.tsx">2.2 types.tsx <a href="#t102.2 types.tsx"> # </a></h3>
+<p>src\components\Todos\types.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> type Todo = {
+    <span class="hljs-attr">id</span>:number;
+    text:string
+}
+</code></pre>
+<h3 id="t112.3 TodoItem.tsx">2.3 TodoItem.tsx <a href="#t112.3 TodoItem.tsx"> # </a></h3>
+<p>src\components\Todos\TodoItem.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> { Todo } <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+<span class="hljs-keyword">const</span> todoItemStyle: React.CSSProperties = {
+  <span class="hljs-attr">color</span>: <span class="hljs-string">"red"</span>,
+  <span class="hljs-attr">backgroundColor</span>: <span class="hljs-string">"green"</span>,
+};
+interface Props {
+  <span class="hljs-attr">todo</span>: Todo;
+}
+<span class="hljs-keyword">const</span> TodoItem: React.FC&lt;Props&gt; = <span class="hljs-function">(<span class="hljs-params">props: Props</span>) =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{todoItemStyle}</span>&gt;</span>{props.todo.text}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+);
+TodoItem.defaultProps;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> TodoItem;
+</code></pre>
+<h3 id="t122.4 TodoInput.tsx">2.4 TodoInput.tsx <a href="#t122.4 TodoInput.tsx"> # </a></h3>
+<p>src\components\Todos\TodoInput.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> { Todo } <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+interface Props {
+  <span class="hljs-attr">addTodo</span>:<span class="hljs-function">(<span class="hljs-params">todo:Todo</span>)=&gt;</span><span class="hljs-keyword">void</span>
+}
+interface State {
+  <span class="hljs-attr">text</span>:string
+}
+<span class="hljs-keyword">let</span> id=<span class="hljs-number">0</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoInput</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+  <span class="hljs-keyword">constructor</span>(props: Props) {
+    <span class="hljs-keyword">super</span>(props);
+    <span class="hljs-keyword">this</span>.state = {
+      <span class="hljs-attr">text</span>: <span class="hljs-string">""</span>,
+    };
+  }
+  public render() {
+    <span class="hljs-keyword">const</span> { text } = <span class="hljs-keyword">this</span>.state;
+    <span class="hljs-keyword">const</span> { handleChange, handleSubmit } = <span class="hljs-keyword">this</span>;
+
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{text}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{this.handleChange}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>添加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+    );
+  }
+
+  handleChange = <span class="hljs-function">(<span class="hljs-params">e: React.ChangeEvent&lt;HTMLInputElement&gt;</span>) =&gt;</span> {
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: e.target.value });
+  }
+
+  handleSubmit = <span class="hljs-function">(<span class="hljs-params">e: React.FormEvent&lt;HTMLFormElement&gt;</span>) =&gt;</span> {
+    e.preventDefault();
+    <span class="hljs-keyword">let</span> text = <span class="hljs-keyword">this</span>.state.text.trim();
+    <span class="hljs-keyword">if</span> (!text) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">this</span>.props.addTodo({<span class="hljs-attr">id</span>:id++,text});
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: <span class="hljs-string">""</span> });
+  }
+}
+
+</code></pre>
+<h3 id="t132.5 Todos\index.tsx">2.5 Todos\index.tsx <a href="#t132.5 Todos\index.tsx"> # </a></h3>
+<p>src\components\Todos\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> TodoInput <span class="hljs-keyword">from</span> <span class="hljs-string">'./TodoInput'</span>;
+<span class="hljs-keyword">import</span> TodoItem <span class="hljs-keyword">from</span> <span class="hljs-string">'./TodoItem'</span>;
+<span class="hljs-keyword">import</span> { Todo} <span class="hljs-keyword">from</span> <span class="hljs-string">'./types'</span>;
+<span class="hljs-keyword">const</span> ulStyle: React.CSSProperties = {
+    <span class="hljs-attr">width</span>: <span class="hljs-string">"100px"</span>
+};
+<span class="hljs-keyword">export</span> interface Props {
+}
+<span class="hljs-keyword">export</span> interface State {
+    <span class="hljs-attr">todos</span>: Todo[]
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Todos</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>,<span class="hljs-title">State</span>&gt;</span>{
+    state = {<span class="hljs-attr">todos</span>:<span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>&lt;Todo&gt;()};
+    addTodo = <span class="hljs-function">(<span class="hljs-params">todo:Todo</span>) =&gt;</span>{
+        <span class="hljs-keyword">this</span>.setState({<span class="hljs-attr">todos</span>:[...this.state.todos,todo]});
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">TodoInput</span> <span class="hljs-attr">addTodo</span>=<span class="hljs-string">{this.addTodo}/</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{ulStyle}</span>&gt;</span>
+                    {
+                        this.state.todos.map(todo=&gt;<span class="hljs-tag">&lt;<span class="hljs-name">TodoItem</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{todo.id}</span> <span class="hljs-attr">todo</span>=<span class="hljs-string">{todo}/</span>&gt;</span>)
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h3 id="t142.6 src\index.tsx">2.6 src\index.tsx <a href="#t142.6 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> Counter <span class="hljs-keyword">from</span> <span class="hljs-string">"./components/Counter"</span>;
+<span class="hljs-keyword">import</span> Todos <span class="hljs-keyword">from</span> <span class="hljs-string">"./components/Todos"</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> <span class="hljs-attr">number</span>=<span class="hljs-string">{100}</span> /&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Todos</span>/&gt;</span><span class="hljs-tag">&lt;/&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+</code></pre>
+<h2 id="t153. 默认属性">3. 默认属性 <a href="#t153. 默认属性"> # </a></h2>
+<h3 id="t163.1 TodoInput.tsx">3.1 TodoInput.tsx <a href="#t163.1 TodoInput.tsx"> # </a></h3>
+<p>src\components\Todos\TodoInput.tsx</p>
+<pre><code class="lang-diff">import * as React from "react";
+import { Todo } from './types';
+
+<span class="hljs-addition">+let defaultProps = {</span>
+<span class="hljs-addition">+  setting:{</span>
+<span class="hljs-addition">+    maxLength: 6,</span>
+<span class="hljs-addition">+    placeholder: '请输入待办事项'</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export type DefaultProps = Partial&lt;typeof defaultProps&gt;;</span>
+<span class="hljs-addition">+interface OwnProps {</span>
+<span class="hljs-addition">+  addTodo:(todo:Todo)=&gt;void</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+type Props = OwnProps &amp; DefaultProps;</span>
+interface State {
+  text:string
+}
+let id=0;
+export default class TodoInput extends React.Component&lt;Props, State&gt; {
+<span class="hljs-addition">+   static defaultProps: Required&lt;DefaultProps&gt; = defaultProps;</span>
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      text: ""
+    };
+  }
+  public render() {
+    const { text } = this.state;
+<span class="hljs-addition">+   const { setting } = this.props as Props &amp; Required&lt;DefaultProps&gt;;</span>
+    const { handleChange, handleSubmit } = this;
+    return (
+      &lt;form onSubmit={handleSubmit}&gt;
+<span class="hljs-addition">+        &lt;input type="text" maxLength={setting.maxLength} placeholder={setting.placeholder} </span>
+        value={text} onChange={handleChange} /&gt;
+        &lt;button type="submit"&gt;添加&lt;/button&gt;
+      &lt;/form&gt;
+    );
+  }
+
+  handleChange = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
+    this.setState({ text: e.target.value });
+  }
+
+  handleSubmit = (e: React.FormEvent&lt;HTMLFormElement&gt;) =&gt; {
+    e.preventDefault();
+    let text = this.state.text.trim();
+    if (!text) {
+      return;
+    }
+    this.props.addTodo({id:id++,text});
+    this.setState({ text: "" });
+  }
+}
+</code></pre>
+<h2 id="t174. 高阶组件">4. 高阶组件 <a href="#t174. 高阶组件"> # </a></h2>
+<h3 id="t184.1 src\high.tsx">4.1 src\high.tsx <a href="#t184.1 src\high.tsx"> # </a></h3>
+<p>src\high.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hoistNonReactStatics</span>&lt;<span class="hljs-title">T</span> <span class="hljs-title">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">ComponentType</span>&lt;<span class="hljs-title">any</span>&gt;,<span class="hljs-title">S</span> <span class="hljs-title">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">ComponentType</span>&lt;<span class="hljs-title">any</span>&gt;
+&gt;(<span class="hljs-params">
+    TargetComponent: T,
+    SourceComponent: S
+</span>): <span class="hljs-title">T</span> &amp; <span class="hljs-title">S</span>;
+<span class="hljs-title">function</span> <span class="hljs-title">hoistNonReactStatics</span>&lt;<span class="hljs-title">N</span> <span class="hljs-title">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">ComponentType</span>&lt;<span class="hljs-title">any</span>&gt;, <span class="hljs-title">O</span> <span class="hljs-title">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">ComponentType</span>&lt;<span class="hljs-title">any</span>&gt;&gt;
+(<span class="hljs-params">targetComponent:N , sourceComponent: O</span>):<span class="hljs-title">N</span>&amp;<span class="hljs-title">O</span> </span>{
+    <span class="hljs-keyword">let</span> keys = <span class="hljs-built_in">Object</span>.getOwnPropertyNames(sourceComponent);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; keys.length; ++i) {
+        <span class="hljs-keyword">const</span> key = keys[i];
+        <span class="hljs-keyword">const</span> descriptor = <span class="hljs-built_in">Object</span>.getOwnPropertyDescriptor(sourceComponent, key);
+        <span class="hljs-built_in">Object</span>.defineProperty(targetComponent, key, descriptor!);
+    }
+    <span class="hljs-keyword">return</span> targetComponent <span class="hljs-keyword">as</span> N&amp;O;
+}
+interface Props{}
+interface State{}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Old</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+    <span class="hljs-keyword">static</span> age1: number = <span class="hljs-number">10</span>;
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">New</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+    <span class="hljs-keyword">static</span> age2: number = <span class="hljs-number">10</span>;
+}
+<span class="hljs-keyword">let</span> c = hoistNonReactStatics&lt;<span class="hljs-keyword">typeof</span> New, <span class="hljs-keyword">typeof</span>  Old&gt;(New, Old);
+c.age1;
+c.age2;
+</code></pre>
+<h3 id="t194.2 src\utils.tsx">4.2 src\utils.tsx <a href="#t194.2 src\utils.tsx"> # </a></h3>
+<p>src\utils.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> hoistNonReactStatics <span class="hljs-keyword">from</span> <span class="hljs-string">'hoist-non-react-statics'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> defaultProps = {
+  <span class="hljs-attr">setting</span>: {
+    <span class="hljs-attr">maxLength</span>: <span class="hljs-number">6</span>,
+    <span class="hljs-attr">placeholder</span>: <span class="hljs-string">'请输入待办事项'</span>
+  }
+}
+
+<span class="hljs-keyword">export</span> type DefaultProps = Partial&lt;<span class="hljs-keyword">typeof</span> defaultProps&gt;;
+<span class="hljs-comment">//export type DefaultProps = typeof defaultProps;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> withDefaultInputProps =  &lt;Props extends DefaultProps&gt;(OldComponent: React.ComponentType&lt;Props&gt;) =&gt; {
+  type OwnProps = Omit&lt;Props, keyof DefaultProps&gt;; 
+  class NewComponent extends React.Component&lt;OwnProps&gt; {
+     public render() {
+       let props = { ...defaultProps, ...this.props} as Props;
+       return (
+         &lt;OldComponent {...props} /&gt;
+       );
+     }
+  }
+  return hoistNonReactStatics(NewComponent, OldComponent);
+};
+</code></pre>
+<h3 id="t204.2 TodoInput.tsx">4.2 TodoInput.tsx <a href="#t204.2 TodoInput.tsx"> # </a></h3>
+<p>src\components\Todos\TodoInput.tsx</p>
+<pre><code class="lang-diff">import * as React from "react";
+import { Todo } from './types';
+<span class="hljs-addition">+import { withDefaultInputProps,DefaultProps } from '@/utils';</span>
+interface OwnProps {
+  addTodo:(todo:Todo)=&gt;void
+}
+type Props = OwnProps &amp; DefaultProps;
+interface State {
+  text:string
+}
+let id=0;
+class TodoInput extends React.Component&lt;Props, State&gt; {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      text: ""
+    };
+  }
+  public render() {
+    const { text } = this.state;
+<span class="hljs-addition">+   const { setting } = this.props as (Props &amp; Required&lt;DefaultProps&gt;);</span>
+    const { handleChange, handleSubmit } = this;
+    return (
+      &lt;form onSubmit={handleSubmit}&gt;
+        &lt;input type="text" maxLength={setting.maxLength} placeholder={setting.placeholder} 
+        value={text} onChange={handleChange} /&gt;
+        &lt;button type="submit"&gt;添加&lt;/button&gt;
+      &lt;/form&gt;
+    );
+  }
+
+  handleChange = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
+    this.setState({ text: e.target.value });
+  }
+
+  handleSubmit = (e: React.FormEvent&lt;HTMLFormElement&gt;) =&gt; {
+    e.preventDefault();
+    let text = this.state.text.trim();
+    if (!text) {
+      return;
+    }
+    this.props.addTodo({id:id++,text});
+    this.setState({ text: "" });
+  }
+}
+<span class="hljs-addition">+ export default withDefaultInputProps&lt;Props&gt;(TodoInput);</span>
+</code></pre>
+<h2 id="t215. 集成redux">5. 集成redux <a href="#t215. 集成redux"> # </a></h2>
+<h3 id="t225.1 models\todos.tsx">5.1 models\todos.tsx <a href="#t225.1 models\todos.tsx"> # </a></h3>
+<p>src\models\todos.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> type Todo = {
+    <span class="hljs-attr">id</span>: number;
+    text: string
+}
+</code></pre>
+<h3 id="t235.2 models\index.tsx">5.2 models\index.tsx <a href="#t235.2 models\index.tsx"> # </a></h3>
+<p>src\models\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Todo} <span class="hljs-keyword">from</span> <span class="hljs-string">'./todos'</span>;
+<span class="hljs-keyword">export</span> {
+    Todo
+}
+</code></pre>
+<h3 id="t245.3 action-types.tsx">5.3 action-types.tsx <a href="#t245.3 action-types.tsx"> # </a></h3>
+<p>src\store\action-types.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ADD = <span class="hljs-string">'ADD'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> MINUS = <span class="hljs-string">'MINUS'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ADD_TODO = <span class="hljs-string">'ADD_TODO'</span>;
+</code></pre>
+<h3 id="t255.4 reducers\counter.tsx">5.4 reducers\counter.tsx <a href="#t255.4 reducers\counter.tsx"> # </a></h3>
+<p>src\store\reducers\counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+<span class="hljs-keyword">import</span> { Action } <span class="hljs-keyword">from</span> <span class="hljs-string">'../actions'</span>;
+<span class="hljs-keyword">export</span> interface CounterState{
+    <span class="hljs-attr">number</span>:number;
+}
+<span class="hljs-keyword">let</span> initialState: CounterState = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> };
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state: CounterState = initialState, action: Action</span>): <span class="hljs-title">CounterState</span> </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> types.ADD:
+            <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">case</span> types.MINUS:
+            <span class="hljs-keyword">return</span> { ...state, <span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+</code></pre>
+<h3 id="t265.5 reducers\todos.tsx">5.5 reducers\todos.tsx <a href="#t265.5 reducers\todos.tsx"> # </a></h3>
+<p>src\store\reducers\todos.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { ADD_TODO} <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+<span class="hljs-keyword">import</span> { Action } <span class="hljs-keyword">from</span> <span class="hljs-string">'../actions'</span>;
+<span class="hljs-keyword">import</span> { Todo} <span class="hljs-keyword">from</span> <span class="hljs-string">'../../models'</span>;
+<span class="hljs-keyword">export</span> interface TodosState {
+    <span class="hljs-attr">list</span>: <span class="hljs-built_in">Array</span>&lt;Todo&gt;;
+}
+<span class="hljs-keyword">let</span> initialState: TodosState = { <span class="hljs-attr">list</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>&lt;Todo&gt;()};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state: TodosState = initialState, action: Action</span>): <span class="hljs-title">TodosState</span> </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> ADD_TODO:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">list</span>: [...state.list,action.payload]};
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+</code></pre>
+<h3 id="t275.6 reducers\index.tsx">5.6 reducers\index.tsx <a href="#t275.6 reducers\index.tsx"> # </a></h3>
+<p>src\store\reducers\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> counter, { CounterState} <span class="hljs-keyword">from</span> <span class="hljs-string">'./counter'</span>;
+<span class="hljs-keyword">import</span> todos,{TodosState} <span class="hljs-keyword">from</span> <span class="hljs-string">'./todos'</span>;
+<span class="hljs-keyword">import</span> { combineReducers } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">let</span> reducers = {
+    counter,
+    todos
+};
+type ReducersType = <span class="hljs-keyword">typeof</span> reducers;
+type CombinedState = {
+    [key <span class="hljs-keyword">in</span> keyof ReducersType]: ReturnType&lt;ReducersType[key]&gt;
+}
+<span class="hljs-keyword">export</span> { CombinedState, CounterState, TodosState}
+
+<span class="hljs-keyword">let</span> combinedReducer = combineReducers(reducers);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> combinedReducer;
+</code></pre>
+<h3 id="t285.7 actions\counter.tsx">5.7 actions\counter.tsx <a href="#t285.7 actions\counter.tsx"> # </a></h3>
+<p>src\store\actions\counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { ADD, MINUS } <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+<span class="hljs-keyword">export</span> interface AddAction {
+    <span class="hljs-attr">type</span>: <span class="hljs-keyword">typeof</span> ADD
+}
+<span class="hljs-keyword">export</span> interface MinusAction {
+    <span class="hljs-attr">type</span>: <span class="hljs-keyword">typeof</span> MINUS
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params"></span>): <span class="hljs-title">AddAction</span> </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: ADD };
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">minus</span>(<span class="hljs-params"></span>): <span class="hljs-title">MinusAction</span> </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: MINUS };
+}
+</code></pre>
+<h3 id="t295.8 actions\todos.tsx">5.8 actions\todos.tsx <a href="#t295.8 actions\todos.tsx"> # </a></h3>
+<p>src\store\actions\todos.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { ADD_TODO } <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+<span class="hljs-keyword">import</span> { Todo} <span class="hljs-keyword">from</span> <span class="hljs-string">'@/models'</span>;
+<span class="hljs-keyword">export</span> interface AddTodoAction {
+    <span class="hljs-attr">type</span>: <span class="hljs-keyword">typeof</span> ADD_TODO,
+    <span class="hljs-attr">payload</span>:Todo
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">todo:Todo</span>): <span class="hljs-title">AddTodoAction</span> </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: ADD_TODO,<span class="hljs-attr">payload</span>:todo };
+}
+</code></pre>
+<h3 id="t305.9 actions\index.tsx">5.9 actions\index.tsx <a href="#t305.9 actions\index.tsx"> # </a></h3>
+<p>src\store\actions\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { AddAction,MinusAction} <span class="hljs-keyword">from</span> <span class="hljs-string">'./counter'</span>;
+<span class="hljs-keyword">import</span> { AddTodoAction } <span class="hljs-keyword">from</span> <span class="hljs-string">'./todos'</span>;
+<span class="hljs-keyword">export</span> type Action = AddAction | MinusAction | AddTodoAction;
+</code></pre>
+<h3 id="t315.10 components\Counter.tsx">5.10 components\Counter.tsx <a href="#t315.10 components\Counter.tsx"> # </a></h3>
+<p>src\components\Counter.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> { CombinedState, CounterState } <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/reducers'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> actions <span class="hljs-keyword">from</span> <span class="hljs-string">'@/store/actions/counter'</span>;
+type StateProps = ReturnType&lt;<span class="hljs-keyword">typeof</span> mapStateToProps&gt;;
+type DispatchProps = <span class="hljs-keyword">typeof</span> actions;
+type Props = StateProps &amp; DispatchProps;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>&gt;</span>{
+    render() {
+        <span class="hljs-keyword">const</span> { number } = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>this.props.add()}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+
+<span class="hljs-keyword">let</span> mapStateToProps = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state: CombinedState</span>): <span class="hljs-title">CounterState</span> </span>{
+    <span class="hljs-keyword">return</span> state.counter;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(mapStateToProps, actions)(Counter);
+</code></pre>
+<h3 id="t325.11 TodoItem.tsx">5.11 TodoItem.tsx <a href="#t325.11 TodoItem.tsx"> # </a></h3>
+<p>src\components\Todos\TodoItem.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> { Todo } <span class="hljs-keyword">from</span> <span class="hljs-string">'@/models'</span>;
+<span class="hljs-keyword">const</span> todoItemStyle: React.CSSProperties = {
+  <span class="hljs-attr">color</span>: <span class="hljs-string">"red"</span>,
+  <span class="hljs-attr">backgroundColor</span>: <span class="hljs-string">"green"</span>,
+};
+interface Props {
+  <span class="hljs-attr">todo</span>: Todo;
+}
+<span class="hljs-keyword">const</span> TodoItem: React.FC&lt;Props&gt; = <span class="hljs-function">(<span class="hljs-params">props: Props</span>) =&gt;</span> (
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{todoItemStyle}</span>&gt;</span>{props.todo.text}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+);
+TodoItem.defaultProps;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> TodoItem;
+
+</code></pre>
+<h3 id="t335.12 TodoInput.tsx">5.12 TodoInput.tsx <a href="#t335.12 TodoInput.tsx"> # </a></h3>
+<p>src\components\Todos\TodoInput.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> { Todo } <span class="hljs-keyword">from</span> <span class="hljs-string">'@/models'</span>;
+<span class="hljs-keyword">import</span> { withDefaultInputProps,DefaultProps } <span class="hljs-keyword">from</span> <span class="hljs-string">'@/utils'</span>;
+interface OwnProps {
+  <span class="hljs-attr">addTodo</span>:<span class="hljs-function">(<span class="hljs-params">todo:Todo</span>)=&gt;</span><span class="hljs-keyword">void</span>
+}
+type Props = OwnProps &amp; DefaultProps;
+interface State {
+  <span class="hljs-attr">text</span>:string
+}
+<span class="hljs-keyword">let</span> id=<span class="hljs-number">0</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoInput</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>, <span class="hljs-title">State</span>&gt; </span>{
+  <span class="hljs-keyword">static</span> age:number = <span class="hljs-number">10</span>;
+  <span class="hljs-keyword">constructor</span>(props: Props) {
+    <span class="hljs-keyword">super</span>(props);
+    <span class="hljs-keyword">this</span>.state = {
+      <span class="hljs-attr">text</span>: <span class="hljs-string">""</span>
+    };
+  }
+  public render() {
+    <span class="hljs-keyword">const</span> { text } = <span class="hljs-keyword">this</span>.state;
+    <span class="hljs-keyword">const</span> { setting } = <span class="hljs-keyword">this</span>.props <span class="hljs-keyword">as</span> Props &amp; Required&lt;DefaultProps&gt;;
+    <span class="hljs-keyword">const</span> { handleChange, handleSubmit } = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">maxLength</span>=<span class="hljs-string">{setting.maxLength}</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">{setting.placeholder}</span> 
+        <span class="hljs-attr">value</span>=<span class="hljs-string">{text}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleChange}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span>&gt;</span>添加<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+    );
+  }
+
+  handleChange = <span class="hljs-function">(<span class="hljs-params">e: React.ChangeEvent&lt;HTMLInputElement&gt;</span>) =&gt;</span> {
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: e.target.value });
+  }
+
+  handleSubmit = <span class="hljs-function">(<span class="hljs-params">e: React.FormEvent&lt;HTMLFormElement&gt;</span>) =&gt;</span> {
+    e.preventDefault();
+    <span class="hljs-keyword">let</span> text = <span class="hljs-keyword">this</span>.state.text.trim();
+    <span class="hljs-keyword">if</span> (!text) {
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">this</span>.props.addTodo({<span class="hljs-attr">id</span>:id++,text});
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: <span class="hljs-string">""</span> });
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> withDefaultInputProps&lt;Props&gt;(TodoInput);
+</code></pre>
+<h3 id="t345.13 Todos\index.tsx">5.13 Todos\index.tsx <a href="#t345.13 Todos\index.tsx"> # </a></h3>
+<p>src\components\Todos\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> TodoInput <span class="hljs-keyword">from</span> <span class="hljs-string">'./TodoInput'</span>;
+<span class="hljs-keyword">import</span> TodoItem <span class="hljs-keyword">from</span> <span class="hljs-string">'./TodoItem'</span>;
+<span class="hljs-keyword">import</span> { Todo} <span class="hljs-keyword">from</span> <span class="hljs-string">'@/models'</span>;
+<span class="hljs-keyword">const</span> ulStyle: React.CSSProperties = {
+    <span class="hljs-attr">width</span>: <span class="hljs-string">"100px"</span>
+};
+<span class="hljs-keyword">export</span> interface Props {
+}
+<span class="hljs-keyword">export</span> interface State {
+    <span class="hljs-attr">todos</span>: Todo[]
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Todos</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span>&lt;<span class="hljs-title">Props</span>,<span class="hljs-title">State</span>&gt;</span>{
+    addTodo = <span class="hljs-function">(<span class="hljs-params">todo:Todo</span>) =&gt;</span>{
+       <span class="hljs-keyword">this</span>.props.addTodo(todo);
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">TodoInput</span> <span class="hljs-attr">addTodo</span>=<span class="hljs-string">{this.addTodo}/</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{ulStyle}</span>&gt;</span>
+                    {
+                        this.props.list.map(todo=&gt;<span class="hljs-tag">&lt;<span class="hljs-name">TodoItem</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{todo.id}</span> <span class="hljs-attr">todo</span>=<span class="hljs-string">{todo}/</span>&gt;</span>)
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">let</span> mapStateToProps = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state: CombinedState</span>): <span class="hljs-title">TodosState</span> </span>{
+    <span class="hljs-keyword">return</span> state.todos;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(mapStateToProps, actions)(Todos);
+</code></pre>
+<h3 id="t355.14 store\index.tsx">5.14 store\index.tsx <a href="#t355.14 store\index.tsx"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>
+<span class="hljs-keyword">import</span> combinedReducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">let</span> store = createStore(combinedReducer);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h3 id="t365.15 src\index.tsx">5.15 src\index.tsx <a href="#t365.15 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">"react-dom"</span>;
+<span class="hljs-keyword">import</span> Counter <span class="hljs-keyword">from</span> <span class="hljs-string">"./components/Counter"</span>;
+<span class="hljs-keyword">import</span> Todos <span class="hljs-keyword">from</span> <span class="hljs-string">"./components/Todos"</span>;
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> store <span class="hljs-keyword">from</span> <span class="hljs-string">'./store'</span>;
+ReactDOM.render(
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">React.Fragment</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">hr</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Todos</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">React.Fragment</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"root"</span>));
+</code></pre>
+<h2 id="t376. 使用路由">6. 使用路由 <a href="#t376. 使用路由"> # </a></h2>
+<h3 id="t386.1 src\index.tsx">6.1 src\index.tsx <a href="#t386.1 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import Counter from './components/Counter';
+import Todos from './components/Todos';
+import { Provider } from 'react-redux';
+import store from './store';
+<span class="hljs-addition">+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';</span>
+ReactDOM.render((
+    &lt;Provider store={store}&gt;
+        &lt;Router &gt;
+            &lt;React.Fragment&gt;
+<span class="hljs-addition">+                &lt;ul&gt;</span>
+<span class="hljs-addition">+                    &lt;li&gt;&lt;Link to="/counter/counterName"&gt;counter&lt;/Link&gt;&lt;/li&gt;</span>
+<span class="hljs-addition">+                    &lt;li&gt;&lt;Link to={{ pathname: "/todos", state: { name: 'todoName' } }}&gt;todos&lt;/Link&gt;&lt;/+li&gt;</span>
+<span class="hljs-addition">+                &lt;/ul&gt;</span>
+<span class="hljs-addition">+                &lt;Route path="/counter/:name" component={Counter} /&gt;</span>
+<span class="hljs-addition">+                &lt;Route path="/todos" component={Todos} /&gt;</span>
+            &lt;/React.Fragment&gt;
+        &lt;/Router&gt;
+
+    &lt;/Provider&gt;
+), document.getElementById('root'));
+</code></pre>
+<h3 id="t396.2 Counter.tsx">6.2 Counter.tsx <a href="#t396.2 Counter.tsx"> # </a></h3>
+<p>src\components\Counter.tsx</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import { connect } from 'react-redux';
+import { CombinedState, CounterState } from '../store/reducers';
+<span class="hljs-addition">+import * as actions from '@/store/actions/counter';</span>
+<span class="hljs-addition">+import { RouteComponentProps } from 'react-router-dom';</span>
+<span class="hljs-addition">+import { StaticContext} from 'react-router';</span>
+<span class="hljs-addition">+type StateProps = ReturnType&lt;typeof mapStateToProps&gt;;</span>
+<span class="hljs-addition">+type DispatchProps = typeof actions;</span>
+<span class="hljs-addition">+interface Params { name:string}</span>
+<span class="hljs-addition">+interface LocationState { }</span>
+<span class="hljs-addition">+type Props = StateProps &amp; DispatchProps &amp; RouteComponentProps&lt;Params, StaticContext,LocationState&gt;;</span>
+
+class Counter extends React.Component&lt;Props&gt;{
+    render() {
+<span class="hljs-addition">+        const { name} = this.props.match.params;</span>
+        const { number } = this.props;
+        return (
+            &lt;div&gt;
+<span class="hljs-addition">+                &lt;p&gt;名称:{name}&lt;/p&gt;</span>
+                &lt;p&gt;{number}&lt;/p&gt;
+                &lt;button onClick={()=&gt;this.props.add()}&gt;+&lt;/button&gt;
+                &lt;button onClick={() =&gt; this.props.history.push({ pathname: "/todos", state: { todoName: 'todoName' } })}&gt;/todos&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+
+let mapStateToProps = function (state: CombinedState): CounterState {
+    return state.counter;
+}
+
+export default connect(mapStateToProps, actions)(Counter);
+</code></pre>
+<h3 id="t406.3 Todos\index.tsx">6.3 Todos\index.tsx <a href="#t406.3 Todos\index.tsx"> # </a></h3>
+<p>src\components\Todos\index.tsx</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import TodoInput from './TodoInput';
+import TodoItem from './TodoItem';
+import { Todo} from '@/models';
+<span class="hljs-addition">+import { CombinedState, CounterState, TodosState } from '@/store/reducers';</span>
+<span class="hljs-addition">+import { RouteComponentProps } from 'react-router-dom';</span>
+<span class="hljs-addition">+import { StaticContext } from 'react-router';</span>
+<span class="hljs-addition">+import * as actions from '@/store/actions/todos';</span>
+<span class="hljs-addition">+import { connect } from 'react-redux';</span>
+<span class="hljs-addition">+type StateProps = ReturnType&lt;typeof mapStateToProps&gt;;</span>
+<span class="hljs-addition">+type DispatchProps = typeof actions;</span>
+<span class="hljs-addition">+const ulStyle: React.CSSProperties = {</span>
+<span class="hljs-addition">+    width: "100px"</span>
+<span class="hljs-addition">+};</span>
+<span class="hljs-addition">+export interface State {</span>
+<span class="hljs-addition">+    todos: Todo[]</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+interface Params {}</span>
+<span class="hljs-addition">+interface LocationState { name:string }</span>
+<span class="hljs-addition">+type Props = StateProps &amp; DispatchProps &amp; RouteComponentProps&lt;Params, StaticContext, LocationState&gt;;</span>
+class Todos extends React.Component&lt;Props,State&gt;{
+    addTodo = (todo:Todo) =&gt;{
+       this.props.addTodo(todo);
+    }
+    render() {
+        return (
+            &lt;div&gt;
+<span class="hljs-addition">+               &lt;p&gt;名称:{this.props.location.state.name}&lt;/p&gt;</span>
+                &lt;TodoInput addTodo={this.addTodo}/&gt;
+                &lt;ul style={ulStyle}&gt;
+                    {
+                        this.props.list.map(todo=&gt;&lt;TodoItem key={todo.id} todo={todo}/&gt;)
+                    }
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+let mapStateToProps = function (state: CombinedState): TodosState {
+    return state.todos;
+}
+export default connect(mapStateToProps, actions)(Todos);
+</code></pre>
+<h2 id="t417. connected-react-router">7. connected-react-router <a href="#t417. connected-react-router"> # </a></h2>
+<h3 id="t427.1 src\history.tsx">7.1 src\history.tsx <a href="#t427.1 src\history.tsx"> # </a></h3>
+<p>src\history.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createBrowserHistory } <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>
+<span class="hljs-keyword">const</span> history = createBrowserHistory()
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> history;
+</code></pre>
+<h3 id="t437.2 src\index.tsx">7.2 src\index.tsx <a href="#t437.2 src\index.tsx"> # </a></h3>
+<p>src\index.tsx</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import Counter from './components/Counter';
+import Todos from './components/Todos';
+import { Provider } from 'react-redux';
+import store from './store';
+import {Route, Link } from 'react-router-dom';
+<span class="hljs-addition">+import history from '@/history';</span>
+<span class="hljs-addition">+import {ConnectedRouter} from 'connected-react-router';</span>
+ReactDOM.render((
+    &lt;Provider store={store}&gt;
+<span class="hljs-addition">+        &lt;ConnectedRouter history={history} &gt;</span>
+            &lt;React.Fragment&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;Link to="/counter/counterName"&gt;counter&lt;/Link&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;Link to={{ pathname: "/todos", state: { name: 'todoName' } }}&gt;todos&lt;/Link&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;Route path="/counter/:name" component={Counter} /&gt;
+                &lt;Route path="/todos" component={Todos} /&gt;
+            &lt;/React.Fragment&gt;
+<span class="hljs-addition">+        &lt;/ConnectedRouter&gt;</span>
+    &lt;/Provider&gt;
+), document.getElementById('root'));
+</code></pre>
+<h3 id="t447.3 store\index.tsx">7.3 store\index.tsx <a href="#t447.3 store\index.tsx"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-diff">import { createStore, applyMiddleware } from 'redux'
+<span class="hljs-addition">+import combinedReducer from './reducers';</span>
+<span class="hljs-addition">+import { routerMiddleware } from 'connected-react-router';</span>
+<span class="hljs-addition">+import history from '@/history';</span>
+
+<span class="hljs-addition">+let store =applyMiddleware(routerMiddleware(history))(createStore)(combinedReducer);</span>
+export default store;
+</code></pre>
+<h3 id="t457.4 reducers\index.tsx">7.4 reducers\index.tsx <a href="#t457.4 reducers\index.tsx"> # </a></h3>
+<p>src\store\reducers\index.tsx</p>
+<pre><code class="lang-diff">import counter, { CounterState} from './counter';
+import todos,{TodosState} from './todos';
+import { combineReducers } from 'redux';
+<span class="hljs-addition">+import history from '@/history';</span>
+<span class="hljs-addition">+import { connectRouter } from 'connected-react-router'</span>
+let reducers = {
+    counter,
+    todos,
+<span class="hljs-addition">+    router: connectRouter(history)</span>
+};
+type ReducersType = typeof reducers;
+type CombinedState = {
+    [key in keyof ReducersType]: ReturnType&lt;ReducersType[key]&gt;
+}
+export { CombinedState, CounterState, TodosState}
+
+let combinedReducer = combineReducers(reducers);
+export default combinedReducer;
+</code></pre>
+<h3 id="t467.5 actions\counter.tsx">7.5 actions\counter.tsx <a href="#t467.5 actions\counter.tsx"> # </a></h3>
+<p>src\store\actions\counter.tsx</p>
+<pre><code class="lang-diff">import { ADD, MINUS } from '../action-types';
+<span class="hljs-addition">+import { push, CallHistoryMethodAction } from 'connected-react-router';</span>
+<span class="hljs-addition">+import { LocationDescriptorObject,Path} from 'history';</span>
+<span class="hljs-addition">+import { TodosLocationState} from '@/components/Todos';</span>
+export interface AddAction {
+    type: typeof ADD
+}
+export interface MinusAction {
+    type: typeof MINUS
+}
+export function add(): AddAction {
+    return { type: ADD };
+}
+export function minus(): MinusAction {
+    return { type: MINUS };
+}
+<span class="hljs-addition">+export function go(path: LocationDescriptorObject&lt;TodosLocationState&gt;): CallHistoryMethodAction {</span>
+<span class="hljs-addition">+    return push(path);</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t477.6 actions\index.tsx">7.6 actions\index.tsx <a href="#t477.6 actions\index.tsx"> # </a></h3>
+<p>src\store\actions\index.tsx</p>
+<pre><code class="lang-diff">import { AddAction,MinusAction} from './counter';
+import { AddTodoAction } from './todos';
+<span class="hljs-addition">+import { CallHistoryMethodAction } from 'connected-react-router';</span>
+<span class="hljs-addition">+export type Action = AddAction | MinusAction | AddTodoAction | CallHistoryMethodAction;</span>
+</code></pre>
+<h3 id="t487.7 Counter.tsx">7.7 Counter.tsx <a href="#t487.7 Counter.tsx"> # </a></h3>
+<p>src\components\Counter.tsx</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import { connect } from 'react-redux';
+import { CombinedState, CounterState } from '../store/reducers';
+import * as actions from '@/store/actions/counter';
+import { RouteComponentProps } from 'react-router-dom';
+<span class="hljs-addition">+import { StaticContext} from 'react-router';</span>
+<span class="hljs-addition">+import { LocationDescriptorObject} from 'history';</span>
+<span class="hljs-addition">+import { TodosLocationState } from '@/components/Todos';</span>
+<span class="hljs-addition">+type StateProps = ReturnType&lt;typeof mapStateToProps&gt;;</span>
+<span class="hljs-addition">+type DispatchProps = typeof actions;</span>
+<span class="hljs-addition">+interface Params { name:string}</span>
+<span class="hljs-addition">+interface CounterLocationState { }</span>
+<span class="hljs-addition">+type Props = StateProps &amp; DispatchProps &amp; RouteComponentProps&lt;Params, StaticContext, CounterLocationState&gt;;</span>
+class Counter extends React.Component&lt;Props&gt;{
+    render() {
+<span class="hljs-addition">+       const { name} = this.props.match.params;</span>
+        const { number } = this.props;
+<span class="hljs-addition">+        let path: LocationDescriptorObject&lt;TodosLocationState&gt; = { pathname: "/todos", state: { name: 'todoName' } };</span>
+        return (
+            &lt;div&gt;
+<span class="hljs-addition">+                &lt;p&gt;名称:{name}&lt;/p&gt;</span>
+                &lt;p&gt;{number}&lt;/p&gt;
+                &lt;button onClick={()=&gt;this.props.add()}&gt;+&lt;/button&gt;
+                &lt;button onClick={() =&gt; this.props.go(path)}&gt;/todos&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+
+let mapStateToProps = function (state: CombinedState): CounterState {
+    return state.counter;
+}
+
+export default connect(mapStateToProps, actions)(Counter);
+</code></pre>
+<h3 id="t497.8 Todos\index.tsx">7.8 Todos\index.tsx <a href="#t497.8 Todos\index.tsx"> # </a></h3>
+<p>src\components\Todos\index.tsx</p>
+<pre><code class="lang-diff">import * as React from 'react';
+import TodoInput from './TodoInput';
+import TodoItem from './TodoItem';
+import { Todo} from '@/models';
+import { CombinedState, CounterState, TodosState } from '@/store/reducers';
+import { RouteComponentProps } from 'react-router-dom';
+import { StaticContext } from 'react-router';
+import * as actions from '@/store/actions/todos';
+import { connect } from 'react-redux';
+type StateProps = ReturnType&lt;typeof mapStateToProps&gt;;
+type DispatchProps = typeof actions;
+const ulStyle: React.CSSProperties = {
+    width: "100px"
+};
+export interface State {
+    todos: Todo[]
+}
+<span class="hljs-addition">+interface Params {}</span>
+<span class="hljs-addition">+export interface TodosLocationState { name: string }</span>
+<span class="hljs-addition">+type Props = StateProps &amp; DispatchProps &amp; RouteComponentProps&lt;Params, StaticContext, TodosLocationState&gt;;</span>
+class Todos extends React.Component&lt;Props,State&gt;{
+    addTodo = (todo:Todo) =&gt;{
+       this.props.addTodo(todo);
+    }
+    render() {
+        return (
+            &lt;div&gt;
+<span class="hljs-addition">+                &lt;p&gt;名称:{this.props.location.state.name}&lt;/p&gt;</span>
+                &lt;TodoInput addTodo={this.addTodo}/&gt;
+                &lt;ul style={ulStyle}&gt;
+                    {
+                        this.props.list.map(todo=&gt;&lt;TodoItem key={todo.id} todo={todo}/&gt;)
+                    }
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+let mapStateToProps = function (state: CombinedState): TodosState {
+    return state.todos;
+}
+export default connect(mapStateToProps, actions)(Todos);
+</code></pre>
+<h2 id="t508. redux-thunk">8. redux-thunk <a href="#t508. redux-thunk"> # </a></h2>
+<h3 id="t518.1 redux-thunk\index.tsx">8.1 redux-thunk\index.tsx <a href="#t518.1 redux-thunk\index.tsx"> # </a></h3>
+<p>src\redux-thunk\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {
+    Middleware,
+    Dispatch,
+    MiddlewareAPI,
+    Action
+} <span class="hljs-keyword">from</span> <span class="hljs-string">"redux"</span>;
+
+<span class="hljs-keyword">export</span> type ThunkAction&lt;R,S,E, A extends Action&gt; = (
+    dispatch: ThunkDispatch&lt;S,E, A&gt;,
+    <span class="hljs-attr">getState</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> S
+) =&gt; <span class="hljs-keyword">void</span>;
+<span class="hljs-keyword">export</span> interface ThunkDispatch&lt;S,E, A extends Action&gt; {
+    &lt;T extends A&gt;(action: T): T;
+    &lt;R&gt;(asyncAction: ThunkAction&lt;R,S, E, A&gt;): R;
+}
+type ThunkDispatched = ThunkDispatch&lt;{},undefined, Action&gt;;
+const thunk: Middleware&lt;
+    ThunkDispatched,
+    {},
+    ThunkDispatched
+&gt; = (api: MiddlewareAPI&lt;ThunkDispatched, {}&gt;) =&gt; (
+    next: Dispatch&lt;Action&gt;
+) =&gt; (action: Function | Action): any =&gt; {
+    if (typeof action === "function") {
+        return action(api.dispatch, api.getState);
+    }
+    return next(action);
+};
+export default thunk;
+</code></pre>
+<h3 id="t528.2 store\index.tsx">8.2 store\index.tsx <a href="#t528.2 store\index.tsx"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {
+    createStore,
+    applyMiddleware,
+    Action,
+    Store,
+    AnyAction,
+    StoreEnhancer,
+    StoreEnhancerStoreCreator
+} <span class="hljs-keyword">from</span> <span class="hljs-string">"redux"</span>;
+<span class="hljs-keyword">import</span> combinedReducer,{CombinedState} <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">import</span> { routerMiddleware } <span class="hljs-keyword">from</span> <span class="hljs-string">'connected-react-router'</span>;
+<span class="hljs-keyword">import</span> history <span class="hljs-keyword">from</span> <span class="hljs-string">'@/history'</span>;
+<span class="hljs-comment">//import thunk, { ThunkAction, ThunkDispatch } from 'redux-thunk';</span>
+<span class="hljs-keyword">import</span> thunk, { ThunkAction, ThunkDispatch } <span class="hljs-keyword">from</span> <span class="hljs-string">'@/redux-thunk'</span>;
+interface Ext {
+    <span class="hljs-attr">dispatch</span>: ThunkDispatch&lt;CombinedState, <span class="hljs-literal">undefined</span>, AnyAction&gt;
+}
+interface StateExt{}
+<span class="hljs-keyword">let</span> storeEnhancer: StoreEnhancer = applyMiddleware(routerMiddleware(history),thunk);
+
+<span class="hljs-keyword">let</span> storeEnhancerStoreCreator: StoreEnhancerStoreCreator = storeEnhancer(createStore);
+<span class="hljs-keyword">let</span> store: Store&lt;CombinedState &amp; StateExt, AnyAction&gt; &amp; Ext = storeEnhancerStoreCreator(combinedReducer);
+<span class="hljs-keyword">let</span> thunkAction: ThunkAction&lt;<span class="hljs-keyword">void</span>,CombinedState, <span class="hljs-literal">undefined</span>, AnyAction&gt; = (
+    dispatch: ThunkDispatch&lt;CombinedState, <span class="hljs-literal">undefined</span>, AnyAction&gt;,
+    <span class="hljs-attr">getState</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> CombinedState
+): <span class="hljs-function"><span class="hljs-params">void</span> =&gt;</span> { }
+store.dispatch(thunkAction);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+
+    

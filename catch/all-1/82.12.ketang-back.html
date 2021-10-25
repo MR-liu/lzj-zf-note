@@ -1,0 +1,766 @@
+
+        <h2 id="t01.项目初始化">1.项目初始化 <a href="#t01.项目初始化"> # </a></h2>
+<h3 id="t11.1 生成项目">1.1 生成项目 <a href="#t11.1 生成项目"> # </a></h3>
+<pre><code class="lang-js">mkdir server
+cd server
+cnpm init -y
+</code></pre>
+<h3 id="t21.2 安装依赖">1.2 安装依赖 <a href="#t21.2 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cnpm i express mongoose body-parser bcryptjs jsonwebtoken morgan cors validator helmet dotenv multer -S
+cnpm i typescript  @types/node @types/express @types/mongoose @types/bcryptjs @types/jsonwebtoken  @types/morgan @types/cors @types/validator ts-node-dev nodemon  @types/helmet @types/multer -D
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">模块名</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="https://www.npmjs.com/package/dotenv">dotenv</a></td>
+<td style="text-align:left">从<code>.env</code>加载到环境变量</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t31.3 初始化tsconfig.json">1.3 初始化tsconfig.json <a href="#t31.3 初始化tsconfig.json"> # </a></h3>
+<pre><code class="lang-json">npx tsconfig.json
+</code></pre>
+<h3 id="t41.4 package.json">1.4 package.json <a href="#t41.4 package.json"> # </a></h3>
+<pre><code class="lang-diff"><span class="hljs-addition">+  "scripts": {</span>
+<span class="hljs-addition">+    "build": "tsc",</span>
+<span class="hljs-addition">+    "start": "cross-env PORT=8000  ts-node-dev --respawn src/index.ts",</span>
+<span class="hljs-addition">+    "dev": "cross-env PORT=8000 nodemon --exec ts-node --files src/index.ts"</span>
+<span class="hljs-addition">+  }</span>
+</code></pre>
+<h3 id="t51.5 .gitignore">1.5 .gitignore <a href="#t51.5 .gitignore"> # </a></h3>
+<pre><code class="lang-js">node_modules
+src/public/upload/
+.env
+</code></pre>
+<h3 id="t61.6 .env">1.6 .env <a href="#t61.6 .env"> # </a></h3>
+<pre><code class="lang-js">JWT_SECRET_KEY=zhufeng
+MONGODB_URL=mongodb:<span class="hljs-comment">//localhost/zhufengketang</span>
+</code></pre>
+<h2 id="t72.用户管理">2.用户管理 <a href="#t72.用户管理"> # </a></h2>
+<h4 id="t82.1 src/index.ts">2.1 src/index.ts <a href="#t82.1 src/index.ts"> # </a></h4>
+<p>src/index.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> express, { Express, Request, Response, NextFunction } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> mongoose <span class="hljs-keyword">from</span> <span class="hljs-string">'mongoose'</span>;
+<span class="hljs-keyword">import</span> HttpException <span class="hljs-keyword">from</span> <span class="hljs-string">'./exceptions/HttpException'</span>;
+<span class="hljs-keyword">import</span> cors <span class="hljs-keyword">from</span> <span class="hljs-string">'cors'</span>;
+<span class="hljs-keyword">import</span> morgan <span class="hljs-keyword">from</span> <span class="hljs-string">'morgan'</span>;
+<span class="hljs-keyword">import</span> helmet <span class="hljs-keyword">from</span> <span class="hljs-string">'helmet'</span>;
+<span class="hljs-keyword">import</span> errorMiddleware <span class="hljs-keyword">from</span> <span class="hljs-string">'./middlewares/errorMiddleware'</span>;
+<span class="hljs-keyword">import</span> *  <span class="hljs-keyword">as</span> userController <span class="hljs-keyword">from</span> <span class="hljs-string">'./controller/user'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">"dotenv/config"</span>;
+<span class="hljs-keyword">import</span> multer <span class="hljs-keyword">from</span> <span class="hljs-string">'multer'</span>;
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">'path'</span>;
+<span class="hljs-keyword">const</span> storage = multer.diskStorage({
+    <span class="hljs-attr">destination</span>: path.join(__dirname, <span class="hljs-string">'public'</span>, <span class="hljs-string">'uploads'</span>),
+    filename(_req: Request, <span class="hljs-attr">file</span>: Express.Multer.File, cb) {
+        cb(<span class="hljs-literal">null</span>, <span class="hljs-built_in">Date</span>.now() + path.extname(file.originalname));
+    }
+});
+<span class="hljs-keyword">const</span> upload = multer({ storage });
+<span class="hljs-keyword">const</span> app: Express = express();
+app.use(morgan(<span class="hljs-string">"dev"</span>));
+app.use(cors());
+app.use(helmet());
+app.use(express.static(path.resolve(__dirname, <span class="hljs-string">'public'</span>)));
+app.use(express.json());
+app.use(express.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+app.get(<span class="hljs-string">'/'</span>, (_req: Request, <span class="hljs-attr">res</span>: Response) =&gt; {
+    res.json({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">message</span>: <span class="hljs-string">'hello world'</span> });
+});
+app.get(<span class="hljs-string">'/user/validate'</span>, userController.validate);
+app.post(<span class="hljs-string">'/user/register'</span>, userController.register);
+app.post(<span class="hljs-string">'/user/login'</span>, userController.login);
+app.post(<span class="hljs-string">'/user/uploadAvatar'</span>, upload.single(<span class="hljs-string">'avatar'</span>), userController.uploadAvatar);
+app.use(<span class="hljs-function">(<span class="hljs-params">_req: Request, _res: Response, next: NextFunction</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> error: HttpException = <span class="hljs-keyword">new</span> HttpException(<span class="hljs-number">404</span>, <span class="hljs-string">'尚未为此路径分配路由'</span>);
+    next(error);
+});
+app.use(errorMiddleware);
+<span class="hljs-keyword">const</span> PORT: number = (process.env.PORT &amp;&amp; <span class="hljs-built_in">parseInt</span>(process.env.PORT)) || <span class="hljs-number">8000</span>;
+(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    mongoose.set(<span class="hljs-string">'useNewUrlParser'</span>, <span class="hljs-literal">true</span>);
+    mongoose.set(<span class="hljs-string">'useUnifiedTopology'</span>, <span class="hljs-literal">true</span>);
+    <span class="hljs-keyword">await</span> mongoose.connect(<span class="hljs-string">'mongodb://localhost/zhufengketang'</span>);
+    app.listen(PORT, () =&gt; {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Running on http://localhost:<span class="hljs-subst">${PORT}</span>`</span>);
+    });
+})();
+</code></pre>
+<h4 id="t92.2 src/exceptions/HttpException.ts">2.2 src/exceptions/HttpException.ts <a href="#t92.2 src/exceptions/HttpException.ts"> # </a></h4>
+<p>src/exceptions/HttpException.ts</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HttpException</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Error</span> </span>{
+    <span class="hljs-keyword">constructor</span>(public status: number, public message: string, public errors?: any) {
+        <span class="hljs-keyword">super</span>(message);
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> HttpException;
+</code></pre>
+<h4 id="t102.3 src/middlewares/errorMiddleware.ts">2.3 src/middlewares/errorMiddleware.ts <a href="#t102.3 src/middlewares/errorMiddleware.ts"> # </a></h4>
+<p>src/middlewares/errorMiddleware.ts</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">import</span> { Request, Response, NextFunction } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> HttpException <span class="hljs-keyword">from</span> <span class="hljs-string">'../exceptions/HttpException'</span>;
+<span class="hljs-keyword">import</span> { INTERNAL_SERVER_ERROR } <span class="hljs-keyword">from</span> <span class="hljs-string">'http-status-codes'</span>;
+<span class="hljs-keyword">const</span> errorMiddleware = <span class="hljs-function">(<span class="hljs-params">err: HttpException, _req: Request, res: Response, _next: NextFunction</span>) =&gt;</span> {
+    <span class="hljs-keyword">let</span> result: any = {
+        <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">message</span>: err.message
+    };
+    <span class="hljs-keyword">if</span> (err.errors &amp;&amp; <span class="hljs-built_in">Object</span>.keys(err.errors).length &gt; <span class="hljs-number">0</span>) {
+        result.errors = err.errors;
+    }
+    res.status(err.status || INTERNAL_SERVER_ERROR)
+        .json(result);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> errorMiddleware;
+</code></pre>
+<h4 id="t112.4 src/utils/validator.ts">2.4 src/utils/validator.ts <a href="#t112.4 src/utils/validator.ts"> # </a></h4>
+<p>src/utils/validator.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> validator <span class="hljs-keyword">from</span> <span class="hljs-string">'validator'</span>;
+<span class="hljs-keyword">import</span> { UserDocument } <span class="hljs-keyword">from</span> <span class="hljs-string">'../models/user'</span>;
+
+<span class="hljs-keyword">export</span> interface RegisterInput extends Partial&lt;UserDocument&gt; {
+    confirmPassword?: string;
+}
+
+<span class="hljs-keyword">export</span> interface RegisterInputValidateResult {
+    <span class="hljs-attr">errors</span>: RegisterInput,
+    <span class="hljs-attr">valid</span>: boolean
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> validateRegisterInput = (
+    username: string,
+    <span class="hljs-attr">password</span>: string,
+    <span class="hljs-attr">confirmPassword</span>: string,
+    <span class="hljs-attr">email</span>: string
+): <span class="hljs-function"><span class="hljs-params">RegisterInputValidateResult</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> errors: RegisterInput = {};
+    <span class="hljs-keyword">if</span> (username == <span class="hljs-literal">undefined</span> || validator.isEmpty(username)) {
+        errors.username = <span class="hljs-string">'用户名不能为空'</span>;
+    }
+    <span class="hljs-keyword">if</span> (password == <span class="hljs-literal">undefined</span> || validator.isEmpty(password)) {
+        errors.password = <span class="hljs-string">'密码不能为空'</span>;
+    }
+    <span class="hljs-keyword">if</span> (confirmPassword == <span class="hljs-literal">undefined</span> || validator.isEmpty(confirmPassword)) {
+        errors.password = <span class="hljs-string">'确认密码不能为空'</span>;
+    }
+    <span class="hljs-keyword">if</span> (!validator.equals(password, confirmPassword)) {
+        errors.confirmPassword = <span class="hljs-string">'确认密码和密码不相等'</span>;
+    }
+    <span class="hljs-keyword">if</span> (email == <span class="hljs-literal">undefined</span> || validator.isEmpty(password)) {
+        errors.email = <span class="hljs-string">'邮箱不能为空'</span>;
+    }
+    <span class="hljs-keyword">if</span> (validator.isEmail(password)) {
+        errors.email = <span class="hljs-string">'邮箱格式必须合法'</span>;
+    }
+    <span class="hljs-keyword">return</span> { errors, <span class="hljs-attr">valid</span>: <span class="hljs-built_in">Object</span>.keys(errors).length == <span class="hljs-number">0</span> };
+}
+</code></pre>
+<h4 id="t122.5 src/typings/jwt.ts">2.5 src/typings/jwt.ts <a href="#t122.5 src/typings/jwt.ts"> # </a></h4>
+<p>src/typings/jwt.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { UserDocument } <span class="hljs-keyword">from</span> <span class="hljs-string">"../models/user"</span>;
+
+<span class="hljs-keyword">export</span> interface UserPayload {
+    <span class="hljs-attr">id</span>: UserDocument[<span class="hljs-string">'_id'</span>]
+}
+</code></pre>
+<h4 id="t132.6 src\models\index.ts">2.6 src\models\index.ts <a href="#t132.6 src\models\index.ts"> # </a></h4>
+<p>src\models\index.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'./user'</span>;
+</code></pre>
+<h4 id="t142.7 src/models/user.ts">2.7 src/models/user.ts <a href="#t142.7 src/models/user.ts"> # </a></h4>
+<p>src/models/user.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> mongoose, { Schema, Model, Document, HookNextFunction } <span class="hljs-keyword">from</span> <span class="hljs-string">'mongoose'</span>;
+<span class="hljs-keyword">import</span> validator <span class="hljs-keyword">from</span> <span class="hljs-string">'validator'</span>;
+<span class="hljs-keyword">import</span> jwt <span class="hljs-keyword">from</span> <span class="hljs-string">'jsonwebtoken'</span>;
+<span class="hljs-keyword">import</span> { UserPayload } <span class="hljs-keyword">from</span> <span class="hljs-string">'../typings/jwt'</span>;
+<span class="hljs-keyword">import</span> bcrypt <span class="hljs-keyword">from</span> <span class="hljs-string">'bcryptjs'</span>;
+<span class="hljs-keyword">export</span> interface UserDocument extends Document {
+    <span class="hljs-attr">username</span>: string,
+    <span class="hljs-attr">password</span>: string,
+    <span class="hljs-attr">email</span>: string;
+    avatar: string;
+    generateToken: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> string,
+    <span class="hljs-attr">_doc</span>: UserDocument
+}
+<span class="hljs-keyword">const</span> UserSchema: Schema&lt;UserDocument&gt; = <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">username</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>,
+        <span class="hljs-attr">required</span>: [<span class="hljs-literal">true</span>, <span class="hljs-string">'用户名不能为空'</span>],
+        <span class="hljs-attr">minlength</span>: [<span class="hljs-number">6</span>, <span class="hljs-string">'最小长度不能少于6位'</span>],
+        <span class="hljs-attr">maxlength</span>: [<span class="hljs-number">12</span>, <span class="hljs-string">'最大长度不能大于12位'</span>]
+    },
+    <span class="hljs-attr">password</span>: <span class="hljs-built_in">String</span>,
+    <span class="hljs-attr">avatar</span>: <span class="hljs-built_in">String</span>,
+    <span class="hljs-attr">email</span>: {
+        <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>,
+        <span class="hljs-attr">validate</span>: {
+            <span class="hljs-attr">validator</span>: validator.isEmail
+        },
+        <span class="hljs-attr">trim</span>: <span class="hljs-literal">true</span>,
+    }
+}, { <span class="hljs-attr">timestamps</span>: <span class="hljs-literal">true</span> ,    <span class="hljs-attr">toJSON</span>: {
+        <span class="hljs-attr">transform</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_doc: any, result: any</span>) </span>{
+            result.id = result._id;
+            <span class="hljs-keyword">delete</span> result._id;
+            <span class="hljs-keyword">delete</span> result.__v;
+            <span class="hljs-keyword">delete</span> result.password;
+            <span class="hljs-keyword">delete</span> result.createdAt;
+            <span class="hljs-keyword">delete</span> result.updatedAt;
+            <span class="hljs-keyword">return</span> result;
+        }
+    }});
+
+UserSchema.methods.generateToken = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>): <span class="hljs-title">string</span> </span>{
+    <span class="hljs-keyword">let</span> payload: UserPayload = ({ <span class="hljs-attr">id</span>: <span class="hljs-keyword">this</span>.id });
+    <span class="hljs-keyword">return</span> jwt.sign(payload, process.env.JWT_SECRET_KEY!, { <span class="hljs-attr">expiresIn</span>: <span class="hljs-string">'1h'</span> });
+}
+UserSchema.pre&lt;UserDocument&gt;(<span class="hljs-string">'save'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">next: HookNextFunction</span>) </span>{
+    <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.isModified(<span class="hljs-string">'password'</span>)) {
+        <span class="hljs-keyword">return</span> next();
+    }
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">this</span>.password = <span class="hljs-keyword">await</span> bcrypt.hash(<span class="hljs-keyword">this</span>.password, <span class="hljs-number">10</span>);
+        next();
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(error);
+    }
+});
+UserSchema.static(<span class="hljs-string">'login'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">this: any, username: string, password: string</span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">UserDocument</span> | <span class="hljs-title">null</span>&gt; </span>{
+    <span class="hljs-keyword">let</span> user: UserDocument | <span class="hljs-literal">null</span> = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.model(<span class="hljs-string">'User'</span>).findOne({ username });
+    <span class="hljs-keyword">if</span> (user) {
+        <span class="hljs-keyword">const</span> matched = <span class="hljs-keyword">await</span> bcrypt.compare(password, user.password);
+        <span class="hljs-keyword">if</span> (matched) {
+            <span class="hljs-keyword">return</span> user;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+        }
+    }
+    <span class="hljs-keyword">return</span> user;
+});
+interface IUserModel&lt;T extends Document&gt; extends Model&lt;T&gt; {
+    <span class="hljs-attr">login</span>: <span class="hljs-function">(<span class="hljs-params">username: string, password: string</span>) =&gt;</span> UserDocument | <span class="hljs-literal">null</span>
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> User: IUserModel&lt;UserDocument&gt; = mongoose.model&lt;UserDocument, IUserModel&lt;UserDocument&gt;&gt;(<span class="hljs-string">'User'</span>, UserSchema);
+</code></pre>
+<h4 id="t152.8 src\controller\user.ts">2.8 src\controller\user.ts <a href="#t152.8 src\controller\user.ts"> # </a></h4>
+<p>src\controller\user.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Request, Response, NextFunction } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> { validateRegisterInput } <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils/validator'</span>;
+<span class="hljs-keyword">import</span> HttpException <span class="hljs-keyword">from</span> <span class="hljs-string">'../exceptions/HttpException'</span>;
+<span class="hljs-keyword">import</span> { UNPROCESSABLE_ENTITY, UNAUTHORIZED } <span class="hljs-keyword">from</span> <span class="hljs-string">'http-status-codes'</span>;
+<span class="hljs-keyword">import</span> { UserDocument, User } <span class="hljs-keyword">from</span> <span class="hljs-string">'../models/user'</span>;
+<span class="hljs-keyword">import</span> { UserPayload } <span class="hljs-keyword">from</span> <span class="hljs-string">'../typings/jwt'</span>;
+<span class="hljs-keyword">import</span> jwt <span class="hljs-keyword">from</span> <span class="hljs-string">'jsonwebtoken'</span>;
+<span class="hljs-comment">//客户端会把token放在请求头里发给服务器</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> validate = <span class="hljs-keyword">async</span> (req: Request, <span class="hljs-attr">res</span>: Response, <span class="hljs-attr">next</span>: NextFunction) =&gt; {
+    <span class="hljs-keyword">const</span> authorization = req.headers.authorization;
+    <span class="hljs-keyword">if</span> (authorization) {
+        <span class="hljs-keyword">const</span> access_token = authorization.split(<span class="hljs-string">' '</span>)[<span class="hljs-number">1</span>];<span class="hljs-comment">//Bearer access_token</span>
+        <span class="hljs-keyword">if</span> (access_token) {
+            <span class="hljs-keyword">try</span> {
+                <span class="hljs-keyword">const</span> userPayload: UserPayload = jwt.verify(access_token, process.env.JWT_SECRET_KEY || <span class="hljs-string">'zhufeng'</span>) <span class="hljs-keyword">as</span> UserPayload;
+                <span class="hljs-keyword">const</span> user: UserDocument | <span class="hljs-literal">null</span> = <span class="hljs-keyword">await</span> User.findById(userPayload.id);
+                <span class="hljs-keyword">if</span> (user) {
+                    res.json({
+                        <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+                        <span class="hljs-attr">data</span>: user.toJSON()
+                    })
+                } <span class="hljs-keyword">else</span> {
+                    next(<span class="hljs-keyword">new</span> HttpException(UNAUTHORIZED, <span class="hljs-string">'用户未找到'</span>));
+                }
+            } <span class="hljs-keyword">catch</span> (error) {
+                next(<span class="hljs-keyword">new</span> HttpException(UNAUTHORIZED, <span class="hljs-string">'access_token不正确'</span>));
+            }
+        } <span class="hljs-keyword">else</span> {
+            next(<span class="hljs-keyword">new</span> HttpException(UNAUTHORIZED, <span class="hljs-string">'access_token未提供'</span>));
+        }
+    } <span class="hljs-keyword">else</span> {
+        next(<span class="hljs-keyword">new</span> HttpException(UNAUTHORIZED, <span class="hljs-string">'authorization未提供'</span>));
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> register = <span class="hljs-keyword">async</span> (req: Request, <span class="hljs-attr">res</span>: Response, <span class="hljs-attr">next</span>: NextFunction) =&gt; {
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> { username, password, confirmPassword, email, addresses } = req.body;
+        <span class="hljs-keyword">const</span> { valid, errors } = validateRegisterInput(username, password, confirmPassword, email);
+        <span class="hljs-keyword">if</span> (!valid) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> HttpException(UNPROCESSABLE_ENTITY, <span class="hljs-string">`参数验证失败!`</span>, errors);
+        }
+        <span class="hljs-keyword">let</span> user: UserDocument = <span class="hljs-keyword">new</span> User({
+            username,
+            email,
+            password,
+            addresses
+        });
+        <span class="hljs-keyword">let</span> oldUser: UserDocument | <span class="hljs-literal">null</span> = <span class="hljs-keyword">await</span> User.findOne({ <span class="hljs-attr">username</span>: user.username });
+        <span class="hljs-keyword">if</span> (oldUser) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> HttpException(UNPROCESSABLE_ENTITY, <span class="hljs-string">`用户名重复!`</span>);
+        }
+        <span class="hljs-keyword">await</span> user.save();
+        <span class="hljs-keyword">let</span> token = user.generateToken();
+        res.json({
+            <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">data</span>: { token }
+        });
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(error);
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> login = <span class="hljs-keyword">async</span> (req: Request, <span class="hljs-attr">res</span>: Response, <span class="hljs-attr">next</span>: NextFunction) =&gt; {
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">let</span> { username, password } = req.body;
+        <span class="hljs-keyword">let</span> user = <span class="hljs-keyword">await</span> User.login(username, password);
+        <span class="hljs-keyword">if</span> (user) {
+            <span class="hljs-keyword">let</span> token = user.generateToken();
+            res.json({
+                <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">data</span>: {
+                    token
+                }
+            });
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> HttpException(UNAUTHORIZED, <span class="hljs-string">`登录失败`</span>);
+        }
+    } <span class="hljs-keyword">catch</span> (error) {
+        next(error);
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> uploadAvatar = <span class="hljs-keyword">async</span> (req: Request, <span class="hljs-attr">res</span>: Response, <span class="hljs-attr">next</span>: NextFunction) =&gt; {
+    <span class="hljs-keyword">let</span> { userId } = req.body;
+    <span class="hljs-keyword">let</span> avatar = <span class="hljs-string">`<span class="hljs-subst">${req.protocol}</span>://<span class="hljs-subst">${req.headers.host}</span>/uploads/<span class="hljs-subst">${req.file.filename}</span>`</span>;
+    <span class="hljs-keyword">await</span> User.updateOne({ <span class="hljs-attr">_id</span>: userId }, { avatar });
+    res.send({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: avatar });
+}
+</code></pre>
+<h4 id="t162.9 typings\express.d.ts">2.9 typings\express.d.ts <a href="#t162.9 typings\express.d.ts"> # </a></h4>
+<p>src\typings\express.d.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { UserDocument } <span class="hljs-keyword">from</span> <span class="hljs-string">"../models/user"</span>;
+declare global {
+    namespace Express {
+        <span class="hljs-keyword">export</span> interface Request {
+            currentUser?: UserDocument | <span class="hljs-literal">null</span>;
+            file: Multer.File
+        }
+    }
+}
+</code></pre>
+<h2 id="t173.轮播图">3.轮播图 <a href="#t173.轮播图"> # </a></h2>
+<h3 id="t183.1 src\index.ts">3.1 src\index.ts <a href="#t183.1 src\index.ts"> # </a></h3>
+<p>src\index.ts</p>
+<pre><code class="lang-diff">import express, { Express, Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
+import HttpException from './exceptions/HttpException';
+import cors from 'cors';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import errorMiddleware from './middlewares/errorMiddleware';
+import *  as userController from './controller/user';
+<span class="hljs-addition">+import *  as sliderController from './controller/slider';</span>
+import "dotenv/config";
+import multer from 'multer';
+import path from 'path';
+<span class="hljs-addition">+import { Slider } from './models';</span>
+const storage = multer.diskStorage({
+    destination: path.join(__dirname, 'public', 'uploads'),
+    filename(_req: Request, file: Express.Multer.File, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+const app: Express = express();
+app.use(morgan("dev"));
+app.use(cors());
+app.use(helmet());
+app.use(express.static(path.resolve(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.get('/', (_req: Request, res: Response) =&gt; {
+    res.json({ success: true, message: 'hello world' });
+});
+app.get('/user/validate', userController.validate);
+app.post('/user/register', userController.register);
+app.post('/user/login', userController.login);
+app.post('/user/uploadAvatar', upload.single('avatar'), userController.uploadAvatar);
+<span class="hljs-addition">+app.get('/slider/list', sliderController.list);</span>
+app.use((_req: Request, _res: Response, next: NextFunction) =&gt; {
+    const error: HttpException = new HttpException(404, 'Route not found');
+    next(error);
+});
+app.use(errorMiddleware);
+const PORT: number = (process.env.PORT &amp;&amp; parseInt(process.env.PORT)) || 8000;
+(async function () {
+    mongoose.set('useNewUrlParser', true);
+    mongoose.set('useUnifiedTopology', true);
+    await mongoose.connect(process.env.MONGODB_URL!);
+<span class="hljs-addition">+    await createSliders();</span>
+    app.listen(PORT, () =&gt; {
+        console.log(`Running on http://localhost:${PORT}`);
+    });
+})();
+
+<span class="hljs-addition">+async function createSliders() {</span>
+<span class="hljs-addition">+    const sliders = await Slider.find();</span>
+<span class="hljs-addition">+    if (sliders.length == 0) {</span>
+<span class="hljs-addition">+        const sliders = [</span>
+<span class="hljs-addition">+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/reactnative.png' },</span>
+<span class="hljs-addition">+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png' },</span>
+<span class="hljs-addition">+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png' },</span>
+<span class="hljs-addition">+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/wechat.png' },</span>
+<span class="hljs-addition">+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/architect.jpg' }</span>
+<span class="hljs-addition">+        ];</span>
+<span class="hljs-addition">+        Slider.create(sliders);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t193.2 controller\slider.ts">3.2 controller\slider.ts <a href="#t193.2 controller\slider.ts"> # </a></h3>
+<p>src\controller\slider.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Request, Response } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> { ISliderDocument, Slider } <span class="hljs-keyword">from</span> <span class="hljs-string">'../models'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> list = <span class="hljs-keyword">async</span> (_req: Request, <span class="hljs-attr">res</span>: Response) =&gt; {
+    <span class="hljs-keyword">let</span> sliders: ISliderDocument[] = <span class="hljs-keyword">await</span> Slider.find();
+    res.json({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: sliders });
+}
+</code></pre>
+<h3 id="t203.3 models\slider.ts">3.3 models\slider.ts <a href="#t203.3 models\slider.ts"> # </a></h3>
+<p>src\models\slider.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> mongoose, { Schema, Document } <span class="hljs-keyword">from</span> <span class="hljs-string">'mongoose'</span>;
+<span class="hljs-keyword">export</span> interface ISliderDocument extends Document {
+    <span class="hljs-attr">url</span>: string,
+    <span class="hljs-attr">_doc</span>: ISliderDocument
+}
+<span class="hljs-keyword">const</span> SliderSchema: Schema&lt;ISliderDocument&gt; = <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">url</span>: <span class="hljs-built_in">String</span>,
+}, { <span class="hljs-attr">timestamps</span>: <span class="hljs-literal">true</span> });
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> Slider = mongoose.model&lt;ISliderDocument&gt;(<span class="hljs-string">'Slider'</span>, SliderSchema);
+</code></pre>
+<h3 id="t213.4 src\models\index.ts">3.4 src\models\index.ts <a href="#t213.4 src\models\index.ts"> # </a></h3>
+<p>src\models\index.ts</p>
+<pre><code class="lang-diff">export * from './user';
+<span class="hljs-addition">+export * from './slider';</span>
+</code></pre>
+<h2 id="t224.课程管理">4.课程管理 <a href="#t224.课程管理"> # </a></h2>
+<h3 id="t234.1 src\index.ts">4.1 src\index.ts <a href="#t234.1 src\index.ts"> # </a></h3>
+<p>src\index.ts</p>
+<pre><code class="lang-diff">import express, { Express, Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
+import HttpException from './exceptions/HttpException';
+import cors from 'cors';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import errorMiddleware from './middlewares/errorMiddleware';
+import *  as userController from './controller/user';
+import *  as sliderController from './controller/slider';
+<span class="hljs-addition">+import *  as lessonController from './controller/lesson';</span>
+import "dotenv/config";
+import multer from 'multer';
+import path from 'path';
+<span class="hljs-addition">+import { Slider, Lesson } from './models';</span>
+const storage = multer.diskStorage({
+    destination: path.join(__dirname, 'public', 'uploads'),
+    filename(_req: Request, file: Express.Multer.File, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+const app: Express = express();
+app.use(morgan("dev"));
+app.use(cors());
+app.use(helmet());
+app.use(express.static(path.resolve(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.get('/', (_req: Request, res: Response) =&gt; {
+    res.json({ success: true, message: 'hello world' });
+});
+app.get('/user/validate', userController.validate);
+app.post('/user/register', userController.register);
+app.post('/user/login', userController.login);
+app.post('/user/uploadAvatar', upload.single('avatar'), userController.uploadAvatar);
+app.get('/slider/list', sliderController.list);
+<span class="hljs-addition">+app.get('/lesson/list', lessonController.list);</span>
+<span class="hljs-addition">+app.get('/lesson/:id', lessonController.get);</span>
+app.use((_req: Request, _res: Response, next: NextFunction) =&gt; {
+    const error: HttpException = new HttpException(404, 'Route not found');
+    next(error);
+});
+app.use(errorMiddleware);
+const PORT: number = (process.env.PORT &amp;&amp; parseInt(process.env.PORT)) || 8000;
+(async function () {
+    mongoose.set('useNewUrlParser', true);
+    mongoose.set('useUnifiedTopology', true);
+    await mongoose.connect(process.env.MONGODB_URL!);
+    await createSliders();
+<span class="hljs-addition">+    await createLessons();</span>
+    app.listen(PORT, () =&gt; {
+        console.log(`Running on http://localhost:${PORT}`);
+    });
+})();
+
+async function createSliders() {
+    const sliders = await Slider.find();
+    if (sliders.length == 0) {
+        const sliders = [
+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/reactnative.png' },
+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png' },
+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png' },
+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/wechat.png' },
+            { url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/architect.jpg' }
+        ];
+        Slider.create(sliders);
+    }
+}
+
+<span class="hljs-addition">+async function createLessons() {</span>
+<span class="hljs-addition">+    const lessons = await Lesson.find();</span>
+<span class="hljs-addition">+    if (lessons.length == 0) {</span>
+        const lessons = [
+            {
+                order: 1,
+                title: '1.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥100.00元',
+                category: 'react'
+            },
+            {
+                order: 2,
+                title: '2.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥200.00元',
+                category: 'react'
+            },
+            {
+                order: 3,
+                title: '3.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥300.00元',
+                category: 'react'
+            },
+            {
+                order: 4,
+                title: '4.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥400.00元',
+                category: 'react'
+            },
+            {
+                order: 5,
+                title: '5.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥500.00元',
+                category: 'react'
+            },
+            {
+                order: 6,
+                title: '6.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥100.00元',
+                category: 'vue'
+            },
+            {
+                order: 7,
+                title: '7.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥200.00元',
+                category: 'vue'
+            },
+            {
+                order: 8,
+                title: '8.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥300.00元',
+                category: 'vue'
+            },
+            {
+                order: 9,
+                title: '9.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥400.00元',
+                category: 'vue'
+            },
+            {
+                order: 10,
+                title: '10.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥500.00元',
+                category: 'vue'
+            },
+            {
+                order: 11,
+                title: '11.React全栈架构',
+                "video": "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥600.00元',
+                category: 'react'
+            },
+            {
+                order: 12,
+                title: '12.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥700.00元',
+                category: 'react'
+            },
+            {
+                order: 13,
+                title: '13.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥800.00元',
+                category: 'react'
+            },
+            {
+                order: 14,
+                title: '14.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥900.00元',
+                category: 'react'
+            },
+            {
+                order: 15,
+                title: '15.React全栈架构',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/react/img/react.jpg",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/react.png',
+                price: '¥1000.00元',
+                category: 'react'
+            },
+            {
+                order: 16,
+                title: '16.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥600.00元',
+                category: 'vue'
+            },
+            {
+                order: 17,
+                title: '17.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥700.00元',
+                category: 'vue'
+            },
+            {
+                order: 18,
+                title: '18.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥800.00元',
+                category: 'vue'
+            },
+            {
+                order: 19,
+                title: '19.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥900.00元',
+                category: 'vue'
+            },
+            {
+                order: 20,
+                title: '20.Vue从入门到项目实战',
+                video: "http://img.zhufengpeixun.cn/gee2.mp4",
+                poster: "http://www.zhufengpeixun.cn/vue/img/vue.png",
+                url: 'http://www.zhufengpeixun.cn/themes/jianmo2/images/vue.png',
+                price: '¥1000.00元',
+                category: 'vue'
+            }
+        ];
+<span class="hljs-addition">+       Lesson.create(lessons);</span>
+    }
+}
+</code></pre>
+<h3 id="t244.2 src\models\index.ts">4.2 src\models\index.ts <a href="#t244.2 src\models\index.ts"> # </a></h3>
+<p>src\models\index.ts</p>
+<pre><code class="lang-diff">export * from './user';
+export * from './slider';
+<span class="hljs-addition">+export * from './lesson';</span>
+</code></pre>
+<h3 id="t254.3 controller\lesson.ts">4.3 controller\lesson.ts <a href="#t254.3 controller\lesson.ts"> # </a></h3>
+<p>src\controller\lesson.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Request, Response } <span class="hljs-keyword">from</span> <span class="hljs-string">'express'</span>;
+<span class="hljs-keyword">import</span> { ILessonDocument, Lesson } <span class="hljs-keyword">from</span> <span class="hljs-string">'../models'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> list = <span class="hljs-keyword">async</span> (req: Request, <span class="hljs-attr">res</span>: Response) =&gt; {
+    <span class="hljs-keyword">let</span> { offset, limit, category } = req.query;
+    offset = <span class="hljs-built_in">isNaN</span>(offset) ? <span class="hljs-number">0</span> : <span class="hljs-built_in">parseInt</span>(offset);<span class="hljs-comment">//偏移量 </span>
+    limit = <span class="hljs-built_in">isNaN</span>(limit) ? <span class="hljs-number">5</span> : <span class="hljs-built_in">parseInt</span>(limit); <span class="hljs-comment">//每页条数</span>
+    <span class="hljs-keyword">let</span> query: Partial&lt;ILessonDocument&gt; = {} <span class="hljs-keyword">as</span> ILessonDocument;
+    <span class="hljs-keyword">if</span> (category &amp;&amp; category != <span class="hljs-string">'all'</span>)
+        query.category = category;
+    <span class="hljs-keyword">let</span> total = <span class="hljs-keyword">await</span> Lesson.count(query);
+    <span class="hljs-keyword">let</span> list = <span class="hljs-keyword">await</span> Lesson.find(query).sort({ <span class="hljs-attr">order</span>: <span class="hljs-number">1</span> }).skip(offset).limit(limit);
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: { list, <span class="hljs-attr">hasMore</span>: total &gt; offset + limit } });
+    }, <span class="hljs-number">1000</span>);
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">get</span> = async (req: Request, res: Response) =&gt; {
+    <span class="hljs-keyword">let</span> id = req.params.id;
+    <span class="hljs-keyword">let</span> lesson = <span class="hljs-keyword">await</span> Lesson.findById(id);
+    res.json({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">data</span>: lesson });
+}
+</code></pre>
+<h3 id="t264.4 models\lesson.ts">4.4 models\lesson.ts <a href="#t264.4 models\lesson.ts"> # </a></h3>
+<p>src\models\lesson.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> mongoose, { Schema, Document } <span class="hljs-keyword">from</span> <span class="hljs-string">'mongoose'</span>;
+<span class="hljs-keyword">export</span> interface ILessonDocument extends Document {
+    <span class="hljs-attr">order</span>: number,<span class="hljs-comment">//顺序</span>
+    <span class="hljs-attr">title</span>: string,<span class="hljs-comment">//标题</span>
+    <span class="hljs-attr">video</span>: string,<span class="hljs-comment">//视频</span>
+    <span class="hljs-attr">poster</span>: string, <span class="hljs-comment">//海报</span>
+    <span class="hljs-attr">url</span>: string,<span class="hljs-comment">//url地址</span>
+    <span class="hljs-attr">price</span>: string,<span class="hljs-comment">//价格</span>
+    <span class="hljs-attr">category</span>: string,<span class="hljs-comment">//分类</span>
+    <span class="hljs-attr">_doc</span>: ILessonDocument
+}
+<span class="hljs-keyword">const</span> LessonSchema: Schema&lt;ILessonDocument&gt; = <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">order</span>: <span class="hljs-built_in">Number</span>,<span class="hljs-comment">//顺序</span>
+    <span class="hljs-attr">title</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//标题</span>
+    <span class="hljs-attr">video</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//视频</span>
+    <span class="hljs-attr">poster</span>: <span class="hljs-built_in">String</span>, <span class="hljs-comment">//海报</span>
+    <span class="hljs-attr">url</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//url地址</span>
+    <span class="hljs-attr">price</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//价格</span>
+    <span class="hljs-attr">category</span>: <span class="hljs-built_in">String</span>,<span class="hljs-comment">//分类</span>
+}, { <span class="hljs-attr">timestamps</span>: <span class="hljs-literal">true</span> });
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> Lesson = mongoose.model&lt;ILessonDocument&gt;(<span class="hljs-string">'Lesson'</span>, LessonSchema);
+
+</code></pre>
+
+    

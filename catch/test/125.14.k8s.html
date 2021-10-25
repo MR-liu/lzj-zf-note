@@ -1,0 +1,311 @@
+
+        <h2 id="t01. Kubernetes介绍">1. Kubernetes介绍 <a href="#t01. Kubernetes介绍"> # </a></h2>
+<ul>
+<li>Master是控制节点,负责编排、管理、调度用户提交的作业<ul>
+<li>负责API服务的<code>kube-apiserver</code></li>
+<li>负责调度的<code>kube-scheduler</code></li>
+<li>负责容器编排的<code>kube-controller-manager</code></li>
+<li><code>kube-apiserver</code>会处理集群的持久化数据并保存在<code>etcd</code>中</li>
+</ul>
+</li>
+<li>Node是计算节点<ul>
+<li>CRI(Container Runtime Interface)的远程调用接口，这个接口定义了容器运行时的各项核心操作</li>
+<li>OCI(Open Container Initiative) 容器运行时通过OCI同底层的Linux操作系统进行交互</li>
+<li>设备插件是用来管理宿主机物理设备的组件</li>
+<li><a href="http://doc.oschina.net/grpc">gRPC</a>是可以在任何环境中运行的现代开源高性能 RPC 框架</li>
+<li>RPC是指远程过程调用，也就是说两台服务器A，B，一个应用部署在A服务器上，想要调用B服务器上应用提供的函数/方法，由于不在一个内存空间，不能直接调用，需要通过网络来表达调用的语义和传达调用的数据</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/bc263d89a4e90ce3a0902a5181d3baef" alt="bc263d89a4e90ce3a0902a5181d3baef"></p>
+<p><img src="https://img.zhufengpeixun.com/6376f226526ca6957a3cd33a4fa9435a" alt="6376f226526ca6957a3cd33a4fa9435a"></p>
+<h3 id="t11.1 Pod">1.1 Pod <a href="#t11.1 Pod"> # </a></h3>
+<ul>
+<li>Pod 是 K8S 中最小的可调度单元（可操作/可部署单元）</li>
+<li>它里面可以包含1个或者多个 Docker 容器</li>
+<li>在 Pod 内的所有 Docker 容器，都会共享同一个网络、存储卷、端口映射规则</li>
+<li>一个 Pod 拥有一个 IP,但这个 IP 会随着Pod的重启，创建，删除等跟着改变，所以不固定且不完全可靠,这也就是 Pod 的 IP 漂移问题。这个问题我们可以使用下面的 Service 去自动映射</li>
+<li>Pod 是一个容器组，里面有很多容器，容器组内共享资源</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/b2c720b50cdea123123344b9c0325cd5" alt="pod"></p>
+<h3 id="t21.2 deployment">1.2 deployment <a href="#t21.2 deployment"> # </a></h3>
+<ul>
+<li>希望批量启动和管理多个Pod实例，就可以使用deployment</li>
+</ul>
+<h3 id="t31.3 Service">1.3 Service <a href="#t31.3 Service"> # </a></h3>
+<ul>
+<li>有了Pod实例后就需要以固定的IP地址以负载均衡的方式访问多个Pod实例，就有了Service</li>
+</ul>
+<h2 id="t42.部署">2.部署 <a href="#t42.部署"> # </a></h2>
+<h3 id="t52.1 编写配置文件">2.1 编写配置文件 <a href="#t52.1 编写配置文件"> # </a></h3>
+<ul>
+<li>Kubernetes 最核心的设计理念就是声明式 API</li>
+<li>声明式 API可以用来描述容器化业务和容器间关系</li>
+<li><a href="https://matthewpalmer.net/kubernetes-app-developer/articles/kubernetes-apiversion-definition-guide.html">apiversion</a></li>
+</ul>
+<pre><code class="lang-js">mkdir deployment &amp;&amp; cd deployment
+vim deployment-user-v1.yaml
+</code></pre>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>  <span class="hljs-comment">#API 配置版本</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>     <span class="hljs-comment">#资源类型</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">user-v1</span>     <span class="hljs-comment">#资源名称</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">matchLabels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">user-v1</span> <span class="hljs-comment">#告诉deployment根据规则匹配相应的Pod进行控制和管理，matchLabels字段匹配Pod的label值</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">3</span> <span class="hljs-comment">#声明一个 Pod,副本的数量</span>
+  <span class="hljs-attr">template:</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">user-v1</span> <span class="hljs-comment">#Pod的名称</span>
+    <span class="hljs-attr">spec:</span>   <span class="hljs-comment">#组内创建的 Pod 信息</span>
+      <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx</span> <span class="hljs-comment">#容器的名称</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1</span> <span class="hljs-comment">#使用哪个镜像</span>
+        <span class="hljs-attr">ports:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment">#容器内映射的端口</span>
+</code></pre>
+<h3 id="t62.2 布署Pod">2.2 布署Pod <a href="#t62.2 布署Pod"> # </a></h3>
+<ul>
+<li><code>kubectl apply</code> 代表准备对资源进行配置</li>
+<li>-f 等于 --filename 后面可以跟随多个配置文件</li>
+</ul>
+<pre><code class="lang-js">kubectl apply -f deployment-user-v1.yaml
+deployment.apps/user-v1 created
+</code></pre>
+<ul>
+<li>想查看部署完毕后的 Pod 运行状态，当状态都是 Running 时，代表 Pod 运行正常<ul>
+<li>name 是 Pod的名称</li>
+<li>READY 为容器状态，格式为可用容器/所有容器数量</li>
+<li>STATUS 为 Pod 的运行状态</li>
+<li>RESTARTS 为重启数量</li>
+<li>AGE 为 Pod 运行时间</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">kubectl <span class="hljs-keyword">get</span> pod
+NAME                        READY   STATUS    RESTARTS   AGE
+user-8445fbf8d7-6f6d7       0/1     ContainerCreating   0          13s
+user-8445fbf8d7-nggzv       0/1     ContainerCreating   0          13s
+user-8445fbf8d7-xfn52       0/1     ContainerCreating   0          13s
+</code></pre>
+<h3 id="t72.3 Service">2.3 Service <a href="#t72.3 Service"> # </a></h3>
+<ul>
+<li>deployment 是无状态的</li>
+<li>deployment 并不会对 pod 进行网络通信和分发</li>
+<li>Pod 的 IP 在运行时还会经常进行漂移且不固定</li>
+<li>想访问服务需要使用 Service  组织统一的 Pod 访问入口</li>
+<li>可以定义Service 来进行统一组织 Pod  服务访问</li>
+<li>负责自动调度和组织deployment中 Pod 的服务访问，由于自动映射 Pod 的IP，同时也解决了 Pod 的IP漂移问题</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/e98326ae235c5da3ee69e3e42981f424" alt="service"></p>
+<h4 id="t82.3.1 配置文件">2.3.1 配置文件 <a href="#t82.3.1 配置文件"> # </a></h4>
+<ul>
+<li><a href="http://www.dockerone.com/article/4884">Kubernetes的三种外部访问方式</a></li>
+<li>NodePort服务是引导外部流量到你的服务的最原始方式</li>
+<li>NodePort在所有节点上开放一个特定端口,任何发送到该端口的流量都被转发到对应服务</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">protocol</td>
+<td style="text-align:left">通信类型（TCP/UDP）</td>
+</tr>
+<tr>
+<td style="text-align:left">targetPort</td>
+<td style="text-align:left">原本 Pod 开放的端口</td>
+</tr>
+<tr>
+<td style="text-align:left">port</td>
+<td style="text-align:left">Kubernetes容器之间互相访问的端口</td>
+</tr>
+<tr>
+<td style="text-align:left">type</td>
+<td style="text-align:left">NodePort，Service的一种访问方式</td>
+</tr>
+</tbody>
+</table>
+<p>user-service-v1.yaml</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">service-user-v1</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">user-v1</span>
+  <span class="hljs-attr">ports:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">80</span>
+    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span>
+  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span>
+</code></pre>
+<h4 id="t92.3.2 启动">2.3.2 启动 <a href="#t92.3.2 启动"> # </a></h4>
+<pre><code class="lang-js">kubectl apply -f user-service-v1.yaml
+service/service-user-v1 created
+</code></pre>
+<ul>
+<li>查看当前的服务 </li>
+</ul>
+<pre><code class="lang-js">kubectl <span class="hljs-keyword">get</span> svc
+</code></pre>
+<p>可以在任何节点上访问</p>
+<pre><code class="lang-js">curl http:<span class="hljs-comment">//172.31.178.169:30859</span>
+curl http:<span class="hljs-comment">//172.31.178.170:30859</span>
+</code></pre>
+<h3 id="t102.4 ingress">2.4 ingress <a href="#t102.4 ingress"> # </a></h3>
+<ul>
+<li>我们可能会根据请求路径前缀的匹配，权重，甚至根据 <code>cookie/header</code> 的值去访问不同的服务</li>
+<li>为了达到这种负载均衡的效果，我们可以使用kubernetes的另一个组件<code>ingress</code></li>
+<li>ingress-nginx 是基于 nginx 的一个 ingress 实现。</li>
+<li>可以实现正则匹配路径，流量转发，基于 cookie header 切分流量（灰度发布）</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/ec4038a49d0f6eb986be1e5144fc6e41" alt="ec4038a49d0f6eb986be1e5144fc6e41"></p>
+<pre><code class="lang-js">#wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.34.1/deploy/static/provider/baremetal/deploy.yaml
+wget https://img.zhufengpeixun.com/deploy.yaml
+</code></pre>
+<p>vi deploy.yaml d$</p>
+<pre><code class="lang-diff">  namespace: ingress-nginx
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+<span class="hljs-addition">+     nodePort: 31234</span>
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https
+<span class="hljs-addition">+     nodePort: 31235</span>
+
+<span class="hljs-addition">+ image: registry.cn-hangzhou.aliyuncs.com/bin_x/nginx-ingress:v0.34.1@sha256:80359bdf124d49264fabf136d2aecadac729b54f16618162194356d3c78ce2fe</span>
+</code></pre>
+<ul>
+<li><p>配置生效，拉取ingress镜像并自动布署ingress</p>
+<pre><code class="lang-js">kubectl apply -f deploy.yaml
+</code></pre>
+</li>
+<li><p>查看pods的部署状态</p>
+<ul>
+<li>-n 指定命名空间查询</li>
+<li>-l 指定label名称查询</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">kubectl -n ingress-nginx <span class="hljs-keyword">get</span> svc
+NAME                                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             NodePort    10.108.109.94   &lt;none&gt;        80:31234/TCP,443:31235/TCP   16m
+ingress-nginx-controller-admission   ClusterIP   10.106.43.59    &lt;none&gt;        443/TCP                      16m
+</code></pre>
+<pre><code class="lang-js">kubectl -n ingress-nginx <span class="hljs-keyword">get</span> svc
+NAME                                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             NodePort    10.108.109.94   &lt;none&gt;        80:31234/TCP,443:31235/TCP   17m
+ingress-nginx-controller-admission   ClusterIP   10.106.43.59    &lt;none&gt;        443/TCP                      17m
+</code></pre>
+<ul>
+<li>ingress 服务的配置也是使用 yaml 文件进行管理</li>
+<li><a href="https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/">annotations</a> 是 ingress 的主要配置项目，可以用来修改这些配置来修改 ingress 的行为。我们可以通过修改这些配置来实现灰度发布，跨域资源，甚至将 <a href="http://www.abc.com">www.abc.com</a> 重定向到 abc.com</li>
+<li>rules 是 ingress 配置路径转发规则的地方,当我们去访问 /front 时， ingress 就会帮我们调度到 front-service-v1 这个 service 上面<ul>
+<li>path 可以是一个路径字符串，也可以是一个正则表达式</li>
+<li>backend 则是 k8s 的 service 服务， serviceName 是服务名称， servicePort 是服务端口</li>
+</ul>
+</li>
+<li>backend 可以用来给 ingress 设置默认访问的 Service 服务。当请求不匹配 rules 中任何一条规则时，则会去走 backend 中的配置</li>
+</ul>
+<p>vi ingress.yaml</p>
+<pre><code class="lang-js">apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - http:
+      paths: 
+       - path: /user
+         backend:
+          serviceName: user-service-v1
+          servicePort: 80
+       - path: /pay
+         backend:
+          serviceName: pay-service-v1
+          servicePort: 80    
+  backend:
+     serviceName: user-service-v1
+     servicePort: 80
+</code></pre>
+<pre><code class="lang-js">kubectl apply -f ./ingress.yaml
+</code></pre>
+<pre><code class="lang-js">curl http:<span class="hljs-comment">//172.16.244.93:31234/user</span>
+curl http:<span class="hljs-comment">//172.16.244.94:31234/user</span>
+curl http:<span class="hljs-comment">//172.16.244.93:31234/pay</span>
+curl http:<span class="hljs-comment">//172.16.244.94:31234/pay</span>
+</code></pre>
+<pre><code class="lang-js">kubectl  describe   ingress
+</code></pre>
+<h2 id="t113.参考">3.参考 <a href="#t113.参考"> # </a></h2>
+<h3 id="t123.1 查看">3.1 查看 <a href="#t123.1 查看"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">//查看当前的deployment</span>
+kubectl <span class="hljs-keyword">get</span> deploy 
+//删除deploy 删除后ReplicateSet和pod也没有了
+kubectl delete deploy nginx
+
+//查看Replication Controller
+kubectl <span class="hljs-keyword">get</span> rc
+//删除Replication Controller,删除后Pod也没有了
+kubectl delete rc mysql
+
+//查看pod
+kubectl <span class="hljs-keyword">get</span> pod
+//删除pod
+kubectl delete pod mysql-77w7z
+
+//查看服务
+kubectl <span class="hljs-keyword">get</span> svc
+//删除服务
+kubectl delete service nginx
+
+//查看pod详情
+kubectl describe pod fail-1034443984-jerry
+
+</code></pre>
+<h3 id="t133.2 发布镜像">3.2 发布镜像 <a href="#t133.2 发布镜像"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">//登录阿里云Docker Registry</span>
+sudo docker login --username=hongqishiq@<span class="hljs-number">126.</span>com registry.cn-beijing.aliyuncs.com
+<span class="hljs-comment">//从Registry中拉取镜像</span>
+docker pull registry.cn-beijing.aliyuncs.com/zhangrenyang/zhangrenyang:[镜像版本号]
+<span class="hljs-comment">//将镜像推送到Registry</span>
+docker login --username=hongqishiq@<span class="hljs-number">126.</span>com registry.cn-beijing.aliyuncs.com
+docker tag [ImageId] registry.cn-beijing.aliyuncs.com/zhangrenyang/zhangrenyang:[镜像版本号]
+docker push registry.cn-beijing.aliyuncs.com/zhangrenyang/zhangrenyang:[镜像版本号]
+</code></pre>
+<pre><code class="lang-js">docker login --username=hongqishiq@<span class="hljs-number">126.</span>com registry.cn-beijing.aliyuncs.com
+docker run -d -p <span class="hljs-number">8080</span>:<span class="hljs-number">80</span> nginx
+docker exec -it <span class="hljs-number">6764</span>db063e37  bash
+/usr/share/nginx/html
+docker container commit -m<span class="hljs-string">"nginx-user-v1"</span> -a<span class="hljs-string">"zhangrenyang"</span> <span class="hljs-number">6764</span>db063e37  registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v1
+docker container commit -m<span class="hljs-string">"nginx-user-v2"</span> -a<span class="hljs-string">"zhangrenyang"</span> <span class="hljs-number">6764</span>db063e37  registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:user-v2
+docker container commit -m<span class="hljs-string">"nginx-pay-v1"</span> -a<span class="hljs-string">"zhangrenyang"</span> <span class="hljs-number">6764</span>db063e37  registry.cn-beijing.aliyuncs.com/zhangrenyang/nginx:pay-v1
+docker push registry.cn-beijing.aliyuncs.com/zhangrenyang/http-probe:<span class="hljs-number">1.0</span><span class="hljs-number">.0</span>
+</code></pre>
+<h3 id="t143.3  链接">3.3  链接 <a href="#t143.3  链接"> # </a></h3>
+<ul>
+<li><a href="http://docs.kubernetes.org.cn/">Kubernetes中文社区</a></li>
+<li><a href="http://docs.kubernetes.org.cn/783.html#i">kubectl Cheat Sheet</a></li>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/">kubernetes.cheatsheet</a></li>
+<li><a href="https://kubernetes.io/zh/docs/concepts/overview/working-with-objects/namespaces/">namespaces</a>Kubernetes 支持多个虚拟集群，它们底层依赖于同一个物理集群。 这些虚拟集群被称为命名空间</li>
+</ul>
+<pre><code class="lang-js">kubectl <span class="hljs-keyword">get</span> ns
+</code></pre>
+
+    

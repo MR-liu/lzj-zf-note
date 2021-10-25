@@ -1,0 +1,277 @@
+
+        <h2 id="t0vue中的状态管理">vue中的状态管理 <a href="#t0vue中的状态管理"> # </a></h2>
+<p>初始化项目环境</p>
+<pre><code>sudo npm install @vue/cli -g
+vue ui 生成项目 vue-router + vuex
+</code></pre><h2 id="t1EventBus事件车">EventBus事件车 <a href="#t1EventBus事件车"> # </a></h2>
+<p>在vue中传递数据是通过属性传递(父子关系)，子父通信是通过emit来触发父级事件。如果遇到平级组件可以通过共同的父级进行数据传递。但是在开发中，我们经常会遇到平级组件数据交互和跨组件数据交互就可以通过一个共同的实例来进行数据传递。
+通过事件来共享数据（发布订阅模式）</p>
+<p>创建bus实例</p>
+<pre><code>// lib/bus.js
+import Vue from 'vue';
+let $bus = new Vue();
+Vue.prototype.$bus = $bus;
+</code></pre><pre><code>// main.js
+import './lib/bus';
+</code></pre><pre><code>// Boy组件 发射dinner事件
+&lt;template&gt;
+    &lt;div&gt;男孩
+        &lt;button @click="sayToGirl()"&gt;对女孩说话&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    methods: {
+        sayToGirl(){
+           this.$bus.$emit('dinner','你饿吗');
+        }
+    }
+}
+&lt;/script&gt;
+</code></pre><pre><code>// Girl组件 监听dinner事件
+&lt;template&gt;
+    &lt;div&gt;
+    女孩 &lt;span&gt;男孩对我说： {{message}}&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+
+
+&lt;script&gt;
+export default {
+    data(){
+        return {message:''}
+    },
+    mounted() {
+        this.$bus.$on('dinner',(data)=&gt;{
+            this.message = data;
+        })
+    }
+}
+&lt;/script&gt;
+</code></pre><h2 id="t2使用vuex来管理状态">使用vuex来管理状态 <a href="#t2使用vuex来管理状态"> # </a></h2>
+<p><img src="https://vuex.vuejs.org/vuex.png" alt=""></p>
+<pre><code>├── actions.js
+├── getters.js
+├── index.js
+├── modules
+│   └── teacher.js
+├── mutations.js
+└── state.js
+</code></pre><h2 id="t3state &amp; getters">state &amp; getters <a href="#t3state &amp; getters"> # </a></h2>
+<ul>
+<li>state类比组件中的状态</li>
+</ul>
+<pre><code>// state.js
+let state = {
+    lesson:'珠峰架构'
+}
+export default state;
+
+// 可以在组件中直接通过 this.$store.state来访问数据，也可以通过计算属性的方式
+&lt;template&gt;
+    &lt;div&gt;
+        课程是:{{lesson}}
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    computed: {
+        lesson(){
+            return this.$store.state.lesson
+        }
+    }
+}
+&lt;/script&gt;
+
+// vue提供的辅助函数实现
+import {mapState} from 'vuex';
+export default {
+    computed: {
+        // 直接取出状态中的结果
+        ...mapState(['lesson']),
+        // 给状态起名字
+        ...mapState({lesson1:'lesson'}),
+        // 通过函数的方式获取结果
+        ...mapState({lesson2:state=&gt;state.lesson})
+    }
+}
+
+// 模块中的状态
+let teacher = {
+    namespaced:true,
+    state:{
+        name:'姜文'
+    }
+}
+export default teacher;
+// 取值时需要通过模块的名字来获取对应的状态
+&lt;template&gt;
+    &lt;div&gt;
+    teacherName: {{name}}
+    &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import {mapState} from 'vuex';
+export default {
+   computed: {
+       ...mapState({name:state=&gt;state.teacher.name}),
+       // 当模块中指定了namespaced:true时 可以使用第一个参数来限定取值的模块
+       ...mapState('teacher',['name']),
+       // state指代的是teacher中的状态
+       ...mapState('teacher',{teacherName:state=&gt;state.name})
+   }
+}
+&lt;/script&gt;
+
+// 使用createNamespacedHelpers
+import {createNamespacedHelpers} from 'vuex';
+// 通过createNamespacedHelpers 方法来获取对应的mapstate
+let {mapState} = createNamespacedHelpers('teacher');
+export default {
+   computed: {
+    ...mapState(['name'])
+   }
+}
+</code></pre><p>默认模块中的状态都是挂在在对应的模块内，并没有直接放到根状态上。像后面的getters/mutations/actions默认都会合并在根模块中</p>
+<ul>
+<li>getters类比组件中的计算属性<pre><code>import {mapState,mapGetters} from 'vuex';
+&lt;div&gt;
+  {{getLessonName}}
+&lt;/div&gt;
+export default {
+  computed: {
+      // getName(){
+      //     return this.$store.getters.getLessonName
+      // }
+      ...mapGetters(['getLessonName'])
+  }
+}
+// 如果模块中有namespaced:true
+&lt;template&gt;
+  &lt;div&gt;
+  teacherName: {{getTeacherName}}
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+import {createNamespacedHelpers} from 'vuex';
+let {mapState,mapGetters} = createNamespacedHelpers('teacher');
+export default {
+ computed: {
+  ...mapGetters(['getTeacherName'])
+ }
+}
+&lt;/script&gt;
+</code></pre></li>
+</ul>
+<p>把模块中的状态进行计算，映射出对应的结果</p>
+<h2 id="t4mutations &amp; actions">mutations &amp; actions <a href="#t4mutations &amp; actions"> # </a></h2>
+<ul>
+<li>mutation突变，唯一修改状态的方式</li>
+</ul>
+<pre><code>strict:process.env.NODE_ENV !== 'production' // 严格模式修改状态只能通过mutation来修改
+
+let mutations = {
+    SET_LESSON_NAME(state,payload){ // 载荷
+        state.lesson = payload; 
+        // 修改时需要获取对应的属性
+        // state.lesson = payload.name;
+    }
+}
+export default mutations;
+// 载在组件中调用commit方法 触发mutation对应的方法
+changeName(){
+    this.$store.commit('SET_LESSON_NAME','node')
+    // 可以写成对象的方式传递
+    // this.$store.commit({
+    //     type:'SET_LESSON_NAME',
+    //     name:'node'
+    // });
+}
+</code></pre><p>给状态新增不存在的属性，需要通过Vue.set方法</p>
+<pre><code>Vue.set(state,'number',payload.number);
+</code></pre><pre><code>import {mapState,mapGetters,mapMutations} from 'vuex';
+methods: {
+    ...mapMutations(['SET_LESSON_NAME']),
+    changeName(){
+        this['SET_LESSON_NAME']({number:10});
+    }
+}
+</code></pre><p>mutation不能操作异步逻辑</p>
+<ul>
+<li>actions就是用来处理异步的请求，异步更新状态</li>
+</ul>
+<pre><code>// 派发动作到action中
+this.$store.dispatch('SET_LESSON_NAME');
+// 在action中处理异步逻辑后将结果提交给mutation
+import {getLesson} from  '../api/lesson'
+let actions = {
+    // 在action中需要将数据提交给mutation，这里可以做异步逻辑
+    SET_LESSON_NAME({commit},payload){
+        getLesson().then(data=&gt;{
+            // data =&gt; {name:node}
+            commit({type:'SET_LESSON_NAME',...data});
+        })
+    }
+}
+export default actions;
+
+// 使用mapActions
+methods: {
+    ...mapActions(['SET_LESSON_NAME']),
+    changeName(){
+        this['SET_LESSON_NAME']();
+    }
+}
+</code></pre><p>action中可以做封装异步请求，多个组件相同的异步处理，可以直接调用action,action中可以多次commit,也可以在action中再次调用action</p>
+<h2 id="t5vuex进阶">vuex进阶 <a href="#t5vuex进阶"> # </a></h2>
+<p>自动保存到本地插件</p>
+<pre><code>// vuex中的store容器
+// vuex中的store容器
+export default (store)=&gt;{
+    // 用新的状态 替换掉老的状态
+    store.replaceState(JSON.parse(localStorage.getItem('state'))|| store.state);
+    store.subscribe((mutation,state)=&gt;{ // 订阅每次commit都会触发此函数
+        localStorage.setItem('state',JSON.stringify(state));
+    });
+}
+
+// 使用插件
+import saveLocale from  './plugins/saveLocale'
+export default new Vuex.Store({
+  state,
+  mutations,
+  getters,
+  actions,
+  strict:process.env.NODE_ENV !== 'production',
+  modules:{
+    teacher
+  },
+  plugins:[saveLocale]
+});
+</code></pre><p>logger插件(vuex中自己实现了这个插件)</p>
+<pre><code>import deepClone from 'lodash/cloneDeep'
+export default (store)=&gt;{
+    let prevState = deepClone(store.state);
+    store.subscribe((mutation,state)=&gt;{
+        console.log('prev',prevState.lesson);
+        console.log(mutation);
+        console.log('next',state.lesson);
+        prevState = deepClone(state);
+    });
+}
+</code></pre><p>vuex双向绑定,当更新数据时手动提交数据的更改</p>
+<pre><code>&lt;input type="text" v-model="teacherName"&gt;
+computed: {
+    ...mapState('teacher',['name']),
+    teacherName:{
+        get(){
+            return this.name;
+        },
+        set(val){
+            this['SET_TEACHER_NAME'](val);
+        }
+    }
+}
+</code></pre>
+    

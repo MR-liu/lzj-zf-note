@@ -1,0 +1,626 @@
+
+        <h2 id="t01.RBAC">1.RBAC <a href="#t01.RBAC"> # </a></h2>
+<ul>
+<li>基于角色的权限访问控制（Role-Based Access Control） </li>
+<li>RBAC（Role-Based Access Control，基于角色的访问控制），就是用户通过角色与权限进行关联</li>
+<li>一个用户拥有若干角色,每一个角色拥有若干权限。这样，就构造成<code>用户-角色-权限</code>的授权模型</li>
+<li>在这种模型中，用户与角色之间，角色与权限之间一般是多对多的关系</li>
+<li>在RBAC中最重要的概念包括：用户(User)，角色(Role)，权限(Permission)</li>
+</ul>
+<h3 id="t11.1 示意图">1.1 示意图 <a href="#t11.1 示意图"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/rbacimage.jpg" alt="rbacimage"></p>
+<h3 id="t21.2 表设计">1.2 表设计 <a href="#t21.2 表设计"> # </a></h3>
+<h3 id="t31.2.1 用户表(user)">1.2.1 用户表(user) <a href="#t31.2.1 用户表(user)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">userName</td>
+<td style="text-align:left">用户名</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">password</td>
+<td style="text-align:left">密码</td>
+<td style="text-align:left">varchar(255)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">CREATE TABLE <span class="hljs-string">`user`</span>  (
+  <span class="hljs-string">`id`</span> int(<span class="hljs-number">11</span>) NOT NULL AUTO_INCREMENT,
+  <span class="hljs-string">`userName`</span> varchar(<span class="hljs-number">255</span>),
+  <span class="hljs-string">`password`</span> varchar(<span class="hljs-number">255</span>),
+  PRIMARY KEY (<span class="hljs-string">`id`</span>) 
+)
+
+INSERT INTO <span class="hljs-string">`user`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-string">'isadmin'</span>, <span class="hljs-string">'123456'</span>);
+INSERT INTO <span class="hljs-string">`user`</span> VALUES (<span class="hljs-number">2</span>, <span class="hljs-string">'isuser'</span>, <span class="hljs-string">'123456'</span>);
+</code></pre>
+<h3 id="t41.2.2 角色表(role)">1.2.2 角色表(role) <a href="#t41.2.2 角色表(role)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">名称</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">desc</td>
+<td style="text-align:left">描述</td>
+<td style="text-align:left">varchar(255)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">CREATE TABLE <span class="hljs-string">`role`</span>  (
+  <span class="hljs-string">`id`</span> int(<span class="hljs-number">11</span>) NOT NULL AUTO_INCREMENT,
+  <span class="hljs-string">`name`</span> varchar(<span class="hljs-number">255</span>) ,
+  <span class="hljs-string">`desc`</span> varchar(<span class="hljs-number">255</span>) ,
+  PRIMARY KEY (<span class="hljs-string">`id`</span>) 
+) E
+
+INSERT INTO <span class="hljs-string">`role`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-string">'admin'</span>, <span class="hljs-string">'管理员'</span>);
+INSERT INTO <span class="hljs-string">`role`</span> VALUES (<span class="hljs-number">2</span>, <span class="hljs-string">'user'</span>, <span class="hljs-string">'普通用户'</span>);
+</code></pre>
+<h3 id="t51.2.3 权限表(permission)">1.2.3 权限表(permission) <a href="#t51.2.3 权限表(permission)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">id</td>
+<td style="text-align:left">ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">name</td>
+<td style="text-align:left">名称</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">parent_id</td>
+<td style="text-align:left">父ID</td>
+<td style="text-align:left">int(11)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">icon</td>
+<td style="text-align:left">图标</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">key</td>
+<td style="text-align:left">路径</td>
+<td style="text-align:left">varchar(255)</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">type</td>
+<td style="text-align:left">类型</td>
+<td style="text-align:left">varchar(32)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">CREATE TABLE <span class="hljs-string">`permission`</span>  (
+  <span class="hljs-string">`id`</span> int(<span class="hljs-number">11</span>) NOT NULL AUTO_INCREMENT,
+  <span class="hljs-string">`name`</span> varchar(<span class="hljs-number">255</span>) ,
+  <span class="hljs-string">`parent_id`</span> int(<span class="hljs-number">11</span>) NULL DEFAULT NULL,
+  <span class="hljs-string">`icon`</span> varchar(<span class="hljs-number">255</span>) ,
+  <span class="hljs-string">`key`</span> varchar(<span class="hljs-number">255</span>) ,
+  <span class="hljs-string">`type`</span> varchar(<span class="hljs-number">255</span>) ,
+  PRIMARY KEY (<span class="hljs-string">`id`</span>) 
+);
+
+INSERT INTO <span class="hljs-string">`permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-string">'授权平台'</span>, <span class="hljs-number">0</span>, <span class="hljs-string">'desktop'</span>, <span class="hljs-string">'/api'</span>, <span class="hljs-string">'menu'</span>);
+INSERT INTO <span class="hljs-string">`permission`</span> VALUES (<span class="hljs-number">2</span>, <span class="hljs-string">'角色管理'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'team'</span>, <span class="hljs-string">'/api/role'</span>, <span class="hljs-string">'menu'</span>);
+INSERT INTO <span class="hljs-string">`permission`</span> VALUES (<span class="hljs-number">3</span>, <span class="hljs-string">'用户管理'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'user'</span>, <span class="hljs-string">'/api/user'</span>, <span class="hljs-string">'menu'</span>);
+INSERT INTO <span class="hljs-string">`permission`</span> VALUES (<span class="hljs-number">4</span>, <span class="hljs-string">'权限管理'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'idcard'</span>, <span class="hljs-string">'/api/resource'</span>, <span class="hljs-string">'menu'</span>);
+INSERT INTO <span class="hljs-string">`permission`</span> VALUES (<span class="hljs-number">5</span>, <span class="hljs-string">'添加用户'</span>, <span class="hljs-number">3</span>, <span class="hljs-string">'team'</span>, <span class="hljs-string">'/api/user/add'</span>, <span class="hljs-string">'button'</span>);
+INSERT INTO <span class="hljs-string">`permission`</span> VALUES (<span class="hljs-number">6</span>, <span class="hljs-string">'删除用户'</span>, <span class="hljs-number">3</span>, <span class="hljs-string">'team'</span>, <span class="hljs-string">'/api/user/delete'</span>, <span class="hljs-string">'button'</span>);
+</code></pre>
+<h3 id="t61.2.4 角色用户表(role_user)">1.2.4 角色用户表(role_user) <a href="#t61.2.4 角色用户表(role_user)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">role_id</td>
+<td style="text-align:left">角色ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+<tr>
+<td style="text-align:left">user_id</td>
+<td style="text-align:left">用户ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">DROP TABLE IF EXISTS <span class="hljs-string">`role_user`</span>;
+CREATE TABLE <span class="hljs-string">`role_user`</span>  (
+  <span class="hljs-string">`role_id`</span> int(<span class="hljs-number">11</span>) NOT NULL,
+  <span class="hljs-string">`user_id`</span> int(<span class="hljs-number">11</span>) NOT NULL,
+  PRIMARY KEY (<span class="hljs-string">`user_id`</span>, <span class="hljs-string">`role_id`</span>) 
+) 
+
+INSERT INTO <span class="hljs-string">`role_user`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+INSERT INTO <span class="hljs-string">`role_user`</span> VALUES (<span class="hljs-number">2</span>, <span class="hljs-number">2</span>);
+</code></pre>
+<h3 id="t71.2.5 角色权限(role_permission)">1.2.5 角色权限(role_permission) <a href="#t71.2.5 角色权限(role_permission)"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">字段名</th>
+<th style="text-align:left">类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">role_id</td>
+<td style="text-align:left">角色ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+<tr>
+<td style="text-align:left">permission_id</td>
+<td style="text-align:left">资源ID</td>
+<td style="text-align:left">int(11)</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">CREATE TABLE <span class="hljs-string">`role_permission`</span>  (
+  <span class="hljs-string">`role_id`</span> int(<span class="hljs-number">11</span>) NOT NULL,
+  <span class="hljs-string">`permission_id`</span> int(<span class="hljs-number">255</span>) NOT NULL,
+  PRIMARY KEY (<span class="hljs-string">`role_id`</span>, <span class="hljs-string">`permission_id`</span>) 
+) 
+
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">3</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">4</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">5</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">1</span>, <span class="hljs-number">6</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">2</span>, <span class="hljs-number">1</span>);
+INSERT INTO <span class="hljs-string">`role_permission`</span> VALUES (<span class="hljs-number">2</span>, <span class="hljs-number">4</span>);
+</code></pre>
+<h3 id="t81.2.6 数据库脚本">1.2.6 数据库脚本 <a href="#t81.2.6 数据库脚本"> # </a></h3>
+<ul>
+<li><a href="http://img.zhufengpeixun.cn/cms.sql">cms.sql</a></li>
+</ul>
+<h2 id="t92. 后端">2. 后端 <a href="#t92. 后端"> # </a></h2>
+<h3 id="t102.1.初始化项目">2.1.初始化项目 <a href="#t102.1.初始化项目"> # </a></h3>
+<ul>
+<li><a href="https://eggjs.org/zh-cn/intro/quickstart.html">egg.js</a></li>
+<li><a href="https://eggjs.org/api/">api</a></li>
+</ul>
+<pre><code class="lang-js">mkdir client-side
+cd client-side
+cnpm init egg --type=ts
+cnpm i 
+cnpm run dev
+</code></pre>
+<h3 id="t112.2.支持MYSQL">2.2.支持MYSQL <a href="#t112.2.支持MYSQL"> # </a></h3>
+<ul>
+<li><a href="https://eggjs.org/zh-cn/tutorials/mysql.html">mysql</a></li>
+</ul>
+<h4 id="t122.2.1 安装">2.2.1 安装 <a href="#t122.2.1 安装"> # </a></h4>
+<pre><code class="lang-js">cnpm i --save egg-mysql
+</code></pre>
+<h4 id="t132.2.2 开启插件">2.2.2 开启插件 <a href="#t132.2.2 开启插件"> # </a></h4>
+<ul>
+<li>config\plugin.ts</li>
+</ul>
+<pre><code class="lang-diff">import { EggPlugin } from 'egg';
+
+const plugin: EggPlugin = {
+<span class="hljs-addition">+  mysql: {</span>
+<span class="hljs-addition">+    enable: true,</span>
+<span class="hljs-addition">+    package: 'egg-mysql'</span>
+<span class="hljs-addition">+  }</span>
+};
+export default plugin;
+</code></pre>
+<h4 id="t142.2.3 配置数据源">2.2.3 配置数据源 <a href="#t142.2.3 配置数据源"> # </a></h4>
+<p>config\config.default.ts</p>
+<pre><code class="lang-diff">import { EggAppConfig, EggAppInfo, PowerPartial } from 'egg';
+
+export default (appInfo: EggAppInfo) =&gt; {
+  const config = {} as PowerPartial&lt;EggAppConfig&gt;;
+
+  // override config from framework / plugin
+  // use for cookie sign key, should change to your own and keep security
+  config.keys = appInfo.name + '_1580620890875_8931';
+
+  // add your egg config in here
+  config.middleware = [];
+
+<span class="hljs-addition">+  config.mysql = {</span>
+<span class="hljs-addition">+    // 单数据库信息配置</span>
+<span class="hljs-addition">+    client: {</span>
+<span class="hljs-addition">+      // host</span>
+<span class="hljs-addition">+      host: 'localhost',</span>
+<span class="hljs-addition">+      // 端口号</span>
+<span class="hljs-addition">+      port: '3306',</span>
+<span class="hljs-addition">+      // 用户名</span>
+<span class="hljs-addition">+      user: 'root',</span>
+<span class="hljs-addition">+      // 密码</span>
+<span class="hljs-addition">+      password: 'root',</span>
+<span class="hljs-addition">+      // 数据库名</span>
+<span class="hljs-addition">+      database: 'cms'</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    // 是否加载到 app 上，默认开启</span>
+<span class="hljs-addition">+    app: true,</span>
+<span class="hljs-addition">+    // 是否加载到 agent 上，默认关闭</span>
+<span class="hljs-addition">+    agent: false,</span>
+<span class="hljs-addition">+  };</span>
+  // add your special config in here
+  const bizConfig = {
+    sourceUrl: `https://github.com/eggjs/examples/tree/master/${appInfo.name}`,
+  };
+
+  // the return config will combines to EggAppConfig
+  return {
+    ...config,
+    ...bizConfig,
+  };
+};
+
+</code></pre>
+<h4 id="t152.2.4 配置声明文件">2.2.4 配置声明文件 <a href="#t152.2.4 配置声明文件"> # </a></h4>
+<ul>
+<li>config\config.default.ts</li>
+</ul>
+<pre><code class="lang-diff">import 'egg';
+
+declare module 'egg' {
+<span class="hljs-addition">+    interface Application {</span>
+<span class="hljs-addition">+        mysql: any;</span>
+<span class="hljs-addition">+    }</span>
+}
+</code></pre>
+<h4 id="t162.2.4 使用mysql">2.2.4 使用mysql <a href="#t162.2.4 使用mysql"> # </a></h4>
+<ul>
+<li>app\controller\home.ts</li>
+</ul>
+<pre><code class="lang-diff">import { Controller } from 'egg';
+
+export default class HomeController extends Controller {
+  public async index() {
+    const { ctx } = this;
+<span class="hljs-addition">+    let users = await this.app.mysql.select('user');</span>
+<span class="hljs-addition">+    ctx.body = {</span>
+<span class="hljs-addition">+      success: true,</span>
+<span class="hljs-addition">+      data: users</span>
+<span class="hljs-addition">+    };</span>
+    //ctx.body = await ctx.service.test.sayHi('egg');
+  }
+}
+</code></pre>
+<h3 id="t172.3.Passport">2.3.Passport <a href="#t172.3.Passport"> # </a></h3>
+<ul>
+<li><a href="https://eggjs.org/zh-cn/tutorials/passport.html">passport</a></li>
+</ul>
+<h4 id="t182.3.1 安装">2.3.1 安装 <a href="#t182.3.1 安装"> # </a></h4>
+<pre><code class="lang-js">cnpm i --save egg-passport passport-local
+</code></pre>
+<h4 id="t192.3.2 config\plugin.ts">2.3.2 config\plugin.ts <a href="#t192.3.2 config\plugin.ts"> # </a></h4>
+<p>config\plugin.ts</p>
+<pre><code class="lang-diff">import { EggPlugin } from 'egg';
+
+const plugin: EggPlugin = {
+  mysql: {
+    enable: true,
+    package: 'egg-mysql'
+  },
+<span class="hljs-addition">+  passport: {</span>
+<span class="hljs-addition">+    enable: true,</span>
+<span class="hljs-addition">+    package: 'egg-passport'</span>
+<span class="hljs-addition">+  },</span>
+<span class="hljs-addition">+  passportLocal: {</span>
+<span class="hljs-addition">+    enable: true,</span>
+<span class="hljs-addition">+    package: 'egg-passport-local'</span>
+<span class="hljs-addition">+  }</span>
+};
+
+export default plugin;
+</code></pre>
+<h4 id="t202.3.3 typings\index.d.ts">2.3.3 typings\index.d.ts <a href="#t202.3.3 typings\index.d.ts"> # </a></h4>
+<p>typings\index.d.ts</p>
+<pre><code class="lang-diff">import 'egg';
+
+declare module 'egg' {
+    interface Application {
+         mysql: any;
+<span class="hljs-addition">+        passport: any;</span>
+    }
+}
+</code></pre>
+<h4 id="t212.3.4 app.ts">2.3.4 app.ts <a href="#t212.3.4 app.ts"> # </a></h4>
+<p>app.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Application, IBoot } <span class="hljs-keyword">from</span> <span class="hljs-string">'egg'</span>;
+<span class="hljs-keyword">import</span> { Strategy } <span class="hljs-keyword">from</span> <span class="hljs-string">'passport-local'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FooBoot</span> <span class="hljs-title">implements</span> <span class="hljs-title">IBoot</span> </span>{
+    private readonly app: Application;
+
+    <span class="hljs-keyword">constructor</span>(app: Application) {
+        <span class="hljs-keyword">this</span>.app = app;
+    }
+    configDidLoad() {
+        <span class="hljs-comment">//Config, plugin files have loaded.</span>
+        <span class="hljs-keyword">let</span> { app } = <span class="hljs-keyword">this</span>;
+        app.passport.use(<span class="hljs-keyword">new</span> Strategy({ <span class="hljs-attr">usernameField</span>: <span class="hljs-string">'userName'</span>, <span class="hljs-attr">passReqToCallback</span>: <span class="hljs-literal">true</span> }, <span class="hljs-keyword">async</span> (req, userName, password, done) =&gt; {
+            <span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.app.mysql.select(<span class="hljs-string">'user'</span>, { <span class="hljs-attr">where</span>: { userName, password }, <span class="hljs-attr">limit</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">offset</span>: <span class="hljs-number">0</span>, });
+            <span class="hljs-keyword">if</span> (users &amp;&amp; users.length &gt; <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">let</span> user = users[<span class="hljs-number">0</span>];
+                <span class="hljs-keyword">let</span> roles = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.app.mysql.query(<span class="hljs-string">`SELECT role.* FROM user INNER JOIN role_user ON user.id = role_user.user_id inner JOIN role ON role_user.role_id=role.id WHERE user.id=?`</span>, [user.id]);
+                user.currentAuthority = roles.map(<span class="hljs-function"><span class="hljs-params">role</span> =&gt;</span> role.name);
+                <span class="hljs-keyword">return</span> done(<span class="hljs-literal">null</span>, user);
+            } <span class="hljs-keyword">else</span> {
+                req.ctx.isAuthenticated() &amp;&amp; req.ctx.logout();
+                <span class="hljs-keyword">return</span> done(<span class="hljs-literal">null</span>, <span class="hljs-literal">false</span>);
+            }
+        }));
+    }
+}
+</code></pre>
+<h4 id="t222.3.5 app\controller\user.ts">2.3.5 app\controller\user.ts <a href="#t222.3.5 app\controller\user.ts"> # </a></h4>
+<p>app\controller\user.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { Controller } <span class="hljs-keyword">from</span> <span class="hljs-string">'egg'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">userController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span> </span>{
+  public <span class="hljs-keyword">async</span> loginCallback() {
+    <span class="hljs-keyword">let</span> { ctx } = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">if</span> (ctx.isAuthenticated()) {
+      ctx.body = {
+        <span class="hljs-attr">status</span>: <span class="hljs-string">'ok'</span>,
+        <span class="hljs-attr">type</span>: ctx.user.type,
+        <span class="hljs-attr">currentAuthority</span>: ctx.user.currentAuthority
+      }
+    } <span class="hljs-keyword">else</span> {
+      ctx.body = {
+        <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">error</span>: <span class="hljs-string">'用户名或密码错误'</span>
+      }
+    }
+  }
+  public <span class="hljs-keyword">async</span> addUser2() {
+    <span class="hljs-keyword">let</span> { ctx } = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">if</span> (ctx.isAuthenticated()) {
+      <span class="hljs-keyword">let</span> user = ctx.user;
+      <span class="hljs-keyword">let</span> url = ctx.url;
+      <span class="hljs-keyword">let</span> permissions = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.app.mysql.query(<span class="hljs-string">`SELECT permission.key FROM user INNER JOIN role_user ON user.id = role_user.user_id inner JOIN role_permission ON role_user.role_id=role_permission.role_id  INNER JOIN permission ON role_permission.permission_id = permission.id  WHERE user.id=?`</span>, [user.id]);
+      <span class="hljs-keyword">let</span> allowed = permissions.map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.key).includes(url);
+      <span class="hljs-keyword">if</span> (allowed) {
+        ctx.body = {
+          <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">error</span>: <span class="hljs-string">'添加用户成功'</span>
+        }
+      } <span class="hljs-keyword">else</span> {
+        ctx.body = {
+          <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">error</span>: <span class="hljs-string">'用户未授权'</span>
+        }
+      }
+    } <span class="hljs-keyword">else</span> {
+      ctx.body = {
+        <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">error</span>: <span class="hljs-string">'用户未授权'</span>
+      }
+    }
+  }
+  public <span class="hljs-keyword">async</span> addUser() {
+    <span class="hljs-keyword">let</span> { ctx } = <span class="hljs-keyword">this</span>;
+    ctx.body = {
+      <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">error</span>: <span class="hljs-string">'添加用户成功'</span>
+    }
+  }
+}
+
+</code></pre>
+<h4 id="t232.3.6 middleware\auth.ts">2.3.6 middleware\auth.ts <a href="#t232.3.6 middleware\auth.ts"> # </a></h4>
+<p>app\middleware\auth.ts</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function">(<span class="hljs-params">_options, _app</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">ctx, next</span>) </span>{
+        <span class="hljs-keyword">if</span> (ctx.isAuthenticated()) {
+            <span class="hljs-keyword">let</span> user = ctx.user;
+            <span class="hljs-keyword">let</span> url = ctx.url;
+            <span class="hljs-keyword">let</span> permissions = <span class="hljs-keyword">await</span> ctx.app.mysql.query(<span class="hljs-string">`SELECT permission.key FROM user INNER JOIN role_user ON user.id = role_user.user_id inner JOIN role_permission ON role_user.role_id=role_permission.role_id  INNER JOIN permission ON role_permission.permission_id = permission.id  WHERE user.id=?`</span>, [user.id]);
+            <span class="hljs-keyword">let</span> allowed = permissions.map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.key).includes(url);
+            <span class="hljs-keyword">if</span> (allowed) {
+                <span class="hljs-keyword">await</span> next();
+            } <span class="hljs-keyword">else</span> {
+                ctx.body = { <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'用户未授权'</span> };
+            }
+        } <span class="hljs-keyword">else</span> {
+            ctx.body = { <span class="hljs-attr">success</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'用户未授权'</span> };
+        }
+    }
+}
+</code></pre>
+<h4 id="t242.3.7 app\router.ts">2.3.7 app\router.ts <a href="#t242.3.7 app\router.ts"> # </a></h4>
+<ul>
+<li><a href="https://eggjs.org/zh-cn/basics/middleware.html#%E9%85%8D%E7%BD%AE">middleware</a></li>
+</ul>
+<p>app\router.ts</p>
+<pre><code class="lang-diff">import { Application } from 'egg';
+export default (app: Application) =&gt; {
+  const { controller, router } = app;
+  router.get('/', controller.home.index);
+<span class="hljs-addition">+  const localStrategy = app.passport.authenticate('local', { successRedirect: '/server/api/loginCallback', failureRedirect: '/server/api/loginCallback' });</span>
+<span class="hljs-addition">+  router.post('/api/login/account', localStrategy);</span>
+<span class="hljs-addition">+  const auth = app.middleware.auth();</span>
+<span class="hljs-addition">+  router.post('/api/user/add', auth, controller.user.addUser);</span>
+<span class="hljs-addition">+  router.get('/api/loginCallback', controller.user.loginCallback);</span>
+};
+
+</code></pre>
+<h4 id="t252.3.8 config\config.default.ts">2.3.8 config\config.default.ts <a href="#t252.3.8 config\config.default.ts"> # </a></h4>
+<ul>
+<li>config\config.default.ts</li>
+<li><a href="https://eggjs.org/zh-cn/core/security.html#web-%E5%AE%89%E5%85%A8%E6%A6%82%E5%BF%B5">csrf</a></li>
+</ul>
+<pre><code class="lang-diff"><span class="hljs-addition">+  config.security = {</span>
+<span class="hljs-addition">+    csrf: false</span>
+<span class="hljs-addition">+  }</span>
+</code></pre>
+<h4 id="t262.3.9 测试">2.3.9 测试 <a href="#t262.3.9 测试"> # </a></h4>
+<ul>
+<li><a href="https://insomnia.rest/">insomnia</a></li>
+<li><a href="http://img.zhufengpeixun.cn/Insomnia.Setup.7.0.6.zip">window</a></li>
+<li><a href="https://eggjs.org/zh-cn/core/development.html#%E8%B0%83%E8%AF%95">debug</a></li>
+</ul>
+<p>ctrl+shift+p</p>
+<pre><code class="lang-js">Debug: Toggle Auto Attach
+</code></pre>
+<h2 id="t273. 前端">3. 前端 <a href="#t273. 前端"> # </a></h2>
+<h3 id="t283.1. 启动项目">3.1. 启动项目 <a href="#t283.1. 启动项目"> # </a></h3>
+<ul>
+<li><a href="https://github.com/umijs/create-umi">create-umi</a></li>
+</ul>
+<pre><code class="lang-js">umi -v
+umi ui
+</code></pre>
+<h3 id="t293.2. 设置代理">3.2. 设置代理 <a href="#t293.2. 设置代理"> # </a></h3>
+<h4 id="t303.2.1 config\config.ts">3.2.1 config\config.ts <a href="#t303.2.1 config\config.ts"> # </a></h4>
+<p>config\config.ts</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+  proxy: {</span>
+<span class="hljs-addition">+    '/server/api/': {</span>
+<span class="hljs-addition">+      target: 'http://localhost:7001/',</span>
+<span class="hljs-addition">+      changeOrigin: true,</span>
+<span class="hljs-addition">+      pathRewrite: { '^/server': '' },</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+  },</span>
+</code></pre>
+<h3 id="t313.3. 前端项目">3.3. 前端项目 <a href="#t313.3. 前端项目"> # </a></h3>
+<h4 id="t323.3.1 config\config.ts">3.3.1 config\config.ts <a href="#t323.3.1 config\config.ts"> # </a></h4>
+<p>config\config.ts</p>
+<pre><code class="lang-js">  routes: [
+    {
+      <span class="hljs-attr">path</span>: <span class="hljs-string">'/user'</span>,
+      <span class="hljs-attr">component</span>: <span class="hljs-string">'../layouts/UserLayout'</span>,
+      <span class="hljs-attr">routes</span>: [
+        {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">'login'</span>,
+          <span class="hljs-attr">path</span>: <span class="hljs-string">'/user/login'</span>,
+          <span class="hljs-attr">component</span>: <span class="hljs-string">'./user/login'</span>,
+        },
+      ],
+    },
+    {
+      <span class="hljs-attr">path</span>: <span class="hljs-string">'/'</span>,
+      <span class="hljs-attr">component</span>: <span class="hljs-string">'../layouts/SecurityLayout'</span>,
+      <span class="hljs-attr">routes</span>: [
+        {
+          <span class="hljs-attr">path</span>: <span class="hljs-string">'/'</span>,
+          <span class="hljs-attr">component</span>: <span class="hljs-string">'../layouts/BasicLayout'</span>,
+          <span class="hljs-attr">authority</span>: [<span class="hljs-string">'admin'</span>, <span class="hljs-string">'user'</span>],
+          <span class="hljs-attr">routes</span>: [
+            {
+              <span class="hljs-attr">path</span>: <span class="hljs-string">'/'</span>,
+              <span class="hljs-attr">redirect</span>: <span class="hljs-string">'/welcome'</span>,
+            },
+            {
+              <span class="hljs-attr">path</span>: <span class="hljs-string">'/welcome'</span>,
+              <span class="hljs-attr">name</span>: <span class="hljs-string">'welcome'</span>,
+              <span class="hljs-attr">icon</span>: <span class="hljs-string">'smile'</span>,
+              <span class="hljs-attr">component</span>: <span class="hljs-string">'./Welcome'</span>,
+            },
+            {
+              <span class="hljs-attr">path</span>: <span class="hljs-string">'/admin'</span>,
+              <span class="hljs-attr">name</span>: <span class="hljs-string">'权限平台'</span>,
+              <span class="hljs-attr">icon</span>: <span class="hljs-string">'crown'</span>,
+              <span class="hljs-comment">//component: './Admin',</span>
+              <span class="hljs-comment">//authority: ['admin'],</span>
+              <span class="hljs-attr">routes</span>: [
+                {
+                  <span class="hljs-attr">name</span>: <span class="hljs-string">'角色管理'</span>,
+                  <span class="hljs-attr">icon</span>: <span class="hljs-string">'smile'</span>,
+                  <span class="hljs-attr">path</span>: <span class="hljs-string">'/admin/role'</span>,
+                  <span class="hljs-attr">component</span>: <span class="hljs-string">'./admin/Role'</span>,
+                  <span class="hljs-attr">authority</span>: [<span class="hljs-string">'admin'</span>]
+                },
+                {
+                  <span class="hljs-attr">name</span>: <span class="hljs-string">'用户管理'</span>,
+                  <span class="hljs-attr">icon</span>: <span class="hljs-string">'smile'</span>,
+                  <span class="hljs-attr">path</span>: <span class="hljs-string">'/admin/user'</span>,
+                  <span class="hljs-attr">component</span>: <span class="hljs-string">'./admin/User'</span>,
+                  <span class="hljs-attr">authority</span>: [<span class="hljs-string">'admin'</span>, <span class="hljs-string">'user'</span>]
+                },
+                {
+                  <span class="hljs-attr">name</span>: <span class="hljs-string">'权限管理'</span>,
+                  <span class="hljs-attr">icon</span>: <span class="hljs-string">'smile'</span>,
+                  <span class="hljs-attr">path</span>: <span class="hljs-string">'/admin/permission'</span>,
+                  <span class="hljs-attr">component</span>: <span class="hljs-string">'./admin/Permission'</span>,
+                  <span class="hljs-attr">authority</span>: [<span class="hljs-string">'admin'</span>]
+                },
+              ],
+            },
+            {
+              <span class="hljs-attr">component</span>: <span class="hljs-string">'./404'</span>,
+            },
+          ],
+        },
+        {
+          <span class="hljs-attr">component</span>: <span class="hljs-string">'./404'</span>,
+        },
+      ],
+    },
+    {
+      <span class="hljs-attr">component</span>: <span class="hljs-string">'./404'</span>,
+    },
+  ],
+</code></pre>
+<h4 id="t333.3.2 User\index.tsx">3.3.2 User\index.tsx <a href="#t333.3.2 User\index.tsx"> # </a></h4>
+<p>src\pages\admin\User\index.tsx</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { queryRule, updateRule, addUser, removeRule } from './service';</span>
+<span class="hljs-addition">+import Authorized from '@/utils/Authorized';</span>
+<span class="hljs-addition">+&lt;Authorized authority={['admin', 'user']} noMatch={null}&gt;</span>
+<span class="hljs-addition">+            &lt;Button icon={'plus'} type="primary" onClick={() =&gt; handleModalVisible(true)}&gt;</span>
+<span class="hljs-addition">+              新建</span>
+<span class="hljs-addition">+           &lt;/Button&gt;</span>
+<span class="hljs-addition">+&lt;/Authorized&gt;</span>
+</code></pre>
+
+    

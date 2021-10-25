@@ -1,0 +1,1200 @@
+
+        <h2 id="t01. 进程管理">1. 进程管理 <a href="#t01. 进程管理"> # </a></h2>
+<h3 id="t11.1 进程">1.1 进程 <a href="#t11.1 进程"> # </a></h3>
+<ul>
+<li>进程是正在执行的一个程序或命令，每一个进程都是一个运行的实体，都有自己的地址空间并且用一定的系统资源</li>
+<li>进程就是正在执行的某个程序</li>
+</ul>
+<h3 id="t21.2 进程管理简介">1.2 进程管理简介 <a href="#t21.2 进程管理简介"> # </a></h3>
+<ul>
+<li>判断服务器的状态</li>
+<li>查看系统中的所有进程</li>
+<li>杀死进程，只有无法关闭才要杀死进程</li>
+</ul>
+<h3 id="t31.2 进程的查看命令(ps)">1.2 进程的查看命令(ps) <a href="#t31.2 进程的查看命令(ps)"> # </a></h3>
+<ul>
+<li><code>ps aux</code>  查看系统中所有进程，使用BSD操作系统格式</li>
+<li><code>ps -le</code> 查看系统中所有进程，使用Linux标准格式</li>
+<li>TTY是TeleType的一个缩写，原来指的是电传打字机，是通过串行线用打印机键盘通过阅读和发送信息的东西</li>
+<li>pts(pseudo['su:doʊ]-terminal slave)是所谓的伪终端或虚拟终端</li>
+</ul>
+<h4 id="t41.2.1 选项">1.2.1 选项 <a href="#t41.2.1 选项"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-a</td>
+<td style="text-align:left">显示一个终端的所有进程</td>
+</tr>
+<tr>
+<td style="text-align:left">-u</td>
+<td style="text-align:left">显示进程的归属用户及内存的使用情况</td>
+</tr>
+<tr>
+<td style="text-align:left">-x</td>
+<td style="text-align:left">显示没有控制终端的进程</td>
+</tr>
+<tr>
+<td style="text-align:left">-l</td>
+<td style="text-align:left">长格式显示，显示更详细的信息</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t51.2.2 结果字段含义">1.2.2 结果字段含义 <a href="#t51.2.2 结果字段含义"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">数据</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">USER</td>
+<td style="text-align:left">该进程是由哪个用户创建的</td>
+</tr>
+<tr>
+<td style="text-align:left">PID</td>
+<td style="text-align:left">进程的ID号</td>
+</tr>
+<tr>
+<td style="text-align:left">%CPU</td>
+<td style="text-align:left">该进程占用CPU资源的百分比，占用越高说明越消耗系统资源</td>
+</tr>
+<tr>
+<td style="text-align:left">%MEM</td>
+<td style="text-align:left">该进程占用物理内存的百分比，占用越高说明越消耗系统资源</td>
+</tr>
+<tr>
+<td style="text-align:left">VSZ</td>
+<td style="text-align:left">该进程占用虚拟内存的百分比，单位是KB</td>
+</tr>
+<tr>
+<td style="text-align:left">RSS</td>
+<td style="text-align:left">该进程占用实际物理内存大小，单位是KB</td>
+</tr>
+<tr>
+<td style="text-align:left">TTY</td>
+<td style="text-align:left">该进程在哪个终端中运行。tty1~tty7表示本地控制终端，tty1~tty6是字符终端，tty7是图形终端。pts/0~255代表虚拟终端，?表示此终端是系统启动的</td>
+</tr>
+<tr>
+<td style="text-align:left">STAT</td>
+<td style="text-align:left">进程状态</td>
+</tr>
+<tr>
+<td style="text-align:left">START</td>
+<td style="text-align:left">该进程的启动时间</td>
+</tr>
+<tr>
+<td style="text-align:left">TIME</td>
+<td style="text-align:left">该进程占用CPU的运算时间,数值越高说明越消耗系统资源</td>
+</tr>
+<tr>
+<td style="text-align:left">COMMAND</td>
+<td style="text-align:left">产生此进程的命令名</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t61.2.3  进程状态(STAT)">1.2.3  进程状态(STAT) <a href="#t61.2.3  进程状态(STAT)"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">R(Runing)</td>
+<td style="text-align:left">运行</td>
+</tr>
+<tr>
+<td style="text-align:left">S(Sleep)</td>
+<td style="text-align:left">休眠</td>
+</tr>
+<tr>
+<td style="text-align:left">T(Terminated)</td>
+<td style="text-align:left">停止</td>
+</tr>
+<tr>
+<td style="text-align:left">S(Son)</td>
+<td style="text-align:left">包含子进程</td>
+</tr>
+<tr>
+<td style="text-align:left">+</td>
+<td style="text-align:left">位于后台</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t71.3 pstree">1.3 pstree <a href="#t71.3 pstree"> # </a></h3>
+<ul>
+<li>pstree [选项]<ul>
+<li>-p 显示进程PID</li>
+<li>-u 显示进程的所属用户</li>
+</ul>
+</li>
+</ul>
+<h3 id="t81.3 进程的查看(top)">1.3 进程的查看(top) <a href="#t81.3 进程的查看(top)"> # </a></h3>
+<ul>
+<li>top </li>
+</ul>
+<pre><code class="lang-js"> top -b -n <span class="hljs-number">1</span> &gt; top.txt
+</code></pre>
+<h4 id="t91.3.1 选项">1.3.1 选项 <a href="#t91.3.1 选项"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-b</td>
+<td style="text-align:left">使用批处理模式输出，一般和<code>-n</code>配合使用</td>
+</tr>
+<tr>
+<td style="text-align:left">-n</td>
+<td style="text-align:left">次数，指定top命令执行的次数。一般了<code>-b</code>选项配合使用</td>
+</tr>
+<tr>
+<td style="text-align:left">-d</td>
+<td style="text-align:left">秒数，指定top命令每隔几秒更新。默认是3秒</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t101.3.2 交互模式的命令">1.3.2 交互模式的命令 <a href="#t101.3.2 交互模式的命令"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">?或h</td>
+<td style="text-align:left">显示交互模式的帮助</td>
+</tr>
+<tr>
+<td style="text-align:left">P</td>
+<td style="text-align:left">按CPU使用率排序，默认就是此选项</td>
+</tr>
+<tr>
+<td style="text-align:left">M</td>
+<td style="text-align:left">以内存的使用率排序</td>
+</tr>
+<tr>
+<td style="text-align:left">N</td>
+<td style="text-align:left">以PID排序</td>
+</tr>
+<tr>
+<td style="text-align:left">q</td>
+<td style="text-align:left">退出top</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t111.3.3 状态栏">1.3.3 状态栏 <a href="#t111.3.3 状态栏"> # </a></h4>
+<h5 id="t121.3.3.1 第一行为任务队列信息">1.3.3.1 第一行为任务队列信息 <a href="#t121.3.3.1 第一行为任务队列信息"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">12:12:12</td>
+<td style="text-align:left">系统的当前时间</td>
+</tr>
+<tr>
+<td style="text-align:left">up 1 day 5:33</td>
+<td style="text-align:left">系统的运行时间，本机已经运行了1天5小时33分</td>
+</tr>
+<tr>
+<td style="text-align:left">2 users</td>
+<td style="text-align:left">当前登录了二个客户端</td>
+</tr>
+<tr>
+<td style="text-align:left">load average 0 0 0</td>
+<td style="text-align:left">系统在之前1分钟、5分钟、15分钟的平均负载。一般认为小于1小时负载较小，大于1超过负载</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t131.3.3.2 第二行为进程信息">1.3.3.2 第二行为进程信息 <a href="#t131.3.3.2 第二行为进程信息"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Tasks: 100 total</td>
+<td style="text-align:left">系统中的进程总数</td>
+</tr>
+<tr>
+<td style="text-align:left">1 running</td>
+<td style="text-align:left">正在运行的进程数</td>
+</tr>
+<tr>
+<td style="text-align:left">94 sleeping</td>
+<td style="text-align:left">睡眠的进程</td>
+</tr>
+<tr>
+<td style="text-align:left">0 stopped</td>
+<td style="text-align:left">正在停止的进程</td>
+</tr>
+<tr>
+<td style="text-align:left">0 zombie</td>
+<td style="text-align:left">僵尸进程。如果不是0的话要进行检查</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t141.3.3.3 第三行为CPU信息">1.3.3.3 第三行为CPU信息 <a href="#t141.3.3.3 第三行为CPU信息"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Cpu(s): 0.1%us</td>
+<td style="text-align:left">用户模式占用的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">0.1%sy</td>
+<td style="text-align:left">系统模式占用的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">0.0%ni</td>
+<td style="text-align:left">改变过优先级的用户进程 占用的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">99.7%id</td>
+<td style="text-align:left">空闲CPU的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">0.1%wa</td>
+<td style="text-align:left">等待输入/输出的进程的占用CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">0.1%hi</td>
+<td style="text-align:left">硬中断请求服务占用的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">0.1%si</td>
+<td style="text-align:left">软中断请求服务占用的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">0.0%st</td>
+<td style="text-align:left">st(Steal time)虚拟时间百分比，就是当有</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>硬中断 由与系统相连的外设(比如网卡、硬盘)自动产生的。主要是用来通知操作系统系统外设状态的变化。比如当网卡收到数据包的时候，就会发出一个中断。我们通常所说的中断指的是硬中断(hardirq)。</li>
+<li><p>软中断是通讯进程之间用来模拟硬中断的 一种信号通讯方式,软中断是执行中断指令产生的，无面外部施加中断请求信号，因此中断的发生不是随机的而是由程序安排好的。</p>
+</li>
+<li><p>硬中断是可屏蔽的，软中断不可屏蔽。软中断是由程序调用发生的,而硬中断是由外设引发的</p>
+</li>
+</ul>
+<h5 id="t151.3.3.4 第四行为物理内存信息">1.3.3.4 第四行为物理内存信息 <a href="#t151.3.3.4 第四行为物理内存信息"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Mem:   1030720k total</td>
+<td style="text-align:left">物理内存的问题，单位是KB</td>
+</tr>
+<tr>
+<td style="text-align:left">551860k used</td>
+<td style="text-align:left">已经使用的物理内存数量</td>
+</tr>
+<tr>
+<td style="text-align:left">478860k free</td>
+<td style="text-align:left">空闲的物理内存数量，虚拟机分配了1024M内存，使用了538M,空闲467M</td>
+</tr>
+<tr>
+<td style="text-align:left">43180k buffers</td>
+<td style="text-align:left">作为缓冲的内存数量，可以存放需要写入硬盘的数据，用来加速数据的写入</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t161.3.3.5 第四行为交换分区信息">1.3.3.5 第四行为交换分区信息 <a href="#t161.3.3.5 第四行为交换分区信息"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Swap:  2047992k total</td>
+<td style="text-align:left">总计的交换分区(虚拟内存)大小</td>
+</tr>
+<tr>
+<td style="text-align:left">536k used</td>
+<td style="text-align:left">已经使用的交换分区大小</td>
+</tr>
+<tr>
+<td style="text-align:left">2047456k free</td>
+<td style="text-align:left">空闲的交换分区大小</td>
+</tr>
+<tr>
+<td style="text-align:left">368164k cached</td>
+<td style="text-align:left">把需要经常读取的数据从硬盘读到内存中，加速了数据的读取</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t171.4 杀死进程(kill)">1.4 杀死进程(kill) <a href="#t171.4 杀死进程(kill)"> # </a></h3>
+<h4 id="t181.4.1 进程信号">1.4.1 进程信号 <a href="#t181.4.1 进程信号"> # </a></h4>
+<ul>
+<li>httpd采用的是worker模式，是一种多进程与多线程混合的模式</li>
+<li><code>kill -l</code> 查看可用的进程信号</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">信号 代码</th>
+<th style="text-align:left">信号名称</th>
+<th style="text-align:left">说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">SIGHUP</td>
+<td style="text-align:left">该信号让进程立即关闭，然后重写读取配置文件后重启,平滑重启</td>
+<td>kill -1 -HUP 进程号</td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">SIGINT</td>
+<td style="text-align:left">程序终止信号，用于关闭前台进程,相当于ctrl+c</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">SIGKILL</td>
+<td style="text-align:left">用来立刻结束程序的运行，本信号不能阻塞、处理和忽略，一般用于强制中止</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:left">15</td>
+<td style="text-align:left">SIGTERM</td>
+<td style="text-align:left">正常结束进程的信号，kill命令的默认信号。如果不能正常中止，才会尝试SIGKILL信号</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t191.4.2 杀死单一进程">1.4.2 杀死单一进程 <a href="#t191.4.2 杀死单一进程"> # </a></h4>
+<pre><code class="lang-js">kill <span class="hljs-number">-9</span> 进程号
+</code></pre>
+<h4 id="t201.4.3 killall">1.4.3 killall <a href="#t201.4.3 killall"> # </a></h4>
+<ul>
+<li>按照进程名杀死进程</li>
+<li>killall [选项][信号] 进程名<ul>
+<li>-i 交互式，询问是否要杀死某个进程</li>
+<li>-I 进程名忽略大小写</li>
+</ul>
+</li>
+<li>/etc/httpd/conf/httpd.conf<ul>
+<li>ServerName localhost:80</li>
+</ul>
+</li>
+</ul>
+<h4 id="t211.4.4 pkill">1.4.4 pkill <a href="#t211.4.4 pkill"> # </a></h4>
+<ul>
+<li>按照进程名杀死进程</li>
+<li>pkill [选项][信号] 进程名
+-t 按终端号踢出用户</li>
+</ul>
+<pre><code class="lang-js">pkill <span class="hljs-number">-9</span> -t <span class="hljs-string">"pts/2"</span>
+</code></pre>
+<h4 id="t221.4.5 w">1.4.5 w <a href="#t221.4.5 w"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">USER</td>
+<td style="text-align:left">显示登陆用户帐号名</td>
+</tr>
+<tr>
+<td style="text-align:left">TTY</td>
+<td style="text-align:left">用户登陆所用的终端</td>
+</tr>
+<tr>
+<td style="text-align:left">FROM</td>
+<td style="text-align:left">显示用户在何处登陆系统</td>
+</tr>
+<tr>
+<td style="text-align:left">LOGIN@</td>
+<td style="text-align:left">是LOGIN AT的意思，表示登陆进入系统的时间</td>
+</tr>
+<tr>
+<td style="text-align:left">IDLE</td>
+<td style="text-align:left">用户空闲时间，从用户上一次任务结束后，开始记时</td>
+</tr>
+<tr>
+<td style="text-align:left">JCPU</td>
+<td style="text-align:left">终端代号来区分，表示在这段时间内，所有与该终端相关的进程任务所耗费的CPU时间</td>
+</tr>
+<tr>
+<td style="text-align:left">PCPU</td>
+<td style="text-align:left">指WHAT域的任务执行后耗费的CPU时间</td>
+</tr>
+<tr>
+<td style="text-align:left">WHAT</td>
+<td style="text-align:left">表示当前执行的任务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t231.5 修改进程优先级">1.5 修改进程优先级 <a href="#t231.5 修改进程优先级"> # </a></h3>
+<h4 id="t241.5.1 进程优先级">1.5.1 进程优先级 <a href="#t241.5.1 进程优先级"> # </a></h4>
+<ul>
+<li>Linux操作系统是一个多用户、多任务的操作系统，Linux系统同时管理着非常多的进程，但是CPU在同一个时间周期内只能运算一个指令</li>
+<li>进程的优先级决定了每个进程处理的先后顺序</li>
+</ul>
+<h4 id="t251.5.2 修改进程优先级">1.5.2 修改进程优先级 <a href="#t251.5.2 修改进程优先级"> # </a></h4>
+<ul>
+<li><code>ps -le</code> 可以查看进程优先级</li>
+<li>PRI表示Priority,NI表示Nice。这两个值都是优先级，数字越小代理进程优先有越高</li>
+<li>NI的值范围是-20~19</li>
+<li>普通用户调整NI值的范围是0~19,而且只能调整自己的进程</li>
+<li>普通用户只能调高NI值，但不能调低。比如原来是0，则只能调为大于0的数字</li>
+<li>root用户才能设定进程NI值为负值，而且可以调整任何用户的进程</li>
+<li>PRI(最终值)=PRI(原始值)+NI</li>
+<li>用户只能修改NI的值，不能直接修改PRI的值</li>
+</ul>
+<h4 id="t261.5.3 nice">1.5.3 nice <a href="#t261.5.3 nice"> # </a></h4>
+<ul>
+<li>nice命令可以给新执行的命令直接赋NI值，但不能修改已经存在进程的NI值</li>
+<li>nice [选项] 命令</li>
+<li>选项
+-n NI值 给命令赋新的NI值 </li>
+</ul>
+<pre><code class="lang-js">nice -n <span class="hljs-number">-5</span> service httpd start
+</code></pre>
+<h4 id="t271.5.4 renice">1.5.4 renice <a href="#t271.5.4 renice"> # </a></h4>
+<ul>
+<li>修改已经存在的进程的NI的值</li>
+<li>renice [优先级] PID</li>
+</ul>
+<pre><code class="lang-js">renice -10 30054
+0054: old priority -5, new priority -10
+# ps -le | grep httpd
+1 S     0 30054     1  0  70 -10 -  2792 -      ?        00:00:00 httpd
+5 S    48 30055 30054  0  75  -5 -  2792 -      ?        00:00:00 httpd
+</code></pre>
+<h2 id="t282. 工作管理">2. 工作管理 <a href="#t282. 工作管理"> # </a></h2>
+<h3 id="t292.1 工作管理(jobs)">2.1 工作管理(jobs) <a href="#t292.1 工作管理(jobs)"> # </a></h3>
+<ul>
+<li>工作管理就是指的是单个登录终端中同时管理多个工作的行为</li>
+<li>有时候有些命令会卡住我们的操作界面，我们就需要把它放入后台，比如拷贝大型文件</li>
+<li>当前的登录终端只能管理当前终端的工作，而不能管理其它终端工作</li>
+<li>放入后台的命令必须是还要持续一段时间的，这样我们才能去捕捉和操作这个动作</li>
+<li>放入后台的命令不能和前台用户有交互或者需要前台输入，否则放入后台只能暂停，而不会执行</li>
+</ul>
+<h3 id="t302.2 工作管理方法">2.2 工作管理方法 <a href="#t302.2 工作管理方法"> # </a></h3>
+<h4 id="t312.2.1 把进程放入后台">2.2.1 把进程放入后台 <a href="#t312.2.1 把进程放入后台"> # </a></h4>
+<ul>
+<li><code>&amp;</code> 在命令后面加可以把命令放入后台，并在后台执行</li>
+<li><code>ctrl+z</code> 把工作放在后台暂停</li>
+</ul>
+<h4 id="t322.2.2 查看后台的工作">2.2.2 查看后台的工作 <a href="#t322.2.2 查看后台的工作"> # </a></h4>
+<ul>
+<li>jobs <ul>
+<li>-l 显示工作的PID</li>
+</ul>
+</li>
+<li>加号代表最近一个放入后台的工作，也就工作恢复时默认恢复的工作</li>
+<li>减号代表倒数第二个放入后台的工作</li>
+</ul>
+<pre><code class="lang-js">[1]+  Stopped                 top
+# jobs -l
+[1]+ 30562 停止 (信号)         top
+
+# sleep 100s
+^Z
+[2]+  Stopped                 sleep 100s
+# jobs -l
+[1]- 30562 停止 (信号)         top
+[2]+ 30588 停止                  sleep 100s
+
+vim hello.txt &amp;
+
+find / -name hello
+</code></pre>
+<h4 id="t332.2.3 恢复到前台">2.2.3 恢复到前台 <a href="#t332.2.3 恢复到前台"> # </a></h4>
+<ul>
+<li>fg %工作号  <ul>
+<li>-%工作号 %可以省略，注意工作号和PID是不同的</li>
+</ul>
+</li>
+</ul>
+<h4 id="t342.2.4 恢复到后台">2.2.4 恢复到后台 <a href="#t342.2.4 恢复到后台"> # </a></h4>
+<ul>
+<li>bg %工作号  <ul>
+<li>-%工作号 %可以省略，注意工作号和PID是不同的</li>
+</ul>
+</li>
+<li>后台恢复执行的命令，不能和前台有交互  </li>
+</ul>
+<pre><code class="lang-js"># bg 2
+[2]+ sleep 100s &amp;
+# jobs -l
+[1]+ 30562 停止 (信号)         top
+[2]- 30601 Running                 sleep 100s &amp;
+</code></pre>
+<h4 id="t352.2.3 后台命令脱离终端">2.2.3 后台命令脱离终端 <a href="#t352.2.3 后台命令脱离终端"> # </a></h4>
+<ul>
+<li>所有的后台程序默认跟终端绑定，终端消失后台程序也会退出</li>
+<li>当终端退出的时候，系统会向终端里所有的进程发送一个<code>SIGHUB</code>的信号,终止后台进程</li>
+</ul>
+<h5 id="t362.2.3.1 rc.local">2.2.3.1 rc.local <a href="#t362.2.3.1 rc.local"> # </a></h5>
+<ul>
+<li>把需要后台执行的命令加入到<code>/etc/rc.local</code>文件中</li>
+</ul>
+<h5 id="t372.2.3.2 定时任务">2.2.3.2 定时任务 <a href="#t372.2.3.2 定时任务"> # </a></h5>
+<ul>
+<li>使用系统定时任务，让系统在指定的时间执行某个后台命令</li>
+</ul>
+<h5 id="t382.2.3.3 rc.local">2.2.3.3 rc.local <a href="#t382.2.3.3 rc.local"> # </a></h5>
+<ul>
+<li>使用<code>nohub</code>命令</li>
+<li>nohup [命令] &amp;</li>
+</ul>
+<p>sleep.sh</p>
+<pre><code class="lang-js"><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-keyword">for</span>((i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">10000</span>;i++))
+<span class="hljs-keyword">do</span>
+   echo <span class="hljs-string">`date`</span> &gt;&gt; <span class="hljs-regexp">/root/</span>date.log
+   sleep <span class="hljs-number">1</span>s
+done
+</code></pre>
+<pre><code class="lang-js">nohup ./sleep.sh &amp;
+tail -f /root/date.log 
+ps -ef | grep sleep.sh
+</code></pre>
+<h2 id="t393. 系统资源查看">3. 系统资源查看 <a href="#t393. 系统资源查看"> # </a></h2>
+<h3 id="t403.1 vmstat">3.1 vmstat <a href="#t403.1 vmstat"> # </a></h3>
+<ul>
+<li>监控系统资源使用状态</li>
+<li>vmstat [刷新延时 刷新次数]</li>
+</ul>
+<pre><code class="lang-js">vmstat <span class="hljs-number">1</span> <span class="hljs-number">3</span>
+procs -----------memory---------- ---swap-- -----io---- --system-- -----cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   <span class="hljs-keyword">in</span>   cs us sy id wa st
+ <span class="hljs-number">1</span>  <span class="hljs-number">0</span>    <span class="hljs-number">532</span> <span class="hljs-number">329932</span>  <span class="hljs-number">99388</span> <span class="hljs-number">459768</span>    <span class="hljs-number">0</span>    <span class="hljs-number">0</span>    <span class="hljs-number">16</span>    <span class="hljs-number">81</span>   <span class="hljs-number">59</span>   <span class="hljs-number">50</span>  <span class="hljs-number">3</span>  <span class="hljs-number">1</span> <span class="hljs-number">96</span>  <span class="hljs-number">0</span>  <span class="hljs-number">0</span>    
+</code></pre>
+<h4 id="t413.1.1 (procs)进程信息字段">3.1.1 (procs)进程信息字段 <a href="#t413.1.1 (procs)进程信息字段"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">procs</td>
+<td style="text-align:left">r</td>
+<td style="text-align:left">等待运行的进程数，数量越大，系统就越繁忙</td>
+</tr>
+<tr>
+<td style="text-align:left">procs</td>
+<td style="text-align:left">b</td>
+<td style="text-align:left">不可被唤醒的进程数量，数量越大，系统越繁忙</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t423.1.2 memory(内存信息字段)">3.1.2 memory(内存信息字段) <a href="#t423.1.2 memory(内存信息字段)"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">memory</td>
+<td style="text-align:left">swpd</td>
+<td style="text-align:left">使用的Swap空间的大小，单位KB</td>
+</tr>
+<tr>
+<td style="text-align:left">memory</td>
+<td style="text-align:left">free</td>
+<td style="text-align:left">空闲的内存容量，单位KB</td>
+</tr>
+<tr>
+<td style="text-align:left">memory</td>
+<td style="text-align:left">buff</td>
+<td style="text-align:left">缓冲的内存容量，单位KB</td>
+</tr>
+<tr>
+<td style="text-align:left">memory</td>
+<td style="text-align:left">cache</td>
+<td style="text-align:left">缓存的内存容量，单位KB</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t433.1.3 swap(交换分区信息)">3.1.3 swap(交换分区信息) <a href="#t433.1.3 swap(交换分区信息)"> # </a></h4>
+<ul>
+<li>如果说si和so数越大说明数据经常要在磁盘和内存之间数据交换，系统性能就会越差</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">swap</td>
+<td style="text-align:left">si(in)</td>
+<td style="text-align:left">从磁盘中交换到内存中的数据的数量，单位KB</td>
+</tr>
+<tr>
+<td style="text-align:left">swap</td>
+<td style="text-align:left">so(out)</td>
+<td style="text-align:left">从内存中交换到硬盘中的数据的数量，单位KB</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t443.1.4 io(磁盘读写)">3.1.4 io(磁盘读写) <a href="#t443.1.4 io(磁盘读写)"> # </a></h4>
+<ul>
+<li>bi和bo数越大，说明磁盘的I/O越繁忙</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">io</td>
+<td style="text-align:left">bi(in)</td>
+<td style="text-align:left">从块设备读入数据的问题，单位是块</td>
+</tr>
+<tr>
+<td style="text-align:left">io</td>
+<td style="text-align:left">bo(out)</td>
+<td style="text-align:left">写到块设备的数据的总量，单位是块</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t453.1.5 system(系统信息字段)">3.1.5 system(系统信息字段) <a href="#t453.1.5 system(系统信息字段)"> # </a></h4>
+<ul>
+<li>in和cs数越大，说明系统与接口设备的通信越繁忙</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">system</td>
+<td style="text-align:left">in(interrupt)</td>
+<td style="text-align:left">每秒被中断的进程次数</td>
+</tr>
+<tr>
+<td style="text-align:left">system</td>
+<td style="text-align:left">cs(switch)</td>
+<td style="text-align:left">每秒钟进行的事件切换次数</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t463.1.6 CPU(CPU信息字段)">3.1.6 CPU(CPU信息字段) <a href="#t463.1.6 CPU(CPU信息字段)"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">CPU</td>
+<td style="text-align:left">us(user)</td>
+<td style="text-align:left">非内核进程消耗CPU运算时间的百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">CPU</td>
+<td style="text-align:left">sy(system)</td>
+<td style="text-align:left">内核进程消耗CPU运算时间的百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">CPU</td>
+<td style="text-align:left">id(idea)</td>
+<td style="text-align:left">空闲CPU的百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">CPU</td>
+<td style="text-align:left">wa(wait)</td>
+<td style="text-align:left">等待I/O所消耗的CPU百分比</td>
+</tr>
+<tr>
+<td style="text-align:left">CPU</td>
+<td style="text-align:left">st(steal)</td>
+<td style="text-align:left">被虚拟机偷走的CPU百分比</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t473.2 dmesg">3.2 dmesg <a href="#t473.2 dmesg"> # </a></h3>
+<ul>
+<li>开机时内核检测信息</li>
+</ul>
+<pre><code class="lang-js">dmesg | grep CPU
+</code></pre>
+<h3 id="t483.3 free">3.3 free <a href="#t483.3 free"> # </a></h3>
+<ul>
+<li>查看内存使用状态</li>
+<li>free [-b|-k|-m|-g]</li>
+<li>选项<ul>
+<li>-b 以字节为单位</li>
+<li>-k 以KB字节为单位</li>
+<li>-m 以MB字节为单位</li>
+<li>-g 以GB字节为单位</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"># free -m
+             total       used       free     shared    buffers     cached
+Mem:          1006        687        319          0         98        449
+-/+ buffers/cache:        139        866
+Swap:         1999          0       1999
+</code></pre>
+<h4 id="t493.3.1 第一行">3.3.1 第一行 <a href="#t493.3.1 第一行"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">total</td>
+<td style="text-align:left">内存总数</td>
+</tr>
+<tr>
+<td style="text-align:left">used</td>
+<td style="text-align:left">已经使用的内存数</td>
+</tr>
+<tr>
+<td style="text-align:left">free</td>
+<td style="text-align:left">空闲的内存数</td>
+</tr>
+<tr>
+<td style="text-align:left">shared</td>
+<td style="text-align:left">多个进程共享的内存数</td>
+</tr>
+<tr>
+<td style="text-align:left">buffers</td>
+<td style="text-align:left">缓冲区内存数</td>
+</tr>
+<tr>
+<td style="text-align:left">cached</td>
+<td style="text-align:left">缓存内存数</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t503.3.2 第二行">3.3.2 第二行 <a href="#t503.3.2 第二行"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">算法</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">- buffers/cache</td>
+<td style="text-align:left">第一行的used-buffers-cached</td>
+<td style="text-align:left">已经使用的要减去缓存和缓冲的内存量</td>
+</tr>
+<tr>
+<td style="text-align:left">+ buffers/cache</td>
+<td style="text-align:left">第一行的free+buffers+cached</td>
+<td style="text-align:left">空闲的要加上缓存和缓冲的内存量</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t513.3.3 第三行">3.3.3 第三行 <a href="#t513.3.3 第三行"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">分类</th>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">total</td>
+<td style="text-align:left">swap总数，默认单位是K</td>
+</tr>
+<tr>
+<td style="text-align:left">used</td>
+<td style="text-align:left">已经使用的swap数，默认单位是K</td>
+</tr>
+<tr>
+<td style="text-align:left">free</td>
+<td style="text-align:left">空闲的swap数，默认单位是K</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t523.4 cpuinfo">3.4 cpuinfo <a href="#t523.4 cpuinfo"> # </a></h3>
+<ul>
+<li>查看CPU的信息</li>
+<li><code>cat /proc/cpuinfo</code></li>
+</ul>
+<h3 id="t533.5 uptime">3.5 uptime <a href="#t533.5 uptime"> # </a></h3>
+<ul>
+<li>显示系统的启动时间和平均负载，也就是top的第一行</li>
+<li>通过<code>w</code>也可以看到</li>
+</ul>
+<h3 id="t543.6 查看内核相关信息">3.6 查看内核相关信息 <a href="#t543.6 查看内核相关信息"> # </a></h3>
+<ul>
+<li>uname</li>
+</ul>
+<pre><code class="lang-js"># uname -a
+Linux localhost 2.6.32-279.el6.i686 #1 SMP Fri Jun 22 10:59:55 UTC 2012 i686 i686 i386 GNU/Linux
+# uname -s
+Linux
+# uname -r
+2.6.32-279.el6.i686
+</code></pre>
+<h3 id="t553.7 查看操作系统位数">3.7 查看操作系统位数 <a href="#t553.7 查看操作系统位数"> # </a></h3>
+<pre><code class="lang-js">file /bin/ls
+</code></pre>
+<h3 id="t563.8 查看发行版本">3.8 查看发行版本 <a href="#t563.8 查看发行版本"> # </a></h3>
+<pre><code class="lang-js">lsb_release -a
+</code></pre>
+<h3 id="t573.9 查看发行版本">3.9 查看发行版本 <a href="#t573.9 查看发行版本"> # </a></h3>
+<pre><code class="lang-js">yum install redhat-lsb -y
+lsb_release -v
+</code></pre>
+<h3 id="t583.10 列表进程打开或使用文件信息">3.10 列表进程打开或使用文件信息 <a href="#t583.10 列表进程打开或使用文件信息"> # </a></h3>
+<ul>
+<li>lsof [选项]</li>
+<li>列出进程调用或打开的文件的信息</li>
+<li>选项<ul>
+<li>-c 字符串: 只列出字符串开头的进程打开的文件</li>
+<li>-u 用户名：只列出某个用户的进程打开的文件</li>
+<li>-p pid: 列出某个PID进程打开的文件</li>
+</ul>
+</li>
+</ul>
+<h4 id="t593.10.1 查看系统中所有进程调用的文件">3.10.1 查看系统中所有进程调用的文件 <a href="#t593.10.1 查看系统中所有进程调用的文件"> # </a></h4>
+<pre><code class="lang-js">lsof | more
+</code></pre>
+<h4 id="t603.10.2 查看某个文件是被哪个进程调用">3.10.2 查看某个文件是被哪个进程调用 <a href="#t603.10.2 查看某个文件是被哪个进程调用"> # </a></h4>
+<pre><code class="lang-js">lsof /sbin/init
+</code></pre>
+<h4 id="t613.10.3 查看某个进程调用了哪些文件">3.10.3 查看某个进程调用了哪些文件 <a href="#t613.10.3 查看某个进程调用了哪些文件"> # </a></h4>
+<pre><code class="lang-js">lsof -c httpd
+</code></pre>
+<h4 id="t623.10.4 查询某个用户调用了哪些文件">3.10.4 查询某个用户调用了哪些文件 <a href="#t623.10.4 查询某个用户调用了哪些文件"> # </a></h4>
+<pre><code class="lang-js">lsof -u root
+</code></pre>
+<h2 id="t634. 系统定时任务">4. 系统定时任务 <a href="#t634. 系统定时任务"> # </a></h2>
+<ul>
+<li>有些任务比如备份数据库等操作需要在系统空闲的时候执行</li>
+</ul>
+<h3 id="t644.1 at">4.1 at <a href="#t644.1 at"> # </a></h3>
+<ul>
+<li>一次性定时任务<h4 id="t654.1.1 启动服务">4.1.1 启动服务 <a href="#t654.1.1 启动服务"> # </a></h4>
+<pre><code class="lang-js">chkconfig --list | grep atd
+service atd status
+service atd start
+</code></pre>
+</li>
+</ul>
+<h4 id="t664.1.2 at的访问控制">4.1.2 at的访问控制 <a href="#t664.1.2 at的访问控制"> # </a></h4>
+<ul>
+<li>如果系统中有<code>/etc/at.allow</code>文件，那么只有写入<code>/etc/at.allow</code>(白名单)中的用户可以使用<code>at</code>命令(优先级更高，会忽略<code>/etc/deny</code>文件)</li>
+<li>如果系统中没有<code>/etc/at.allow</code>文件，只有<code>/etc/at.deny</code>文件，那么写入<code>/etc/at.deny</code>文件中的用户不能使用at命令，但这个对<code>root</code>用户并没有作用</li>
+<li>如果这两个文件都不存在，那么只有<code>root</code>用户可以使用<code>at</code>命令</li>
+</ul>
+<h4 id="t674.1.3 at命令">4.1.3 at命令 <a href="#t674.1.3 at命令"> # </a></h4>
+<ul>
+<li>at 选项 时间</li>
+<li>选项<ul>
+<li>-m 当at工作完成后，无论是否命令有输出，都用<code>email</code>通知执行<code>at</code>命令的用户</li>
+<li>-c 工作号 显示该at工作的实际内容</li>
+</ul>
+</li>
+<li>时间<ul>
+<li>HH:MM 例如 10:10</li>
+<li>HH:MM YYYY -MM-DD 10:10 2018-08-08</li>
+<li>HH:MM[am|pm] [month] [date]  10:10 May 11</li>
+<li>HH:MM[am|pm] + [minutes|hours|days|weeks] now + 5 minutes</li>
+</ul>
+</li>
+</ul>
+<p>输出日志</p>
+<pre><code class="lang-js"># at now +5 minutes
+at&gt; /root/hello.sh &gt; /root/hello.log
+job 3 at 2019-04-10 22:48
+[root@localhost ~]# atq
+3    2019-04-10 22:48 a root
+
+at -c 3
+</code></pre>
+<p>指定的时间重启服务器</p>
+<pre><code class="lang-js"># at now +6 minutes
+at&gt; /bin/sync 把内存中的数据保存到硬盘中
+at&gt; /sbin/shutdown -r now 重启服务器
+</code></pre>
+<h4 id="t684.1.4 atq">4.1.4 atq <a href="#t684.1.4 atq"> # </a></h4>
+<ul>
+<li>查询当前服务器上的<code>at</code>工作</li>
+</ul>
+<h4 id="t694.1.5 atrm">4.1.5 atrm <a href="#t694.1.5 atrm"> # </a></h4>
+<ul>
+<li>删除指定的<code>at</code>任务</li>
+</ul>
+<h3 id="t704.2 crontab">4.2 crontab <a href="#t704.2 crontab"> # </a></h3>
+<ul>
+<li>可以循环定时执行定时任务</li>
+<li><a href="http://www.bejson.com/othertools/cron/">cron</a></li>
+</ul>
+<pre><code class="lang-js">service crond restart
+chkconfig crond on
+</code></pre>
+<h4 id="t714.2.2 at的访问控制">4.2.2 at的访问控制 <a href="#t714.2.2 at的访问控制"> # </a></h4>
+<ul>
+<li>如果系统中有<code>/etc/cron.allow</code>文件，那么只有写入<code>/etc/cron.allow</code>(白名单)中的用户可以使用<code>at</code>命令(优先级更高，会忽略<code>/etc/cron.deny</code>文件)</li>
+<li>如果系统中没有<code>/etc/cron.allow</code>文件，只有<code>/etc/cron.deny</code>文件，那么写入<code>/etc/cron.deny</code>文件中的用户不能使用at命令，但这个对<code>root</code>用户并没有作用</li>
+<li>如果这两个文件都不存在，那么只有<code>root</code>用户可以使用<code>at</code>命令</li>
+</ul>
+<h4 id="t724.2.3 crontab设置">4.2.3 crontab设置 <a href="#t724.2.3 crontab设置"> # </a></h4>
+<ul>
+<li>crontab [选项]</li>
+<li>选项<ul>
+<li>-e 编辑crontab定时任务</li>
+<li>-l 查询crontab任务</li>
+<li>-r 删除当前用户所有的crontab任务</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">* * * * *  执行的任务
+</code></pre>
+<h5 id="t734.2.3.1 语法">4.2.3.1 语法 <a href="#t734.2.3.1 语法"> # </a></h5>
+<pre><code class="lang-js"># .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name command to be executed
+</code></pre>
+<h5 id="t744.2.3.2 位置">4.2.3.2 位置 <a href="#t744.2.3.2 位置"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">项目</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">第1个星</td>
+<td style="text-align:left">1个小时中的第几分钟</td>
+<td style="text-align:left">0~59</td>
+</tr>
+<tr>
+<td style="text-align:left">第2个星</td>
+<td style="text-align:left">1天当中的第几小时</td>
+<td style="text-align:left">0~23</td>
+</tr>
+<tr>
+<td style="text-align:left">第3个星</td>
+<td style="text-align:left">1月当中的第几天</td>
+<td style="text-align:left">1~31</td>
+</tr>
+<tr>
+<td style="text-align:left">第4个星</td>
+<td style="text-align:left">1年当中的第几月</td>
+<td style="text-align:left">1~12</td>
+</tr>
+<tr>
+<td style="text-align:left">第5个星</td>
+<td style="text-align:left">1周当中的星期几</td>
+<td style="text-align:left">0~6</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t754.2.3.3 特殊符号">4.2.3.3 特殊符号 <a href="#t754.2.3.3 特殊符号"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">符号</th>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">*</td>
+<td style="text-align:left">代表任意时间</td>
+<td style="text-align:left">比如第一个星就代表一个小时中每分钟都执行一次</td>
+</tr>
+<tr>
+<td style="text-align:left">,</td>
+<td style="text-align:left">代表不连续的时间</td>
+<td style="text-align:left">比如"1,2,3 <em> </em> <em> </em>",就代表每小时的1分、2分、3分执行命令</td>
+</tr>
+<tr>
+<td style="text-align:left">-</td>
+<td style="text-align:left">代表连续的时间范围</td>
+<td style="text-align:left">比如 " 1-5 <em> </em> * ** ",代表每小时的第1分到第5分执行命令</td>
+</tr>
+<tr>
+<td style="text-align:left">*/n</td>
+<td style="text-align:left">代表每隔多久执行一次</td>
+<td style="text-align:left">比如 "<em>/10 </em> <em> </em> <em> </em>" 就代表每隔10分钟就执行一次命令</td>
+</tr>
+<tr>
+<td style="text-align:left">0 0 1,10 * 1</td>
+<td style="text-align:left">每月1号和10号，每周1的0点0分都会执行</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t764.2.3.4 案例">4.2.3.4 案例 <a href="#t764.2.3.4 案例"> # </a></h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">符号</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">10 22 <em> </em> *</td>
+<td style="text-align:left">在每天的22点10分执行</td>
+</tr>
+<tr>
+<td style="text-align:left">0 15 <em> </em> 1</td>
+<td style="text-align:left">每周1的15点0分执行</td>
+</tr>
+<tr>
+<td style="text-align:left">0 5 5,10 <em> </em></td>
+<td style="text-align:left">每月5号和10号的凌晨5点整执行</td>
+</tr>
+<tr>
+<td style="text-align:left">10 5 <em> </em> 1-5</td>
+<td style="text-align:left">每周一到周五的凌晨5点10分执行命令</td>
+</tr>
+<tr>
+<td style="text-align:left"><em>/10 10 </em> <em> </em></td>
+<td style="text-align:left">每天凌晨10点钟，每隔10分钟执行一次</td>
+</tr>
+</tbody>
+</table>
+<h5 id="t774.2.3.5 注意事项">4.2.3.5 注意事项 <a href="#t774.2.3.5 注意事项"> # </a></h5>
+<ul>
+<li>所有选项不能为空，必须填写</li>
+<li>crontab最小单位是分钟,最大单位是天</li>
+<li>不管写命令还是脚本都要使用绝对路径</li>
+</ul>
+<h3 id="t784.3 系统定时任务">4.3 系统定时任务 <a href="#t784.3 系统定时任务"> # </a></h3>
+<ul>
+<li><code>crontab -e</code>是用户执行的命令，不同的用户身份可以执行自己的定时任务</li>
+<li>如果需要系统执行定时任务，可以编辑<code>/etc/crontab</code>文件</li>
+<li><code>/etc/crontab</code>可以指定shell、路径、邮件发送和家目录</li>
+</ul>
+<h3 id="t794.3.1 /etc/crontab">4.3.1 /etc/crontab <a href="#t794.3.1 /etc/crontab"> # </a></h3>
+<ul>
+<li>修改<code>/etc/crontab</code>配置文件 <pre><code class="lang-js"><span class="hljs-string">`5 5 * * * echo `</span>date<span class="hljs-string">` &gt;&gt; /root/date.log`</span>
+</code></pre>
+</li>
+</ul>
+<h3 id="t804.3.2 /etc/cron">4.3.2 /etc/cron <a href="#t804.3.2 /etc/cron"> # </a></h3>
+<ul>
+<li>把需要定时执行的脚本复制到/etc/cron.{daily,weekly,monthly}目录中的任意一个</li>
+</ul>
+<pre><code class="lang-js">root@localhost log]# ls /etc/cron*
+/etc/cron.daily:
+cups  logrotate  makewhatis.cron  mlocate.cron  prelink  readahead.cron  tmpwatch
+/etc/cron.hourly:
+/etc/cron.monthly:
+/etc/cron.weekly:
+</code></pre>
+<h3 id="t814.4 anacron配置">4.4 anacron配置 <a href="#t814.4 anacron配置"> # </a></h3>
+<ul>
+<li>anacron是用来保证在系统关机的时候错过的定时任务(/etc/cron.daily)，可以在系统开机后自动执行</li>
+<li>anacron会使用1天、7天和1个月作为检测周期</li>
+<li>在系统的<code>/var/spool/anacron</code>目录中存在<code>cron.{daily,weekly,monthly}</code>文件，用于记录上次执行cron的时间</li>
+<li>和当前的时间做比较，如果两个时间的差值超过了<code>anacron</code>指定的时间差，那就证明有 <code>crontab</code>未执行</li>
+<li><code>/etc/cron.{daily,weekly,monthly}</code>只会被anacron调用</li>
+</ul>
+<h4 id="t824.4.1 /etc/anacrontab">4.4.1 /etc/anacrontab <a href="#t824.4.1 /etc/anacrontab"> # </a></h4>
+<pre><code class="lang-js"># /etc/anacrontab: configuration file for anacron
+
+# See anacron(8) and anacrontab(5) for details.
+
+SHELL=/bin/sh
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+# the maximal random delay added to the base delay of the jobs
+# 最大随机延迟时间(分钟)
+RANDOM_DELAY=45
+# the jobs will be started during the following hours only
+# anacron的执行时间范围是 3:00 ~ 22:00
+START_HOURS_RANGE=3-22
+
+#period in days   delay in minutes   job-identifier   command
+每隔几天执行 强制延迟时间(分钟) 修改优先级 执行目录下面的所有脚本
+1    5    cron.daily        nice run-parts /etc/cron.daily
+7    25    cron.weekly        nice run-parts /etc/cron.weekly
+@monthly 45    cron.monthly        nice run-parts /etc/cron.monthly
+</code></pre>
+<h4 id="t834.4.2 cron.daily执行过程">4.4.2 cron.daily执行过程 <a href="#t834.4.2 cron.daily执行过程"> # </a></h4>
+<ul>
+<li>首先读取/var/spool/anacron/cron.daily中的上一次执行时间</li>
+<li>和当前时间对比，如果两个时间相差超过1天，说明漏执行了，就执行cron.daily任务</li>
+<li>执行任务的时间只能在3-22点之间</li>
+<li>执行的时强制延迟时间为5分钟，再随机延迟0~45分钟</li>
+<li>使用nice命令指定默认的优先级，再使用<code>run-parts</code>脚本执行<code>/etc/cron.daily</code>目录中所有的可执行文件</li>
+</ul>
+
+    

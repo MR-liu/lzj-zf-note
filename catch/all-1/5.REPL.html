@@ -1,0 +1,31 @@
+
+        <h2 id="t01.REPL">1.REPL <a href="#t01.REPL"> # </a></h2>
+<p>在Node.js中为了使开发者方便测试JavaScript代码，提供了一个名为REPL的可交互式运行环境。开发者可以在该运行环境中输入任何JavaScript表达式，当用户按下回车键后，REPL运行环境将显示该表达式的运行结果。</p>
+<h2 id="t12.如何进入REPL">2.如何进入REPL <a href="#t12.如何进入REPL"> # </a></h2>
+<p>在命令行容器中输入node命令并按下回车键，即可进入REPL运行环境。</p>
+<h2 id="t23.REPL操作">3.REPL操作 <a href="#t23.REPL操作"> # </a></h2>
+<ul>
+<li>变量的操作,声明普通变量和对象</li>
+<li>eval</li>
+<li>函数的书写</li>
+<li>下划线访问最近使用的表达式</li>
+<li>多行书写</li>
+<li>REPL运行环境中的上下文对象<pre><code>let repl = require('repl');
+let con = repl.start().context;
+con.msg = 'hello';
+con.hello = function(){
+console.log(con.msg);
+}
+</code></pre></li>
+</ul>
+<h2 id="t34.REPL运行环境的基础命令">4.REPL运行环境的基础命令 <a href="#t34.REPL运行环境的基础命令"> # </a></h2>
+<ul>
+<li>.break 退出当前命令</li>
+<li>.clear 清除REPL运行环境上下文对象中保存的所有变量与函数</li>
+<li>.exit 退出REPL运行环境</li>
+<li>.save 把输入的所有表达式保存到一个文件中</li>
+<li>.load 把所有的表达式加载到REPL运行环境中</li>
+<li>.help 查看帮助命令</li>
+</ul>
+
+    

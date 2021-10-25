@@ -1,0 +1,199 @@
+
+        <h2 id="t01. 渲染状态">1. 渲染状态 <a href="#t01. 渲染状态"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> appState={
+    <span class="hljs-attr">title</span>: {<span class="hljs-attr">color</span>: <span class="hljs-string">'red'</span>,<span class="hljs-attr">text</span>: <span class="hljs-string">'标题'</span>},
+    <span class="hljs-attr">content</span>:{<span class="hljs-attr">color</span>:<span class="hljs-string">'green'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'内容'</span>}
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderTitle</span>(<span class="hljs-params">title</span>) </span>{
+    <span class="hljs-keyword">let</span> titleEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#title'</span>);
+    titleEle.innerHTML=title.text;
+    titleEle.style.color=title.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderContent</span>(<span class="hljs-params">content</span>) </span>{
+    <span class="hljs-keyword">let</span> contentEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#content'</span>);
+    contentEle.innerHTML=content.text;
+    contentEle.style.color=content.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderApp</span>(<span class="hljs-params">appState</span>) </span>{
+    renderTitle(appState.title);
+    renderContent(appState.content);
+}
+renderApp(appState);
+</code></pre>
+<h2 id="t12. 提高数据修改的门槛">2. 提高数据修改的门槛 <a href="#t12. 提高数据修改的门槛"> # </a></h2>
+<ul>
+<li>一旦数据可以任意修改，所有对共享状态的操作都是不可预料的</li>
+<li>模块之间需要共享数据和数据可能被任意修改导致不可预料的结果之间有矛盾</li>
+<li>所有对数据的操作必须通过 dispatch 函数</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> appState={
+    <span class="hljs-attr">title</span>: {<span class="hljs-attr">color</span>: <span class="hljs-string">'red'</span>,<span class="hljs-attr">text</span>: <span class="hljs-string">'标题'</span>},
+    <span class="hljs-attr">content</span>:{<span class="hljs-attr">color</span>:<span class="hljs-string">'green'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'内容'</span>}
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderTitle</span>(<span class="hljs-params">title</span>) </span>{
+    <span class="hljs-keyword">let</span> titleEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#title'</span>);
+    titleEle.innerHTML=title.text;
+    titleEle.style.color=title.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderContent</span>(<span class="hljs-params">content</span>) </span>{
+    <span class="hljs-keyword">let</span> contentEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#content'</span>);
+    contentEle.innerHTML=content.text;
+    contentEle.style.color=content.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderApp</span>(<span class="hljs-params">appState</span>) </span>{
+    renderTitle(appState.title);
+    renderContent(appState.content);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span>(<span class="hljs-params">action</span>) </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'UPDATE_TITLE_COLOR'</span>:
+            appState.title.color=action.color;    
+            <span class="hljs-keyword">break</span>;    
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'UPDATE_CONTENT_CONTENT'</span>:
+            appState.content.text=action.text;
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">break</span>;    
+    }
+}
+dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'UPDATE_TITLE_COLOR'</span>,<span class="hljs-attr">color</span>:<span class="hljs-string">'purple'</span>});
+dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'UPDATE_CONTENT_CONTENT'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'新标题'</span>});
+
+renderApp(appState);
+</code></pre>
+<h2 id="t23.封装仓库">3.封装仓库 <a href="#t23.封装仓库"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderTitle</span>(<span class="hljs-params">title</span>) </span>{
+    <span class="hljs-keyword">let</span> titleEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#title'</span>);
+    titleEle.innerHTML=title.text;
+    titleEle.style.color=title.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderContent</span>(<span class="hljs-params">content</span>) </span>{
+    <span class="hljs-keyword">let</span> contentEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#content'</span>);
+    contentEle.innerHTML=content.text;
+    contentEle.style.color=content.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderApp</span>(<span class="hljs-params">appState</span>) </span>{
+    renderTitle(appState.title);
+    renderContent(appState.content);
+}
+
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createStore</span>(<span class="hljs-params">reducer</span>) </span>{
+    <span class="hljs-keyword">let</span> state;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getState</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> state;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span>(<span class="hljs-params">action</span>) </span>{
+        state=reducer(state,action);
+    }
+    dispatch({});
+    <span class="hljs-keyword">return</span> {
+        getState,
+        dispatch
+    }
+
+}
+<span class="hljs-keyword">let</span> initState={
+    <span class="hljs-attr">title</span>: {<span class="hljs-attr">color</span>: <span class="hljs-string">'red'</span>,<span class="hljs-attr">text</span>: <span class="hljs-string">'标题'</span>},
+    <span class="hljs-attr">content</span>:{<span class="hljs-attr">color</span>:<span class="hljs-string">'green'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'内容'</span>}
+}
+<span class="hljs-keyword">let</span> reducer=<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state=initState,action</span>) </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'UPDATE_TITLE_COLOR'</span>:
+            <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">title</span>: {...state.title,<span class="hljs-attr">color</span>:action.color}};
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'UPDATE_CONTENT_CONTENT'</span>:
+        <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">content</span>: {...state.content,<span class="hljs-attr">text</span>:action.text}};    
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;    
+    }
+}
+<span class="hljs-keyword">let</span> store=createStore(reducer);
+renderApp(store.getState());
+setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    store.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'UPDATE_TITLE_COLOR'</span>,<span class="hljs-attr">color</span>:<span class="hljs-string">'purple'</span>});
+    store.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'UPDATE_CONTENT_CONTENT'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'新标题'</span>});
+    renderApp(store.getState());
+},<span class="hljs-number">2000</span>);
+</code></pre>
+<h2 id="t34. 监控数据变化">4. 监控数据变化 <a href="#t34. 监控数据变化"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderTitle</span>(<span class="hljs-params">title</span>) </span>{
+    <span class="hljs-keyword">let</span> titleEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#title'</span>);
+    titleEle.innerHTML=title.text;
+    titleEle.style.color=title.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderContent</span>(<span class="hljs-params">content</span>) </span>{
+    <span class="hljs-keyword">let</span> contentEle=<span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">'#content'</span>);
+    contentEle.innerHTML=content.text;
+    contentEle.style.color=content.color;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{
+    renderTitle(store.getState().title);
+    renderContent(store.getState().content);
+}
+
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createStore</span>(<span class="hljs-params">reducer</span>) </span>{
+    <span class="hljs-keyword">let</span> state;
+    <span class="hljs-keyword">let</span> listeners=[];
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getState</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> state;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span>(<span class="hljs-params">action</span>) </span>{
+        state=reducer(state,action);
+        listeners.forEach(<span class="hljs-function"><span class="hljs-params">l</span>=&gt;</span>l());
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">subscribe</span>(<span class="hljs-params">listener</span>) </span>{
+        listeners.push(listener);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            listeners = listeners.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item!=listener);
+            <span class="hljs-built_in">console</span>.log(listeners);
+        }
+    }
+    dispatch({});
+    <span class="hljs-keyword">return</span> {
+        getState,
+        dispatch,
+        subscribe
+    }
+
+}
+<span class="hljs-keyword">let</span> initState={
+    <span class="hljs-attr">title</span>: {<span class="hljs-attr">color</span>: <span class="hljs-string">'red'</span>,<span class="hljs-attr">text</span>: <span class="hljs-string">'标题'</span>},
+    <span class="hljs-attr">content</span>:{<span class="hljs-attr">color</span>:<span class="hljs-string">'green'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'内容'</span>}
+}
+<span class="hljs-keyword">let</span> reducer=<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state=initState,action</span>) </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'UPDATE_TITLE_COLOR'</span>:
+            <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">title</span>: {...state.title,<span class="hljs-attr">color</span>:action.color}};
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'UPDATE_CONTENT_CONTENT'</span>:
+        <span class="hljs-keyword">return</span> {...state,<span class="hljs-attr">content</span>: {...state.content,<span class="hljs-attr">text</span>:action.text}};    
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;    
+    }
+}
+<span class="hljs-keyword">let</span> store=createStore(reducer);
+render();
+<span class="hljs-keyword">let</span> unsubscribe = store.subscribe(render);
+setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    store.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'UPDATE_TITLE_COLOR'</span>,<span class="hljs-attr">color</span>:<span class="hljs-string">'purple'</span>});
+    unsubscribe();
+    store.dispatch({<span class="hljs-attr">type</span>:<span class="hljs-string">'UPDATE_CONTENT_CONTENT'</span>,<span class="hljs-attr">text</span>:<span class="hljs-string">'新标题'</span>});
+},<span class="hljs-number">2000</span>);
+</code></pre>
+<h2 id="t45.纯函数">5.纯函数 <a href="#t45.纯函数"> # </a></h2>
+<p>纯函数很严格，也就是说你几乎除了计算数据以外什么都不能干，计算的时候还不能依赖除了函数参数以外的数据。</p>
+<ul>
+<li>函数的返回结果只依赖于它的参数</li>
+<li>函数执行过程没有副作用,一个函数执行过程对产生了外部可观察的变化那么就说这个函数是有副作用的<ul>
+<li>调用 DOM API 修改页面</li>
+<li>发送了 Ajax 请求</li>
+</ul>
+</li>
+</ul>
+
+    

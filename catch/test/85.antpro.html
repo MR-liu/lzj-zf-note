@@ -1,0 +1,654 @@
+
+        <h2 id="t01.前端项目最佳实践">1.前端项目最佳实践 <a href="#t01.前端项目最佳实践"> # </a></h2>
+<h3 id="t11. 工具选择">1. 工具选择 <a href="#t11. 工具选择"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类别</th>
+<th style="text-align:left">选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">框架</td>
+<td style="text-align:left"><a href="https://reactjs.org/">react</a></td>
+</tr>
+<tr>
+<td style="text-align:left">JS语言</td>
+<td style="text-align:left"><a href="http://www.typescriptlang.org">TypeScript</a></td>
+</tr>
+<tr>
+<td style="text-align:left">CSS语言</td>
+<td style="text-align:left"><a href="https://github.com/css-modules/css-modules">css-modules</a>+<a href="http://lesscss.org">less</a>+<a href="https://github.com/postcss/postcss">postcss</a></td>
+</tr>
+<tr>
+<td style="text-align:left">JS编译</td>
+<td style="text-align:left"><a href="https://www.babeljs.cn/">babel</a></td>
+</tr>
+<tr>
+<td style="text-align:left">模块打包</td>
+<td style="text-align:left"><a href="https://webpack.github.io/">webpack全家桶</a></td>
+</tr>
+<tr>
+<td style="text-align:left">单元测试</td>
+<td style="text-align:left"><a href="https://github.com/facebook/jest">jest</a>+<a href="https://github.com/airbnb/enzyme">enzyme</a>+<a href="https://github.com/puppeteer/puppeteer">puppteer</a>+<a href="https://github.com/jsdom/jsdom">jsdom</a></td>
+</tr>
+<tr>
+<td style="text-align:left">路由</td>
+<td style="text-align:left"><a href="https://github.com/ReactTraining/react-router">react-router</a></td>
+</tr>
+<tr>
+<td style="text-align:left">数据流</td>
+<td style="text-align:left"><a href="https://dvajs.com">dva</a>+<a href="https://www.redux.org.cn/">redux生态</a></td>
+</tr>
+<tr>
+<td style="text-align:left">代码风格</td>
+<td style="text-align:left"><a href="https://eslint.org/">eslint</a>+<a href="https://prettier.io/">prettier</a></td>
+</tr>
+<tr>
+<td style="text-align:left">JS压缩</td>
+<td style="text-align:left"><a href="https://github.com/terser/terser">TerserJS</a></td>
+</tr>
+<tr>
+<td style="text-align:left">CSS压缩</td>
+<td style="text-align:left"><a href="https://github.com/cssnano/cssnano">cssnano</a></td>
+</tr>
+<tr>
+<td style="text-align:left">请求库</td>
+<td style="text-align:left"><a href="https://github.com/umijs/umi-request#readme">umi-request</a></td>
+</tr>
+<tr>
+<td style="text-align:left">UI</td>
+<td style="text-align:left"><a href="https://ant.design/docs/react/introduce-cn">AntDesign</a>+<a href="https://pro.ant.design/index-cn">AntDesignPro</a></td>
+</tr>
+<tr>
+<td style="text-align:left">国际化</td>
+<td style="text-align:left"><a href="https://github.com/formatjs/react-intl">react-intl</a></td>
+</tr>
+<tr>
+<td style="text-align:left">hooks库</td>
+<td style="text-align:left"><a href="https://hooks.umijs.org/">umi-hooks</a></td>
+</tr>
+<tr>
+<td style="text-align:left">静态文档</td>
+<td style="text-align:left"><a href="https://www.docz.site/">docz</a></td>
+</tr>
+<tr>
+<td style="text-align:left">微前端</td>
+<td style="text-align:left"><a href="https://github.com/umijs/qiankun">qiankun</a></td>
+</tr>
+<tr>
+<td style="text-align:left">图表库</td>
+<td style="text-align:left"><a href="https://antv.vision/">antv</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="t22.技术栈选型">2.技术栈选型 <a href="#t22.技术栈选型"> # </a></h3>
+<h4 id="t32.1 固定化">2.1 固定化 <a href="#t32.1 固定化"> # </a></h4>
+<ul>
+<li>React框架</li>
+<li>TypeScript语言</li>
+<li>Less+CSS Modules</li>
+<li>Eslint+Prettier+固定配置</li>
+<li>固定数据流方案dva</li>
+<li>固定babel插件</li>
+<li>Jest+Enzyme</li>
+<li>框架版本不允许锁定，^前缀必须有</li>
+<li>主要依赖不允许自定义依赖版本</li>
+</ul>
+<h4 id="t42.2 配置化">2.2 配置化 <a href="#t42.2 配置化"> # </a></h4>
+<ul>
+<li>不仅是框架功能，还有UI界面</li>
+<li>路由、布局、菜单、导航、面包屑、权限、请求、埋点、错误处理</li>
+<li>只管写Page页面就可以了</li>
+</ul>
+<h5 id="t52.2.1 编译态配置">2.2.1 编译态配置 <a href="#t52.2.1 编译态配置"> # </a></h5>
+<ul>
+<li>给node.js使用，比如webpack、babel相关配置，静态路由配置</li>
+</ul>
+<h5 id="t62.2.2 运行态配置">2.2.2 运行态配置 <a href="#t62.2.2 运行态配置"> # </a></h5>
+<ul>
+<li>给浏览器用、比如渲染逻辑、动态修改路由、获取用户信息</li>
+</ul>
+<h4 id="t72.3 约定化">2.3 约定化 <a href="#t72.3 约定化"> # </a></h4>
+<ul>
+<li>国际化</li>
+<li>数据流</li>
+<li>MOCK</li>
+<li>目录结构</li>
+<li>404</li>
+<li>权限策略</li>
+<li>Service</li>
+<li>配置文件</li>
+</ul>
+<h3 id="t81.3 理念">1.3 理念 <a href="#t81.3 理念"> # </a></h3>
+<ul>
+<li>通过最佳实践减少不必要的选择的差异</li>
+<li>通过插件和插件集的架构方式，满足不同场景的业务</li>
+<li>通过资产市场和场景市场着力解决70%的开发者问题</li>
+<li>通过对垂直场景采取强约束的方式，进一步提升研发效率</li>
+<li>不给选择、配置化、约定化</li>
+</ul>
+<h2 id="t92.前端">2.前端 <a href="#t92.前端"> # </a></h2>
+<h3 id="t102.1. Ant Design Pro项目初始化">2.1. Ant Design Pro项目初始化 <a href="#t102.1. Ant Design Pro项目初始化"> # </a></h3>
+<ul>
+<li><a href="https://pro.ant.design/docs/getting-started-cn">pro.ant.design</a></li>
+<li><a href="https://github.com/ant-design/pro-blocks">Pro的区块</a></li>
+<li><a href="https://github.com/ant-design/ant-design-pro-layout">ant-design-pro-layout</a></li>
+<li><a href="https://ant-design.github.io/ant-design-pro-layout/?path=/story/basiclayout--readecn">ant-design-pro-layout</a></li>
+<li><a href="https://github.com/ant-design/pro-blocks">pro-blocks</a></li>
+<li><a href="https://pro.ant.design/docs/uset-typescript-cn">uset-typescript-cn</a></li>
+<li><a href="https://umijs.org/zh/config/#chainwebpack">umi-config</a></li>
+<li><code>Ant Design Pro</code> 是一个企业级中后台前端/设计解决方案，我们秉承 Ant Design 的设计价值观，致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。</li>
+</ul>
+<h3 id="t112.2 启动项目">2.2 启动项目 <a href="#t112.2 启动项目"> # </a></h3>
+<h4 id="t122.2.1 安装">2.2.1 安装 <a href="#t122.2.1 安装"> # </a></h4>
+<ul>
+<li>新建一个空的文件夹作为项目目录，并在目录下执行</li>
+<li><a href="https://www.python.org/downloads/release/python-380/">python-380</a></li>
+</ul>
+<pre><code class="lang-js">npm config <span class="hljs-keyword">set</span> python "C:/Python38/python.exe"
+yarn create umi
+</code></pre>
+<h4 id="t132.2.2 目录结构">2.2.2 目录结构 <a href="#t132.2.2 目录结构"> # </a></h4>
+<ul>
+<li>我们已经为你生成了一个完整的开发框架，提供了涵盖中后台开发的各类功能和坑位，下面是整个项目的目录结构。</li>
+</ul>
+<pre><code class="lang-js">├── config                   # umi 配置，包含路由，构建等配置
+├── mock                     # 本地模拟数据
+├── public
+│   └── favicon.png          # Favicon
+├── src
+│   ├── assets               # 本地静态资源
+│   ├── components           # 业务通用组件
+│   ├── e2e                  # 集成测试用例
+│   ├── layouts              # 通用布局
+│   ├── models               # 全局 dva model
+│   ├── pages                # 业务页面入口和常用模板
+│   ├── services             # 后台接口服务
+│   ├── utils                # 工具库
+│   ├── locales              # 国际化资源
+│   ├── global.less          # 全局样式
+│   └── global.ts            # 全局 JS
+├── tests                    # 测试工具
+├── README.md
+└── package.json
+</code></pre>
+<h4 id="t142.2.3 本地开发">2.2.3 本地开发 <a href="#t142.2.3 本地开发"> # </a></h4>
+<p>安装依赖</p>
+<pre><code class="lang-js">git init
+npm install
+</code></pre>
+<p>启动项目</p>
+<pre><code class="lang-js">npm start
+</code></pre>
+<h3 id="t152.3 用户注册">2.3 用户注册 <a href="#t152.3 用户注册"> # </a></h3>
+<ul>
+<li><a href="https://umijs.org/zh/guide/block.html">umijs-block</a></li>
+<li><a href="https://pro.ant.design/docs/block-cn">pro区块</a></li>
+<li><a href="https://preview.pro.ant.design/dashboard/analysis">pro-dashboard</a></li>
+<li><a href="https://github.com/ant-design/pro-blocks">pro-blocks下载</a></li>
+</ul>
+<h4 id="t162.3.1 先配置区块下载地址">2.3.1 先配置区块下载地址 <a href="#t162.3.1 先配置区块下载地址"> # </a></h4>
+<p>config.ts</p>
+<pre><code class="lang-diff">export default {
+  plugins,
+<span class="hljs-addition">+ block: {</span>
+<span class="hljs-addition">+   defaultGitUrl: 'https://github.com/ant-design/pro-blocks',</span>
+<span class="hljs-addition">+ },</span>
+</code></pre>
+<h4 id="t172.3.2 区块列表">2.3.2 区块列表 <a href="#t172.3.2 区块列表"> # </a></h4>
+<pre><code class="lang-js">umi block list
+</code></pre>
+<pre><code class="lang-js">UserRegister (https:<span class="hljs-comment">//preview.pro.ant.design/https://preview.pro.ant.design/user/register)</span>
+
+UserRegisterResult  (https:<span class="hljs-comment">//preview.pro.ant.design/https://preview.pro.ant.design/user/register/result)</span>
+请输入输出安装区块的路径 /user/register-result
+</code></pre>
+<h4 id="t182.3.3 user\register\index.tsx">2.3.3 user\register\index.tsx <a href="#t182.3.3 user\register\index.tsx"> # </a></h4>
+<p>src\pages\user\register\index.tsx</p>
+<pre><code class="lang-diff">  onGetCaptcha = () =&gt; {
+<span class="hljs-addition">+    const { dispatch, form } = this.props;</span>
+<span class="hljs-addition">+    const mobile = form.getFieldValue('mobile');</span>
+<span class="hljs-addition">+    dispatch({</span>
+<span class="hljs-addition">+      type: 'login/getCaptcha',</span>
+<span class="hljs-addition">+      payload: mobile,</span>
+<span class="hljs-addition">+    })</span>
+    let count = 59;
+    this.setState({ count });
+    this.interval = window.setInterval(() =&gt; {
+      count -= 1;
+      this.setState({ count });
+      if (count <span class="hljs-comment">=== 0) {</span>
+        clearInterval(this.interval);
+      }
+    }, 1000);
+  };
+
+<span class="hljs-addition">+   &lt;FormItem&gt;</span>
+<span class="hljs-addition">+            {getFieldDecorator('currentAuthority', {</span>
+<span class="hljs-addition">+              rules: [</span>
+<span class="hljs-addition">+                {</span>
+<span class="hljs-addition">+                  required: true,</span>
+<span class="hljs-addition">+                  message: formatMessage({ id: 'userandregister.currentAuthority.required' }),</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+              ],</span>
+<span class="hljs-addition">+            })(</span>
+<span class="hljs-addition">+              &lt;Select placeholder={formatMessage({ id: 'userandregister.currentAuthority.placeholder' })}&gt;</span>
+<span class="hljs-addition">+                &lt;Option value="user"&gt;普通用户&lt;/Option&gt;</span>
+<span class="hljs-addition">+                &lt;Option value="admin"&gt;管理员&lt;/Option&gt;</span>
+<span class="hljs-addition">+              &lt;/Select&gt;</span>
+<span class="hljs-addition">+            )}</span>
+<span class="hljs-addition">+  &lt;/FormItem&gt;</span>
+</code></pre>
+<h4 id="t192.3.4 user\register\locales\zh-CN.ts">2.3.4 user\register\locales\zh-CN.ts <a href="#t192.3.4 user\register\locales\zh-CN.ts"> # </a></h4>
+<p>src\pages\user\register\locales\zh-CN.ts</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+  'userandregister.currentAuthority.placeholder': '角色',</span>
+<span class="hljs-addition">+  'userandregister.currentAuthority.required': '请输入邮箱地址！',</span>
+</code></pre>
+<h4 id="t202.3.5 user\register\service.ts">2.3.5 user\register\service.ts <a href="#t202.3.5 user\register\service.ts"> # </a></h4>
+<p>src\pages\user\register\service.ts</p>
+<pre><code class="lang-diff">import request from '@/utils/request';
+import { UserRegisterParams } from './index';
+
+export async function fakeRegister(params: UserRegisterParams) {
+<span class="hljs-addition">+  return request('/server/api/register', {</span>
+    method: 'POST',
+    data: params,
+  });
+}
+</code></pre>
+<h4 id="t212.3.6 src\services\login.ts">2.3.6 src\services\login.ts <a href="#t212.3.6 src\services\login.ts"> # </a></h4>
+<p>src\services\login.ts</p>
+<pre><code class="lang-diff">export async function getFakeCaptcha(mobile: string) {
+<span class="hljs-addition">+  return request(`/server/api/login/captcha?mobile=${mobile}`);</span>
+}
+</code></pre>
+<h3 id="t222.4. 用户登录">2.4. 用户登录 <a href="#t222.4. 用户登录"> # </a></h3>
+<h4 id="t232.4.1 services\login.ts">2.4.1 services\login.ts <a href="#t232.4.1 services\login.ts"> # </a></h4>
+<p>src\services\login.ts</p>
+<pre><code class="lang-diff">export async function fakeAccountLogin(params: LoginParamsType) {
+<span class="hljs-addition">+  return request('/server/api/login/account', {</span>
+    method: 'POST',
+    data: params,
+  });
+}
+</code></pre>
+<h4 id="t242.4.2 src\services\user.ts">2.4.2 src\services\user.ts <a href="#t242.4.2 src\services\user.ts"> # </a></h4>
+<p>src\services\user.ts</p>
+<pre><code class="lang-diff">export async function queryCurrent(): Promise&lt;any&gt; {
+<span class="hljs-addition">+  return request('/server/api/currentUser');</span>
+}
+</code></pre>
+<h3 id="t252.5. 权限菜单">2.5. 权限菜单 <a href="#t252.5. 权限菜单"> # </a></h3>
+<h4 id="t262.5.1 src\models\login.ts">2.5.1 src\models\login.ts <a href="#t262.5.1 src\models\login.ts"> # </a></h4>
+<p>src\models\login.ts</p>
+<pre><code class="lang-diff">if (response.status <span class="hljs-comment">=== 'ok') {</span>
+<span class="hljs-addition">+        if (response.token) {</span>
+<span class="hljs-addition">+          localStorage.setItem('token', response.token);</span>
+<span class="hljs-addition">+        }</span>
+        const urlParams = new URL(window.location.href);
+</code></pre>
+<h4 id="t272.5.2 src\utils\request.ts">2.5.2 src\utils\request.ts <a href="#t272.5.2 src\utils\request.ts"> # </a></h4>
+<p>src\utils\request.ts</p>
+<pre><code class="lang-diff">const request = extend({
+  errorHandler, // 默认错误处理
+  credentials: 'include', // 默认请求是否带上cookie
+});
+<span class="hljs-addition">+const baseURL = 'http://localhost:4000';</span>
+<span class="hljs-addition">+request.interceptors.request.use((url: any, options: any) =&gt; {</span>
+<span class="hljs-addition">+  if (localStorage.getItem('token')) {</span>
+<span class="hljs-addition">+    options.headers.Authorization = 'Bearer ' + localStorage.getItem('token')</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  if (url.startsWith('/server')) {</span>
+<span class="hljs-addition">+    url = baseURL + url.slice(7);</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+  return { url, options };</span>
+<span class="hljs-addition">+});</span>
+
+export default request;
+</code></pre>
+<h3 id="t282.6 docker">2.6 docker <a href="#t282.6 docker"> # </a></h3>
+<h4 id="t292.6.1 Dockerfile">2.6.1 Dockerfile <a href="#t292.6.1 Dockerfile"> # </a></h4>
+<pre><code class="lang-js">FROM nginx
+LABEL name=<span class="hljs-string">"antdesign-front"</span>
+LABEL version=<span class="hljs-string">"1.0"</span>
+COPY  ./dist/ <span class="hljs-regexp">/usr/</span>share/nginx/html/
+COPY ./antdesign-front.conf /etc/nginx/conf.d/
+EXPOSE <span class="hljs-number">80</span>
+</code></pre>
+<h4 id="t302.6.2 .dockerignore">2.6.2 .dockerignore <a href="#t302.6.2 .dockerignore"> # </a></h4>
+<pre><code class="lang-js">.git
+node_modules
+package-lock.json
+Dockerfile
+.dockerignore
+</code></pre>
+<h4 id="t312.6.3 antdesign-front.conf">2.6.3 antdesign-front.conf <a href="#t312.6.3 antdesign-front.conf"> # </a></h4>
+<p>antdesign-front.conf</p>
+<pre><code class="lang-js">server {
+    listen       80;
+    server_name  47.104.204.74;
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+}
+</code></pre>
+<h2 id="t323.后端">3.后端 <a href="#t323.后端"> # </a></h2>
+<h3 id="t333.1 api.js">3.1 api.js <a href="#t333.1 api.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express"</span>);
+<span class="hljs-keyword">let</span> bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">"body-parser"</span>);
+<span class="hljs-keyword">let</span> jwt = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jwt-simple'</span>);
+<span class="hljs-keyword">let</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">"cors"</span>);
+<span class="hljs-keyword">let</span> Models = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./db'</span>);
+<span class="hljs-keyword">let</span> sendCode = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./sms'</span>);
+<span class="hljs-keyword">let</span> session = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express-session"</span>);
+<span class="hljs-keyword">let</span> MongoStore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connect-mongo'</span>)(session);
+<span class="hljs-keyword">let</span> config = process.env.NODE_ENV == <span class="hljs-string">'production'</span> ? <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config/config.prod'</span>) : <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config/config.dev'</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(
+    cors({
+        <span class="hljs-attr">origin</span>: config.origin,
+        <span class="hljs-attr">credentials</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">allowedHeaders</span>: <span class="hljs-string">"Content-Type,Authorization"</span>,
+        <span class="hljs-attr">methods</span>: <span class="hljs-string">"GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"</span>
+    })
+);
+app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+app.use(bodyParser.json());
+app.use(
+    session({
+        <span class="hljs-attr">secret</span>: config.secret,
+        <span class="hljs-attr">resave</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">saveUninitialized</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">store</span>: <span class="hljs-keyword">new</span> MongoStore({
+            <span class="hljs-attr">url</span>: config.dbUrl,
+            <span class="hljs-attr">mongoOptions</span>: {
+                <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span>
+            }
+        })
+    })
+);
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: <span class="hljs-string">`hello`</span> });
+});
+app.get(<span class="hljs-string">'/api/login/captcha'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> mobile = req.query.mobile;
+    <span class="hljs-keyword">let</span> captcha = rand();
+    req.session.captcha = captcha;
+    <span class="hljs-keyword">await</span> sendCode(mobile, captcha);
+    res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">data</span>: <span class="hljs-string">`[仅限测试环境验证码]: <span class="hljs-subst">${captcha}</span>`</span> });
+});
+app.post(<span class="hljs-string">'/api/register'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> user = req.body;
+    <span class="hljs-keyword">if</span> (user.captcha != req.session.captcha) {
+        <span class="hljs-keyword">return</span> res.json({ <span class="hljs-attr">code</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">error</span>: <span class="hljs-string">'验证码不正确'</span> });
+    }
+    <span class="hljs-keyword">let</span> avatarValue = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>).createHash(<span class="hljs-string">'md5'</span>).update(user.mail).digest(<span class="hljs-string">'hex'</span>);
+    user.avatar = <span class="hljs-string">`https://secure.gravatar.com/avatar/<span class="hljs-subst">${avatarValue}</span>?s=48`</span>;
+    user = <span class="hljs-keyword">await</span> Models.UserModel.create(user);
+    res.send({ <span class="hljs-attr">status</span>: <span class="hljs-string">'ok'</span>, <span class="hljs-attr">currentAuthority</span>: <span class="hljs-string">'user'</span> });
+});
+app.post(<span class="hljs-string">'/api/login/account'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> user = req.body;
+    <span class="hljs-keyword">let</span> query = {};
+    <span class="hljs-keyword">if</span> (user.type == <span class="hljs-string">'account'</span>) {
+        query.mail = user.userName;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (user.type == <span class="hljs-string">'mobile'</span>) {
+        query.mobile = user.mobile;
+        <span class="hljs-keyword">if</span> (user.captcha != req.session.captcha) {
+            <span class="hljs-keyword">return</span> res.send({
+                <span class="hljs-attr">status</span>: <span class="hljs-string">'error'</span>,
+                <span class="hljs-attr">type</span>: user.type,
+                <span class="hljs-attr">currentAuthority</span>: <span class="hljs-string">'guest'</span>,
+            });
+        }
+    }
+    <span class="hljs-keyword">let</span> dbUser = <span class="hljs-keyword">await</span> Models.UserModel.findOne(query);
+    <span class="hljs-keyword">if</span> (dbUser) {
+        dbUser.userid = dbUser._id;
+        dbUser.name = dbUser.mail;
+        <span class="hljs-keyword">let</span> token = jwt.encode(dbUser, config.secret);
+        res.send({ <span class="hljs-attr">status</span>: <span class="hljs-string">'ok'</span>, token, <span class="hljs-attr">type</span>: user.type, <span class="hljs-attr">currentAuthority</span>: dbUser.currentAuthority });
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> res.send({
+            <span class="hljs-attr">status</span>: <span class="hljs-string">'error'</span>,
+            <span class="hljs-attr">type</span>: user.type,
+            <span class="hljs-attr">currentAuthority</span>: <span class="hljs-string">'guest'</span>,
+        });
+    }
+});
+
+app.get(<span class="hljs-string">'/api/currentUser'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> authorization = req.headers[<span class="hljs-string">'authorization'</span>];
+    <span class="hljs-keyword">if</span> (authorization) {
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-keyword">let</span> user = jwt.decode(authorization.split(<span class="hljs-string">' '</span>)[<span class="hljs-number">1</span>], config.secret);
+            user.userid = user._id;
+            user.name = user.mail;
+            res.json(user);
+        } <span class="hljs-keyword">catch</span> (err) {
+            res.status(<span class="hljs-number">401</span>).send({});
+        }
+    } <span class="hljs-keyword">else</span> {
+        res.status(<span class="hljs-number">401</span>).send({});
+    }
+
+});
+app.listen(<span class="hljs-number">4000</span>, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'服务器在4000端口启动!'</span>);
+});
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rand</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> min = <span class="hljs-number">1000</span>, max = <span class="hljs-number">9999</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * (max - min)) + min;
+}
+</code></pre>
+<h3 id="t343.2 db.js">3.2 db.js <a href="#t343.2 db.js"> # </a></h3>
+<p>db.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+<span class="hljs-keyword">const</span> ObjectId = Schema.Types.ObjectId;
+<span class="hljs-keyword">let</span> configs = process.env.NODE_ENV == <span class="hljs-string">'production'</span> ? <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config/config.prod'</span>) : <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config/config.dev'</span>);
+<span class="hljs-keyword">const</span> conn = mongoose.createConnection(configs.dbUrl, { <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span> });
+<span class="hljs-keyword">const</span> UserModel = conn.model(<span class="hljs-string">'User'</span>, <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">userid</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },<span class="hljs-comment">//邮箱</span>
+    <span class="hljs-attr">name</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },
+    <span class="hljs-attr">mail</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//邮箱</span>
+    <span class="hljs-attr">password</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//密码</span>
+    <span class="hljs-attr">mobile</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//手机号</span>
+    <span class="hljs-attr">avatar</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//头像</span>
+    <span class="hljs-attr">currentAuthority</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> }<span class="hljs-comment">//当前用户的权限</span>
+}));
+
+<span class="hljs-built_in">module</span>.exports = {
+    UserModel
+}
+
+</code></pre>
+<h3 id="t353.3 config.prod.js">3.3 config.prod.js <a href="#t353.3 config.prod.js"> # </a></h3>
+<p>config\config.prod.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">'zhufengcms'</span>,
+    <span class="hljs-attr">dbUrl</span>: <span class="hljs-string">"mongodb://antdesign-mongo:27017/zhufengcms"</span>,
+    <span class="hljs-attr">origin</span>: [<span class="hljs-string">"http://47.104.204.74"</span>, <span class="hljs-string">"http://47.104.204.74:8000"</span>]
+}
+</code></pre>
+<h3 id="t363.4 config\config.dev.js">3.4 config\config.dev.js <a href="#t363.4 config\config.dev.js"> # </a></h3>
+<p>config\config.dev.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">'zhufengcms'</span>,
+    <span class="hljs-attr">dbUrl</span>: <span class="hljs-string">"mongodb://localhost:27017/zhufengcms"</span>,
+    <span class="hljs-attr">origin</span>: [<span class="hljs-string">"http://localhost:8000"</span>]
+}
+</code></pre>
+<h3 id="t373.5 sms.js">3.5 sms.js <a href="#t373.5 sms.js"> # </a></h3>
+<p>sms.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> axios = <span class="hljs-built_in">require</span>(<span class="hljs-string">'axios'</span>);
+<span class="hljs-keyword">const</span> smsConfig = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./smsConfig'</span>);
+<span class="hljs-comment">//http://docs.ucpaas.com/doku.php?id=%E7%9F%AD%E4%BF%A1:sendsms</span>
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-keyword">async</span> (mobile, captcha) =&gt; {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">'https://open.ucpaas.com/ol/sms/sendsms'</span>;
+    <span class="hljs-keyword">let</span> result = <span class="hljs-keyword">await</span> axios({
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
+        url,
+        <span class="hljs-attr">data</span>: {
+            <span class="hljs-attr">sid</span>: smsConfig.sid,
+            <span class="hljs-attr">token</span>: smsConfig.token,
+            <span class="hljs-attr">appid</span>: smsConfig.appid,
+            <span class="hljs-attr">templateid</span>: smsConfig.templateid,
+            <span class="hljs-attr">param</span>: captcha,
+            mobile
+        },
+        <span class="hljs-attr">headers</span>: {
+            <span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json;charset=utf-8"</span>,
+            <span class="hljs-string">"Accept"</span>: <span class="hljs-string">"application/json"</span>
+        }
+    })
+    <span class="hljs-keyword">return</span> result;
+}
+</code></pre>
+<h3 id="t383.6 smsConfig.js">3.6 smsConfig.js <a href="#t383.6 smsConfig.js"> # </a></h3>
+<p>smsConfig.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">sid</span>: <span class="hljs-string">'32548fb951ac0df279db0e6e9a515566'</span>,      <span class="hljs-comment">//开发者账号id</span>
+    <span class="hljs-attr">token</span>: <span class="hljs-string">'aa0309c08920ca38201de69eb3c745b6'</span>,    <span class="hljs-comment">//开发者token</span>
+    <span class="hljs-attr">appid</span>: <span class="hljs-string">'16129d504b7c484c9e8f09b4ec929983'</span>,    <span class="hljs-comment">//应用id</span>
+    <span class="hljs-attr">templateid</span>: <span class="hljs-string">'387675'</span>                          <span class="hljs-comment">//短信模板id</span>
+}
+</code></pre>
+<h3 id="t393.7 package.json">3.7 package.json <a href="#t393.7 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-js">  <span class="hljs-string">"scripts"</span>: {
+    <span class="hljs-string">"start"</span>: <span class="hljs-string">"node api.js"</span>
+  },
+</code></pre>
+<h3 id="t403.8 Dockerfile">3.8 Dockerfile <a href="#t403.8 Dockerfile"> # </a></h3>
+<p>Dockerfile</p>
+<pre><code class="lang-js">FROM node
+ENV NODE_ENV production
+LABEL name=<span class="hljs-string">"antdesign-server"</span>
+LABEL version=<span class="hljs-string">"1.0"</span>
+COPY . /app
+WORKDIR /app
+RUN npm install
+EXPOSE <span class="hljs-number">4000</span>
+CMD npm start
+</code></pre>
+<h3 id="t413.9 .dockerignore">3.9 .dockerignore <a href="#t413.9 .dockerignore"> # </a></h3>
+<p>.dockerignore</p>
+<pre><code class="lang-js">.git
+node_modules
+package-lock.json
+Dockerfile
+.dockerignore
+</code></pre>
+<h2 id="t424.服务器布署">4.服务器布署 <a href="#t424.服务器布署"> # </a></h2>
+<h3 id="t434.1 安装配置服务器">4.1 安装配置服务器 <a href="#t434.1 安装配置服务器"> # </a></h3>
+<pre><code class="lang-js">#升级所有包同时也升级软件和系统内核
+yum update  -y
+#只升级所有包，不升级软件和系统内核
+yum upgrade 
+</code></pre>
+<h3 id="t444.2 docker是什么?">4.2 docker是什么? <a href="#t444.2 docker是什么?"> # </a></h3>
+<ul>
+<li><code>Docker</code> 属于 Linux 容器的一种封装，提供简单易用的容器使用接口。</li>
+<li><code>Docker</code> 将应用程序与该程序的依赖，打包在一个文件里面。运行这个文件，就会生成一个虚拟容器。程序在这个虚拟容器里运行，就好像在真实的物理机上运行一样</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/dockercontainer.png" alt="dockercontainer"></p>
+<h3 id="t454.3 安装docker">4.3 安装docker <a href="#t454.3 安装docker"> # </a></h3>
+<pre><code class="lang-js">yum install -y yum-utils   device-mapper-persistent-data   lvm2
+yum-config-manager \
+    --add-repo \
+    <span class="hljs-attr">https</span>:<span class="hljs-comment">//mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo</span>
+yum install -y docker-ce docker-ce-cli containerd.io
+</code></pre>
+<h3 id="t464.4 阿里云加速">4.4 阿里云加速 <a href="#t464.4 阿里云加速"> # </a></h3>
+<pre><code class="lang-js">mkdir -p /etc/docker
+tee /etc/docker/daemon.json &lt;&lt;-'EOF'
+{
+  "registry-mirrors": ["https://fwvjnv59.mirror.aliyuncs.com"]
+}
+EOF
+# 重载所有修改过的配置文件
+systemctl daemon-reload
+systemctl restart docker
+</code></pre>
+<h3 id="t474.5 安装git">4.5 安装git <a href="#t474.5 安装git"> # </a></h3>
+<pre><code class="lang-js">yum install git -y
+</code></pre>
+<h3 id="t484.6 安装node和npm">4.6 安装node和npm <a href="#t484.6 安装node和npm"> # </a></h3>
+<ul>
+<li><a href="https://github.com/nvm-sh/nvm">nvm</a></li>
+</ul>
+<pre><code class="lang-js">curl -o- https:<span class="hljs-comment">//raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash</span>
+
+source /root/.bashrc
+nvm ls-remote
+nvm install v12<span class="hljs-number">.13</span><span class="hljs-number">.1</span>
+npm i cnpm -g
+</code></pre>
+<h3 id="t494.7 创建docker网络">4.7 创建docker网络 <a href="#t494.7 创建docker网络"> # </a></h3>
+<pre><code class="lang-js">docker network create --driver bridge antdesign
+docker network connect  antdesign antdesign-mongo
+docker network inspect antdesign
+</code></pre>
+<h3 id="t504.8 启动mongodb">4.8 启动mongodb <a href="#t504.8 启动mongodb"> # </a></h3>
+<h4 id="t514.8.1 启动mongo的docker容器">4.8.1 启动mongo的docker容器 <a href="#t514.8.1 启动mongo的docker容器"> # </a></h4>
+<pre><code class="lang-js">docker pull mongo:latest
+docker images
+docker run -d --name antdesign-mongo -p <span class="hljs-number">27017</span>:<span class="hljs-number">27017</span> --net antdesign mongo
+docker ps
+docker exec -it antdesign-mongo bash
+mongo
+</code></pre>
+<h4 id="t524.8.2 本地安装mongodb">4.8.2 本地安装mongodb <a href="#t524.8.2 本地安装mongodb"> # </a></h4>
+<h5 id="t534.8.2.1 配置MongoDB的yum源">4.8.2.1 配置MongoDB的yum源 <a href="#t534.8.2.1 配置MongoDB的yum源"> # </a></h5>
+<pre><code class="lang-js">vim /etc/yum.repos.d/mongodb-org-4.0.repo
+#添加以下内容：
+[mongodb-org-4.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/
+gpgcheck=0
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+
+#这里可以修改 gpgcheck=0, 省去gpg验证
+[root@localhost ~]# yum makecache
+</code></pre>
+<h5 id="t544.8.2.2 安装MongoDB">4.8.2.2 安装MongoDB <a href="#t544.8.2.2 安装MongoDB"> # </a></h5>
+<pre><code class="lang-js">yum -y install mongodb-org
+whereis mongod
+vim /etc/mongod.conf
+</code></pre>
+<h5 id="t554.8.2.3 启动MongoDB">4.8.2.3 启动MongoDB <a href="#t554.8.2.3 启动MongoDB"> # </a></h5>
+<pre><code class="lang-js">systemctl start mongod.service #启动
+systemctl stop mongod.service #停止
+systemctl status mongod.service #查看状态
+</code></pre>
+<h5 id="t564.8.2.4 外网访问">4.8.2.4 外网访问 <a href="#t564.8.2.4 外网访问"> # </a></h5>
+<pre><code class="lang-js">systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+</code></pre>
+<h3 id="t574.9 启动后台服务器">4.9 启动后台服务器 <a href="#t574.9 启动后台服务器"> # </a></h3>
+<pre><code class="lang-js">git clone https:<span class="hljs-comment">//gitee.com/zhufengpeixun/antdesign-server.git</span>
+cd antdesign-server
+docker build -t antdesign-server .
+docker image ls
+docker run  -d --name antdesign-server -p <span class="hljs-number">4000</span>:<span class="hljs-number">4000</span> --net antdesign antdesign-server
+curl http:<span class="hljs-comment">//localhost:4000</span>
+</code></pre>
+<h3 id="t584.10 启动前台服务">4.10 启动前台服务 <a href="#t584.10 启动前台服务"> # </a></h3>
+<pre><code class="lang-js">git clone https:<span class="hljs-comment">//gitee.com/zhufengpeixun/antdesign-front.git</span>
+cd antdesign-front
+cnpm install
+cnpm run build
+
+docker build -t antdesign-front .
+docker run -d --name antdesign-front -p <span class="hljs-number">80</span>:<span class="hljs-number">80</span>  --net antdesign antdesign-front
+</code></pre>
+
+    

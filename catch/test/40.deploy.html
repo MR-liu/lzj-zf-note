@@ -1,0 +1,307 @@
+
+        <p>﻿</p>
+<h2 id="t01. 服务器部署步骤">1. 服务器部署步骤 <a href="#t01. 服务器部署步骤"> # </a></h2>
+<ol>
+<li>购买自己的域名</li>
+<li>域名备案</li>
+<li>购买服务器</li>
+<li>配置服务器应用环境</li>
+<li>安装配置服务器</li>
+<li>项目远程部署和发布与更新</li>
+</ol>
+<h3 id="t11.2 购买域名">1.2 购买域名 <a href="#t11.2 购买域名"> # </a></h3>
+<ul>
+<li><a href="https://dnspod.cloud.tencent.com">腾讯云</a></li>
+<li><a href="https://wanwang.aliyun.com">阿里云</a></li>
+<li><a href="https://cloud.baidu.com/product/bcd.html">百度云</a></li>
+<li><a href="https://www.22.cn">爱名网</a></li>
+<li><a href="https://sg.godaddy.com">godaddy</a></li>
+</ul>
+<h3 id="t21.3 云主机">1.3 云主机 <a href="#t21.3 云主机"> # </a></h3>
+<ul>
+<li><a href="https://www.aliyun.com">阿里云 ECS</a></li>
+<li><a href="https://aws.amazon.com/cn">亚马逊 AWS</a></li>
+<li><a href="https://cloud.baidu.com">百度云</a></li>
+</ul>
+<h3 id="t31.4 购买阿里云">1.4 购买阿里云 <a href="#t31.4 购买阿里云"> # </a></h3>
+<ul>
+<li><a href="https://ecs-buy.aliyun.com/wizard/#/postpay/cn-beijing">选择配置</a></li>
+<li>镜像 Ubuntu 16.04 64位</li>
+</ul>
+<h3 id="t41.5 备案">1.5 备案 <a href="#t41.5 备案"> # </a></h3>
+<ul>
+<li><a href="https://beian.aliyun.com">阿里云备案</a></li>
+<li><a href="https://bsn.console.aliyun.com/#/bsnManagement">备案服务号管理</a></li>
+</ul>
+<h2 id="t52. 服务器">2. 服务器 <a href="#t52. 服务器"> # </a></h2>
+<ul>
+<li><a href="http://img.zhufengpeixun.cn/Xshell4.zip">Xshell4</a></li>
+<li>使用<code>git bash</code>而非<code>git cmd</code></li>
+</ul>
+<h3 id="t62.1  连接服务器">2.1  连接服务器 <a href="#t62.1  连接服务器"> # </a></h3>
+<pre><code class="lang-js">ssh root@<span class="hljs-number">47.104</span><span class="hljs-number">.75</span><span class="hljs-number">.43</span>
+</code></pre>
+<h3 id="t72.2  创建用户">2.2  创建用户 <a href="#t72.2  创建用户"> # </a></h3>
+<pre><code class="lang-js">adduser zhufeng
+</code></pre>
+<h3 id="t82.3 赋予权限">2.3 赋予权限 <a href="#t82.3 赋予权限"> # </a></h3>
+<p><code>gpasswd</code>命令是Linux下工作组文件<code>/etc/group</code>和<code>/etc/gshadow</code>管理工具。</p>
+<ul>
+<li><code>-a</code>: 添加用户到组</li>
+<li><code>-d</code>: 从组删除用户</li>
+</ul>
+<pre><code class="lang-js">gpasswd -a zhufeng sudo
+</code></pre>
+<h3 id="t92.4 添加sudo权限">2.4 添加sudo权限 <a href="#t92.4 添加sudo权限"> # </a></h3>
+<ul>
+<li>Linux用户配置sudo权限<code>visudo</code>,如果你用<code>visudo</code>来编辑这个文件，那么它会帮你自动做很多事情，比如说语法检查，加锁防止别人同时修改这个文件等等</li>
+</ul>
+<pre><code class="lang-js">sudo visudo
+vi /etc/sudoers
+</code></pre>
+<blockquote>
+<p>visudo其实是打开/etc/sudoers</p>
+</blockquote>
+<p>增加以下内容</p>
+<pre><code class="lang-js"># User privilege specification
+zhufeng ALL=(ALL:ALL) ALL
+</code></pre>
+<ul>
+<li>1 "From ALL hosts", zhufeng 从任何机器登录，都可以应用接下来的规则</li>
+<li>2 "Run As ALL User", zhufeng"可以以任何用户的身份运行一些命令</li>
+<li>3 "Run As All Groups", zhufeng"可以以任何用户组的身份运行一些命令</li>
+<li>4 前面的规定适用于任何命令</li>
+</ul>
+<blockquote>
+<p><code>zhufeng</code>这个用户可以从任何机器登录，以任何用户和用户组的身份运行任何命令。
+保存并退出</p>
+</blockquote>
+<h3 id="t102.5 SSH无密码登录">2.5 SSH无密码登录 <a href="#t102.5 SSH无密码登录"> # </a></h3>
+<p>ssh 公钥认证是ssh认证的方式之一。通过公钥认证可实现ssh免密码登陆，git的ssh方式也是通过公钥进行认证的。</p>
+<h4 id="t112.5.1  本地生成公钥和私钥">2.5.1  本地生成公钥和私钥 <a href="#t112.5.1  本地生成公钥和私钥"> # </a></h4>
+<pre><code class="lang-js">ssh-keygen --help
+cd ~/.ssh
+ssh-keygen -t rsa -b 4096
+</code></pre>
+<ul>
+<li>-t 指定加密方式</li>
+<li>-b 字节数</li>
+</ul>
+<h4 id="t122.5.2 开启ssh代理">2.5.2 开启ssh代理 <a href="#t122.5.2 开启ssh代理"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-built_in">eval</span> <span class="hljs-string">"$(ssh-agent -s)"</span>
+ssh-add ~<span class="hljs-regexp">/.ssh/i</span>d_rsa
+</code></pre>
+<h4 id="t132.5.3 服务器配置">2.5.3 服务器配置 <a href="#t132.5.3 服务器配置"> # </a></h4>
+<pre><code class="lang-js">ssh-keygen -t rsa -b <span class="hljs-number">4096</span>
+<span class="hljs-built_in">eval</span> <span class="hljs-string">"$(ssh-agent -s)"</span>
+ssh-add ~<span class="hljs-regexp">/.ssh/i</span>d_rsa
+</code></pre>
+<h4 id="t142.5.4 把本地的公钥上传到服务器授权文件中">2.5.4 把本地的公钥上传到服务器授权文件中 <a href="#t142.5.4 把本地的公钥上传到服务器授权文件中"> # </a></h4>
+<pre><code class="lang-js">vi ~<span class="hljs-regexp">/.ssh/</span>authorized_keys
+chmod <span class="hljs-number">600</span> ~<span class="hljs-regexp">/.ssh/</span>authorized_keys
+service ssh restart
+</code></pre>
+<h3 id="t152.6 安装软件">2.6 安装软件 <a href="#t152.6 安装软件"> # </a></h3>
+<pre><code class="lang-js">apt-<span class="hljs-keyword">get</span> update
+apt-<span class="hljs-keyword">get</span> install wget curl git -y
+</code></pre>
+<h3 id="t162.7 安装node">2.7 安装node <a href="#t162.7 安装node"> # </a></h3>
+<ul>
+<li><a href="https://github.com/creationix/nvm/blob/master/README.md">nvm</a><pre><code class="lang-js">wget -qO- https:<span class="hljs-comment">//raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash</span>
+. /root/.bashrc
+nvm install stable
+node -v
+npm i cnpm -g
+npm i nrm -g
+</code></pre>
+</li>
+</ul>
+<h3 id="t172.8 编写node程序">2.8 编写node程序 <a href="#t172.8 编写node程序"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+
+<span class="hljs-keyword">const</span> hostname = <span class="hljs-string">'127.0.0.1'</span>;
+<span class="hljs-keyword">const</span> port = <span class="hljs-number">3000</span>;
+
+<span class="hljs-keyword">const</span> server = http.createServer(<span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> {
+  res.statusCode = <span class="hljs-number">200</span>;
+  res.setHeader(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'text/plain'</span>);
+  res.end(<span class="hljs-string">'Hello World\n'</span>);
+});
+
+server.listen(port, () =&gt; {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Server running at http://<span class="hljs-subst">${hostname}</span>:<span class="hljs-subst">${port}</span>/`</span>);
+});
+</code></pre>
+<h3 id="t182.9 启动程序">2.9 启动程序 <a href="#t182.9 启动程序"> # </a></h3>
+<p>强大的进程管理器，进程异常退出时pm2会尝试重启</p>
+<pre><code class="lang-js">cnpm install pm2 -g
+</code></pre>
+<p>用pm2启动node
+|命令|用途|
+|:----|:----|
+|pm2 start blog.js --name "blog"|启动应用|
+|pm2 list|查看所有应用|
+|pm2 restart crawl|重启应用|
+|pm2 stop crawl|停止应用|
+|pm2 delete crawl|删除应用|</p>
+<pre><code class="lang-js">pm2 start blog.js --name <span class="hljs-string">"blog"</span>
+</code></pre>
+<h3 id="t192.10 nginx">2.10 nginx <a href="#t192.10 nginx"> # </a></h3>
+<ul>
+<li><code>Nginx</code>是一个高性能的<code>HTTP</code>和反向代理服务器</li>
+</ul>
+<h4 id="t202.10.1 安装">2.10.1 安装 <a href="#t202.10.1 安装"> # </a></h4>
+<pre><code class="lang-js">apt-<span class="hljs-keyword">get</span> install nginx -y
+</code></pre>
+<h4 id="t212.10.2 nginx命令">2.10.2 nginx命令 <a href="#t212.10.2 nginx命令"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">启动nginx</td>
+<td style="text-align:left">nginx -c /etc/nginx/nginx.conf</td>
+</tr>
+<tr>
+<td style="text-align:left">关闭 nginx</td>
+<td style="text-align:left">nginx -s stop</td>
+</tr>
+<tr>
+<td style="text-align:left">重读配置文件</td>
+<td style="text-align:left">nginx -s reload / kill -HUP nginx</td>
+</tr>
+<tr>
+<td style="text-align:left">常用命令</td>
+<td style="text-align:left">service nginx {start</td>
+<td>stop</td>
+<td>status</td>
+<td>restart</td>
+<td>reload</td>
+<td>configtest</td>
+<td>}</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t222.10.3 nginx配置">2.10.3 nginx配置 <a href="#t222.10.3 nginx配置"> # </a></h4>
+<pre><code class="lang-js">cd /etc/nginx/sites-enabled
+vi blog.conf
+</code></pre>
+<pre><code class="lang-js">upstream blog{
+    server <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">3000</span>;
+}
+server {
+    listen <span class="hljs-number">80</span>;
+    server_name <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>;
+    location / {
+        proxy_pass http:<span class="hljs-comment">//blog;</span>
+    }
+}
+</code></pre>
+<h4 id="t232.10.4 重启nginx">2.10.4 重启nginx <a href="#t232.10.4 重启nginx"> # </a></h4>
+<pre><code class="lang-js"> nginx -s reload
+</code></pre>
+<h2 id="t243. Docker 是什么">3. Docker 是什么 <a href="#t243. Docker 是什么"> # </a></h2>
+<ul>
+<li>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，然后发布到任何流行的 Linux或Windows 机器上，也可以实现虚拟化。容器是完全使用沙箱机制，相互之间不会有任何接口</li>
+</ul>
+<h3 id="t253.1 docker安装">3.1 docker安装 <a href="#t253.1 docker安装"> # </a></h3>
+<ul>
+<li>docker分为企业版(EE)和社区版(CE)</li>
+<li><a href="https://docs.docker.com/install/linux/docker-ce/centos/">docker-ce</a></li>
+<li><a href="https://hub.docker.com/">hub.docker</a></li>
+</ul>
+<h3 id="t263.2 安装">3.2 安装 <a href="#t263.2 安装"> # </a></h3>
+<pre><code class="lang-js">yum install -y yum-utils   device-mapper-persistent-data   lvm2
+yum-config-manager     --add-repo     https:<span class="hljs-comment">//download.docker.com/linux/centos/docker-ce.repo</span>
+yum install docker-ce docker-ce-cli containerd.io
+</code></pre>
+<h3 id="t273.3 启动">3.3 启动 <a href="#t273.3 启动"> # </a></h3>
+<pre><code class="lang-js">systemctl start docker
+</code></pre>
+<h3 id="t283.4 查看docker版本">3.4 查看docker版本 <a href="#t283.4 查看docker版本"> # </a></h3>
+<pre><code class="lang-js">$ docker version
+$ docker info
+</code></pre>
+<h3 id="t293.5 卸载">3.5 卸载 <a href="#t293.5 卸载"> # </a></h3>
+<pre><code class="lang-js">docker info
+yum remove docker
+rm -rf /<span class="hljs-keyword">var</span>/lib/docker
+</code></pre>
+<h3 id="t303.6 Docker架构">3.6 Docker架构 <a href="#t303.6 Docker架构"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/docker-arch.jpg" alt="docker"></p>
+<h3 id="t313.7 阿里云加速">3.7 阿里云加速 <a href="#t313.7 阿里云加速"> # </a></h3>
+<ul>
+<li><a href="https://dev.aliyun.com/search.html">镜像仓库</a></li>
+<li><a href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">镜像加速器</a></li>
+</ul>
+<pre><code class="lang-js">mkdir -p /etc/docker
+tee /etc/docker/daemon.json &lt;&lt;-'EOF'
+{
+  "registry-mirrors": ["https://fwvjnv59.mirror.aliyuncs.com"]
+}
+EOF
+
+# 重载所有修改过的配置文件
+systemctl daemon-reload
+systemctl restart docker
+</code></pre>
+<p>启动服务</p>
+<pre><code class="lang-js">docker run ubuntu /bin/echo <span class="hljs-string">"Hello world"</span>
+</code></pre>
+<ul>
+<li>docker: Docker 的二进制执行文件</li>
+<li>run:与前面的 docker 组合来运行一个容器</li>
+<li>ubuntu指定要运行的镜像，Docker首先从本地主机上查找镜像是否存在，如果不存在，Docker 就会从镜像仓库 Docker Hub 下载公共镜像</li>
+<li><code>/bin/echo "Hello world"</code>: 在启动的容器里执行的命令</li>
+</ul>
+<h3 id="t323.8 启动node服务">3.8 启动node服务 <a href="#t323.8 启动node服务"> # </a></h3>
+<h4 id="t333.8.1 Dockerfile">3.8.1 Dockerfile <a href="#t333.8.1 Dockerfile"> # </a></h4>
+<pre><code class="lang-js">FROM node
+COPY ./app /app
+WORKDIR /app
+RUN npm install
+EXPOSE <span class="hljs-number">3000</span>
+</code></pre>
+<ul>
+<li>FROM 表示该镜像继承的镜像 :表示标签</li>
+<li>COPY 是将当前目录下的app目录下面的文件都拷贝到image里的/app目录中</li>
+<li>WORKDIR 指定工作路径，类似于执行 cd 命令</li>
+<li>RUN npm install 在/app目录下安装依赖，安装后的依赖也会打包到image目录中</li>
+<li>EXPOSE 暴露3000端口，允许外部连接这个端口</li>
+</ul>
+<h4 id="t343.8.2 创建image">3.8.2 创建image <a href="#t343.8.2 创建image"> # </a></h4>
+<pre><code class="lang-js">docker build -t zhufengblog .
+</code></pre>
+<ul>
+<li>-t用来指定image镜像的名称，后面还可以加冒号指定标签，如果不指定默认就是latest</li>
+<li>. 表示Dockerfile文件的所有路径,.就表示当前路径</li>
+</ul>
+<h4 id="t353.8.3 使用新的镜像运行容器">3.8.3 使用新的镜像运行容器 <a href="#t353.8.3 使用新的镜像运行容器"> # </a></h4>
+<pre><code class="lang-js">docker container run -p <span class="hljs-number">3333</span>:<span class="hljs-number">3000</span> -it zhufengblog /bin/bash
+npm start
+</code></pre>
+<ul>
+<li>-p 参数是将容器的<code>3000</code>端口映射为本机的<code>3333</code>端口</li>
+<li>-it 参数是将容器的shell容器映射为当前的shell,在本机容器中执行的命令都会发送到容器当中执行</li>
+<li>zhufengblog image的名称</li>
+<li>/bin/bash 容器启动后执行的第一个命令,这里是启动了bash容器以便执行脚本</li>
+</ul>
+<h4 id="t363.8.4 CMD">3.8.4 CMD <a href="#t363.8.4 CMD"> # </a></h4>
+<p>Dockerfile</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+ CMD npm start</span>
+</code></pre>
+<p>重新制作镜像</p>
+<pre><code class="lang-js">docker build -t zhufengblog .
+</code></pre>
+<ul>
+<li>RUN命令在 image 文件的构建阶段执行，执行结果都会打包进入 image 文件</li>
+<li>CMD命令则是在容器启动后执行</li>
+<li>一个 Dockerfile 可以包含多个RUN命令，但是只能有一个CMD命令</li>
+<li>指定了CMD命令以后，<code>docker container run</code>命令就不能附加命令了(比如前面的/bin/bash),否则它会覆盖CMD命令</li>
+</ul>
+
+    

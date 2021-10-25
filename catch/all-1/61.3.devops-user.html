@@ -1,0 +1,254 @@
+
+        <h2 id="t01. 用户和用户组">1. 用户和用户组 <a href="#t01. 用户和用户组"> # </a></h2>
+<ul>
+<li>使用操作系统的人都是用户</li>
+<li>用户组是具有相同系统权限的一组用户</li>
+</ul>
+<h2 id="t12 配置文件">2 配置文件 <a href="#t12 配置文件"> # </a></h2>
+<h3 id="t22.1 /etc/group">2.1 /etc/group <a href="#t22.1 /etc/group"> # </a></h3>
+<ul>
+<li>/etc/group 存储当前系统中所有用户组信息</li>
+<li><code>root</code> 组编号为 <code>0</code></li>
+<li><code>1-499</code>系统预留的编号 预留给安装的软件和服务的</li>
+<li>用户手动创建的用户组从<code>500</code>开始</li>
+<li>组密码占位符都是<code>x</code></li>
+<li>如果组内只有一个用户，而且用户名和组名相同的话，是可以省略用户名的</li>
+</ul>
+<p><code>root:x:0:root</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">含义</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">组的名称</td>
+</tr>
+<tr>
+<td style="text-align:left">x</td>
+<td style="text-align:left">密码占位符</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">组编号</td>
+</tr>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">组中用户名列表</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t32.2 /etc/gshadow">2.2 /etc/gshadow <a href="#t32.2 /etc/gshadow"> # </a></h3>
+<ul>
+<li>存放当前系统中用户组的密码信息</li>
+<li>和<code>/etc/group</code>中的记录一一对应</li>
+</ul>
+<p><code>root:*::root</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">组的名称</td>
+</tr>
+<tr>
+<td style="text-align:left">*</td>
+<td style="text-align:left">组密码,*为空</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">组管理者,为空表示都可以管理这个组</td>
+</tr>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">组中用户名列表</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t42.3 /etc/passwd">2.3 /etc/passwd <a href="#t42.3 /etc/passwd"> # </a></h3>
+<ul>
+<li>存储当前系统中所有用户的信息</li>
+</ul>
+<p><code>root:x:0:0:root:/root:/bin/bash</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">用户名</td>
+</tr>
+<tr>
+<td style="text-align:left">x</td>
+<td style="text-align:left">密码占位符</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">用户编号</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">用户组编号</td>
+</tr>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">用户注释信息</td>
+</tr>
+<tr>
+<td style="text-align:left">/root</td>
+<td style="text-align:left">用户主目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/bin/bash</td>
+<td style="text-align:left">shell类型</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t52.4 /etc/shadow">2.4 /etc/shadow <a href="#t52.4 /etc/shadow"> # </a></h3>
+<ul>
+<li>存放当前系统中所有用户的密码信息</li>
+<li>user:xxx:::::::</li>
+<li>用户名:密码:</li>
+</ul>
+<p><code>root:password:17982:0:99999:7:::</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">内容</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">root</td>
+<td style="text-align:left">用户名</td>
+</tr>
+<tr>
+<td style="text-align:left">password</td>
+<td style="text-align:left">单向加密后的密码</td>
+</tr>
+<tr>
+<td style="text-align:left">17982</td>
+<td style="text-align:left">修改日期,这个是表明上一次修改密码的日期与1970-1-1相距的天数密码不可改的天数：假如这个数字是8，则8天内不可改密码，如果是0，则随时可以改</td>
+</tr>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">这个是表明上一次修改密码的日期与1970-1-1相距的天数密码不可改的天数：假如这个数字是8，则8天内不可改密码，如果是0，则随时可以改</td>
+</tr>
+<tr>
+<td style="text-align:left">99999</td>
+<td style="text-align:left">如果是99999则永远不用改。如果是其其他数字比如12345，那么必须在距离1970-1-1的12345天内修改密码，否则密码失效</td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">修改期限前N天发出警告</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">密码过期的宽限天数</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">帐号失效日期</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">保留：被保留项，暂时还没有被用上</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t63. 用户命令">3. 用户命令 <a href="#t63. 用户命令"> # </a></h2>
+<p>显示登录的用户名</p>
+<pre><code class="lang-js">whoami
+</code></pre>
+<p>显示指定用户信息，包括用户编号，用户名 主要组的编号及名称，附属组列表</p>
+<pre><code class="lang-js">id zhangsan  
+</code></pre>
+<p>显示zhangsan用户所在的所有组</p>
+<pre><code class="lang-js">groups zhangsan 
+</code></pre>
+<p>显示用户详细资料</p>
+<pre><code class="lang-js">finger zhangsan  
+</code></pre>
+<h2 id="t74. 用户和用户组操作">4. 用户和用户组操作 <a href="#t74. 用户和用户组操作"> # </a></h2>
+<h3 id="t84.1 添加用户组">4.1 添加用户组 <a href="#t84.1 添加用户组"> # </a></h3>
+<pre><code class="lang-js">groupadd stu
+cat  /etc/group
+</code></pre>
+<h3 id="t94.2 修改用户组名称">4.2 修改用户组名称 <a href="#t94.2 修改用户组名称"> # </a></h3>
+<pre><code class="lang-js">groupmod -n student stu
+cat  /etc/group
+</code></pre>
+<h3 id="t104.3 修改用户组编号">4.3 修改用户组编号 <a href="#t104.3 修改用户组编号"> # </a></h3>
+<pre><code class="lang-js">groupmod -g <span class="hljs-number">666</span> student
+cat  /etc/group
+</code></pre>
+<h3 id="t114.4 创建分组并指定编号">4.4 创建分组并指定编号 <a href="#t114.4 创建分组并指定编号"> # </a></h3>
+<pre><code class="lang-js">groupadd -g <span class="hljs-number">888</span> teacher
+</code></pre>
+<h3 id="t124.5 删除用户组">4.5 删除用户组 <a href="#t124.5 删除用户组"> # </a></h3>
+<pre><code class="lang-js">groupdel student
+</code></pre>
+<h3 id="t134.6 添加用户">4.6 添加用户 <a href="#t134.6 添加用户"> # </a></h3>
+<ul>
+<li>如果创建用户的时候没有指定用户组，系统会为他创建一个和用户名相同的用户组</li>
+</ul>
+<pre><code class="lang-js">groupadd stu
+useradd -g stu zhangsan  创建用户并指定用户组
+useradd -g stu lisi      创建用户并指定用户组
+
+id zhangsan
+id lisi
+
+useradd -d /home/woshiwangwu wangwu   创建用户并指定家目录
+</code></pre>
+<h3 id="t144.7 修改用户注释">4.7 修改用户注释 <a href="#t144.7 修改用户注释"> # </a></h3>
+<pre><code class="lang-js">usermod -c good wangwu
+</code></pre>
+<h3 id="t154.8 修改用户名">4.8 修改用户名 <a href="#t154.8 修改用户名"> # </a></h3>
+<pre><code class="lang-js">usermod -l wangwu2 wangwu
+</code></pre>
+<h3 id="t164.9 指定个人文件夹">4.9 指定个人文件夹 <a href="#t164.9 指定个人文件夹"> # </a></h3>
+<pre><code class="lang-js">usermod -d /home/wangwu2 wangwu2
+</code></pre>
+<h3 id="t174.10 修改用户组">4.10 修改用户组 <a href="#t174.10 修改用户组"> # </a></h3>
+<pre><code class="lang-js">usermod -g student wangwu2
+</code></pre>
+<h3 id="t184.11 删除用户">4.11 删除用户 <a href="#t184.11 删除用户"> # </a></h3>
+<pre><code class="lang-js">userdel wangwu2
+userdel -r wangwu2 删除用户的时候级联删除对应的目录
+</code></pre>
+<h3 id="t194.12 锁定用户wangwu2的密码">4.12 锁定用户wangwu2的密码 <a href="#t194.12 锁定用户wangwu2的密码"> # </a></h3>
+<pre><code class="lang-js">passwd -l wangwu2
+</code></pre>
+<h3 id="t204.13 解锁用户wangwu2的密码">4.13 解锁用户wangwu2的密码 <a href="#t204.13 解锁用户wangwu2的密码"> # </a></h3>
+<pre><code class="lang-js">passwd -u wangwu2
+</code></pre>
+<h2 id="t215. 主要组和附属组">5. 主要组和附属组 <a href="#t215. 主要组和附属组"> # </a></h2>
+<ul>
+<li>用户可以同时属于多个组,一个主要组和多个附属组</li>
+<li>一个用户创建的文件属于主要组</li>
+</ul>
+<p>把wangwu2添加到teacher附属组中</p>
+<pre><code class="lang-js">gpasswd -a wangwu2 teacher
+Adding user wangwu2 to group teacher
+newgrp teacher  当前用户把身份切换为附属组，如果附属组有密码，需要设置密码
+gpasswd -d wangwu2 teacher 把wangwu2从teacher附属组中移除
+
+useradd -g group1 -G group2,group3... zhaoliu 添加用户的时候指定主要组和附属组
+gpasswd group1 设置组密码
+</code></pre>
+
+    

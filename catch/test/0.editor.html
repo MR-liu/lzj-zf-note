@@ -1,0 +1,116 @@
+
+        <h2 id="t01. VSCODE">1. VSCODE <a href="#t01. VSCODE"> # </a></h2>
+<h3 id="t11.1 使用node启动调试">1.1 使用node启动调试 <a href="#t11.1 使用node启动调试"> # </a></h3>
+<pre><code>{
+            "type": "node",
+            "request": "launch",
+            "name": "启动程序",
+            "program": "E:/cli.js"
+        }
+</code></pre><ul>
+<li><a href="https://cnodejs.org/topic/58f376fec749f63d48fe9548">VSCODE</a><h3 id="t21.2 保存时自动格式化">1.2 保存时自动格式化 <a href="#t21.2 保存时自动格式化"> # </a></h3>
+File-&gt;Preferences-&gt;User Settings<pre><code class="lang-json">{
+  <span class="hljs-attr">"editor.formatOnType"</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">"editor.formatOnSave"</span>: <span class="hljs-literal">false</span>
+}
+</code></pre>
+</li>
+</ul>
+<h3 id="t31.3 语言改为英文">1.3 语言改为英文 <a href="#t31.3 语言改为英文"> # </a></h3>
+<p>快捷键Command+Shift+P（Win下为Control）打开命令行工具,输入设置语言，会打开一个locale.json的文件，如下面所示</p>
+<p>{
+ // 定义 VSCode 的显示语言。
+ // 请参阅 <a href="http://go.microsoft.com/fwlink/?LinkId=761051，了解支持的语言列表。">http://go.microsoft.com/fwlink/?LinkId=761051，了解支持的语言列表。</a>
+ // 要更改值需要重启 VSCode。
+ "locale":"zh-CN" 
+}
+将locale的值改为en-US之后重启VSCode就恢复到英文版本的了!</p>
+<h3 id="t41.4 快捷键">1.4 快捷键 <a href="#t41.4 快捷键"> # </a></h3>
+<ul>
+<li>列选择 alt+shift+左键</li>
+<li>多点编辑 按alt点击左键</li>
+<li>格式化 Alt+shift+f</li>
+</ul>
+<h3 id="t51.5 单行注释">1.5 单行注释 <a href="#t51.5 单行注释"> # </a></h3>
+<p>单行注释 </p>
+<pre><code class="lang-js"><span class="hljs-comment">//.+?(?=["$\r\n]</span>
+</code></pre>
+<h3 id="t61.6 多行注释">1.6 多行注释 <a href="#t61.6 多行注释"> # </a></h3>
+<pre><code class="lang-js">\/\*([\w\W]+?)\*\/
+</code></pre>
+<h3 id="t71.7 空行">1.7 空行 <a href="#t71.7 空行"> # </a></h3>
+<pre><code class="lang-js">^\s*(?=\r?$)\n
+</code></pre>
+<h3 id="t81.8 全部替换">1.8 全部替换 <a href="#t81.8 全部替换"> # </a></h3>
+<pre><code class="lang-js">((\/\*([\w\W]+?)\*\/)|(\/\/.+?(?=["$\r\n]))|(^\s*(?=\r?$)\n))
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/emptylineregexp.png" alt="emptylineregexp.png"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">表达式</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">(?:)</td>
+<td style="text-align:left">表示非捕获分组，和捕获分组唯一的区别在于，非捕获分组匹配的值不会保存起来</td>
+</tr>
+<tr>
+<td style="text-align:left">(?=pattern)</td>
+<td style="text-align:left">正向肯定查找(前瞻),后面必须跟着什么</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t92.MAC">2.MAC <a href="#t92.MAC"> # </a></h2>
+<h3 id="t102.1 杀死进程">2.1 杀死进程 <a href="#t102.1 杀死进程"> # </a></h3>
+<p>查看进程占用</p>
+<pre><code class="lang-javascript">lsof -i tcp:<span class="hljs-number">8080</span> 
+</code></pre>
+<p>该命令会显示占用8080端口的进程，有其 pid ,可以通过pid关掉该进程</p>
+<pre><code class="lang-javascript">kill pid
+</code></pre>
+<h3 id="t112.2 查看端口占用">2.2 查看端口占用 <a href="#t112.2 查看端口占用"> # </a></h3>
+<h4 id="t122.2.1 lsof">2.2.1 lsof <a href="#t122.2.1 lsof"> # </a></h4>
+<pre><code>lsof -i:port
+</code></pre><pre><code>lsof -i:8080
+</code></pre><h4 id="t132.2.2 netstat">2.2.2 netstat <a href="#t132.2.2 netstat"> # </a></h4>
+<pre><code>netstat -antp | grep port
+</code></pre><pre><code>netstat -antp | grep 8080
+</code></pre><h2 id="t143.安装需要编译包">3.安装需要编译包 <a href="#t143.安装需要编译包"> # </a></h2>
+<h3 id="t153.1 安装sharp">3.1 安装sharp <a href="#t153.1 安装sharp"> # </a></h3>
+<ul>
+<li><a href="https://www.iqi360.com/p/sharp-cn">sharp</a>是一个高性能的nodejs图像处理库</li>
+<li><a href="https://www.iqi360.com/p/sharp-cn/docs/5f8b012a5a726a40e3f0f02e">安装sharp</a></li>
+<li><a href="https://www.cnblogs.com/zzsdream/p/13391731.html">安装过程中遇到sharp安装慢</a></li>
+<li><a href="https://github.com/lovell/sharp-libvips/releases/tag/v8.10.5">sharp-libvips</a></li>
+<li><pre><code class="lang-js">npm config <span class="hljs-keyword">set</span> sharp_binary_host "https://npm.taobao.org/mirrors/sharp"
+npm config <span class="hljs-keyword">set</span> sharp_libvips_binary_host "https://npm.taobao.org/mirrors/sharp-libvips"
+npm install sharp
+</code></pre>
+<h3 id="t163.2 编译">3.2 编译 <a href="#t163.2 编译"> # </a></h3>
+</li>
+<li><a href="https://github.com/nodejs/node-gyp#on-windows">node-gyp#on-windows</a></li>
+<li><a href="https://github.com/felixrieseberg/windows-build-tools">windows-build-tools</a></li>
+<li><a href="https://www.python.org/">python</a></li>
+</ul>
+<h3 id="t173.2 cache目录">3.2 cache目录 <a href="#t173.2 cache目录"> # </a></h3>
+<ul>
+<li>NPM会把所有下载的包保存，放在用户文件夹下面，在我的windows10机器上是保存在C:\Users\Administrator\AppData\Roaming\npm-cache下面</li>
+<li>NPM install之后会计算每个包的sha1值，然后将包与他的sha1值关联保存在package.lock.json里面</li>
+<li>下次NPM install的时候会根据package.lock.json里面保存的sha1值去文件夹C:\Users\Administrator\AppData\Roaming\npm-cache里面寻找包文件，如果存在，就不用再次从网上下载安装包</li>
+<li>NPM cache verify 重新计算C:\Users\Administrator\AppData\Roaming\npm-cache下的文件是否与sha1值匹配，如果不匹配可能删除？</li>
+<li>NPM cache clean --force 这个命令从C:\Users\Administrator\AppData\Roaming\npm-cache下删除所有缓存文件</li>
+<li><p>NPM不同版本算出来的sha1貌似不完全一样，所以直接用别人的package.lock.json会报sha1不匹配的error</p>
+</li>
+<li><p><code>yarn cache list</code> 查看缓存的包</p>
+</li>
+<li><code>yarn cache dir</code> 查询cache缓存文件目录路径</li>
+<li><p><code>yarn cache clean</code>  yarn 清除缓存</p>
+</li>
+<li><p><code>npm cache clean --force</code> npm清除缓存</p>
+</li>
+</ul>
+
+    

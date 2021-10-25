@@ -1,0 +1,442 @@
+
+        <h2 id="t01. React Hooks">1. React Hooks <a href="#t01. React Hooks"> # </a></h2>
+<ul>
+<li>Hook 是 React 16.8 的新增特性。它可以让你在不编写 class 的情况下使用 state 以及其他的 React 特性</li>
+</ul>
+<h3 id="t11.1 Hooks 优点">1.1 Hooks 优点 <a href="#t11.1 Hooks 优点"> # </a></h3>
+<ul>
+<li>可以抽离公共方法和逻辑，提高代码的可复用性</li>
+<li>函数式组件更简洁，开发效率更高</li>
+</ul>
+<h3 id="t21.2 自定义 Hook">1.2 自定义 Hook <a href="#t21.2 自定义 Hook"> # </a></h3>
+<ul>
+<li>通过自定义 Hook，可以将组件逻辑提取到可重用的函数中</li>
+<li>自定义 Hook 是一个函数，其名称以 <code>use</code> 开头，函数内部可以调用其他的 <code>Hook</code></li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/e4fa49ed9ad67984a49e90cbe1d0b111" alt="e4fa49ed9ad67984a49e90cbe1d0b111"></p>
+<h3 id="t31.3 初始化项目">1.3 初始化项目 <a href="#t31.3 初始化项目"> # </a></h3>
+<pre><code class="lang-js">create-react-app zhufeng_custom_hooks
+cd zhufeng_custom_hooks
+npm i express cors morgan bootstrap@<span class="hljs-number">3</span> react-router-dom --save
+</code></pre>
+<h2 id="t42.useRequest">2.useRequest <a href="#t42.useRequest"> # </a></h2>
+<h3 id="t52.1 index.js">2.1 index.js <a href="#t52.1 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'bootstrap/dist/css/bootstrap.css'</span>
+<span class="hljs-keyword">import</span> {BrowserRouter,Route,Link} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router-dom'</span>;
+<span class="hljs-keyword">import</span> Table <span class="hljs-keyword">from</span> <span class="hljs-string">'./Table'</span>;
+<span class="hljs-keyword">import</span> Drag <span class="hljs-keyword">from</span> <span class="hljs-string">'./Drag'</span>;
+<span class="hljs-keyword">import</span> Form <span class="hljs-keyword">from</span> <span class="hljs-string">'./Form'</span>;
+<span class="hljs-keyword">import</span> Circle <span class="hljs-keyword">from</span> <span class="hljs-string">'./Circle'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"container"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"row"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"col-md-12"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">padding:</span> <span class="hljs-attr">10</span> }}&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">BrowserRouter</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"nav nav-tabs"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/table"</span>&gt;</span>Table<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/drag"</span>&gt;</span>Drag<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/form"</span>&gt;</span>Form<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/circle"</span>&gt;</span>Circle<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/table"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Table}/</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/drag"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Drag}/</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/form"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Form}/</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/circle"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Circle}/</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">BrowserRouter</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t62.2 Table.js">2.2 Table.js <a href="#t62.2 Table.js"> # </a></h3>
+<p>src\Table.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> useRequest <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks/useRequest'</span>;
+<span class="hljs-keyword">const</span> URL = <span class="hljs-string">'http://localhost:8000/api/users'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Table</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> [data, options,setOptions] = useRequest(URL);
+    <span class="hljs-keyword">const</span> { currentPage, totalPage, list } = data;
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"table table-striped"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>ID<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>姓名<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">tbody</span>&gt;</span>
+                    {
+                        list.map(item =&gt; (<span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item.id}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{item.id}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{item.name}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>))
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">tbody</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">nav</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"pagination"</span>&gt;</span>
+                    {currentPage&gt;1&amp;&amp;(
+                        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"btn btn-default"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"#"</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setOptions({ ...options,currentPage: currentPage - 1 })}&gt;
+                                <span class="hljs-tag">&lt;<span class="hljs-name">span</span> &gt;</span><span class="hljs-symbol">&amp;laquo;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                    )}
+                    {
+                        new Array(totalPage).fill(0).map((item, index) =&gt; (
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{index+1</span>===<span class="hljs-string">currentPage?</span>'<span class="hljs-attr">btn</span> <span class="hljs-attr">btn-success</span>'<span class="hljs-attr">:</span>'<span class="hljs-attr">btn</span> <span class="hljs-attr">btn-default</span>'} <span class="hljs-attr">key</span>=<span class="hljs-string">{item.id}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setOptions({ ...options,currentPage: index + 1 })}&gt;{index + 1}<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                        ))
+                    }
+                    {
+                        currentPage<span class="hljs-tag">&lt;<span class="hljs-name">totalPage&amp;&amp;(</span>
+                            &lt;<span class="hljs-attr">li</span>&gt;</span>
+                                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"btn btn-default"</span>  <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setOptions({...options, currentPage: currentPage + 1 })}&gt;
+                                    <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span><span class="hljs-symbol">&amp;raquo;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                                <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                            <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                        )
+                    }
+                <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span>
+        <span class="hljs-tag">&lt;/&gt;</span>
+    )
+}
+</span></code></pre>
+<h3 id="t72.3 useRequest.js">2.3 useRequest.js <a href="#t72.3 useRequest.js"> # </a></h3>
+<p>src\hooks\useRequest.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useRequest</span>(<span class="hljs-params">url</span>) </span>{
+    <span class="hljs-keyword">let</span> [options, setOptions] = useState({
+        <span class="hljs-attr">currentPage</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">pageSize</span>: <span class="hljs-number">5</span>
+    });
+    <span class="hljs-keyword">let</span> [data, setData] = useState({
+        <span class="hljs-attr">totalPage</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">list</span>: []
+    });
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getData</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">let</span> { currentPage, pageSize } = options;
+        fetch(<span class="hljs-string">`<span class="hljs-subst">${url}</span>?currentPage=<span class="hljs-subst">${currentPage}</span>&amp;pageSize=<span class="hljs-subst">${pageSize}</span>`</span>)
+            .then(<span class="hljs-function"><span class="hljs-params">response</span> =&gt;</span> response.json())
+            .then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+                setData({...result});
+            });
+    }
+    useEffect(getData, [options, url]);
+    <span class="hljs-keyword">return</span> [data,options, setOptions];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useRequest;
+</code></pre>
+<h3 id="t82.4 api.js">2.4 api.js <a href="#t82.4 api.js"> # </a></h3>
+<p>api.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">let</span> cors = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cors'</span>);
+<span class="hljs-keyword">let</span> logger = <span class="hljs-built_in">require</span>(<span class="hljs-string">'morgan'</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(logger(<span class="hljs-string">'dev'</span>));
+app.use(cors());
+app.get(<span class="hljs-string">'/api/users'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-keyword">let</span> currentPage = <span class="hljs-built_in">parseInt</span>(req.query.currentPage);
+    <span class="hljs-keyword">let</span> pageSize = <span class="hljs-built_in">parseInt</span>(req.query.pageSize);
+    <span class="hljs-keyword">let</span> total=<span class="hljs-number">25</span>;
+    <span class="hljs-keyword">let</span> list = [];
+    <span class="hljs-keyword">let</span> offset = (currentPage<span class="hljs-number">-1</span>)*pageSize;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = offset; i &lt; offset + pageSize; i++) {
+        list.push({ <span class="hljs-attr">id</span>: i + <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'name'</span> + (i + <span class="hljs-number">1</span>) });
+    }
+    res.json({
+        currentPage,
+        pageSize,
+        <span class="hljs-attr">totalPage</span>:<span class="hljs-built_in">Math</span>.ceil(total/pageSize),
+        list
+    });
+});
+app.listen(<span class="hljs-number">8000</span>,()=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'sever started at port 8000'</span>);
+});
+</code></pre>
+<h2 id="t93.useDrag">3.useDrag <a href="#t93.useDrag"> # </a></h2>
+<p><img src="https://img.zhufengpeixun.com/c81b23738e0b951ad11d4a395795b7ff" alt="c81b23738e0b951ad11d4a395795b7ff"></p>
+<h3 id="t103.1 基础">3.1 基础 <a href="#t103.1 基础"> # </a></h3>
+<h4 id="t113.1.1 触摸事件">3.1.1 触摸事件 <a href="#t113.1.1 触摸事件"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">事件名称</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">是否包含 touches 数组</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">touchstart</td>
+<td style="text-align:left">触摸开始发</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">touchmove</td>
+<td style="text-align:left">滑动时接触点改变</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">touchend</td>
+<td style="text-align:left">手指离开屏幕时触摸结束</td>
+<td style="text-align:left">是</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t123.1.2 触摸列表">3.1.2 触摸列表 <a href="#t123.1.2 触摸列表"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">touches</td>
+<td style="text-align:left">当前位于屏幕上的所有手指的列表</td>
+</tr>
+<tr>
+<td style="text-align:left">targetTouches</td>
+<td style="text-align:left">位于当前DOM元素上手指的列表</td>
+</tr>
+</tbody>
+</table>
+<h4 id="t133.1.3  Touch对象">3.1.3  Touch对象 <a href="#t133.1.3  Touch对象"> # </a></h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">clientX</td>
+<td style="text-align:left">触摸目标在视口中的x坐标</td>
+</tr>
+<tr>
+<td style="text-align:left">clientY</td>
+<td style="text-align:left">触摸目标在视口中的y坐标</td>
+</tr>
+<tr>
+<td style="text-align:left">pageX</td>
+<td style="text-align:left">触摸目标在页面中的x坐标</td>
+</tr>
+<tr>
+<td style="text-align:left">pageY</td>
+<td style="text-align:left">触摸目标在页面中的y坐标</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t143.2 实现">3.2 实现 <a href="#t143.2 实现"> # </a></h3>
+<h4 id="t153.2.1 index.js">3.2.1 index.js <a href="#t153.2.1 index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'bootstrap/dist/css/bootstrap.css'</span>
+<span class="hljs-keyword">import</span> Drag <span class="hljs-keyword">from</span> <span class="hljs-string">'./Drag'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"container"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"row"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"col-md-12"</span>&gt;</span>
+        {<span class="hljs-tag">&lt;<span class="hljs-name">Drag</span> /&gt;</span>}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h4 id="t163.2.2 src\Drag.js">3.2.2 src\Drag.js <a href="#t163.2.2 src\Drag.js"> # </a></h4>
+<p>src\Drag.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> useDrag <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks/useDrag'</span>;
+<span class="hljs-keyword">let</span> style = {<span class="hljs-attr">width</span>:<span class="hljs-string">'100px'</span>,<span class="hljs-attr">height</span>:<span class="hljs-string">'100px'</span>,<span class="hljs-attr">borderRadius</span>:<span class="hljs-string">'50%'</span>};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Drag</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> [style1, dragRef1] = useDrag()
+    <span class="hljs-keyword">const</span> [style2, dragRef2] = useDrag()
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+                <span class="hljs-attr">ref</span>=<span class="hljs-string">{dragRef1}</span>
+                <span class="hljs-attr">style</span>=<span class="hljs-string">{{...style,backgroundColor:</span>'<span class="hljs-attr">red</span>',<span class="hljs-attr">transform:</span> `<span class="hljs-attr">translate</span>(${<span class="hljs-attr">style1.x</span>}<span class="hljs-attr">px</span>, ${<span class="hljs-attr">style1.y</span>}<span class="hljs-attr">px</span>)` }}
+            &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+             <span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+                <span class="hljs-attr">ref</span>=<span class="hljs-string">{dragRef2}</span>
+                <span class="hljs-attr">style</span>=<span class="hljs-string">{{...style,backgroundColor:</span>'<span class="hljs-attr">green</span>',<span class="hljs-attr">transform:</span> `<span class="hljs-attr">translate</span>(${<span class="hljs-attr">style2.x</span>}<span class="hljs-attr">px</span>, ${<span class="hljs-attr">style2.y</span>}<span class="hljs-attr">px</span>)` }}
+            &gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/&gt;</span></span>
+    )
+}
+</code></pre>
+<h4 id="t173.2.3 useDrag.js">3.2.3 useDrag.js <a href="#t173.2.3 useDrag.js"> # </a></h4>
+<p>src\hooks\useDrag.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { useLayoutEffect, useState, useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useDrag</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> positionRef = useRef({
+        <span class="hljs-attr">currentX</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">currentY</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">lastX</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">lastY</span>: <span class="hljs-number">0</span>
+    })
+    <span class="hljs-keyword">const</span> moveElement = useRef(<span class="hljs-literal">null</span>);
+    <span class="hljs-keyword">const</span> [, forceUpdate] = useState({});
+    useLayoutEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">let</span> startX, startY;
+        <span class="hljs-keyword">const</span> start = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+            <span class="hljs-keyword">const</span> { clientX, clientY } =  event.targetTouches[<span class="hljs-number">0</span>];
+            startX = clientX;
+            startY = clientY;
+            moveElement.current.addEventListener(<span class="hljs-string">'touchmove'</span>, move);
+            moveElement.current.addEventListener(<span class="hljs-string">'touchend'</span>, end);
+
+        }
+        <span class="hljs-keyword">const</span> move = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+            <span class="hljs-keyword">const</span> { clientX, clientY } = event.targetTouches[<span class="hljs-number">0</span>];
+            positionRef.current.currentX = positionRef.current.lastX + (clientX - startX);
+            positionRef.current.currentY = positionRef.current.lastY + (clientY - startY);
+            forceUpdate({});
+        }
+        <span class="hljs-keyword">const</span> end = <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+            positionRef.current.lastX = positionRef.current.currentX;
+            positionRef.current.lastY = positionRef.current.currentY;
+            moveElement.current.removeEventListener(<span class="hljs-string">'touchmove'</span>, move);
+                moveElement.current.removeEventListener(<span class="hljs-string">'touchend'</span>, end);
+        }
+        moveElement.current.addEventListener(<span class="hljs-string">'touchstart'</span>, start);
+
+    }, []);
+    <span class="hljs-keyword">return</span> [{ <span class="hljs-attr">x</span>: positionRef.current.currentX, <span class="hljs-attr">y</span>: positionRef.current.currentY }, moveElement]
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useDrag;
+</code></pre>
+<h2 id="t184.useForm">4.useForm <a href="#t184.useForm"> # </a></h2>
+<h3 id="t194.1 src\index.js">4.1 src\index.js <a href="#t194.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'bootstrap/dist/css/bootstrap.css'</span>
+<span class="hljs-keyword">import</span> Form <span class="hljs-keyword">from</span> <span class="hljs-string">'./Form'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"container"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"row"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"col-md-12"</span>&gt;</span>
+        {<span class="hljs-tag">&lt;<span class="hljs-name">Form</span> /&gt;</span>}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t204.2 src\Form.js">4.2 src\Form.js <a href="#t204.2 src\Form.js"> # </a></h3>
+<p>src\Form.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> useForm <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks/useForm'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Form</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> [formData, setFormValue, resetFormValues] = useForm({<span class="hljs-attr">username</span>:<span class="hljs-string">''</span>,<span class="hljs-attr">email</span>:<span class="hljs-string">''</span>});
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"panel"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"panel-body"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">form</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">label</span> &gt;</span>用户名<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+                            <span class="hljs-attr">className</span>=<span class="hljs-string">"form-control"</span>
+                            <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"用户名"</span>
+                            <span class="hljs-attr">value</span>=<span class="hljs-string">{formData.username}</span>
+                            <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(event)</span> =&gt;</span> setFormValue('username', event.target.value)} /&gt;
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">label</span> &gt;</span>邮箱<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+                            <span class="hljs-attr">className</span>=<span class="hljs-string">"form-control"</span>
+                            <span class="hljs-attr">placeholder</span>=<span class="hljs-string">"邮箱"</span>
+                            <span class="hljs-attr">value</span>=<span class="hljs-string">{formData.email}</span>
+                            <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(event)</span> =&gt;</span> setFormValue('email', event.target.value)}
+                        /&gt;
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"btn btn-default"</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> console.log(formData)}&gt;提交<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">button</span>  <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"btn btn-default"</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{resetFormValues}</span>&gt;</span>重置<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+</code></pre>
+<h3 id="t214.3 useForm.js">4.3 useForm.js <a href="#t214.3 useForm.js"> # </a></h3>
+<p>src\hooks\useForm.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useForm</span>(<span class="hljs-params">values</span>) </span>{
+    <span class="hljs-keyword">const</span> [formData, setFormData] = useState(values);
+    <span class="hljs-keyword">const</span> setFormValue = <span class="hljs-function">(<span class="hljs-params">key, value</span>) =&gt;</span> {
+        setFormData({...formData,[key]:value});
+    }
+    <span class="hljs-keyword">const</span> resetFormValues = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        setFormData(values);
+    }
+    <span class="hljs-keyword">return</span> [formData, setFormValue, resetFormValues];
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useForm;
+</code></pre>
+<h2 id="t225.useAnimation">5.useAnimation <a href="#t225.useAnimation"> # </a></h2>
+<h3 id="t235.1 src\index.js">5.1 src\index.js <a href="#t235.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'bootstrap/dist/css/bootstrap.css'</span>
+<span class="hljs-keyword">import</span> Circle <span class="hljs-keyword">from</span> <span class="hljs-string">'./Circle'</span>;
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"container"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"row"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"col-md-12"</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">padding:</span> <span class="hljs-attr">10</span> }}&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Circle</span>/&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t245.2 src\Circle.js">5.2 src\Circle.js <a href="#t245.2 src\Circle.js"> # </a></h3>
+<p>src\Circle.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> useAnimation <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks/useAnimation'</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./Circle.css'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Circle</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> [className, start] = useAnimation(<span class="hljs-string">'circle'</span>,<span class="hljs-string">'active'</span>);
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{className}</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{start}</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Circle;;
+</code></pre>
+<h3 id="t255.3 Circle.css">5.3 Circle.css <a href="#t255.3 Circle.css"> # </a></h3>
+<p>src\Circle.css</p>
+<pre><code class="lang-css"><span class="hljs-selector-class">.circle</span> {
+    <span class="hljs-attribute">width </span>: <span class="hljs-number">200px</span>;
+    <span class="hljs-attribute">height </span>: <span class="hljs-number">200px</span>;
+    <span class="hljs-attribute">background-color </span>: gray;
+    <span class="hljs-attribute">transition</span>: all <span class="hljs-number">2s</span>;
+}
+<span class="hljs-selector-class">.circle</span><span class="hljs-selector-class">.active</span> {
+    <span class="hljs-attribute">background-color </span>: green;
+}
+</code></pre>
+<h3 id="t265.4 useAnimation.js">5.4 useAnimation.js <a href="#t265.4 useAnimation.js"> # </a></h3>
+<p>src\hooks\useAnimation.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {useState} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useAnimation</span>(<span class="hljs-params">initialClassName,activeClassName</span>) </span>{
+    <span class="hljs-keyword">const</span> [className, setClassName] = useState(initialClassName);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">if</span> (className === initialClassName) {
+            setClassName(<span class="hljs-string">`<span class="hljs-subst">${initialClassName}</span> <span class="hljs-subst">${activeClassName}</span>`</span>);
+        }<span class="hljs-keyword">else</span>{
+            setClassName(<span class="hljs-string">`<span class="hljs-subst">${initialClassName}</span>`</span>);
+        }
+    }
+    <span class="hljs-keyword">return</span> [className, start];
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useAnimation;
+</code></pre>
+
+    

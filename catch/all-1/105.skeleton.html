@@ -1,0 +1,666 @@
+
+        <h2 id="t01.初始化项目">1.初始化项目 <a href="#t01.初始化项目"> # </a></h2>
+<pre><code class="lang-js">$ mkdir zhufengskeleton
+$ cd zhufengskeleton
+$ npm init -y
+$ cnpm i css-tree  @babel/core @babel/preset-env @babel/preset-react babel-loader cross-env fs-extra html-webpack-plugin  webpack webpack-cli webpack-dev-server -D
+$ cnpm i react react-dom -S
+$ cnpm i puppeteer -D
+</code></pre>
+<h2 id="t12.React项目构建">2.React项目构建 <a href="#t12.React项目构建"> # </a></h2>
+<h3 id="t22.1 webpack.config.js">2.1 webpack.config.js <a href="#t22.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-keyword">const</span> {resolve} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>:resolve(__dirname,<span class="hljs-string">'dist'</span>),
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">"main.js"</span>
+    },
+    <span class="hljs-attr">module</span>: {
+        <span class="hljs-attr">rules</span>: [{
+            <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>,
+            <span class="hljs-attr">use</span>: [
+                {
+                    <span class="hljs-attr">loader</span>:<span class="hljs-string">'babel-loader'</span>,
+                    <span class="hljs-attr">options</span>:{
+                        <span class="hljs-attr">presets</span>:[<span class="hljs-string">"@babel/preset-env"</span>,<span class="hljs-string">"@babel/preset-react"</span>]
+                    }
+                }
+            ],
+            <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>
+        }]
+    },
+    <span class="hljs-attr">devServer</span>: {
+        <span class="hljs-attr">contentBase</span>: resolve(__dirname,<span class="hljs-string">'dist'</span>)
+    },
+    <span class="hljs-attr">plugins</span>: [
+        <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+            <span class="hljs-attr">template</span>: <span class="hljs-string">'./src/index.html'</span>
+        })
+    ]
+}
+</code></pre>
+<h3 id="t32.2 src\index.js">2.2 src\index.js <a href="#t32.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+ReactDOM.render((
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"http://img.zhufengpeixun.cn/zhufengjg.jpg"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"100%"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">img</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>点我点我<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+),<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t42.3 src\index.html">2.3 src\index.html <a href="#t42.3 src\index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-js">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;skeleton&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="root"&gt;&lt;!-- shell --&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="t53. 创建插件">3. 创建插件 <a href="#t53. 创建插件"> # </a></h2>
+<h3 id="t63.1 skeleton\index.js">3.1 skeleton\index.js <a href="#t63.1 skeleton\index.js"> # </a></h3>
+<p>skeleton\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> SkeletonPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./SkeletonPlugin'</span>)
+<span class="hljs-built_in">module</span>.exports = {
+  SkeletonPlugin
+}
+</code></pre>
+<h3 id="t73.2 SkeletonPlugin.js">3.2 SkeletonPlugin.js <a href="#t73.2 SkeletonPlugin.js"> # </a></h3>
+<p>skeleton\SkeletonPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> PLUGIN_NAME = <span class="hljs-string">'SkeletonPlugin'</span>;
+<span class="hljs-keyword">const</span> defaultOptions = {
+
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SkeletonPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options){
+        <span class="hljs-keyword">this</span>.options = {...defaultOptions,...options};
+    }
+    apply(compiler) {
+        compiler.hooks.done.tap(PLUGIN_NAME, <span class="hljs-keyword">async</span> () =&gt; {
+            <span class="hljs-built_in">console</span>.log(PLUGIN_NAME,<span class="hljs-string">'done'</span>);
+        })
+    }
+}
+<span class="hljs-built_in">module</span>.exports = SkeletonPlugin;
+</code></pre>
+<h3 id="t83.3 webpack.config.js">3.3 webpack.config.js <a href="#t83.3 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {resolve} = require('path');
+<span class="hljs-addition">+const {SkeletonPlugin} = require('./skeleton');</span>
+module.exports = {
+    mode:'development',
+    devtool:false,
+    entry: "./src/index.js",
+    output: {
+        path:resolve(__dirname,'dist'),
+        filename: "main.js"
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: [
+                {
+                    loader:'babel-loader',
+                    options:{
+                        presets:["@babel/preset-env","@babel/preset-react"]
+                    }
+                }
+            ],
+            exclude: /node_modules/
+        }]
+    },
+    devServer: {
+        contentBase: resolve(__dirname,'dist')
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        }),
+<span class="hljs-addition">+        new SkeletonPlugin({</span>
+<span class="hljs-addition">+            </span>
+<span class="hljs-addition">+        })</span>
+    ]
+}
+</code></pre>
+<h2 id="t94. 启动服务">4. 启动服务 <a href="#t94. 启动服务"> # </a></h2>
+<h3 id="t104.1 webpack.config.js">4.1 webpack.config.js <a href="#t104.1 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {resolve} = require('path');
+const {SkeletonPlugin} = require('./skeleton');
+module.exports = {
+    mode:'development',
+    devtool:false,
+    entry: "./src/index.js",
+    output: {
+        path:resolve(__dirname,'dist'),
+        filename: "main.js"
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: [
+                {
+                    loader:'babel-loader',
+                    options:{
+                        presets:["@babel/preset-env","@babel/preset-react"]
+                    }
+                }
+            ],
+            exclude: /node_modules/
+        }]
+    },
+    devServer: {
+        contentBase: resolve(__dirname,'dist')
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        }),
+        new SkeletonPlugin({
+<span class="hljs-addition">+            staticDir: resolve(__dirname,'dist'),</span>
+<span class="hljs-addition">+            port:8000,</span>
+<span class="hljs-addition">+            origin:'http://localhost:8000'</span>
+        })
+    ]
+}
+</code></pre>
+<h3 id="t114.2 SkeletonPlugin.js">4.2 SkeletonPlugin.js <a href="#t114.2 SkeletonPlugin.js"> # </a></h3>
+<p>skeleton\SkeletonPlugin.js</p>
+<pre><code class="lang-diff">const PLUGIN_NAME = 'SkeletonPlugin';
+<span class="hljs-addition">+const Server = require('./Server');</span>
+const defaultOptions = {
+
+}
+class SkeletonPlugin {
+    constructor(options){
+        this.options = {...defaultOptions,...options};
+    }
+    apply(compiler) {
+        compiler.hooks.done.tap(PLUGIN_NAME, async () =&gt; {
+<span class="hljs-addition">+           await this.startServer();    </span>
+<span class="hljs-addition">+           await this.server.close(); </span>
+        })
+    }
+<span class="hljs-addition">+    async startServer(){</span>
+<span class="hljs-addition">+        this.server = new Server(this.options);</span>
+<span class="hljs-addition">+        await this.server.listen();</span>
+<span class="hljs-addition">+    }</span>
+}
+module.exports = SkeletonPlugin;
+</code></pre>
+<h3 id="t124.3 Server.js">4.3 Server.js <a href="#t124.3 Server.js"> # </a></h3>
+<p>skeleton\Server.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>)
+<span class="hljs-keyword">const</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Server</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+    listen() {
+        <span class="hljs-keyword">const</span> app = <span class="hljs-keyword">this</span>.app = express();
+        app.use(<span class="hljs-string">'/'</span>,express.static(<span class="hljs-keyword">this</span>.options.staticDir));
+        <span class="hljs-keyword">this</span>.listenServer = http.createServer(app);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>( <span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span>{
+            <span class="hljs-keyword">this</span>.listenServer.listen(<span class="hljs-keyword">this</span>.options.port, () =&gt; {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`server listen at port: <span class="hljs-subst">${<span class="hljs-keyword">this</span>.options.origin}</span>`</span>);
+                resolve();
+            })
+        });
+    }
+    <span class="hljs-keyword">async</span> close() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>( <span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span>{
+            <span class="hljs-keyword">this</span>.listenServer.close(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'server closed!'</span>);
+                resolve();
+            })
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Server;
+</code></pre>
+<h2 id="t135. 启动puppeteer">5. 启动puppeteer <a href="#t135. 启动puppeteer"> # </a></h2>
+<h3 id="t145.1 webpack.config.js">5.1 webpack.config.js <a href="#t145.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {resolve} = require('path');
+const {SkeletonPlugin} = require('./skeleton');
+module.exports = {
+    mode:'development',
+    devtool:false,
+    entry: "./src/index.js",
+    output: {
+        path:resolve(__dirname,'dist'),
+        filename: "main.js"
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: [
+                {
+                    loader:'babel-loader',
+                    options:{
+                        presets:["@babel/preset-env","@babel/preset-react"]
+                    }
+                }
+            ],
+            exclude: /node_modules/
+        }]
+    },
+    devServer: {
+        contentBase: resolve(__dirname,'dist')
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        }),
+        new SkeletonPlugin({
+            staticDir: resolve(__dirname,'dist'),
+            port:8000,
+            origin:'http://localhost:8000',
+<span class="hljs-addition">+           device: 'iPhone 6'</span>
+        })
+    ]
+}
+
+</code></pre>
+<h3 id="t155.2 SkeletonPlugin.js">5.2 SkeletonPlugin.js <a href="#t155.2 SkeletonPlugin.js"> # </a></h3>
+<p>skeleton\SkeletonPlugin.js</p>
+<pre><code class="lang-diff">const PLUGIN_NAME = 'SkeletonPlugin';
+const Server = require('./Server');
+<span class="hljs-addition">+const Skeleton = require('./Skeleton');</span>
+const defaultOptions = {
+
+}
+class SkeletonPlugin {
+    constructor(options){
+        this.options = {...defaultOptions,...options};
+    }
+    apply(compiler) {
+        compiler.hooks.done.tap(PLUGIN_NAME, async () =&gt; {
+            await this.startServer();
+<span class="hljs-addition">+            this.skeleton= new Skeleton(this.options);</span>
+<span class="hljs-addition">+            await this.skeleton.initialize();</span>
+<span class="hljs-addition">+            const skeletonHtml = await this.skeleton.genHtml(this.options.origin);</span>
+<span class="hljs-addition">+            console.log('skeletonHtml',skeletonHtml);</span>
+<span class="hljs-addition">+            await this.skeleton.destroy();</span>
+            await this.server.close();
+        })
+    }
+    async startServer(){
+        this.server = new Server(this.options);
+        await this.server.listen();
+    }
+}
+module.exports = SkeletonPlugin;
+</code></pre>
+<h3 id="t165.3 Skeleton.js">5.3 Skeleton.js <a href="#t165.3 Skeleton.js"> # </a></h3>
+<p>skeleton\Skeleton.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">let</span>  puppeteer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'puppeteer'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Skeleton</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options = {}) {
+        <span class="hljs-keyword">this</span>.options = options
+    }
+    <span class="hljs-keyword">async</span> initialize() {
+        <span class="hljs-keyword">this</span>.browser = <span class="hljs-keyword">await</span> puppeteer.launch({ <span class="hljs-attr">headless</span>: <span class="hljs-literal">false</span> });
+    }
+    <span class="hljs-keyword">async</span> newPage() {
+        <span class="hljs-keyword">const</span> { device } = <span class="hljs-keyword">this</span>.options;
+        <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.browser.newPage();
+        <span class="hljs-keyword">await</span> page.emulate(puppeteer.devices[device]);
+        <span class="hljs-keyword">return</span> page;
+    }
+    <span class="hljs-keyword">async</span> genHtml(url) {
+        <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.newPage()
+        <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> page.goto(url, { <span class="hljs-attr">waitUntil</span>: <span class="hljs-string">'networkidle2'</span> });
+        <span class="hljs-keyword">if</span> (response &amp;&amp; !response.ok()) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${response.status}</span> on <span class="hljs-subst">${url}</span>`</span>)
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'html'</span>;
+    }
+    <span class="hljs-keyword">async</span> destroy() {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.browser) {
+            <span class="hljs-keyword">await</span> <span class="hljs-keyword">this</span>.browser.close();
+            <span class="hljs-keyword">this</span>.browser = <span class="hljs-literal">null</span>
+        }
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Skeleton;
+</code></pre>
+<h2 id="t176. 截取骨架内容">6. 截取骨架内容 <a href="#t176. 截取骨架内容"> # </a></h2>
+<h3 id="t186.1 SkeletonPlugin.js">6.1 SkeletonPlugin.js <a href="#t186.1 SkeletonPlugin.js"> # </a></h3>
+<p>skeleton\SkeletonPlugin.js</p>
+<pre><code class="lang-diff">const PLUGIN_NAME = 'SkeletonPlugin';
+const Server = require('./Server');
+const Skeleton = require('./Skeleton');
+<span class="hljs-addition">+const {resolve} = require('path');</span>
+<span class="hljs-addition">+const {readFileSync,writeFileSync} = require('fs');</span>
+const defaultOptions = {
+
+}
+class SkeletonPlugin {
+    constructor(options){
+        this.options = {...defaultOptions,...options};
+    }
+    apply(compiler) {
+        compiler.hooks.done.tap(PLUGIN_NAME, async () =&gt; {
+            await this.startServer();
+            this.skeleton= new Skeleton(this.options);
+            await this.skeleton.initialize();
+            const skeletonHtml = await this.skeleton.genHtml(this.options.origin);
+<span class="hljs-addition">+           const originPath = resolve(this.options.staticDir,'index.html');</span>
+<span class="hljs-addition">+           const orgiginHtml = await readFileSync(originPath, 'utf8');</span>
+<span class="hljs-addition">+           const finalHtml = orgiginHtml.replace('&lt;!-- shell --&gt;',skeletonHtml);</span>
+<span class="hljs-addition">+           await writeFileSync(originPath,finalHtml,'utf8');</span>
+<span class="hljs-addition">+           await this.skeleton.destroy();</span>
+<span class="hljs-addition">+           await this.server.close();</span>
+<span class="hljs-addition">+           process.exit(0);</span>
+        })
+    }
+    async startServer(){
+        this.server = new Server(this.options);
+        await this.server.listen();
+    }
+}
+module.exports = SkeletonPlugin;
+</code></pre>
+<h3 id="t196.2 Skeleton.js">6.2 Skeleton.js <a href="#t196.2 Skeleton.js"> # </a></h3>
+<p>skeleton\Skeleton.js</p>
+<pre><code class="lang-diff">let  puppeteer = require('puppeteer');
+<span class="hljs-addition">+let  {readFileSync} = require('fs');</span>
+<span class="hljs-addition">+let  {resolve} = require('path');</span>
+<span class="hljs-addition">+let  {sleep} = require('./utils');</span>
+class Skeleton {
+    constructor(options = {}) {
+        this.options = options
+    }
+    async initialize() {
+        this.browser = await puppeteer.launch({ headless: false });
+    }
+    async newPage() {
+        const { device } = this.options;
+        const page = await this.browser.newPage();
+        await page.emulate(puppeteer.devices[device]);
+        return page;
+    }
+<span class="hljs-addition">+    async makeSkeleton(page) {</span>
+<span class="hljs-addition">+        const { defer = 5000 } = this.options;</span>
+<span class="hljs-addition">+        const scriptContent = await readFileSync(resolve(__dirname, 'skeletonScript.js'), 'utf8');</span>
+<span class="hljs-addition">+        await page.addScriptTag({ content: scriptContent })</span>
+<span class="hljs-addition">+        await sleep(defer);</span>
+<span class="hljs-addition">+        await page.evaluate((options) =&gt; {</span>
+<span class="hljs-addition">+          Skeleton.genSkeleton(options);</span>
+<span class="hljs-addition">+        }, this.options)</span>
+<span class="hljs-addition">+    }</span>
+    async genHtml(url) {
+        const page = await this.newPage()
+        const response = await page.goto(url, { waitUntil: 'networkidle2' });
+        if (response &amp;&amp; !response.ok()) {
+            throw new Error(`${response.status} on ${url}`)
+        }
+<span class="hljs-addition">+        await this.makeSkeleton(page);</span>
+<span class="hljs-addition">+        const { styles, html } = await page.evaluate(() =&gt; Skeleton.getHtmlAndStyle());</span>
+<span class="hljs-addition">+        let result = `</span>
+<span class="hljs-addition">+            &lt;style&gt;${styles.join('\n')}&lt;/style&gt;</span>
+<span class="hljs-addition">+            ${html}</span>
+<span class="hljs-addition">+        `;</span>
+<span class="hljs-addition">+        return Promise.resolve(result);</span>
+    }
+    async destroy() {
+        if (this.browser) {
+            await this.browser.close()
+            this.browser = null
+        }
+    }
+}
+module.exports = Skeleton;
+</code></pre>
+<h3 id="t206.3 skeletonScript.js">6.3 skeletonScript.js <a href="#t206.3 skeletonScript.js"> # </a></h3>
+<p>skeleton\skeletonScript.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.Skeleton = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> $$ = <span class="hljs-built_in">document</span>.querySelectorAll.bind(<span class="hljs-built_in">document</span>);
+    <span class="hljs-keyword">const</span> REMOVE_TAGS = [<span class="hljs-string">'title'</span>, <span class="hljs-string">'meta'</span>, <span class="hljs-string">'style'</span>,<span class="hljs-string">'script'</span>];
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">genSkeleton</span>(<span class="hljs-params">options = {}</span>) </span>{
+
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getHtmlAndStyle</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">const</span> styles = <span class="hljs-built_in">Array</span>.from($$(<span class="hljs-string">'style'</span>)).map(<span class="hljs-function"><span class="hljs-params">style</span> =&gt;</span> style.innerHTML || style.innerText);
+        <span class="hljs-built_in">Array</span>.from($$(REMOVE_TAGS.join(<span class="hljs-string">','</span>))).forEach(<span class="hljs-function"><span class="hljs-params">ele</span> =&gt;</span> ele.parentNode.removeChild(ele));
+        <span class="hljs-keyword">const</span> html = <span class="hljs-built_in">document</span>.body.innerHTML;
+        <span class="hljs-keyword">return</span> { html, styles };
+    }
+    <span class="hljs-keyword">return</span> {genSkeleton,getHtmlAndStyle};
+}());
+</code></pre>
+<h3 id="t216.4 utils.js">6.4 utils.js <a href="#t216.4 utils.js"> # </a></h3>
+<p>skeleton\utils.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sleep</span>(<span class="hljs-params">duration</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+      setTimeout(resolve, duration)
+    })
+}
+<span class="hljs-built_in">module</span>.exports = {
+    sleep
+}
+</code></pre>
+<h2 id="t227. 元素转换">7. 元素转换 <a href="#t227. 元素转换"> # </a></h2>
+<h3 id="t237.1 webpack.config.js">7.1 webpack.config.js <a href="#t237.1 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {resolve} = require('path');
+const {SkeletonPlugin} = require('./skeleton');
+module.exports = {
+    mode:'development',
+    devtool:false,
+    entry: "./src/index.js",
+    output: {
+        path:resolve(__dirname,'dist'),
+        filename: "main.js"
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: [
+                {
+                    loader:'babel-loader',
+                    options:{
+                        presets:["@babel/preset-env","@babel/preset-react"]
+                    }
+                }
+            ],
+            exclude: /node_modules/
+        }]
+    },
+    devServer: {
+        contentBase: resolve(__dirname,'dist')
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        }),
+        new SkeletonPlugin({
+            staticDir: resolve(__dirname,'dist'),
+            port:8000,
+            origin:'http://localhost:8000',
+            device: 'iPhone 6',
+<span class="hljs-addition">+            image: {</span>
+<span class="hljs-addition">+                color: '#EFEFEF',</span>
+<span class="hljs-addition">+              },</span>
+<span class="hljs-addition">+            button: {</span>
+<span class="hljs-addition">+                color: '#EFEFEF',</span>
+<span class="hljs-addition">+            }</span>
+        })
+    ]
+}
+</code></pre>
+<h3 id="t247.2 skeletonScript.js">7.2 skeletonScript.js <a href="#t247.2 skeletonScript.js"> # </a></h3>
+<p>skeleton\skeletonScript.js</p>
+<pre><code class="lang-diff">window.Skeleton = (function () {
+<span class="hljs-addition">+    const SMALLEST_BASE64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';</span>
+<span class="hljs-addition">+    const CLASS_NAME_PREFEX = 'sk-';</span>
+    const $$ = document.querySelectorAll.bind(document);
+    const REMOVE_TAGS = ['title', 'meta', 'style', 'script'];
+<span class="hljs-addition">+    const styleCache = new Map();</span>
+<span class="hljs-addition">+    const setAttributes = (ele, attrs) =&gt; {</span>
+<span class="hljs-addition">+        Object.keys(attrs).forEach(k =&gt; ele.setAttribute(k, attrs[k]));</span>
+<span class="hljs-addition">+    };</span>
+<span class="hljs-addition">+    const addStyle = (selector, rule) =&gt; {</span>
+<span class="hljs-addition">+        if (!styleCache.has(selector)) {</span>
+<span class="hljs-addition">+          styleCache.set(selector, rule)</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    function imgHandler(ele, options={}) {</span>
+<span class="hljs-addition">+        const {width, height} = ele.getBoundingClientRect();</span>
+<span class="hljs-addition">+        const attrs = {</span>
+<span class="hljs-addition">+            width,</span>
+<span class="hljs-addition">+            height,</span>
+<span class="hljs-addition">+            src: SMALLEST_BASE64</span>
+<span class="hljs-addition">+        };</span>
+<span class="hljs-addition">+        setAttributes(ele, attrs);</span>
+<span class="hljs-addition">+        const className = CLASS_NAME_PREFEX + 'image';</span>
+<span class="hljs-addition">+        const rule = `{ background: ${options.color} !important;}`;</span>
+<span class="hljs-addition">+        addStyle(`.${className}`, rule);</span>
+<span class="hljs-addition">+        ele.classList.add(className)</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    function buttonHandler(ele,options={}) {</span>
+<span class="hljs-addition">+        const classname = CLASS_NAME_PREFEX + 'button'</span>
+<span class="hljs-addition">+        const rule = `{</span>
+<span class="hljs-addition">+          color: ${options.color} !important;</span>
+<span class="hljs-addition">+          background: ${options.color} !important;</span>
+<span class="hljs-addition">+          border: none !important;</span>
+<span class="hljs-addition">+          box-shadow: none !important;</span>
+<span class="hljs-addition">+        }`</span>
+<span class="hljs-addition">+        addStyle(`.${classname}`, rule)</span>
+<span class="hljs-addition">+        ele.classList.add(classname)</span>
+<span class="hljs-addition">+    }</span>
+    function genSkeleton(options = {}) {
+<span class="hljs-addition">+        const rootElement = document.documentElement;</span>
+<span class="hljs-addition">+        ;(function traverse(options) {</span>
+<span class="hljs-addition">+            let { button, image } = options;</span>
+<span class="hljs-addition">+            const buttons = [];</span>
+<span class="hljs-addition">+            const imgs = [];</span>
+<span class="hljs-addition">+            ;(function preTraverse(ele) {</span>
+<span class="hljs-addition">+                if (ele.children &amp;&amp; ele.children.length &gt; 0) {</span>
+<span class="hljs-addition">+                    Array.from(ele.children).forEach(child =&gt; preTraverse(child))</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+                if (ele.tagName === 'BUTTON') {</span>
+<span class="hljs-addition">+                    return buttons.push(ele);</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+                if (ele.tagName === 'IMG') {</span>
+<span class="hljs-addition">+                    return imgs.push(ele)</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            })(rootElement);</span>
+<span class="hljs-addition">+            buttons.forEach(e =&gt; buttonHandler(e, button))</span>
+<span class="hljs-addition">+            imgs.forEach(e =&gt; imgHandler(e, image));</span>
+<span class="hljs-addition">+        })(options);</span>
+<span class="hljs-addition">+        let rules = ''</span>
+<span class="hljs-addition">+        for (const [selector, rule] of styleCache) {</span>
+<span class="hljs-addition">+           rules += `${selector} ${rule}\n`;</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        const styleEle = document.createElement('style')</span>
+<span class="hljs-addition">+        styleEle.innerHTML = rules;</span>
+<span class="hljs-addition">+       document.head.appendChild(styleEle)</span>
+    }
+    function getHtmlAndStyle() {
+        const styles = Array.from($$('style')).map(style =&gt; style.innerHTML || style.innerText);
+        Array.from($$(REMOVE_TAGS.join(','))).forEach(ele =&gt; ele.parentNode.removeChild(ele));
+        const html = document.body.innerHTML;
+        return { html, styles };
+    }
+    return { genSkeleton, getHtmlAndStyle };
+}());
+</code></pre>
+<h2 id="t258. cssTree">8. cssTree <a href="#t258. cssTree"> # </a></h2>
+<ul>
+<li><a href="https://astexplorer.net/">astexplorer</a></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/csstree.png" alt="csstree"></p>
+<h3 id="t268.1 cssTree.js">8.1 cssTree.js <a href="#t268.1 cssTree.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> fs= <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
+<span class="hljs-keyword">const</span> path= <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>)
+<span class="hljs-keyword">const</span> csstree = <span class="hljs-built_in">require</span>(<span class="hljs-string">'css-tree'</span>);
+<span class="hljs-keyword">let</span> createCode = <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">scssFilePath</span>) </span>{
+    <span class="hljs-keyword">let</span> cssString = fs.readFileSync(scssFilePath,<span class="hljs-string">'utf8'</span>)
+    <span class="hljs-keyword">let</span> ast = csstree.parse(cssString);
+    csstree.walk(ast, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">node</span>) </span>{
+        <span class="hljs-keyword">if</span> (node.type == <span class="hljs-string">'Dimension'</span> &amp;&amp; node.unit ==<span class="hljs-string">'px'</span>) {
+            node.value = node.value/<span class="hljs-number">75</span>;
+            node.unit =<span class="hljs-string">'rem'</span>;
+        }
+    });
+    <span class="hljs-keyword">let</span> output = csstree.generate(ast);
+    fs.writeFile(path.join(__dirname,<span class="hljs-string">'output.css'</span>), output, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'最终代码写入到output.css'</span>)
+    })
+}
+<span class="hljs-keyword">let</span> scssFilePath= path.join(__dirname,<span class="hljs-string">'input.css'</span>);
+createCode(scssFilePath);
+</code></pre>
+<h3 id="t278.2 input.css">8.2 input.css <a href="#t278.2 input.css"> # </a></h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.avatar</span>{
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">750px</span>;
+}
+</code></pre>
+<h3 id="t288.3 output.css">8.3 output.css <a href="#t288.3 output.css"> # </a></h3>
+<pre><code class="lang-js">.avatar{<span class="hljs-attr">width</span>:<span class="hljs-number">10</span>rem}
+</code></pre>
+<h3 id="t298.4 ast.json">8.4 ast.json <a href="#t298.4 ast.json"> # </a></h3>
+<pre><code class="lang-js">{
+    <span class="hljs-string">"type"</span>: <span class="hljs-string">"StyleSheet"</span>,
+    <span class="hljs-string">"loc"</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-string">"children"</span>: [
+        {
+            <span class="hljs-string">"type"</span>: <span class="hljs-string">"Rule"</span>,
+            <span class="hljs-string">"prelude"</span>: {
+                <span class="hljs-string">"type"</span>: <span class="hljs-string">"SelectorList"</span>,
+                <span class="hljs-string">"children"</span>: [
+                    {
+                        <span class="hljs-string">"type"</span>: <span class="hljs-string">"Selector"</span>,
+                        <span class="hljs-string">"children"</span>: [
+                            {
+                                <span class="hljs-string">"type"</span>: <span class="hljs-string">"ClassSelector"</span>,
+                                <span class="hljs-string">"name"</span>: <span class="hljs-string">"avatar"</span>
+                            }
+                        ]
+                    }
+                ]
+            },
+            <span class="hljs-string">"block"</span>: {
+                <span class="hljs-string">"type"</span>: <span class="hljs-string">"Block"</span>,
+                <span class="hljs-string">"children"</span>: [
+                    {
+                        <span class="hljs-string">"type"</span>: <span class="hljs-string">"Declaration"</span>,
+                        <span class="hljs-string">"property"</span>: <span class="hljs-string">"width"</span>,
+                        <span class="hljs-string">"value"</span>: {
+                            <span class="hljs-string">"type"</span>: <span class="hljs-string">"Value"</span>,
+                            <span class="hljs-string">"loc"</span>: <span class="hljs-literal">null</span>,
+                            <span class="hljs-string">"children"</span>: [
+                                {
+                                    <span class="hljs-string">"type"</span>: <span class="hljs-string">"Dimension"</span>,
+                                    <span class="hljs-string">"value"</span>: <span class="hljs-string">"750"</span>,
+                                    <span class="hljs-string">"unit"</span>: <span class="hljs-string">"px"</span>
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
+</code></pre>
+<h2 id="t309. 参考">9. 参考 <a href="#t309. 参考"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/skeleton.jpg" alt="skeleton"></p>
+
+    

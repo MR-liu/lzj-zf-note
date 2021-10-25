@@ -1,0 +1,174 @@
+
+        <h2 id="t01. 静态文件中间件">1. 静态文件中间件 <a href="#t01. 静态文件中间件"> # </a></h2>
+<pre><code>express.static(root, [options])
+</code></pre><p><code>express.static</code>是 Express 内置的唯一一个中间件。是基于 serve-static 开发的，负责托管 Express 应用内的静态资源。</p>
+<ul>
+<li>root 参数指的是静态资源文件所在的根目录。</li>
+<li>options 对象是可选的，支持以下属性：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">属性</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">dotfiles</td>
+<td style="text-align:left">控制点文件服务，可选值为allow,deny,'ignore'</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">“ignore”</td>
+</tr>
+<tr>
+<td style="text-align:left">etag</td>
+<td style="text-align:left">控制etag生成</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">true</td>
+</tr>
+<tr>
+<td style="text-align:left">extensions</td>
+<td style="text-align:left">设置文件后缀名补充</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">false</td>
+</tr>
+<tr>
+<td style="text-align:left">index</td>
+<td style="text-align:left">设置目录访问的返回，设置为false可以禁止目录访问</td>
+<td style="text-align:left">Mixed</td>
+<td style="text-align:left">“index.html”</td>
+</tr>
+<tr>
+<td style="text-align:left">lastModified</td>
+<td style="text-align:left">根据文件修改时间设置Last-Modified报头</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">true</td>
+</tr>
+<tr>
+<td style="text-align:left">maxAge</td>
+<td style="text-align:left">设置Cache-Control报头的缓存控制时间，单位为毫秒</td>
+<td style="text-align:left">Number</td>
+<td style="text-align:left">0</td>
+</tr>
+<tr>
+<td style="text-align:left">redirect</td>
+<td style="text-align:left">当路径名是目录时，重定向到包含结尾/的目录</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">true</td>
+</tr>
+<tr>
+<td style="text-align:left">setHeaders</td>
+<td style="text-align:left">函数用于为文件设置HTTP头</td>
+<td style="text-align:left">Function</td>
+</tr>
+</tbody>
+</table>
+<p>关于此中间件的细节，请参考 通过 <a href="http://www.expressjs.com.cn/starter/static-files.html">Express 托管静态资源文件</a>。</p>
+<h2 id="t12. body-parser中间件">2. body-parser中间件 <a href="#t12. body-parser中间件"> # </a></h2>
+<p>body-parser是非常常用的一个express中间件，作用是对post请求的请求体进行解析。使用非常简单，以下两行代码已经覆盖了大部分的使用场景。</p>
+<pre><code class="lang-js">app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+</code></pre>
+<h3 id="t22.1 http报文头">2.1 http报文头 <a href="#t22.1 http报文头"> # </a></h3>
+<pre><code class="lang-js">POST / HTTP/<span class="hljs-number">1.1</span>
+<span class="hljs-attr">Host</span>: <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">8080</span>
+Content-Type: text/html; charset=utf8
+Content-Encoding: gzip
+
+zfpx
+</code></pre>
+<ul>
+<li>Content-Type：请求报文主体的类型、编码。常见的类型有text/plain、application/json、application/x-www-form-urlencoded。常见的编码有utf8、gbk等。</li>
+<li>Content-Encoding：声明报文主体的压缩格式，常见的取值有gzip、deflate、identity。
+报文主体：这里是个普通的文本字符串zfpx。</li>
+</ul>
+<h3 id="t32.2 body-parser工作">2.2 body-parser工作 <a href="#t32.2 body-parser工作"> # </a></h3>
+<ul>
+<li>处理不同类型的请求体：比如text、json、urlencoded等，对应的报文主体的格式不同。</li>
+<li>处理不同的编码：比如utf8、gbk等。</li>
+<li>处理不同的压缩类型：比如gzip、deflate等。</li>
+</ul>
+<h3 id="t42.3 处理内容类型">2.3 处理内容类型 <a href="#t42.3 处理内容类型"> # </a></h3>
+<h4 id="t52.3.1 处理text/plain">2.3.1 处理text/plain <a href="#t52.3.1 处理text/plain"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+
+<span class="hljs-keyword">var</span> options = {
+    <span class="hljs-attr">hostname</span>: <span class="hljs-string">'127.0.0.1'</span>,
+    <span class="hljs-attr">port</span>: <span class="hljs-string">'3000'</span>,
+    <span class="hljs-attr">path</span>: <span class="hljs-string">'/'</span>,
+    <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
+    <span class="hljs-attr">headers</span>: {
+        <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'text/plain'</span>,
+        <span class="hljs-string">'Content-Encoding'</span>: <span class="hljs-string">'identity'</span>
+    }
+};
+
+<span class="hljs-keyword">var</span> client = http.request(options, (res) =&gt; {
+    res.pipe(process.stdout);
+});
+
+client.end(<span class="hljs-string">'zfpx'</span>);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+
+<span class="hljs-keyword">var</span> parse = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, done</span>) </span>{
+    <span class="hljs-keyword">let</span> arr = [];
+    req.on(<span class="hljs-string">'data'</span>, data =&gt; {
+        arr.push(data);
+    });
+
+    req.on(<span class="hljs-string">'end'</span>, () =&gt; {
+        <span class="hljs-keyword">let</span> result = Buffer.concat(arr);
+        done(result);
+    });
+};
+
+<span class="hljs-keyword">var</span> server = http.createServer(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    parse(req, (chunks) =&gt; {
+        res.end(chunks)
+    });
+});
+
+server.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<h4 id="t62.3.2 处理application/json">2.3.2 处理application/json <a href="#t62.3.2 处理application/json"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
+client.end( <span class="hljs-built_in">JSON</span>.stringify({<span class="hljs-attr">name</span>:zfpx}) );
+</code></pre>
+<pre><code class="lang-js"> <span class="hljs-keyword">var</span> json = <span class="hljs-built_in">JSON</span>.parse( chunks.toString() );
+</code></pre>
+<h4 id="t72.3.3 处理application/x-www-form-urlencoded">2.3.3 处理application/x-www-form-urlencoded <a href="#t72.3.3 处理application/x-www-form-urlencoded"> # </a></h4>
+<pre><code class="lang-js">'Content-Type': 'form/x-www-form-urlencoded',
+client.end( querystring.stringify({name:'zfpx}) );
+</code></pre>
+<pre><code class="lang-js"> <span class="hljs-keyword">var</span> body = querystring.parse( chunks.toString() );
+</code></pre>
+<h2 id="t82.4 处理不同编码">2.4 处理不同编码 <a href="#t82.4 处理不同编码"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> iconv = <span class="hljs-built_in">require</span>(<span class="hljs-string">'iconv-lite'</span>);
+<span class="hljs-keyword">var</span> encoding = <span class="hljs-string">'gbk'</span>;
+<span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'text/plain; charset='</span> + encoding,
+<span class="hljs-keyword">var</span> buff = iconv.encode(<span class="hljs-string">'zfpx'</span>, encoding);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> contentType = <span class="hljs-built_in">require</span>(<span class="hljs-string">'content-type'</span>);
+<span class="hljs-keyword">var</span> obj = contentType.parse(req.headers[<span class="hljs-string">'content-type'</span>]);
+<span class="hljs-keyword">var</span> charset = obj.parameters.charset;
+<span class="hljs-keyword">var</span> body = iconv.decode(chunks, charset);
+</code></pre>
+<h2 id="t92.5 处理不同压缩类型">2.5 处理不同压缩类型 <a href="#t92.5 处理不同压缩类型"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> zlib = <span class="hljs-built_in">require</span>(<span class="hljs-string">'zlib'</span>);
+<span class="hljs-string">'Content-Encoding'</span>: <span class="hljs-string">'gzip'</span>
+<span class="hljs-keyword">var</span> buff = zlib.gzipSync(<span class="hljs-string">'zfpx'</span>);
+client.end(buff);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> contentEncoding = req.headers[<span class="hljs-string">'content-encoding'</span>];
+<span class="hljs-keyword">if</span>(contentEncoding === <span class="hljs-string">'gzip'</span>) {
+  stream = zlib.createGunzip();
+  req.pipe(stream);
+}
+
+</code></pre>
+<h2 id="t102.6 multipart/form-data">2.6 multipart/form-data <a href="#t102.6 multipart/form-data"> # </a></h2>
+
+    

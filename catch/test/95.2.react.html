@@ -1,0 +1,508 @@
+
+        <h2 id="t01. 初始化项目">1. 初始化项目 <a href="#t01. 初始化项目"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/react16.6">react16.6</a></li>
+</ul>
+<pre><code class="lang-js">create-react-app <span class="hljs-number">1.</span>jsx
+</code></pre>
+<h2 id="t12. 实现虚拟DOM">2. 实现虚拟DOM <a href="#t12. 实现虚拟DOM"> # </a></h2>
+<h3 id="t22.1 src\index.js">2.1 src\index.js <a href="#t22.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-keyword">let</span> element = <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>;
+<span class="hljs-built_in">console</span>.log(element);
+
+ReactDOM.render(
+  element
+  , <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+
+<span class="hljs-comment">/**
+class App extends Component {
+  render() {
+    return React.createElement("div", null,
+     React.createElement("p", null, "1"),
+     React.createElement("button", null, "+"));
+  }
+}
+let element = React.createElement(App, null);
+*/</span>
+</code></pre>
+<h3 id="t32.2 react\index.js">2.2 react\index.js <a href="#t32.2 react\index.js"> # </a></h3>
+<p>src\react\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createElement } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactElement'</span>;
+<span class="hljs-keyword">import</span> { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactBaseClasses'</span>;
+<span class="hljs-keyword">const</span> React = {
+    createElement
+}
+<span class="hljs-keyword">export</span> {
+    Component
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React;
+</code></pre>
+<h3 id="t42.3 react\ReactElement.js">2.3 react\ReactElement.js <a href="#t42.3 react\ReactElement.js"> # </a></h3>
+<p>src\react\ReactElement.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> ReactCurrentOwner <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactCurrentOwner'</span>;
+<span class="hljs-keyword">import</span> { REACT_ELEMENT_TYPE } <span class="hljs-keyword">from</span> <span class="hljs-string">'../shared/ReactSymbols'</span>;
+<span class="hljs-keyword">const</span> RESERVED_PROPS = {
+    <span class="hljs-attr">key</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">ref</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">__self</span>: <span class="hljs-literal">true</span>,<span class="hljs-comment">// __self 是为了以后正确获取 this</span>
+    <span class="hljs-attr">__source</span>: <span class="hljs-literal">true</span>,
+};
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hasValidRef</span>(<span class="hljs-params">config</span>) </span>{
+    <span class="hljs-keyword">return</span> config.ref !== <span class="hljs-literal">undefined</span>;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hasValidKey</span>(<span class="hljs-params">config</span>) </span>{
+    <span class="hljs-keyword">return</span> config.key !== <span class="hljs-literal">undefined</span>;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createElement</span>(<span class="hljs-params">type, config, children</span>) </span>{
+    <span class="hljs-keyword">let</span> propName;
+    <span class="hljs-comment">//保留的属性被移除掉了</span>
+    <span class="hljs-keyword">const</span> props = {};
+    <span class="hljs-keyword">let</span> key = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">let</span> ref = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">let</span> self = <span class="hljs-literal">null</span>;<span class="hljs-comment">//获取this指向</span>
+    <span class="hljs-keyword">let</span> source = <span class="hljs-literal">null</span>;<span class="hljs-comment">//获取行等信息</span>
+    <span class="hljs-comment">// 判断是否传入配置</span>
+    <span class="hljs-keyword">if</span> (config != <span class="hljs-literal">null</span>) {
+        <span class="hljs-comment">// 验证 ref 和 key</span>
+        <span class="hljs-keyword">if</span> (hasValidRef(config)) {
+            ref = config.ref;
+        }
+        <span class="hljs-keyword">if</span> (hasValidKey(config)) {
+            key = <span class="hljs-string">''</span> + config.key;
+        }
+        <span class="hljs-comment">// __self 是为了以后正确获取 this</span>
+        self = config.__self === <span class="hljs-literal">undefined</span> ? <span class="hljs-literal">null</span> : config.__self;
+        source = config.__source === <span class="hljs-literal">undefined</span> ? <span class="hljs-literal">null</span> : config.__source;
+        <span class="hljs-comment">// 遍历配置,把非保留属性拷贝到props上去</span>
+        <span class="hljs-keyword">for</span> (propName <span class="hljs-keyword">in</span> config) {
+            <span class="hljs-keyword">if</span> (!RESERVED_PROPS.hasOwnProperty(propName)) {
+                props[propName] = config[propName];
+            }
+        }
+    }
+
+    <span class="hljs-keyword">const</span> childrenLength = <span class="hljs-built_in">arguments</span>.length - <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">if</span> (childrenLength === <span class="hljs-number">1</span>) {
+        props.children = children;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (childrenLength &gt; <span class="hljs-number">1</span>) {
+        <span class="hljs-keyword">const</span> childArray = <span class="hljs-built_in">Array</span>(childrenLength);
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; childrenLength; i++) {
+            childArray[i] = <span class="hljs-built_in">arguments</span>[i + <span class="hljs-number">2</span>];
+        }
+        props.children = childArray;
+    }
+
+    <span class="hljs-comment">// 判断是否有给组件设置 defaultProps，有的话判断是否有给 props 赋值，只有当值为undefined 时，才会设置默认值</span>
+    <span class="hljs-keyword">if</span> (type &amp;&amp; type.defaultProps) {
+        <span class="hljs-keyword">const</span> defaultProps = type.defaultProps;
+        <span class="hljs-keyword">for</span> (propName <span class="hljs-keyword">in</span> defaultProps) {
+            <span class="hljs-keyword">if</span> (props[propName] === <span class="hljs-literal">undefined</span>) {
+                props[propName] = defaultProps[propName];
+            }
+        }
+    }
+    <span class="hljs-keyword">return</span> ReactElement(
+        type,
+        key,
+        ref,
+        self,
+        source,
+        ReactCurrentOwner.current,
+        props,
+    );
+}
+
+<span class="hljs-comment">//这是一个工厂函数，帮助我们创建React元素</span>
+<span class="hljs-keyword">const</span> ReactElement = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">type, key, ref, self, source, owner, props</span>) </span>{
+    <span class="hljs-keyword">const</span> element = {
+        <span class="hljs-comment">//这个标志让我们可以唯一的标识这是一个React元素</span>
+        <span class="hljs-attr">$$typeof</span>: REACT_ELEMENT_TYPE,
+        <span class="hljs-comment">//此元素的内建属性</span>
+        <span class="hljs-attr">type</span>: type,
+        <span class="hljs-attr">key</span>: key,
+        <span class="hljs-attr">ref</span>: ref,
+        <span class="hljs-attr">props</span>: props,
+
+        <span class="hljs-comment">//记录一下创建此元素组件</span>
+        <span class="hljs-attr">_owner</span>: owner,
+    };
+    element._self = self;
+    element._source = source;
+    <span class="hljs-keyword">return</span> element;
+};
+</code></pre>
+<h3 id="t52.4 ReactCurrentOwner.js">2.4 ReactCurrentOwner.js <a href="#t52.4 ReactCurrentOwner.js"> # </a></h3>
+<p>src\react\ReactCurrentOwner.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> ReactCurrentOwner = {
+    <span class="hljs-attr">current</span>: <span class="hljs-literal">null</span>
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ReactCurrentOwner;
+</code></pre>
+<h3 id="t62.5 shared\ReactSymbols.js">2.5 shared\ReactSymbols.js <a href="#t62.5 shared\ReactSymbols.js"> # </a></h3>
+<p>src\shared\ReactSymbols.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> hasSymbol = <span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> === <span class="hljs-string">'function'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.for;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> REACT_ELEMENT_TYPE = hasSymbol
+    ? <span class="hljs-built_in">Symbol</span>.for(<span class="hljs-string">'react.element'</span>)
+    : <span class="hljs-number">0xeac7</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> REACT_FORWARD_REF_TYPE = hasSymbol
+    ? <span class="hljs-built_in">Symbol</span>.for(<span class="hljs-string">'react.forward_ref'</span>)
+    : <span class="hljs-number">0xead0</span>;
+</code></pre>
+<h3 id="t72.6 react\ReactBaseClasses.js">2.6 react\ReactBaseClasses.js <a href="#t72.6 react\ReactBaseClasses.js"> # </a></h3>
+<p>src\react\ReactBaseClasses.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Component</span> </span>{
+    <span class="hljs-keyword">constructor</span>(props, context) {
+        <span class="hljs-keyword">this</span>.props = props;<span class="hljs-comment">//属性对象</span>
+        <span class="hljs-keyword">this</span>.context = context;<span class="hljs-comment">//上下文对象</span>
+    }
+}
+    Component.prototype.isReactComponent = {
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PureComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+}
+PureComponent.prototype.isPureReactComponent = {}
+
+<span class="hljs-comment">/* function ComponentDummy() { }
+ComponentDummy.prototype = Component.prototype;
+
+function PureComponent(props, context, updater) {
+    this.props = props;
+    this.context = context;
+    this.refs = emptyObject;
+    this.updater = updater;
+}
+
+const pureComponentPrototype = (PureComponent.prototype = new ComponentDummy());
+pureComponentPrototype.constructor = PureComponent;
+
+Object.assign(pureComponentPrototype, Component.prototype);
+pureComponentPrototype.isPureReactComponent = true; */</span>
+
+<span class="hljs-keyword">export</span> { Component, PureComponent };
+</code></pre>
+<h2 id="t83. React.Children.map">3. React.Children.map <a href="#t83. React.Children.map"> # </a></h2>
+<ul>
+<li><a href="https://reactjs.org/docs/react-api.html#reactchildrenmap">React.Children.map</a></li>
+</ul>
+<pre><code class="lang-js">React.Children.map(children, function[(thisArg)])
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/ReactChildrenmap.jpg" style="width:60%"></p>
+<h3 id="t93.1 实现单个映射">3.1 实现单个映射 <a href="#t93.1 实现单个映射"> # </a></h3>
+<h4 id="t103.1.1 src\index.js">3.1.1 src\index.js <a href="#t103.1.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.props.children);
+    <span class="hljs-keyword">const</span> mappedChildren = React.Children.map(
+      <span class="hljs-keyword">this</span>.props.children,
+      (item, index) =&gt; (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span>{item}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+      )
+    );
+    <span class="hljs-built_in">console</span>.log(mappedChildren);
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        {mappedChildren}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Child</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">span</span> &gt;</span>A<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Child</span>&gt;</span></span>
+    )
+  }
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h4 id="t113.1.2 react\ReactChildren.js">3.1.2 react\ReactChildren.js <a href="#t113.1.2 react\ReactChildren.js"> # </a></h4>
+<p>src\react\ReactChildren.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { REACT_ELEMENT_TYPE } <span class="hljs-keyword">from</span> <span class="hljs-string">'../shared/ReactSymbols'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapChildren</span>(<span class="hljs-params">children, mapFunction, context</span>) </span>{
+    <span class="hljs-keyword">const</span> result = [];
+    mapIntoWithKeyPrefixInternal(children, result, mapFunction, context);
+    <span class="hljs-keyword">return</span> result;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapIntoWithKeyPrefixInternal</span>(<span class="hljs-params">children, result, mapFunction, context</span>) </span>{
+    <span class="hljs-keyword">const</span> traverseContext = { result, mapFunction, context };
+    traverseAllChildren(children, mapSingleChildIntoContext, traverseContext);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">traverseAllChildren</span>(<span class="hljs-params">children, mapSingleChildIntoContext, traverseContext</span>) </span>{
+    <span class="hljs-keyword">const</span> type = <span class="hljs-keyword">typeof</span> children;
+    <span class="hljs-keyword">if</span> (type === <span class="hljs-string">'string'</span> || type === <span class="hljs-string">'number'</span> || (type === <span class="hljs-string">'object'</span> &amp;&amp; children.$$<span class="hljs-keyword">typeof</span> === REACT_ELEMENT_TYPE)) {
+        mapSingleChildIntoContext(
+            traverseContext,
+            children
+        );
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mapSingleChildIntoContext</span>(<span class="hljs-params">traverseContext, child</span>) </span>{
+    <span class="hljs-keyword">const</span> { result, mapFunction, context } = traverseContext;
+    <span class="hljs-keyword">let</span> mappedChild = mapFunction.call(context, child);
+    result.push(mappedChild);
+}
+
+<span class="hljs-keyword">export</span> {
+    mapChildren <span class="hljs-keyword">as</span> map,
+};
+</code></pre>
+<h3 id="t123.2 实现对数组的映射">3.2 实现对数组的映射 <a href="#t123.2 实现对数组的映射"> # </a></h3>
+<h4 id="t133.2.1 src\index.js">3.2.1 src\index.js <a href="#t133.2.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React, { Component } from './react';
+import ReactDOM from 'react-dom';
+class Child extends Component {
+  render() {
+    console.log(this.props.children);
+    const mappedChildren = React.Children.map(
+      this.props.children,
+      (item, index) =&gt; (
+        &lt;div key={index}&gt;{item}&lt;/div&gt;
+      )
+    );
+    console.log(mappedChildren);
+    return (
+      &lt;div&gt;
+        {mappedChildren}
+      &lt;/div&gt;
+    )
+  }
+}
+class App extends Component {
+  render() {
+    return (
+<span class="hljs-addition">+      &lt;Child&gt;&lt;span &gt;A&lt;/span&gt;&lt;span &gt;B&lt;/span&gt;&lt;/Child&gt;</span>
+    )
+  }
+}
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+</code></pre>
+<h4 id="t143.2.2 src\react\ReactChildren.js">3.2.2 src\react\ReactChildren.js <a href="#t143.2.2 src\react\ReactChildren.js"> # </a></h4>
+<p>src\react\ReactChildren.js</p>
+<pre><code class="lang-diff">import { REACT_ELEMENT_TYPE } from '../shared/ReactSymbols';
+
+function mapChildren(children, mapFunction, context) {
+    const result = [];
+    mapIntoWithKeyPrefixInternal(children, result, mapFunction, context);
+    return result;
+}
+
+function mapIntoWithKeyPrefixInternal(children, result, mapFunction, context) {
+    const traverseContext = { result, mapFunction, context };
+    traverseAllChildren(children, mapSingleChildIntoContext, traverseContext);
+}
+
+function traverseAllChildren(children, mapSingleChildIntoContext, traverseContext) {
+    const type = typeof children;
+    if (type <span class="hljs-comment">=== 'string' || type === 'number' || (type === 'object' &amp;&amp; children.$$typeof === REACT_ELEMENT_TYPE)) {</span>
+        mapSingleChildIntoContext(
+            traverseContext,
+            children
+        );
+    }
+<span class="hljs-addition">+    if (Array.isArray(children)) {</span>
+<span class="hljs-addition">+        for (let i = 0; i &lt; children.length; i++) {</span>
+<span class="hljs-addition">+            traverseAllChildren(children[i], mapSingleChildIntoContext, traverseContext);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+}
+function mapSingleChildIntoContext(traverseContext, child) {
+    const { result, mapFunction, context } = traverseContext;
+    let mappedChild = mapFunction.call(context, child);
+    result.push(mappedChild);
+}
+
+export {
+    mapChildren as map,
+};
+</code></pre>
+<h3 id="t153.3 实现映射为数组">3.3 实现映射为数组 <a href="#t153.3 实现映射为数组"> # </a></h3>
+<h4 id="t163.3.1 src\index.js">3.3.1 src\index.js <a href="#t163.3.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React, { Component } from './react';
+import ReactDOM from 'react-dom';
+class Child extends Component {
+  render() {
+<span class="hljs-addition">+    console.log(this.props.children);</span>
+<span class="hljs-addition">+    const mappedChildren = React.Children.map(</span>
+<span class="hljs-addition">+      this.props.children,</span>
+<span class="hljs-addition">+      (item) =&gt; (</span>
+<span class="hljs-addition">+        [item, [item, [item, item]]]</span>
+<span class="hljs-addition">+      )</span>
+<span class="hljs-addition">+    );</span>
+<span class="hljs-addition">+    console.log(mappedChildren);</span>
+    return (
+      &lt;div&gt;
+        {mappedChildren}
+      &lt;/div&gt;
+    )
+  }
+}
+class App extends Component {
+  render() {
+    return (
+      &lt;Child&gt;
+        &lt;span &gt;A&lt;/span&gt;
+        &lt;span &gt;B&lt;/span&gt;
+      &lt;/Child&gt;
+
+    )
+  }
+}
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+</code></pre>
+<h4 id="t173.3.2 src\react\ReactChildren.js">3.3.2 src\react\ReactChildren.js <a href="#t173.3.2 src\react\ReactChildren.js"> # </a></h4>
+<p>src\react\ReactChildren.js</p>
+<pre><code class="lang-diff">import { REACT_ELEMENT_TYPE } from '../shared/ReactSymbols';
+
+function mapChildren(children, mapFunction, context) {
+    const result = [];
+    mapIntoWithKeyPrefixInternal(children, result, mapFunction, context);
+    return result;
+}
+
+function mapIntoWithKeyPrefixInternal(children, result, mapFunction, context) {
+    const traverseContext = { result, mapFunction, context };
+    traverseAllChildren(children, mapSingleChildIntoContext, traverseContext);
+}
+
+function traverseAllChildren(children, mapSingleChildIntoContext, traverseContext) {
+    const type = typeof children;
+    if (type <span class="hljs-comment">=== 'string' || type === 'number' || (type === 'object' &amp;&amp; children.$$typeof === REACT_ELEMENT_TYPE)) {</span>
+        mapSingleChildIntoContext(
+            traverseContext,
+            children
+        );
+    }
+    if (Array.isArray(children)) {
+        for (let i = 0; i &lt; children.length; i++) {
+            traverseAllChildren(children[i], mapSingleChildIntoContext, traverseContext);
+        }
+    }
+}
+function mapSingleChildIntoContext(traverseContext, child) {
+    const { result, mapFunction, context } = traverseContext;
+    let mappedChild = mapFunction.call(context, child);
+<span class="hljs-addition">+    if (Array.isArray(mappedChild)) {</span>
+<span class="hljs-addition">+        mapIntoWithKeyPrefixInternal(mappedChild, result, c =&gt; c);</span>
+<span class="hljs-addition">+    } else if (mappedChild != null) {</span>
+<span class="hljs-addition">+        result.push(mappedChild);</span>
+<span class="hljs-addition">+    }</span>
+}
+
+export {
+    mapChildren as map,
+};
+</code></pre>
+<h3 id="t183.4. 映射为数组">3.4. 映射为数组 <a href="#t183.4. 映射为数组"> # </a></h3>
+<h4 id="t193.4.1 src\index.js">3.4.1 src\index.js <a href="#t193.4.1 src\index.js"> # </a></h4>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React, { Component } from './react';
+import ReactDOM from 'react-dom';
+class Child extends Component {
+  render() {
+    console.log(this.props.children);
+    const mappedChildren = React.Children.map(
+      this.props.children,
+      (item) =&gt; (
+<span class="hljs-addition">+        [item, [item, [item, item]]]</span>
+      )
+    );
+    console.log(mappedChildren);
+    return (
+      &lt;div&gt;
+        {mappedChildren}
+      &lt;/div&gt;
+    )
+  }
+}
+class App extends Component {
+  render() {
+    return (
+      &lt;Child&gt;
+<span class="hljs-addition">+        {[&lt;span &gt;A&lt;/span&gt;, &lt;span &gt;B&lt;/span&gt;]}</span>
+<span class="hljs-addition">+        {[&lt;span &gt;C&lt;/span&gt;, &lt;span &gt;D&lt;/span&gt;]}</span>
+      &lt;/Child&gt;
+    )
+  }
+}
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+</code></pre>
+<h4 id="t203.4.2 src\react\ReactChildren.js">3.4.2 src\react\ReactChildren.js <a href="#t203.4.2 src\react\ReactChildren.js"> # </a></h4>
+<p>src\react\ReactChildren.js</p>
+<pre><code class="lang-diff">import { REACT_ELEMENT_TYPE } from '../shared/ReactSymbols';
+<span class="hljs-addition">+const SEPARATOR = '.';</span>
+<span class="hljs-addition">+const SUBSEPARATOR = ':';</span>
+function mapChildren(children, mapFunction, context) {
+    const result = [];
+<span class="hljs-addition">+    mapIntoWithKeyPrefixInternal(children, result, null, mapFunction, context);</span>
+    return result;
+}
+
+function mapIntoWithKeyPrefixInternal(children, result, prefix, mapFunction, context) {
+<span class="hljs-addition">+    if (prefix != null) {</span>
+<span class="hljs-addition">+        prefix = prefix + '/';</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    const traverseContext = { result, prefix, mapFunction, context };</span>
+<span class="hljs-addition">+    traverseAllChildren(children, '', mapSingleChildIntoContext, traverseContext);</span>
+}
+
+<span class="hljs-addition">+function traverseAllChildren(children, nameSoFar, mapSingleChildIntoContext, traverseContext) {</span>
+    const type = typeof children;
+    if (type <span class="hljs-comment">=== 'string' || type === 'number' || (type === 'object' &amp;&amp; children.$$typeof === REACT_ELEMENT_TYPE)) {</span>
+<span class="hljs-addition">+        mapSingleChildIntoContext(</span>
+<span class="hljs-addition">+            traverseContext,</span>
+<span class="hljs-addition">+            children,</span>
+<span class="hljs-addition">+            nameSoFar === '' ? SEPARATOR + getComponentKey(children, 0) : nameSoFar</span>
+<span class="hljs-addition">+        );</span>
+    }
+    if (Array.isArray(children)) {
+<span class="hljs-addition">+        let child;</span>
+<span class="hljs-addition">+        let nextName;</span>
+<span class="hljs-addition">+        const nextNamePrefix = nameSoFar === '' ? SEPARATOR : nameSoFar + SUBSEPARATOR;</span>
+        for (let i = 0; i &lt; children.length; i++) {
+<span class="hljs-addition">+            child = children[i];</span>
+<span class="hljs-addition">+            nextName = nextNamePrefix + getComponentKey(child, i);</span>
+<span class="hljs-addition">+            traverseAllChildren(child, nextName, mapSingleChildIntoContext, traverseContext);</span>
+        }
+    }
+}
+<span class="hljs-addition">+function mapSingleChildIntoContext(traverseContext, child, childKey) {</span>
+<span class="hljs-addition">+    const { result, prefix, mapFunction, context } = traverseContext;</span>
+    let mappedChild = mapFunction.call(context, child);
+    if (Array.isArray(mappedChild)) {
+<span class="hljs-addition">+        mapIntoWithKeyPrefixInternal(mappedChild, result, childKey, c =&gt; c);</span>
+    } else if (mappedChild != null) {
+<span class="hljs-addition">+        result.push({ ...mappedChild, key: prefix + childKey });</span>
+    }
+}
+<span class="hljs-addition">+function getComponentKey(component, index) {</span>
+<span class="hljs-addition">+    return component.key || index.toString(36);</span>
+<span class="hljs-addition">+}</span>
+export {
+    mapChildren as map
+};
+</code></pre>
+
+    

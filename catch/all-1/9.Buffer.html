@@ -1,0 +1,201 @@
+
+        <h2 id="t01. 什么是Buffer">1. 什么是Buffer <a href="#t01. 什么是Buffer"> # </a></h2>
+<ul>
+<li>缓冲区Buffer是暂时存放输入输出数据的一段内存。</li>
+<li>JS语言没有二进制数据类型，而在处理TCP和文件流的时候，必须要处理二进制数据。</li>
+<li>NodeJS提供了一个Buffer对象来提供对二进制数据的操作</li>
+<li>是一个表示固定内存分配的全局对象，也就是说要放到缓存区中的字节数需要提前确定</li>
+<li>Buffer好比由一个8位字节元素组成的数组，可以有效的在JavasScript中表示二进制数据</li>
+</ul>
+<h2 id="t12. 什么是字节">2. 什么是字节 <a href="#t12. 什么是字节"> # </a></h2>
+<ul>
+<li>字节(Byte)是计算机存储时的一种计量单位，一个字节等于8位二进制数</li>
+<li>一个位就代表一个0或1，每8个位（bit）组成一个字节（Byte）</li>
+<li>字节是通过网络传输信息的基本单位</li>
+<li>一个字节最大值十进制数是255(2**8-1)</li>
+</ul>
+<h2 id="t23. 进制">3. 进制 <a href="#t23. 进制"> # </a></h2>
+<ul>
+<li>0b 2进制</li>
+<li>0x 16进制</li>
+<li>0o 8进制</li>
+</ul>
+<h3 id="t33.1 转为十进制">3.1 转为十进制 <a href="#t33.1 转为十进制"> # </a></h3>
+<ul>
+<li>将任意进制字符串转换为十进制<pre><code class="lang-js"><span class="hljs-built_in">parseInt</span>(<span class="hljs-string">"11"</span>, <span class="hljs-number">2</span>); <span class="hljs-comment">// 3 2进制转10进制</span>
+<span class="hljs-built_in">parseInt</span>(<span class="hljs-string">"77"</span>, <span class="hljs-number">8</span>); <span class="hljs-comment">// 63 8进制转10进制</span>
+<span class="hljs-built_in">parseInt</span>(<span class="hljs-string">"e7"</span>, <span class="hljs-number">16</span>); <span class="hljs-comment">//231 16进制转10进制</span>
+</code></pre>
+</li>
+</ul>
+<h3 id="t43.2 转其它进制">3.2 转其它进制 <a href="#t43.2 转其它进制"> # </a></h3>
+<ul>
+<li>将10进制转换为其它进制字符串<pre><code class="lang-js">(<span class="hljs-number">3</span>).toString(<span class="hljs-number">2</span>) <span class="hljs-comment">// "11" 十进制转2进制</span>
+(<span class="hljs-number">17</span>).toString(<span class="hljs-number">16</span>) <span class="hljs-comment">// "11" 十进制转16进制</span>
+(<span class="hljs-number">33</span>).toString(<span class="hljs-number">32</span>) <span class="hljs-comment">// "11" 十提制转32进制</span>
+</code></pre>
+</li>
+</ul>
+<h2 id="t54. 定义buffer的三种方式">4. 定义buffer的三种方式 <a href="#t54. 定义buffer的三种方式"> # </a></h2>
+<h3 id="t64.1 通过长度定义buffer">4.1 通过长度定义buffer <a href="#t64.1 通过长度定义buffer"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">// 创建一个长度为 10、且用 0 填充的 Buffer。</span>
+<span class="hljs-keyword">const</span> buf1 = Buffer.alloc(<span class="hljs-number">10</span>);
+<span class="hljs-comment">// 创建一个长度为 10、且用 0x1 填充的 Buffer。</span>
+<span class="hljs-keyword">const</span> buf2 = Buffer.alloc(<span class="hljs-number">10</span>, <span class="hljs-number">1</span>);
+<span class="hljs-comment">// 创建一个长度为 10、且未初始化的 Buffer。</span>
+<span class="hljs-keyword">const</span> buf3 = Buffer.allocUnsafe(<span class="hljs-number">10</span>);
+</code></pre>
+<h3 id="t73.2 通过数组定义buffer">3.2 通过数组定义buffer <a href="#t73.2 通过数组定义buffer"> # </a></h3>
+<pre><code class="lang-javascript"><span class="hljs-comment">// 创建一个包含 [0x1, 0x2, 0x3] 的 Buffer。</span>
+<span class="hljs-keyword">const</span> buf4 = Buffer.from([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]);
+</code></pre>
+<blockquote>
+<p>正常情况下为0-255之间;</p>
+</blockquote>
+<h3 id="t83.3 字符串创建">3.3 字符串创建 <a href="#t83.3 字符串创建"> # </a></h3>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> buf5 = Buffer.from(<span class="hljs-string">'珠峰培训'</span>);
+</code></pre>
+<h2 id="t95.buffer常用方法">5.buffer常用方法 <a href="#t95.buffer常用方法"> # </a></h2>
+<h3 id="t105.1 fill">5.1 fill <a href="#t105.1 fill"> # </a></h3>
+<p><code>buf.fill(value[, offset[, end]][, encoding])</code></p>
+<pre><code class="lang-js">buffer.fill(<span class="hljs-number">0</span>);
+</code></pre>
+<h3 id="t115.2 write方法">5.2 write方法 <a href="#t115.2 write方法"> # </a></h3>
+<p><code>buf.write(string[, offset[, length]][, encoding])</code></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer = Buffer.allocUnsafe(<span class="hljs-number">6</span>);
+buffer.write(<span class="hljs-string">'珠'</span>,<span class="hljs-number">0</span>,<span class="hljs-number">3</span>,<span class="hljs-string">'utf8'</span>);
+buffer.write(<span class="hljs-string">'峰'</span>,<span class="hljs-number">3</span>,<span class="hljs-number">3</span>,<span class="hljs-string">'utf8'</span>); <span class="hljs-comment">//珠峰</span>
+</code></pre>
+<h3 id="t125.3 writeInt8">5.3 writeInt8 <a href="#t125.3 writeInt8"> # </a></h3>
+<ul>
+<li>通过指定的 <code>offset</code> 将 <code>value</code> 写入到当前 Buffer 中。</li>
+<li>这个 value 应当是一个有效的有符号的8位整数</li>
+</ul>
+<p><code>buf.writeInt8(value, offset[, noAssert])</code></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buf = Buffer.alloc(<span class="hljs-number">4</span>);
+buf.writeInt8()
+buf.writeInt8(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>);
+buf.writeInt8(<span class="hljs-number">16</span>,<span class="hljs-number">1</span>);
+buf.writeInt8(<span class="hljs-number">32</span>,<span class="hljs-number">2</span>);
+buf.writeInt8(<span class="hljs-number">48</span>,<span class="hljs-number">3</span>);
+<span class="hljs-built_in">console</span>.log(buf);<span class="hljs-comment">// &lt;Buffer 00 10 20 30&gt;</span>
+<span class="hljs-built_in">console</span>.log(buf.readInt8(<span class="hljs-number">0</span>));<span class="hljs-comment">//0</span>
+<span class="hljs-built_in">console</span>.log(buf.readInt8(<span class="hljs-number">1</span>));<span class="hljs-comment">//16</span>
+<span class="hljs-built_in">console</span>.log(buf.readInt8(<span class="hljs-number">2</span>));<span class="hljs-comment">//32</span>
+<span class="hljs-built_in">console</span>.log(buf.readInt8(<span class="hljs-number">3</span>));<span class="hljs-comment">//48</span>
+</code></pre>
+<h4 id="t135.3.1 Little-Endian&amp;Big-Endian">5.3.1 Little-Endian&amp;Big-Endian <a href="#t135.3.1 Little-Endian&amp;Big-Endian"> # </a></h4>
+<p>不同的CPU有不同的字节序类型，这些字节序是指整数在内存中保存的顺序。</p>
+<ul>
+<li>Big-endian：将高序字节存储在起始地址（高位编址）</li>
+<li>Little-endian：将低序字节存储在起始地址（低位编址）</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer = Buffer.alloc(<span class="hljs-number">4</span>);
+buffer.writeInt16BE(<span class="hljs-number">2</span>**<span class="hljs-number">8</span>,<span class="hljs-number">0</span>);<span class="hljs-comment">//256</span>
+<span class="hljs-built_in">console</span>.log(buffer);<span class="hljs-comment">//&lt;Buffer 01 00 00 00&gt;</span>
+<span class="hljs-built_in">console</span>.log(buffer.readInt16BE(<span class="hljs-number">0</span>));<span class="hljs-comment">//256</span>
+
+buffer.writeInt16LE(<span class="hljs-number">2</span>**<span class="hljs-number">8</span>,<span class="hljs-number">2</span>);<span class="hljs-comment">//256</span>
+<span class="hljs-built_in">console</span>.log(buffer);<span class="hljs-comment">//&lt;Buffer 01 00 00 01&gt;</span>
+<span class="hljs-built_in">console</span>.log(buffer.readInt16LE(<span class="hljs-number">2</span>));<span class="hljs-comment">//256</span>
+</code></pre>
+<h3 id="t145.3 toString方法">5.3 toString方法 <a href="#t145.3 toString方法"> # </a></h3>
+<p><code>buf.toString([encoding[, start[, end]]])</code></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'珠峰架构'</span>);
+<span class="hljs-built_in">console</span>.log(buffer.toString(<span class="hljs-string">'utf8'</span>,<span class="hljs-number">3</span>,<span class="hljs-number">6</span>));<span class="hljs-comment">//峰</span>
+</code></pre>
+<h3 id="t155.4 slice方法">5.4 slice方法 <a href="#t155.4 slice方法"> # </a></h3>
+<p><code>buf.slice([start[, end]])</code></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'珠峰架构'</span>);
+<span class="hljs-keyword">let</span> subBuffer = buffer.slice(<span class="hljs-number">0</span>,<span class="hljs-number">6</span>);
+<span class="hljs-built_in">console</span>.log(subBuffer.toString());
+</code></pre>
+<h4 id="t165.4.1 截取乱码问题">5.4.1 截取乱码问题 <a href="#t165.4.1 截取乱码问题"> # </a></h4>
+<pre><code class="lang-javascript"><span class="hljs-keyword">let</span> {StringDecoder}  = <span class="hljs-built_in">require</span>(<span class="hljs-string">'string_decoder'</span>);
+<span class="hljs-keyword">let</span> sd = <span class="hljs-keyword">new</span> StringDecoder();
+<span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'珠峰'</span>);
+<span class="hljs-built_in">console</span>.log(sd.write(buffer.slice(<span class="hljs-number">0</span>,<span class="hljs-number">4</span>)));
+<span class="hljs-built_in">console</span>.log(sd.write(buffer.slice(<span class="hljs-number">4</span>)));
+</code></pre>
+<h3 id="t175.5 copy方法">5.5 copy方法 <a href="#t175.5 copy方法"> # </a></h3>
+<ul>
+<li>复制Buffer 把多个buffer拷贝到一个大buffer上</li>
+</ul>
+<p><code>buf.copy(target[, targetStart[, sourceStart[, sourceEnd]]])</code></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'珠峰架构'</span>);
+<span class="hljs-keyword">let</span> subBuffer = Buffer.alloc(<span class="hljs-number">6</span>);
+buffer.copy(subBuffer,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">4</span>);<span class="hljs-comment">//珠</span>
+buffer.copy(subBuffer,<span class="hljs-number">3</span>,<span class="hljs-number">3</span>,<span class="hljs-number">6</span>);<span class="hljs-comment">//峰</span>
+<span class="hljs-built_in">console</span>.log(subBuffer.toString());<span class="hljs-comment">//珠峰</span>
+</code></pre>
+<pre><code class="lang-js">Buffer.prototype.copy = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">targetBuffer,targetStart,sourceStart,sourceEnd</span>)</span>{
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=sourceStart;i&lt;sourceEnd;i++){
+        targetBuffer[targetStart++] = <span class="hljs-keyword">this</span>[i];
+    }
+}
+<span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'珠峰'</span>);
+<span class="hljs-keyword">let</span> subBuffer = Buffer.alloc(<span class="hljs-number">6</span>);
+buffer.copy(subBuffer,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">4</span>);<span class="hljs-comment">//珠</span>
+buffer.copy(subBuffer,<span class="hljs-number">3</span>,<span class="hljs-number">3</span>,<span class="hljs-number">6</span>);<span class="hljs-comment">//峰</span>
+<span class="hljs-built_in">console</span>.log(subBuffer.toString());<span class="hljs-comment">//珠峰</span>
+</code></pre>
+<h3 id="t185.6 concat方法">5.6 concat方法 <a href="#t185.6 concat方法"> # </a></h3>
+<p><code>Buffer.concat(list[, totalLength])</code></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer1 = Buffer.from(<span class="hljs-string">'珠'</span>);
+<span class="hljs-keyword">let</span> buffer2 = Buffer.from(<span class="hljs-string">'峰'</span>);
+<span class="hljs-keyword">let</span> buffer = Buffer.concat([buffer1,buffer2]);
+<span class="hljs-built_in">console</span>.log(buffer.toString());
+</code></pre>
+<pre><code class="lang-js">Buffer.concat = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">list</span>) </span>{
+    <span class="hljs-keyword">let</span> totalLength = list.reduce(<span class="hljs-function">(<span class="hljs-params">len, item</span>) =&gt;</span> len + item.length, <span class="hljs-number">0</span>);
+    <span class="hljs-keyword">if</span> (list.length == <span class="hljs-number">0</span>)
+        <span class="hljs-keyword">return</span> list[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">let</span> newBuffer = Buffer.alloc(totalLength);
+    <span class="hljs-keyword">let</span> pos = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> buffer <span class="hljs-keyword">of</span> list) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> byte <span class="hljs-keyword">of</span> buffer) {
+            newBuffer[pos++] = byte;
+        }
+    }
+    <span class="hljs-keyword">return</span> newBuffer;
+}
+<span class="hljs-keyword">let</span> buffer1 = Buffer.from(<span class="hljs-string">'珠'</span>);
+<span class="hljs-keyword">let</span> buffer2 = Buffer.from(<span class="hljs-string">'峰'</span>);
+<span class="hljs-keyword">let</span> buffer = Buffer.concat([buffer1, buffer2]);
+<span class="hljs-built_in">console</span>.log(buffer.toString());
+</code></pre>
+<h3 id="t195.7 isBuffer">5.7 isBuffer <a href="#t195.7 isBuffer"> # </a></h3>
+<ul>
+<li>判断是否是buffer</li>
+</ul>
+<pre><code class="lang-js">Buffer.isBuffer();
+</code></pre>
+<h3 id="t205.8 length">5.8 length <a href="#t205.8 length"> # </a></h3>
+<ul>
+<li>获取字节长度(显示是字符串所代表buffer的长度)</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> str = <span class="hljs-string">'珠峰'</span>;
+<span class="hljs-built_in">console</span>.log(str.length);<span class="hljs-comment">//2</span>
+<span class="hljs-keyword">let</span> buffer = Buffer.from(str);
+<span class="hljs-built_in">console</span>.log(Buffer.byteLength(buffer));<span class="hljs-comment">//6</span>
+</code></pre>
+<h2 id="t216. base64">6. base64 <a href="#t216. base64"> # </a></h2>
+<ul>
+<li>Base64是网络上最常见的用于传输8Bit字节码的编码方式之一</li>
+<li>Base64就是一种基于64个可打印字符来表示二进制数据的方法</li>
+<li>Base64要求把每三个8Bit的字节转换为四个6Bit的字节（3<em>8 = 4</em>6 = 24），然后把6Bit再添两位高位0，组成四个8Bit的字节</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> CHARTS = <span class="hljs-string">'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transfer</span>(<span class="hljs-params">str</span>)</span>{
+  <span class="hljs-keyword">let</span> buf = Buffer.from(str);
+  <span class="hljs-keyword">let</span> result = <span class="hljs-string">''</span>;
+  <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> b <span class="hljs-keyword">of</span> buf){
+      result += b.toString(<span class="hljs-number">2</span>);
+  }
+  <span class="hljs-keyword">return</span> result.match(<span class="hljs-regexp">/(\d{6})/g</span>).map(<span class="hljs-function"><span class="hljs-params">val</span>=&gt;</span><span class="hljs-built_in">parseInt</span>(val,<span class="hljs-number">2</span>)).map(<span class="hljs-function"><span class="hljs-params">val</span>=&gt;</span>CHARTS[val]).join(<span class="hljs-string">''</span>);
+}
+<span class="hljs-keyword">let</span> r = transfer(<span class="hljs-string">'珠'</span>);
+<span class="hljs-built_in">console</span>.log(r);<span class="hljs-comment">//54+g</span>
+</code></pre>
+
+    

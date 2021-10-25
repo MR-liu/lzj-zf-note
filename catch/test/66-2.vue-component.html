@@ -1,0 +1,267 @@
+
+        <h2 id="t0组件的声明">组件的声明 <a href="#t0组件的声明"> # </a></h2>
+<ul>
+<li><p>全局组件</p>
+<pre><code>&lt;my-button&gt;&lt;/my-button&gt;  
+Vue.component('my-button',{
+  template:'&lt;button&gt;点我啊&lt;/button&gt;'
+})
+let vm = new Vue({
+  el:'#app'
+})
+</code></pre></li>
+<li><p>局部组件</p>
+<pre><code>&lt;my-button&gt;&lt;/my-button&gt;
+let vm = new Vue({
+  el:'#app',
+  components:{
+      'MyButton':{
+          template:'&lt;button&gt;按钮&lt;/button&gt;'
+      }
+  }
+});
+</code></pre><p>HTML不支持自闭合的自定义元素，在DOM模板里永远不要使用自闭和组件,在HTML中也不支持MyButton的写法，所以组件调用全部使用短横线连接的方式！</p>
+</li>
+</ul>
+<p><a href="https://www.w3.org/TR/html/syntax.html#void-elements">https://www.w3.org/TR/html/syntax.html#void-elements</a></p>
+<h2 id="t1组件的数据">组件的数据 <a href="#t1组件的数据"> # </a></h2>
+<p>在组件中的数据必须是函数的形式</p>
+<pre><code>'MyButton':{
+    data(){
+        return {content:'按钮'}
+    },
+    template:'&lt;button&gt;{{content}}&lt;/button&gt;'
+}
+</code></pre><h2 id="t2组件的属性应用及校验">组件的属性应用及校验 <a href="#t2组件的属性应用及校验"> # </a></h2>
+<h3 id="t3属性应用">属性应用 <a href="#t3属性应用"> # </a></h3>
+<pre><code>&lt;my-button button-content="按钮"&gt;&lt;/my-button&gt;
+components:{
+    'MyButton':{
+        props:['buttonContent'],
+        template:'&lt;button&gt;{{buttonContent}}&lt;/button&gt;'
+    }
+}
+</code></pre><p>属性在组件标签上需要使用短横线命名法，在组件中声明需要采用驼峰命名法</p>
+<h3 id="t4属性校验">属性校验 <a href="#t4属性校验"> # </a></h3>
+<pre><code>&lt;my-button button-content="按钮" :number="'1'"&gt;&lt;/my-button&gt;
+components:{
+    'MyButton':{
+        props:{
+            buttonContent:String,
+            arr:{
+                type:Array,
+                default:()=&gt;([])
+            },
+            number:{
+                type:Number,
+                validator:(value)=&gt;{
+                    return typeof value == 'number'
+                }
+            },
+
+        },
+        template:'&lt;button&gt;{{buttonContent}} {{arr}} {{number}}&lt;/button&gt;'
+    }
+}
+</code></pre><h3 id="t5批量传入数据">批量传入数据 <a href="#t5批量传入数据"> # </a></h3>
+<pre><code>&lt;my-button v-bind="info"&gt;&lt;/my-button&gt;
+let vm = new Vue({
+    el:'#app',
+    data:{
+        info:{name:'姜文',age:18}
+    },
+    components:{
+        'MyButton':{
+            props:['name','age'],
+            inheritAttrs:false,
+            mounted(){
+                console.log(this.$attrs)
+            },
+            template:'&lt;button&gt;{{name}} {{age}} &lt;/button&gt;'
+        }
+    }
+});
+</code></pre><h2 id="t6事件应用">事件应用 <a href="#t6事件应用"> # </a></h2>
+<pre><code>&lt;!-- 给组件绑定方法，在内部触发绑定的方法 --&gt;
+&lt;my-button @click="change" msg="按钮"&gt;&lt;/my-button&gt;
+let vm = new Vue({
+    el:'#app',
+    methods:{
+        change(){ alert('hello'); }
+    },
+    components:{
+        'MyButton':{
+            props:['msg'],
+            template:`&lt;div&gt;
+                &lt;button @click="this.$listeners.click"&gt;{{msg}}&lt;/button&gt;
+                &lt;button v-on="this.$listeners"&gt;{{msg}}&lt;/button&gt;
+                &lt;button @click="$emit('click')"&gt;&lt;/button&gt;
+            &lt;/div&gt;`
+        }
+    }
+});
+</code></pre><p>在组件的根元素上直接监听一个原生事件</p>
+<pre><code>&lt;my-button @click.native="change"&gt;&lt;/my-button&gt;
+</code></pre><h2 id="t7\$parent &amp; \$child">\$parent &amp; \$child <a href="#t7\$parent &amp; \$child"> # </a></h2>
+<p>实现收缩面板功能</p>
+<pre><code>&lt;collapse&gt;
+    &lt;collapse-item title="react"&gt;内容1&lt;/collapse-item&gt;
+    &lt;collapse-item title="vue"&gt;内容2&lt;/collapse-item&gt;
+    &lt;collapse-item title="node"&gt;内容3&lt;/collapse-item&gt;
+&lt;/collapse&gt;  
+Vue.component('Collapse',{
+    methods:{
+        open(id){
+            this.$children.forEach(child =&gt; {
+                if(child._uid != id){
+                    child.show = false;
+                }
+            });
+        }
+    },
+    template:`&lt;div class="wrap"&gt;
+        &lt;slot&gt;&lt;/slot&gt;
+    &lt;/div&gt;`
+});
+Vue.component('CollapseItem',{
+    props:['title'],
+    data(){
+        return {show:true}
+    },
+    methods:{
+        change(){
+            this.$parent.open(this._uid);
+            this.show =!this.show;
+        }
+    },  
+    template:`&lt;div class="collapse-item" @click="change"&gt;
+        &lt;div class="title"&gt;{{title}}&lt;/div&gt;
+        &lt;div v-show="show"&gt;
+            &lt;slot&gt;&lt;/slot&gt;    
+        &lt;/div&gt;
+    &lt;/div&gt;`
+});
+</code></pre><h2 id="t8v-slot应用">v-slot应用 <a href="#t8v-slot应用"> # </a></h2>
+<ul>
+<li><p>v-slot:可以简写成#</p>
+<pre><code>&lt;List&gt;
+  &lt;template v-slot:banana&gt;🍌&lt;/template&gt;
+  &lt;template v-slot:apple&gt;🍎&lt;/template&gt;
+      🍊
+&lt;/List&gt;  
+list:{
+  template:`
+      &lt;ul&gt;
+          &lt;li&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;slot name="banner"&gt;&lt;/slot&gt;&lt;/li&gt;    
+          &lt;li&gt;&lt;slot name="apple"&gt;&lt;/slot&gt;&lt;/li&gt;   
+      &lt;/ul&gt;
+  `
+}
+</code></pre></li>
+<li><p>作用域插槽</p>
+<pre><code>&lt;List #default="{val}"&gt;
+  {{val}}
+&lt;/List&gt; 
+list:{
+  data(){
+      return {arr:[1,2,3]}
+  },
+  template:`
+      &lt;ul&gt;
+          &lt;li v-for="a in arr" :key="a"&gt;
+              &lt;slot :val="a"&gt;{{a}}&lt;/slot&gt;
+          &lt;/li&gt;
+      &lt;/ul&gt;
+  `
+}
+</code></pre></li>
+</ul>
+<h2 id="t9Provide &amp; inject">Provide &amp; inject <a href="#t9Provide &amp; inject"> # </a></h2>
+<p>跨组件数据传递，主要为高阶插件/组件库提供用例</p>
+<pre><code>provide:{ name:'zf' },
+components:{
+    list:{
+        inject:['name'],
+        template:`&lt;div&gt;{{name}}&lt;/div&gt;`
+    }
+}
+</code></pre><h2 id="t10父子组件数据同步">父子组件数据同步 <a href="#t10父子组件数据同步"> # </a></h2>
+<p>.sync 和 v-model的使用</p>
+<pre><code>&lt;div id="app"&gt;
+        {{msg}}
+        &lt;tab :msg="msg" @update:msg="change"&gt;&lt;/tab&gt;
+        &lt;tab :msg.sync="msg"&gt;&lt;/tab&gt;
+        &lt;tab v-model="msg"&gt;&lt;/tab&gt;
+&lt;/div&gt;
+
+
+let vm = new Vue({
+    el:'#app',
+    data:{
+        msg:'hello'
+    },
+    methods:{
+        change(value){
+            this.msg = value
+        }
+    },
+    components:{
+        tab:{
+            props:['msg'],
+            methods:{
+                change(){
+                    this.$emit('update:msg','world')
+                    this.$emit('input','world');
+                }
+            },
+            template:`&lt;div&gt;
+                {{msg}} &lt;button @click="change"&gt;切换&lt;/button&gt;
+            &lt;/div&gt;`
+        }
+    }
+})
+</code></pre><h2 id="t11ref 特性">ref 特性 <a href="#t11ref 特性"> # </a></h2>
+<ul>
+<li>放在dom上表示获取当前dom元素,放到组件上表示获取当前组件实例,在v-for中获取的是集合  </li>
+</ul>
+<pre><code>// 在组件中可以获取组件实例
+&lt;tab :msg="msg" @update:msg="change" ref="ele"&gt;&lt;/tab&gt;
+this.$refs.ele.change()
+
+// 放在dom上表示获取当前dom元素
+&lt;div ref="ele"&gt;&lt;/div&gt;
+this.$refs.ele.style.border="1px solid red"
+
+// 在v-for中获取的是集合
+&lt;template v-for="a in 3"&gt;
+    &lt;tab :msg="msg" @update:msg="change" ref="ele" :key="a"&gt;&lt;/tab&gt;
+&lt;/template&gt;
+console.log(this.$refs.ele.length)
+</code></pre><h3 id="t12组件间通信">组件间通信 <a href="#t12组件间通信"> # </a></h3>
+<ul>
+<li>1) props和$emit 
+父组件向子组件传递数据是通过prop传递的，子组件传递数据给父组件是通过$emit触发事件来做到的</li>
+<li>2) $attrs和$listeners
+A-&gt;B-&gt;C。Vue 2.4 开始提供了$attrs和$listeners来解决这个问题</li>
+<li>3) $parent,$children 智能组件木偶组件</li>
+<li>4) $refs 获取实例</li>
+<li>5) 父组件中通过provider来提供变量，然后在子组件中通过inject来注入变量。</li>
+<li>6) envetBus 平级组件数据传递  这种情况下可以使用中央事件总线的方式</li>
+<li>7) vuex状态管理</li>
+</ul>
+<h2 id="t13异步组件">异步组件 <a href="#t13异步组件"> # </a></h2>
+<pre><code>Vue.component('async', function (resolve, reject) {
+    setTimeout(function () {
+        resolve({
+            template: '&lt;div&gt;异步组件&lt;/div&gt;'
+        })
+    }, 1000);
+});
+</code></pre><p>在后期我们一般配合webpack的import语法使用</p>
+<h2 id="t14递归组件">递归组件 <a href="#t14递归组件"> # </a></h2>
+<ul>
+<li>name属性 (后期实现菜单组件)</li>
+</ul>
+
+    

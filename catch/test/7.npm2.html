@@ -1,0 +1,29 @@
+
+        <h2 id="t01. npm script">1. npm script <a href="#t01. npm script"> # </a></h2>
+<h3 id="t11.1 快速创建项目">1.1 快速创建项目 <a href="#t11.1 快速创建项目"> # </a></h3>
+<pre><code class="lang-js">npm init
+npm init -f
+npm init -y
+</code></pre>
+<pre><code class="lang-js">npm config <span class="hljs-keyword">set</span> init.author.email "zhufengnodejs@126.com"
+npm config <span class="hljs-keyword">set</span> init.author.name "zhufengnodejs"
+npm config <span class="hljs-keyword">set</span> init.author.url "http://github.com/zhufengnodejs"
+npm config <span class="hljs-keyword">set</span> init.license "MIT"
+npm config <span class="hljs-keyword">set</span> init.version "0.0.1"
+</code></pre>
+<h3 id="t21.2 用 npm run 执行命令">1.2 用 npm run 执行命令 <a href="#t21.2 用 npm run 执行命令"> # </a></h3>
+<ul>
+<li>npm run 实际上执行的是<code>npm run-script</code></li>
+<li>从<code>package.json</code>文件中读取<code>scripts</code>对象里面的全部配置</li>
+<li>以传给<code>npm run</code>的第一个参数作为键,在scripts对象里面获取对应的值作为接下来要执行的命令,如果没找到直接报错</li>
+<li>在系统默认的 shell 中执行上述命令，系统默认 shell 通常是 bash，windows 环境下不太一样</li>
+</ul>
+<pre><code class="lang-js">  <span class="hljs-string">"scripts"</span>: {
+    <span class="hljs-string">"test"</span>: <span class="hljs-string">"echo \"Error: no test specified\" &amp;&amp; exit 1"</span>,
+    <span class="hljs-string">"eslint"</span>: <span class="hljs-string">"eslint --version"</span>
+  }
+</code></pre>
+<pre><code class="lang-js">npm run eslint
+</code></pre>
+
+    

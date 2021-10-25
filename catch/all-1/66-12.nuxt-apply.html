@@ -1,0 +1,127 @@
+
+        <h2 id="t0什么是nuxt">什么是nuxt <a href="#t0什么是nuxt"> # </a></h2>
+<p>Nuxt.js是使用 Webpack 和 Node.js 进行封装的基于Vue的SSR框架  </p>
+<h2 id="t1nuxt特点">nuxt特点 <a href="#t1nuxt特点"> # </a></h2>
+<p>优点:<br>更好的 SEO，由于搜索引擎爬虫抓取工具可以直接查看完全渲染的页面。首屏渲染速度快</p>
+<p>缺点:<br>Node.js 中渲染完整的应用程序，显然会比仅仅提供静态文件的 server 更加大量占用 CPU 资源。需要考虑服务器负载，缓存策略</p>
+<h2 id="t2项目生成">项目生成 <a href="#t2项目生成"> # </a></h2>
+<pre><code>npx create-nuxt-app nuxt-project
+cd nuxt-project
+yarn dev
+</code></pre><h2 id="t3项目目录">项目目录 <a href="#t3项目目录"> # </a></h2>
+<ul>
+<li>assets 静态资源 会被webpack处理</li>
+<li>static 不会被webpack处理</li>
+<li>components 公共组件</li>
+<li>layout布局组件</li>
+<li>pages路由页面 可以生成对应的路由</li>
+<li>middleware 运行过程中发生的事</li>
+<li>store 存放vuex</li>
+<li>plugins 存放javascript插件的</li>
+<li>nuxt.config.js 存放nuxt配置文件</li>
+<li>别名默认可以采用 ~ 或者 @符号</li>
+</ul>
+<h2 id="t4nuxt.config.js配置">nuxt.config.js配置 <a href="#t4nuxt.config.js配置"> # </a></h2>
+<ul>
+<li><p>env 可以配置环境变量通过cross-env  </p>
+<pre><code>      env:{
+          baseUrl:process.env.BASE_URL
+      }
+</code></pre></li>
+<li>cache:false // 提升组件缓存策略</li>
+<li>css 全局css样式</li>
+<li>head 配置头</li>
+<li><p>loading (需要等待$loading 挂载完成)  </p>
+<pre><code>      loading: { color: '#000',height:'10px' }
+      mounted(){
+          this.$nextTick(()=&gt;{
+              this.$nuxt.$loading.start()
+          });
+      }
+</code></pre></li>
+<li>modules 存放第三方模块 @nuxtjs/axios 第三方模块</li>
+<li>plugins 配置插件 </li>
+<li><p>transition动画效果  </p>
+<pre><code>      config.js
+      transition: {
+          name: 'layout',
+          mode: 'out-in'
+      },
+      .layout-enter-active, .layout-leave-active {
+          transition: opacity .5s
+      }
+      .layout-enter, .layout-leave-active {
+          opacity: 0
+      }
+</code></pre></li>
+</ul>
+<h2 id="t5nuxt-link">nuxt-link <a href="#t5nuxt-link"> # </a></h2>
+<p>使用history.pushState跳转页面,不会触发页面整体重新渲染</p>
+<ul>
+<li>路径参数<pre><code> &lt;nuxt-link to="/user/4/5"&gt;路径参数&lt;/nuxt-link&gt;
+</code></pre></li>
+<li>查询字符串</li>
+<li>validate方法
+必须返回是否访问这个页面，返回false执行404逻辑<pre><code>export default {
+  validate({params}){
+      return params.id != 4;
+  }
+}
+</code></pre></li>
+<li>动画效果<pre><code>.page-enter-active, .page-leave-active {
+  transition: opacity .5s;
+}
+.page-enter, .page-leave-active {
+  opacity: 0;
+}
+</code></pre></li>
+</ul>
+<h2 id="t6中间件">中间件 <a href="#t6中间件"> # </a></h2>
+<p>如果经过服务端则在服务端执行</p>
+<ul>
+<li>全局中间件</li>
+<li>layout 在layout中增加middleware</li>
+<li>组件中间件  在组件中增加middleware</li>
+</ul>
+<pre><code>export default function ({ store, redirect }) {
+  if (!store.state.user) {
+    return redirect('/login')
+  }
+}
+router: {
+    middleware: 'auth'
+}
+</code></pre><h2 id="t7layout配置">layout配置 <a href="#t7layout配置"> # </a></h2>
+<ul>
+<li>自定义error页面 增加error.vue(配置错误layout)</li>
+<li>自定义layout布局</li>
+</ul>
+<p>增加错误页面，错误页需要配置layout</p>
+<pre><code>export default {
+    props:['error'],
+    layout:'page'
+}
+</code></pre><h2 id="t8数据获取">数据获取 <a href="#t8数据获取"> # </a></h2>
+<ul>
+<li>asyncData使用(仅在页面组件中使用)<pre><code>async asyncData ({ params }) { // 无this
+  let { data } = await axios.get();
+  return { title: data }
+}
+</code></pre></li>
+</ul>
+<h2 id="t9插件的使用">插件的使用 <a href="#t9插件的使用"> # </a></h2>
+<p>扩展原型上的方法plugins</p>
+<pre><code>export default function({app},inject){
+    inject('my',()=&gt;{ // 在app上和this都注册这个方法
+        console.log('my');
+    })
+}
+</code></pre><h2 id="t10使用vuex">使用vuex <a href="#t10使用vuex"> # </a></h2>
+<h2 id="t11运行流程">运行流程 <a href="#t11运行流程"> # </a></h2>
+<p>nextServerinit  只在主模块中使用<br>nuxt.config.js 全局中间件<br>matching layout 不同布局的中间件<br>matching page &amp; children 页面中间件<br>validate 返回false显示错误页面<br>asyncData 服务端渲染的页面数据请求<br>fetch 同步vuex数据</p>
+<p><img src="https://www.fullstackjavascript.cn/nuxt.jpg" alt=""></p>
+<h2 id="t12登录实战">登录实战 <a href="#t12登录实战"> # </a></h2>
+<p>element-ui + redis + mongo + nuxt  </p>
+<p><a href="https://github.com/zhufengzhufeng/nuxt-login.git">https://github.com/zhufengzhufeng/nuxt-login.git</a> </p>
+
+    

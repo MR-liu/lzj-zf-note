@@ -1,0 +1,438 @@
+
+        <h2 id="t01.websocket介绍">1.websocket介绍 <a href="#t01.websocket介绍"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">WebSockets_API</a>是HTML5开始提供的一种浏览器与服务器进行全双工通讯的网络技术</li>
+<li>通俗地讲：在客户端和服务器保有一个持久的连接，两边可以在任意时间开始发送数据</li>
+<li>HTML5开始提供的一种浏览器与服务器进行全双工通讯的网络技术</li>
+<li>属于应用层协议，它基于TCP传输协议，并复用HTTP的握手通道</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/httpwebsocket.png" style="width:50%"></p>
+<h2 id="t12. websocket实战">2. websocket实战 <a href="#t12. websocket实战"> # </a></h2>
+<h3 id="t22.1 server.js">2.1 server.js <a href="#t22.1 server.js"> # </a></h3>
+<p>server.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { Server } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ws'</span>);
+<span class="hljs-keyword">const</span> wss = <span class="hljs-keyword">new</span> Server({ <span class="hljs-attr">port</span>: <span class="hljs-number">8888</span> });
+wss.on(<span class="hljs-string">'connection'</span>, (socket) =&gt; {
+    socket.on(<span class="hljs-string">'message'</span>, (message) =&gt; {
+        socket.send(message);
+    });
+});
+</code></pre>
+<h3 id="t32.2 client.js">2.2 client.js <a href="#t32.2 client.js"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>websocket<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"text"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">"send()"</span>&gt;</span>发送<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">let</span> text = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'text'</span>);
+        <span class="hljs-keyword">var</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">"ws://localhost:8888"</span>);
+        ws.onopen = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            ws.send(<span class="hljs-string">"server"</span>);
+        };
+        ws.onmessage = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'onmessage'</span>, event.data);
+        };
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">send</span>(<span class="hljs-params"></span>) </span>{
+            ws.send(text.value);
+            text.value = <span class="hljs-string">''</span>;
+        }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h2 id="t43. websocket连接">3. websocket连接 <a href="#t43. websocket连接"> # </a></h2>
+<ul>
+<li>WebSocket复用了HTTP的握手通道</li>
+<li>具体指的是,客户端通过HTTP请求与WebSocket服务端协商升级协议</li>
+<li>协议升级完成后,后续的数据交换则遵照WebSocket的协议</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/websocketconnecting.jpg" style="width:50%"></p>
+<p><img src="http://img.zhufengpeixun.cn/websocketconnect.png" style="width:50%"></p>
+<p><img src="http://img.zhufengpeixun.cn/wiresharkws.png" style="width:50%"></p>
+<h3 id="t53.1 客户端：申请协议升级">3.1 客户端：申请协议升级 <a href="#t53.1 客户端：申请协议升级"> # </a></h3>
+<ul>
+<li>首先客户端发起协议升级请求</li>
+<li>请求采用的是标准的HTTP报文格式，且只支持GET方法</li>
+</ul>
+<pre><code class="lang-js">GET ws:<span class="hljs-comment">//localhost:8888/ HTTP/1.1</span>
+Host: localhost:<span class="hljs-number">8888</span>
+<span class="hljs-attr">Connection</span>: Upgrade
+<span class="hljs-attr">Upgrade</span>: websocket
+Sec-WebSocket-Version: <span class="hljs-number">13</span>
+Sec-WebSocket-Key: IHfMdf8a0aQXbwQO1pkGdA==
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Connection: Upgrade</td>
+<td style="text-align:left">表示要升级协议</td>
+</tr>
+<tr>
+<td style="text-align:left">Upgrade: websocket</td>
+<td style="text-align:left">表示要升级到websocket协议</td>
+</tr>
+<tr>
+<td style="text-align:left">Sec-WebSocket-Version: 13</td>
+<td style="text-align:left">表示websocket的版本</td>
+</tr>
+<tr>
+<td style="text-align:left">Sec-WebSocket-Key</td>
+<td style="text-align:left">与后面服务端响应首部的Sec-WebSocket-Accept是配套的，提供基本的防护，比如恶意的连接，或者无意义的连接</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t63.2 服务端：响应协议升级">3.2 服务端：响应协议升级 <a href="#t63.2 服务端：响应协议升级"> # </a></h3>
+<ul>
+<li>服务端返回内容如下<ul>
+<li>状态代码101表示协议切换</li>
+</ul>
+</li>
+<li>到此完成协议升级，后续的数据交互都按照新的协议来</li>
+</ul>
+<pre><code class="lang-js">HTTP/<span class="hljs-number">1.1</span> <span class="hljs-number">101</span> Switching Protocols
+<span class="hljs-attr">Upgrade</span>: websocket
+<span class="hljs-attr">Connection</span>: Upgrade
+Sec-WebSocket-Accept: aWAY+V/uyz5ILZEoWuWdxjnlb7E=
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Connection: Upgrade</td>
+<td style="text-align:left">升级协议</td>
+</tr>
+<tr>
+<td style="text-align:left">Upgrade: websocket</td>
+<td style="text-align:left">升级到websocket协议</td>
+</tr>
+<tr>
+<td style="text-align:left">Sec-WebSocket-Accept</td>
+<td style="text-align:left">Accept字符串</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t73.3 Sec-WebSocket-Accept的计算">3.3 Sec-WebSocket-Accept的计算 <a href="#t73.3 Sec-WebSocket-Accept的计算"> # </a></h3>
+<ul>
+<li>Sec-WebSocket-Accept根据客户端请求首部的Sec-WebSocket-Key计算出来</li>
+<li>计算公式为：<ul>
+<li>将Sec-WebSocket-Key跟258EAFA5-E914-47DA-95CA-C5AB0DC85B11拼接</li>
+<li>通过SHA1计算出摘要，并转成base64字符串</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> crypto = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">const</span> CODE = <span class="hljs-string">'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toAcceptKey</span>(<span class="hljs-params">wsKey</span>) </span>{
+    <span class="hljs-keyword">return</span> crypto.createHash(<span class="hljs-string">'sha1'</span>).update(wsKey + CODE).digest(<span class="hljs-string">'base64'</span>);;
+}
+<span class="hljs-keyword">const</span> webSocketKey = <span class="hljs-string">'IHfMdf8a0aQXbwQO1pkGdA=='</span>;
+<span class="hljs-built_in">console</span>.log(toAcceptKey(webSocketKey));<span class="hljs-comment">//aWAY+V/uyz5ILZEoWuWdxjnlb7E=</span>
+</code></pre>
+<h2 id="t84. 数据帧格式">4. 数据帧格式 <a href="#t84. 数据帧格式"> # </a></h2>
+<ul>
+<li>WebSocket客户端、服务端通信的最小单位是<a href="https://tools.ietf.org/html/rfc6455#section-5.2">帧</a>，由1个或多个帧组成一条完整的消息（message）</li>
+<li>发送端 将消息切割成多个帧，并发送给服务端</li>
+<li>接收端 接收消息帧，并将关联的帧重新组装成完整的消息</li>
+</ul>
+<h3 id="t94.1 bit和byte">4.1 bit和byte <a href="#t94.1 bit和byte"> # </a></h3>
+<ul>
+<li>比特就是bit 二进制数系统中,每个0或1就是一个位(bit),位是数据存储的最小单位</li>
+<li>其中8个bit就称为一个字节(Byte)</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/bitbyte.jpg" style="width:50%"></p>
+<h3 id="t104.2 位运算符">4.2 位运算符 <a href="#t104.2 位运算符"> # </a></h3>
+<h4 id="t114.2.1 按位与(&amp;)">4.2.1 按位与(&amp;) <a href="#t114.2.1 按位与(&amp;)"> # </a></h4>
+<ul>
+<li>两个输入数的同一位都为1才为1</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/bitand2.png" style="width:50%"></p>
+<h4 id="t124.2.2 按位或(|)">4.2.2 按位或(|) <a href="#t124.2.2 按位或(|)"> # </a></h4>
+<ul>
+<li>两个输入数的同一位只要有一个为1就是1</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/bitor2.png" style="width:50%"></p>
+<h4 id="t134.2.3 按位异或(^)">4.2.3 按位异或(^) <a href="#t134.2.3 按位异或(^)"> # </a></h4>
+<ul>
+<li>两个输入数的同一位不同就是1,如果相同就设为0</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/bitarrow2.png" style="width:50%"></p>
+<h3 id="t144.3 数据帧格式">4.3 数据帧格式 <a href="#t144.3 数据帧格式"> # </a></h3>
+<ul>
+<li>单位是比特 比如FIN、RSV1各占据1比特,opcode占据4比特</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/websocketframe.jpg" style="width:50%"></p>
+<pre><code class="lang-js">  <span class="hljs-number">0</span>                   <span class="hljs-number">1</span>                   <span class="hljs-number">2</span>                   <span class="hljs-number">3</span>
+  <span class="hljs-number">0</span> <span class="hljs-number">1</span> <span class="hljs-number">2</span> <span class="hljs-number">3</span> <span class="hljs-number">4</span> <span class="hljs-number">5</span> <span class="hljs-number">6</span> <span class="hljs-number">7</span> <span class="hljs-number">8</span> <span class="hljs-number">9</span> <span class="hljs-number">0</span> <span class="hljs-number">1</span> <span class="hljs-number">2</span> <span class="hljs-number">3</span> <span class="hljs-number">4</span> <span class="hljs-number">5</span> <span class="hljs-number">6</span> <span class="hljs-number">7</span> <span class="hljs-number">8</span> <span class="hljs-number">9</span> <span class="hljs-number">0</span> <span class="hljs-number">1</span> <span class="hljs-number">2</span> <span class="hljs-number">3</span> <span class="hljs-number">4</span> <span class="hljs-number">5</span> <span class="hljs-number">6</span> <span class="hljs-number">7</span> <span class="hljs-number">8</span> <span class="hljs-number">9</span> <span class="hljs-number">0</span> <span class="hljs-number">1</span>
+ +-+-+-+-+-------+-+-------------+-------------------------------+
+ |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+ |I|S|S|S|  (<span class="hljs-number">4</span>)  |A|     (<span class="hljs-number">7</span>)     |             (<span class="hljs-number">16</span>/<span class="hljs-number">64</span>)           |
+ |N|V|V|V|       |S|             |   (<span class="hljs-keyword">if</span> payload len==<span class="hljs-number">126</span>/<span class="hljs-number">127</span>)   |
+ | |<span class="hljs-number">1</span>|<span class="hljs-number">2</span>|<span class="hljs-number">3</span>|       |K|             |                               |
+ +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+ |     Extended payload length continued, <span class="hljs-keyword">if</span> payload len == <span class="hljs-number">127</span>  |
+ + - - - - - - - - - - - - - - - +-------------------------------+
+ |                               |Masking-key, <span class="hljs-keyword">if</span> MASK <span class="hljs-keyword">set</span> to 1  |
+ +-------------------------------+-------------------------------+
+ | Masking-key (continued)       |          Payload Data         |
+ +-------------------------------- - - - - - - - - - - - - - - - +
+ :                     Payload Data continued ...                :
+ + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+ |                     Payload Data continued ...                |
+ +---------------------------------------------------------------+
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">FIN</td>
+<td style="text-align:left">1个比特 如果是1,表示这是消息（message）的最后一个分片（fragment）,如果是0,表示不是是消息(message)的最后一个分片(fragment)</td>
+</tr>
+<tr>
+<td style="text-align:left">RSV1, RSV2, RSV3</td>
+<td style="text-align:left">各占1个比特。一般情况下全为0</td>
+</tr>
+<tr>
+<td style="text-align:left">Opcode</td>
+<td style="text-align:left">4个比特,操作代码</td>
+</tr>
+<tr>
+<td style="text-align:left">Mask</td>
+<td style="text-align:left">1个比特。表示是否要对数据载荷进行掩码操作,从客户端向服务端发送数据时，需要对数据进行掩码操作；从服务端向客户端发送数据时，不需要对数据进行掩码操作,如果Mask是1，那么在Masking-key中会定义一个掩码键(masking key),并用这个掩码键来对数据载荷进行反掩码。所有客户端发送到服务端的数据帧，Mask都是1</td>
+</tr>
+<tr>
+<td style="text-align:left">Payload length</td>
+<td style="text-align:left">数据载荷的长度</td>
+</tr>
+<tr>
+<td style="text-align:left">Masking-key</td>
+<td style="text-align:left">0或4字节(32位) 所有从客户端传送到服务端的数据帧,数据载荷都进行了掩码操作,Mask为1,且携带了4字节的Masking-key。如果Mask为0,则没有Masking-key。载荷数据的长度，不包括mask key的长度</td>
+</tr>
+<tr>
+<td style="text-align:left">Payload data</td>
+<td style="text-align:left">载荷数据</td>
+</tr>
+</tbody>
+</table>
+<p>Opcode</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">%x0</td>
+<td style="text-align:left">表示一个延续帧。当Opcode为0时，表示本次数据传输采用了数据分片，当前收到的数据帧为其中一个数据分片</td>
+</tr>
+<tr>
+<td style="text-align:left">%x1</td>
+<td style="text-align:left">表示这是一个文本帧</td>
+</tr>
+<tr>
+<td style="text-align:left">%x2</td>
+<td style="text-align:left">表示这是一个二进制帧</td>
+</tr>
+<tr>
+<td style="text-align:left">%x3-7</td>
+<td style="text-align:left">保留的操作代码</td>
+</tr>
+<tr>
+<td style="text-align:left">%x8</td>
+<td style="text-align:left">表示连接断开</td>
+</tr>
+<tr>
+<td style="text-align:left">%x9</td>
+<td style="text-align:left">表示这是一个ping操作</td>
+</tr>
+<tr>
+<td style="text-align:left">%xA</td>
+<td style="text-align:left">表示这是一个pong操作</td>
+</tr>
+<tr>
+<td style="text-align:left">%xB-F</td>
+<td style="text-align:left">保留的操作代码</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t154.4 Payload length">4.4 Payload length <a href="#t154.4 Payload length"> # </a></h3>
+<ul>
+<li>Payload length：数据载荷的长度，单位是字节。为7位，或7+16位，或7+64位<ul>
+<li>Payload length=x为0~125：数据的长度为x字节。</li>
+<li>Payload length=x为126：后续2个字节代表一个16位的无符号整数，该无符号整数的值为数据的长度</li>
+<li>Payload length=x为127：后续8个字节代表一个64位的无符号整数（最高位为0），该无符号整数的值为数据的长度。 </li>
+<li>如果payload length占用了多个字节的话，payload length的二进制表达采用网络序（big endian，重要的位在前)</li>
+</ul>
+</li>
+<li>readBigUInt64BE 用指定的字节序[readBigInt64BE() 读取为大端序,readBigInt64LE() 读取为小端序]从 buf 中指定的 offset 读取一个有符号的 64 位整数值</li>
+<li>Big-endian(大端序) 高位字节在前</li>
+<li>Little-endian(小端序) 低位字节在前</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> buffer = Buffer.from([<span class="hljs-number">0b00000001</span>, <span class="hljs-number">0b00000000</span>]);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Math</span>.pow(<span class="hljs-number">2</span>, <span class="hljs-number">8</span>));
+<span class="hljs-built_in">console</span>.log(buffer.readUInt16BE(<span class="hljs-number">0</span>));<span class="hljs-comment">// 00000001 00000000</span>
+<span class="hljs-built_in">console</span>.log(buffer.readUInt16LE(<span class="hljs-number">0</span>));<span class="hljs-comment">// 00000000 00000001</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLength</span>(<span class="hljs-params">buffer</span>) </span>{
+    <span class="hljs-keyword">const</span> byte = buffer.readUInt8(<span class="hljs-number">1</span>);
+    <span class="hljs-keyword">let</span> length = <span class="hljs-built_in">parseInt</span>(byte.toString(<span class="hljs-number">2</span>).substring(<span class="hljs-number">1</span>), <span class="hljs-number">2</span>);
+    <span class="hljs-keyword">if</span> (length === <span class="hljs-number">126</span>) {
+        length = buffer.readUInt16BE(<span class="hljs-number">2</span>);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (length === <span class="hljs-number">127</span>) {
+        length = buffer.readBigUInt64BE(<span class="hljs-number">2</span>);
+    }
+    <span class="hljs-keyword">return</span> length;
+}
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">126.</span>.toString(<span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">127.</span>.toString(<span class="hljs-number">2</span>));
+<span class="hljs-built_in">console</span>.log(getLength(Buffer.from([<span class="hljs-number">0b10000001</span>, <span class="hljs-number">0b10000001</span>])));
+<span class="hljs-built_in">console</span>.log(getLength(Buffer.from([<span class="hljs-number">0b10000001</span>, <span class="hljs-number">0b11111110</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000001</span>])));
+<span class="hljs-built_in">console</span>.log(getLength(Buffer.from([<span class="hljs-number">0b10000001</span>, <span class="hljs-number">0b11111111</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000000</span>, <span class="hljs-number">0b00000001</span>])));
+</code></pre>
+<h3 id="t164.5 掩码算法">4.5 掩码算法 <a href="#t164.5 掩码算法"> # </a></h3>
+<ul>
+<li>掩码键（Masking-key）是由客户端挑选出来的<code>32bit</code>的随机数,掩码操作不会影响数据载荷的长度</li>
+<li>掩码和反掩码操作都采用如下算法</li>
+<li>对索引<code>i</code>模以4得到结果并对原来的索引进行异或操作</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/maskkey.jpg" style="width:50%"></p>
+<p><img src="http://img.zhufengpeixun.cn/masknumber.jpg" style="width:50%"></p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unmask</span>(<span class="hljs-params">buffer, mask</span>) </span>{
+    <span class="hljs-keyword">const</span> length = buffer.length;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+        buffer[i] ^= mask[i % <span class="hljs-number">4</span>];
+    }
+}
+
+<span class="hljs-keyword">let</span> mask = Buffer.from([<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>]);
+<span class="hljs-keyword">let</span> buffer = Buffer.from([<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>]);
+unmask(buffer, mask);
+<span class="hljs-built_in">console</span>.log(buffer);
+</code></pre>
+<h2 id="t175. 实现websocket服务器">5. 实现websocket服务器 <a href="#t175. 实现websocket服务器"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">'net'</span>);
+<span class="hljs-keyword">const</span> { EventEmitter } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'events'</span>);
+<span class="hljs-keyword">const</span> crypto = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>);
+<span class="hljs-keyword">const</span> CODE = <span class="hljs-string">'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'</span>;
+<span class="hljs-keyword">const</span> OP_CODES = {
+    <span class="hljs-attr">TEXT</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">BINARY</span>: <span class="hljs-number">2</span>
+};
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Server</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">EventEmitter</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">super</span>(options);
+        <span class="hljs-keyword">this</span>.options = options;
+        <span class="hljs-keyword">this</span>.server = net.createServer(<span class="hljs-keyword">this</span>.listener);
+        <span class="hljs-keyword">this</span>.server.listen(options.port);
+    }
+    listener = <span class="hljs-function">(<span class="hljs-params">socket</span>) =&gt;</span> {
+        socket.setKeepAlive(<span class="hljs-literal">true</span>);
+        socket.send = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">payload</span>) </span>{
+            <span class="hljs-keyword">let</span> _opcode;
+            <span class="hljs-keyword">if</span> (Buffer.isBuffer(payload)) {
+                _opcode = OP_CODES.BINARY;
+            } <span class="hljs-keyword">else</span> {
+                _opcode = OP_CODES.TEXT;
+                payload = Buffer.from(payload);
+            }
+            <span class="hljs-keyword">let</span> length = payload.length;
+            <span class="hljs-keyword">let</span> buffer = Buffer.alloc(<span class="hljs-number">2</span> + length);
+            buffer[<span class="hljs-number">0</span>] = <span class="hljs-number">0b10000000</span> | _opcode;
+            buffer[<span class="hljs-number">1</span>] = length;
+            payload.copy(buffer, <span class="hljs-number">2</span>);
+            socket.write(buffer);
+        }
+        socket.on(<span class="hljs-string">'data'</span>, (chunk) =&gt; {
+            <span class="hljs-keyword">if</span> (chunk.toString().match(<span class="hljs-regexp">/Upgrade: websocket/</span>)) {
+                <span class="hljs-keyword">this</span>.upgrade(socket, chunk.toString());
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">this</span>.onmessage(socket, chunk);
+            }
+        });
+        <span class="hljs-keyword">this</span>.emit(<span class="hljs-string">'connection'</span>, socket);
+    }
+    onmessage = <span class="hljs-function">(<span class="hljs-params">socket, chunk</span>) =&gt;</span> {
+        <span class="hljs-keyword">let</span> FIN = (chunk[<span class="hljs-number">0</span>] &amp; <span class="hljs-number">0b10000000</span>) === <span class="hljs-number">0b10000000</span>;<span class="hljs-comment">//判断是否是结束位,第一个bit是不是1</span>
+        <span class="hljs-keyword">let</span> opcode = chunk[<span class="hljs-number">0</span>] &amp; <span class="hljs-number">0b00001111</span>;<span class="hljs-comment">//取一个字节的后四位,得到的一个是十进制数</span>
+        <span class="hljs-keyword">let</span> masked = (chunk[<span class="hljs-number">1</span>] &amp; <span class="hljs-number">0b10000000</span>) === <span class="hljs-number">0b10000000</span>;<span class="hljs-comment">//第一位是否是1</span>
+        <span class="hljs-keyword">let</span> payloadLength = chunk[<span class="hljs-number">1</span>] &amp; <span class="hljs-number">0b01111111</span>;<span class="hljs-comment">//取得负载数据的长度</span>
+        <span class="hljs-keyword">let</span> payload;
+        <span class="hljs-keyword">if</span> (masked) {
+            <span class="hljs-keyword">let</span> masteringKey = chunk.slice(<span class="hljs-number">2</span>, <span class="hljs-number">6</span>);<span class="hljs-comment">//掩码</span>
+            payload = chunk.slice(<span class="hljs-number">6</span>);<span class="hljs-comment">//负载数据</span>
+            unmask(payload, masteringKey);<span class="hljs-comment">//对数据进行解码处理</span>
+        }
+        <span class="hljs-keyword">if</span> (FIN) {
+            <span class="hljs-keyword">switch</span> (opcode) {
+                <span class="hljs-keyword">case</span> OP_CODES.TEXT:
+                    socket.emit(<span class="hljs-string">'message'</span>, payload.toString());
+                    <span class="hljs-keyword">break</span>;
+                <span class="hljs-keyword">case</span> OP_CODES.BINARY:
+                    socket.emit(<span class="hljs-string">'message'</span>, payload);
+                    <span class="hljs-keyword">break</span>;
+                <span class="hljs-keyword">default</span>:
+                    <span class="hljs-keyword">break</span>;
+            }
+        }
+    }
+    upgrade = <span class="hljs-function">(<span class="hljs-params">socket, chunk</span>) =&gt;</span> {
+        <span class="hljs-keyword">let</span> rows = chunk.split(<span class="hljs-string">'\r\n'</span>);<span class="hljs-comment">//按分割符分开</span>
+        <span class="hljs-keyword">let</span> headers = toHeaders(rows.slice(<span class="hljs-number">1</span>, <span class="hljs-number">-2</span>));<span class="hljs-comment">//去掉请求行和尾部的二个分隔符</span>
+        <span class="hljs-keyword">let</span> wsKey = headers[<span class="hljs-string">'Sec-WebSocket-Key'</span>];
+        <span class="hljs-keyword">let</span> acceptKey = toAcceptKey(wsKey);
+        <span class="hljs-keyword">let</span> response = [
+            <span class="hljs-string">'HTTP/1.1 101 Switching Protocols'</span>,
+            <span class="hljs-string">'Upgrade: websocket'</span>,
+            <span class="hljs-string">`Sec-WebSocket-Accept: <span class="hljs-subst">${acceptKey}</span>`</span>,
+            <span class="hljs-string">'Connection: Upgrade'</span>,
+            <span class="hljs-string">'\r\n'</span>
+        ].join(<span class="hljs-string">'\r\n'</span>);
+        socket.write(response);
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toAcceptKey</span>(<span class="hljs-params">wsKey</span>) </span>{
+    <span class="hljs-keyword">return</span> crypto.createHash(<span class="hljs-string">'sha1'</span>).update(wsKey + CODE).digest(<span class="hljs-string">'base64'</span>);;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toHeaders</span>(<span class="hljs-params">rows</span>) </span>{
+    <span class="hljs-keyword">const</span> headers = {};
+    rows.forEach(<span class="hljs-function"><span class="hljs-params">row</span> =&gt;</span> {
+        <span class="hljs-keyword">let</span> [key, value] = row.split(<span class="hljs-string">': '</span>);
+        headers[key] = value;
+    });
+    <span class="hljs-keyword">return</span> headers;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unmask</span>(<span class="hljs-params">buffer, mask</span>) </span>{
+    <span class="hljs-keyword">const</span> length = buffer.length;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+        buffer[i] ^= mask[i &amp; <span class="hljs-number">3</span>];
+    }
+}
+
+exports.Server = Server;
+</code></pre>
+
+    

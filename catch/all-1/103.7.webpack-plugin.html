@@ -1,0 +1,603 @@
+
+        <h2 id="t01. plugin">1. plugin <a href="#t01. plugin"> # </a></h2>
+<p>插件向第三方开发者提供了 webpack 引擎中完整的能力。使用阶段式的构建回调，开发者可以引入它们自己的行为到 webpack 构建流程中。创建插件比创建 loader 更加高级，因为你将需要理解一些 webpack 底层的内部特性来做相应的钩子</p>
+<h3 id="t11.1 为什么需要一个插件">1.1 为什么需要一个插件 <a href="#t11.1 为什么需要一个插件"> # </a></h3>
+<ul>
+<li>webpack 基础配置无法满足需求</li>
+<li>插件几乎能够任意更改 webpack 编译结果</li>
+<li>webpack 内部也是通过大量内部插件实现的</li>
+</ul>
+<h3 id="t21.2 可以加载插件的常用对象">1.2 可以加载插件的常用对象 <a href="#t21.2 可以加载插件的常用对象"> # </a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">对象</th>
+<th style="text-align:left">钩子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Compiler.js">Compiler</a></td>
+<td style="text-align:left">run,compile,compilation,make,emit,done</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Compilation.js">Compilation</a></td>
+<td style="text-align:left">buildModule,normalModuleLoader,succeedModule,finishModules,seal,optimize,after-seal</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/master/lib/ModuleFactory.js">Module Factory</a></td>
+<td style="text-align:left">beforeResolver,afterResolver,module,parser</td>
+</tr>
+<tr>
+<td style="text-align:left">Module</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/master/lib/Parser.js">Parser</a></td>
+<td style="text-align:left">program,statement,call,expression</td>
+</tr>
+<tr>
+<td style="text-align:left"><a href="https://github.com/webpack/webpack/blob/master/lib/Template.js">Template</a></td>
+<td style="text-align:left">hash,bootstrap,localVars,render</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t32. 创建插件">2. 创建插件 <a href="#t32. 创建插件"> # </a></h2>
+<ul>
+<li>插件是一个类</li>
+<li>类上有一个apply的实例方法</li>
+<li>apply的参数是compiler</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DonePlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+    apply(compiler) {
+
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DonePlugin;
+</code></pre>
+<h2 id="t43. Compiler 和 Compilation">3. Compiler 和 Compilation <a href="#t43. Compiler 和 Compilation"> # </a></h2>
+<p>在插件开发中最重要的两个资源就是<code>compiler</code>和<code>compilation</code>对象。理解它们的角色是扩展 webpack 引擎重要的第一步。</p>
+<ul>
+<li><p>compiler 对象代表了完整的 webpack 环境配置。这个对象在启动 webpack 时被一次性建立，并配置好所有可操作的设置，包括 options，loader 和 plugin。当在 webpack 环境中应用一个插件时，插件将收到此 compiler 对象的引用。可以使用它来访问 webpack 的主环境。</p>
+</li>
+<li><p>compilation 对象代表了一次资源版本构建。当运行 webpack 开发环境中间件时，每当检测到一个文件变化，就会创建一个新的 compilation，从而生成一组新的编译资源。一个 compilation 对象表现了当前的模块资源、编译生成资源、变化的文件、以及被跟踪依赖的状态信息。compilation 对象也提供了很多关键时机的回调，以供插件做自定义处理时选择使用。</p>
+</li>
+</ul>
+<h2 id="t54. 基本插件架构">4. 基本插件架构 <a href="#t54. 基本插件架构"> # </a></h2>
+<ul>
+<li>插件是由「具有 apply 方法的 prototype 对象」所实例化出来的</li>
+<li>这个 apply 方法在安装插件时，会被 webpack compiler 调用一次</li>
+<li>apply 方法可以接收一个 webpack compiler 对象的引用，从而可以在回调函数中访问到 compiler 对象</li>
+</ul>
+<h3 id="t64.1 使用插件代码">4.1 使用插件代码 <a href="#t64.1 使用插件代码"> # </a></h3>
+<ul>
+<li>[使用插件]<a href="https://github.com/webpack/webpack/blob/master/lib/webpack.js#L60-L69">https://github.com/webpack/webpack/blob/master/lib/webpack.js#L60-L69</a>)</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">if</span> (options.plugins &amp;&amp; <span class="hljs-built_in">Array</span>.isArray(options.plugins)) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> plugin <span class="hljs-keyword">of</span> options.plugins) {
+    plugin.apply(compiler);
+  }
+}
+</code></pre>
+<h3 id="t74.2 Compiler 插件">4.2 Compiler 插件 <a href="#t74.2 Compiler 插件"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/master/lib/Compiler.js#L105">done: new AsyncSeriesHook(["stats"])</a></li>
+</ul>
+<h4 id="t84.2.1 同步">4.2.1 同步 <a href="#t84.2.1 同步"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DonePlugin</span> </span>{
+  <span class="hljs-keyword">constructor</span>(options) {
+    <span class="hljs-keyword">this</span>.options = options;
+  }
+  apply(compiler) {
+    compiler.hooks.done.tap(<span class="hljs-string">"DonePlugin"</span>, (stats) =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Hello "</span>, <span class="hljs-keyword">this</span>.options.name);
+    });
+  }
+}
+<span class="hljs-built_in">module</span>.exports = DonePlugin;
+</code></pre>
+<h4 id="t94.2.2 异步">4.2.2 异步 <a href="#t94.2.2 异步"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DonePlugin</span> </span>{
+  <span class="hljs-keyword">constructor</span>(options) {
+    <span class="hljs-keyword">this</span>.options = options;
+  }
+  apply(compiler) {
+    compiler.hooks.done.tapAsync(<span class="hljs-string">"DonePlugin"</span>, (stats, callback) =&gt; {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Hello "</span>, <span class="hljs-keyword">this</span>.options.name);
+      callback();
+    });
+  }
+}
+<span class="hljs-built_in">module</span>.exports = DonePlugin;
+</code></pre>
+<h3 id="t104.3 使用插件">4.3 使用插件 <a href="#t104.3 使用插件"> # </a></h3>
+<ul>
+<li>要安装这个插件，只需要在你的 webpack 配置的 plugin 数组中添加一个实例</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> DonePlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./plugins/DonePlugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(<span class="hljs-string">"build"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"bundle.js"</span>,
+  },
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-keyword">new</span> DonePlugin({ <span class="hljs-attr">name</span>: <span class="hljs-string">"zhufeng"</span> })],
+};
+</code></pre>
+<h3 id="t114.4 触发钩子执行">4.4 触发钩子执行 <a href="#t114.4 触发钩子执行"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/master/lib/Compiler.js#L360-L363">done</a></li>
+</ul>
+<pre><code class="lang-diff">if (this.hooks.shouldEmit.call(compilation) <span class="hljs-comment">=== false) {</span>
+                const stats = new Stats(compilation);
+                stats.startTime = startTime;
+                stats.endTime = Date.now();
+<span class="hljs-addition">+                this.hooks.done.callAsync(stats, err =&gt; {</span>
+<span class="hljs-addition">+                    if (err) return finalCallback(err);</span>
+<span class="hljs-addition">+                    return finalCallback(null, stats);</span>
+<span class="hljs-addition">+                });</span>
+                return;
+            }
+</code></pre>
+<h2 id="t125. compilation 插件">5. compilation 插件 <a href="#t125. compilation 插件"> # </a></h2>
+<ul>
+<li>使用 compiler 对象时，你可以绑定提供了编译 compilation 引用的回调函数，然后拿到每次新的 compilation 对象。这些 compilation 对象提供了一些钩子函数，来钩入到构建流程的很多步骤中</li>
+</ul>
+<h3 id="t135.1 asset-plugin.js">5.1 asset-plugin.js <a href="#t135.1 asset-plugin.js"> # </a></h3>
+<p>plugins\asset-plugin.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AssetPlugin</span></span>{
+    <span class="hljs-keyword">constructor</span>(options){
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+    apply(compiler){
+        <span class="hljs-comment">//compiler只有一个,每当监听到文件的变化,就会创建一个新的compilation</span>
+        <span class="hljs-comment">//每当compiler开启一次新的编译,就会创建一个新的compilation,触发一次compilation事件 </span>
+        compiler.hooks.compilation.tap(<span class="hljs-string">'AssetPlugin'</span>,(compilation)=&gt;{
+            <span class="hljs-comment">// main=&gt;main.js  vendor=&gt;vendor.js</span>
+            compilation.hooks.chunkAsset.tap(<span class="hljs-string">'AssetPlugin'</span>,(chunk,filename)=&gt;{
+                <span class="hljs-built_in">console</span>.log(chunk,filename);
+            });
+        });
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = AssetPlugin;
+</code></pre>
+<h3 id="t145.2 compilation.call">5.2 compilation.call <a href="#t145.2 compilation.call"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/master/lib/Compiler.js#L853-L860">Compiler.js</a></li>
+</ul>
+<pre><code class="lang-js">newCompilation(params) {
+        <span class="hljs-keyword">const</span> compilation = <span class="hljs-keyword">this</span>.createCompilation();
+        <span class="hljs-keyword">this</span>.hooks.compilation.call(compilation, params);
+        <span class="hljs-keyword">return</span> compilation;
+    }
+</code></pre>
+<h3 id="t155.3 chunkAsset.call">5.3 chunkAsset.call <a href="#t155.3 chunkAsset.call"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Compilation.js#L2019">chunkAsset.call</a></li>
+</ul>
+<pre><code class="lang-diff">chunk.files.push(file);
+<span class="hljs-addition">+this.hooks.chunkAsset.call(chunk, file);</span>
+</code></pre>
+<blockquote>
+<p>关于 compiler, compilation 的可用回调，和其它重要的对象的更多信息，请查看 <a href="https://webpack.docschina.org/api/compiler-hooks/">插件</a> 文档。</p>
+</blockquote>
+<h2 id="t166. 打包 zip">6. 打包 zip <a href="#t166. 打包 zip"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/webpack-sources">webpack-sources</a></li>
+</ul>
+<h3 id="t176.1 zip-plugin.js">6.1 zip-plugin.js <a href="#t176.1 zip-plugin.js"> # </a></h3>
+<p>plugins\zip-plugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { RawSource } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack-sources"</span>);
+<span class="hljs-keyword">const</span> JSZip = <span class="hljs-built_in">require</span>(<span class="hljs-string">"jszip"</span>);
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ZipPlugin</span> </span>{
+  <span class="hljs-keyword">constructor</span>(options) {
+    <span class="hljs-keyword">this</span>.options = options;
+  }
+  apply(compiler) {
+    <span class="hljs-keyword">let</span> that = <span class="hljs-keyword">this</span>;
+    compiler.hooks.emit.tapAsync(<span class="hljs-string">"ZipPlugin"</span>, (compilation, callback) =&gt; {
+      <span class="hljs-keyword">var</span> zip = <span class="hljs-keyword">new</span> JSZip();
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> filename <span class="hljs-keyword">in</span> compilation.assets) {
+        <span class="hljs-keyword">const</span> source = compilation.assets[filename].source();
+        zip.file(filename, source);
+      }
+      zip.generateAsync({ <span class="hljs-attr">type</span>: <span class="hljs-string">"nodebuffer"</span> }).then(<span class="hljs-function">(<span class="hljs-params">content</span>) =&gt;</span> {
+        compilation.assets[that.options.filename] = <span class="hljs-keyword">new</span> RawSource(content);
+        callback();
+      });
+    });
+  }
+}
+<span class="hljs-built_in">module</span>.exports = ZipPlugin;
+</code></pre>
+<h3 id="t186.2 webpack.config.js">6.2 webpack.config.js <a href="#t186.2 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">  plugins: [
+<span class="hljs-addition">+    new zipPlugin({</span>
+<span class="hljs-addition">+      filename: 'assets.zip'</span>
+<span class="hljs-addition">+    })</span>
+]
+</code></pre>
+<h2 id="t197.自动外链">7.自动外链 <a href="#t197.自动外链"> # </a></h2>
+<h3 id="t207.1 使用外部类库">7.1 使用外部类库 <a href="#t207.1 使用外部类库"> # </a></h3>
+<ul>
+<li>手动指定 <code>external</code></li>
+<li>手动引入 <code>script</code></li>
+</ul>
+<blockquote>
+<p>能否检测代码中的 import 自动处理这个步骤?</p>
+</blockquote>
+<pre><code class="lang-js">{
+  <span class="hljs-attr">externals</span>:{
+    <span class="hljs-comment">//key jquery是要require或import 的模块名,值 jQuery是一个全局变量名</span>
+  <span class="hljs-string">'jquery'</span>:<span class="hljs-string">'$'</span>
+}, 
+  <span class="hljs-attr">module</span>:{}
+}
+</code></pre>
+<h3 id="t217.2 思路">7.2 思路 <a href="#t217.2 思路"> # </a></h3>
+<ul>
+<li>解决 import 自动处理<code>external</code>和<code>script</code>的问题，需要怎么实现，该从哪方面开始考虑</li>
+<li><code>依赖</code> 当检测到有<code>import</code>该<code>library</code>时，将其设置为不打包类似<code>exteral</code>,并在指定模版中加入 script,那么如何检测 import？这里就用<code>Parser</code></li>
+<li><code>external依赖</code>
+需要了解 external 是如何实现的，webpack 的 external 是通过插件<code>ExternalsPlugin</code>实现的，ExternalsPlugin 通过<code>tap</code> <code>NormalModuleFactory</code> 在每次创建 Module 的时候判断是否是<code>ExternalModule</code></li>
+<li>webpack4 加入了模块类型之后，<code>Parser</code>获取需要指定类型 moduleType,一般使用<code>javascript/auto</code>即可</li>
+</ul>
+<h3 id="t227.3 使用 plugins">7.3 使用 plugins <a href="#t227.3 使用 plugins"> # </a></h3>
+<pre><code class="lang-js">plugins: [
+  <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+    <span class="hljs-attr">template</span>: <span class="hljs-string">"./src/index.html"</span>,
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"index.html"</span>,
+  }),
+  <span class="hljs-keyword">new</span> AutoExternalPlugin({
+    <span class="hljs-attr">jquery</span>: {
+      <span class="hljs-attr">expose</span>: <span class="hljs-string">"$"</span>,
+      <span class="hljs-attr">url</span>: <span class="hljs-string">"https://cdn.bootcss.com/jquery/3.1.0/jquery.js"</span>,
+    },
+  }),
+];
+</code></pre>
+<h3 id="t237.4 AutoExternalPlugin">7.4 AutoExternalPlugin <a href="#t237.4 AutoExternalPlugin"> # </a></h3>
+<ul>
+<li><a href="https://github.com/webpack/webpack/blob/0d4607c68e04a659fa58499e1332c97d5376368a/lib/ExternalsPlugin.js">ExternalsPlugin.js</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/eeafeee32ad5a1469e39ce66df671e3710332608/lib/ExternalModuleFactoryPlugin.js">ExternalModuleFactoryPlugin</a></li>
+<li><a href="https://github.com/webpack/webpack/blob/eeafeee32ad5a1469e39ce66df671e3710332608/lib/ExternalModule.js">ExternalModule.js</a></li>
+<li><a href="https://github.com/zhufengnodejs/webpack-analysis/blob/master/node_modules/_webpack%404.20.2%40webpack/lib/NormalModuleFactory.js#L87">parser</a></li>
+<li><a href="https://github.com/zhufengnodejs/webpack-analysis/blob/master/node_modules/_webpack%404.20.2%40webpack/lib/NormalModuleFactory.js#L66">factory</a></li>
+<li><a href="https://github.com/jantimon/html-webpack-plugin/blob/v3.2.0/index.js#L62">htmlWebpackPluginAlterAssetTags </a></li>
+</ul>
+<p>AsyncSeriesBailHook factorize</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> { AsyncSeriesBailHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"tapable"</span>);
+<span class="hljs-keyword">let</span> factorize = <span class="hljs-keyword">new</span> AsyncSeriesBailHook([<span class="hljs-string">"resolveData"</span>]);
+factorize.tapAsync(<span class="hljs-string">"tap1"</span>, (resolveData, callback) =&gt; {
+    <span class="hljs-keyword">if</span> (resolveData === <span class="hljs-string">"jquery"</span>) {
+        callback(<span class="hljs-literal">null</span>, { <span class="hljs-attr">externalModule</span>: <span class="hljs-string">"jquery"</span> });
+    } <span class="hljs-keyword">else</span> {
+        callback();
+    }
+});
+factorize.tapAsync(<span class="hljs-string">"tap2"</span>, (resolveData, callback) =&gt; {
+    callback(<span class="hljs-literal">null</span>, { <span class="hljs-attr">normalModule</span>: resolveData });
+});
+<span class="hljs-comment">//由tap1返回</span>
+factorize.callAsync(<span class="hljs-string">"jquery"</span>, (err, <span class="hljs-built_in">module</span>) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">module</span>);
+});
+<span class="hljs-comment">//由tap2返回</span>
+factorize.callAsync(<span class="hljs-string">"jquery2"</span>, (err, <span class="hljs-built_in">module</span>) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">module</span>);
+});
+</code></pre>
+<p>plugins\auto-external-plugin.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">/**
+ * https://webpack.js.org/api/compiler-hooks/#normalmodulefactory
+ * 1.通过AST语法树检测当前的项目脚本中引入了哪些模块,是不是引入了jquery
+ * 2.如果发现引入了,则要自动插入CDN脚本
+ */</span>
+<span class="hljs-keyword">const</span> {ExternalModule} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AutoExternalPlugin</span> </span>{
+  <span class="hljs-keyword">constructor</span>(options) {
+    <span class="hljs-keyword">this</span>.options = options;
+    <span class="hljs-keyword">this</span>.externalModules = <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.options);<span class="hljs-comment">// ['jquery','lodash']</span>
+    <span class="hljs-keyword">this</span>.importedModules = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>();<span class="hljs-comment">//存放着所有导入的外部依赖模块</span>
+  }
+  apply(compiler) {
+    <span class="hljs-comment">//每种模块都会有一个对应的模块工厂来创建这个模块,普通模块对应的工作就是普通模块工厂</span>
+    compiler.hooks.normalModuleFactory.tap(<span class="hljs-string">'AutoExternalPlugin'</span>, (normalModuleFactory) =&gt; {
+      normalModuleFactory.hooks.parser
+        .for(<span class="hljs-string">'javascript/auto'</span>)<span class="hljs-comment">//parser babel esprima  acorn 可以把源代码转成抽象语法树,然后进行遍历,</span>
+        <span class="hljs-comment">//遍历到不同类型的节点会触发不同的钩子,执行钩子对应的事件函数</span>
+        .tap(<span class="hljs-string">'AutoExternalPlugin'</span>, parser =&gt; {
+          parser.hooks.import.tap(<span class="hljs-string">'AutoExternalPlugin'</span>,(statement,source)=&gt;{
+            <span class="hljs-comment">//console.log(statement,source);</span>
+            <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.externalModules.includes(source)){<span class="hljs-comment">//jquery</span>
+              <span class="hljs-keyword">this</span>.importedModules.add(source);
+            }
+          }); 
+          <span class="hljs-comment">//拦截对require的方法调用</span>
+          parser.hooks.call.for(<span class="hljs-string">'require'</span>).tap(<span class="hljs-string">'AutoExternalPlugin'</span>,(expression)=&gt;{
+            <span class="hljs-built_in">console</span>.log(expression);
+            <span class="hljs-keyword">let</span> value = expression.arguments[<span class="hljs-number">0</span>].value;
+            <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.externalModules.includes(value)){<span class="hljs-comment">//jquery</span>
+              <span class="hljs-keyword">this</span>.importedModules.add(value);
+            }
+          })
+        })
+       <span class="hljs-comment">//改造创建模块的过程</span>
+       normalModuleFactory.hooks.factorize.tapAsync(<span class="hljs-string">'AutoExternalPlugin'</span>,(resolveData, callback)=&gt;{
+          <span class="hljs-keyword">let</span> request = resolveData.request;<span class="hljs-comment">//jquery</span>
+          <span class="hljs-keyword">if</span>(<span class="hljs-keyword">this</span>.externalModules.includes(request)){<span class="hljs-comment">//如果这个模块是一个外部模块的话,进行拦截</span>
+            <span class="hljs-keyword">let</span> expose = <span class="hljs-keyword">this</span>.options[request].expose;
+            <span class="hljs-comment">//创建一个外部模块并返回 jquery = window.jQuery</span>
+            <span class="hljs-comment">//模块不一样,打包不一样</span>
+            callback(<span class="hljs-literal">null</span>,<span class="hljs-keyword">new</span> ExternalModule(expose,<span class="hljs-string">'window'</span>,request));
+          }<span class="hljs-keyword">else</span>{
+            callback();<span class="hljs-comment">//如果是正常模块,会直接调用callback向后执行</span>
+          }
+       });
+    });
+    compiler.hooks.compilation.tap(<span class="hljs-string">'AutoExternalPlugin'</span>,(compilation)=&gt;{
+      <span class="hljs-comment">//改变资源标签</span>
+      HtmlWebpackPlugin.getHooks(compilation).alterAssetTags.tapAsync(<span class="hljs-string">'AutoExternalPlugin'</span>,(htmlData,callback)=&gt;{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'htmlData'</span>,htmlData);
+        <span class="hljs-keyword">let</span> {assetTags} = htmlData;
+        <span class="hljs-comment">//找了我实际引入了哪些模块 jquery lodash</span>
+        <span class="hljs-keyword">let</span> importedExternalModules = <span class="hljs-built_in">Object</span>.keys(<span class="hljs-keyword">this</span>.options).filter(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span><span class="hljs-keyword">this</span>.importedModules.has(item));
+        importedExternalModules.forEach(<span class="hljs-function"><span class="hljs-params">key</span>=&gt;</span>{
+          assetTags.scripts.unshift({
+            <span class="hljs-attr">tagName</span>:<span class="hljs-string">'script'</span>,
+            <span class="hljs-attr">voidTag</span>:<span class="hljs-literal">false</span>,
+            <span class="hljs-attr">attributes</span>:{
+              <span class="hljs-attr">src</span>:<span class="hljs-keyword">this</span>.options[key].url,
+              <span class="hljs-attr">defer</span>:<span class="hljs-literal">false</span>
+            }
+          });
+        });
+        callback(<span class="hljs-literal">null</span>,htmlData);
+      });
+    });
+  }
+}
+
+<span class="hljs-built_in">module</span>.exports = AutoExternalPlugin;
+<span class="hljs-comment">/**
+ * Node {
+  type: 'ImportDeclaration',
+  start: 0,
+  end: 23,
+  loc: SourceLocation {
+    start: Position { line: 1, column: 0 },
+    end: Position { line: 1, column: 23 }
+  },
+  range: [ 0, 23 ],
+  specifiers: [
+    Node {
+      type: 'ImportDefaultSpecifier',
+      start: 7,
+      end: 8,
+      loc: [SourceLocation],
+      range: [Array],
+      local: [Node]
+    }
+  ],
+  source: Node {
+    type: 'Literal',
+    start: 14,
+    end: 22,
+    loc: SourceLocation { start: [Position], end: [Position] },
+    range: [ 14, 22 ],
+    value: 'jquery',
+    raw: "'jquery'"
+  }
+}
+jquery
+ */</span>
+</code></pre>
+<h2 id="t248.HashPlugin">8.HashPlugin <a href="#t248.HashPlugin"> # </a></h2>
+<ul>
+<li>可以自己修改各种hash值 </li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HashPlugin</span></span>{
+    <span class="hljs-keyword">constructor</span>(options){
+        <span class="hljs-keyword">this</span>.options = options;
+    }
+    apply(compiler){
+        compiler.hooks.compilation.tap(<span class="hljs-string">'HashPlugin'</span>,(compilation,params)=&gt;{
+            <span class="hljs-comment">//如果你想改变hash值，可以在hash生成这后修改</span>
+            compilation.hooks.afterHash.tap(<span class="hljs-string">'HashPlugin'</span>,()=&gt;{
+                <span class="hljs-keyword">let</span> fullhash = <span class="hljs-string">'fullhash'</span>;<span class="hljs-comment">//时间戳</span>
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'本次编译的compilation.hash'</span>,compilation.hash);
+                compilation.hash= fullhash;<span class="hljs-comment">//output.filename [fullhash]</span>
+                <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> chunk <span class="hljs-keyword">of</span> compilation.chunks){
+                    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'chunk.hash'</span>,chunk.hash);
+                    chunk.renderedHash = <span class="hljs-string">'chunkHash'</span>;<span class="hljs-comment">//可以改变chunkhash</span>
+                    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'chunk.contentHash'</span>,chunk.contentHash);
+                    chunk.contentHash= { <span class="hljs-attr">javascript</span>: <span class="hljs-string">'javascriptContentHash'</span>,<span class="hljs-string">'css/mini-extract'</span>:<span class="hljs-string">'cssContentHash'</span> }
+                }
+            });
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = HashPlugin;
+<span class="hljs-comment">/**
+ * 三种hash
+ * 1. hash compilation.hash 
+ * 2. chunkHash 每个chunk都会有一个hash
+ * 3. contentHash 内容hash 每个文件会可能有一个hash值
+ */</span>
+</code></pre>
+<p>webpack.config.js</p>
+<pre><code class="lang-diff">const path = require('path');
+const DonePlugin = require('./plugins/DonePlugin');
+const AssetPlugin = require('./plugins/AssetPlugin');
+const ZipPlugin = require('./plugins/ZipPlugin');
+const HashPlugin = require('./plugins/HashPlugin');
+const AutoExternalPlugin = require('./plugins/AutoExternalPlugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [
+<span class="hljs-addition">+                   MiniCssExtractPlugin.loader,</span>
+                    'css-loader'
+                ]
+            }
+        ]
+    },
+    plugins: [
+<span class="hljs-addition">+       new HashPlugin(),</span>
+    ]
+}
+</code></pre>
+<h2 id="t259.AsyncQueue">9.AsyncQueue <a href="#t259.AsyncQueue"> # </a></h2>
+<h3 id="t269.1 AsyncQueue">9.1 AsyncQueue <a href="#t269.1 AsyncQueue"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> AsyncQueue = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack/lib/util/AsyncQueue'</span>);
+<span class="hljs-keyword">let</span> AsyncQueue = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./AsyncQueue'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processor</span>(<span class="hljs-params">item, callback</span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'process'</span>,item);
+        callback(<span class="hljs-literal">null</span>, item);
+    }, <span class="hljs-number">3000</span>);
+}
+<span class="hljs-keyword">const</span> getKey = <span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> item.key;
+}
+<span class="hljs-keyword">let</span> queue  = <span class="hljs-keyword">new</span> AsyncQueue({
+    <span class="hljs-attr">name</span>:<span class="hljs-string">'createModule'</span>,<span class="hljs-attr">parallelism</span>:<span class="hljs-number">3</span>,processor,getKey
+});
+<span class="hljs-keyword">const</span> start = <span class="hljs-built_in">Date</span>.now();
+<span class="hljs-keyword">let</span> item1 = {<span class="hljs-attr">key</span>:<span class="hljs-string">'module1'</span>};
+queue.add(item1,(err,result)=&gt;{
+    <span class="hljs-built_in">console</span>.log(err,result);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Date</span>.now() - start);
+});
+queue.add(item1,(err,result)=&gt;{
+    <span class="hljs-built_in">console</span>.log(err,result);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Date</span>.now() - start);
+});
+queue.add({<span class="hljs-attr">key</span>:<span class="hljs-string">'module2'</span>},(err,result)=&gt;{
+    <span class="hljs-built_in">console</span>.log(err,result);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Date</span>.now() - start);
+});
+queue.add({<span class="hljs-attr">key</span>:<span class="hljs-string">'module3'</span>},(err,result)=&gt;{
+    <span class="hljs-built_in">console</span>.log(err,result);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Date</span>.now() - start);
+});
+queue.add({<span class="hljs-attr">key</span>:<span class="hljs-string">'module4'</span>},(err,result)=&gt;{
+    <span class="hljs-built_in">console</span>.log(err,result);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Date</span>.now() - start);
+});
+
+</code></pre>
+<h3 id="t279.2 use.js">9.2 use.js <a href="#t279.2 use.js"> # </a></h3>
+<p>use.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> QUEUED_STATE = <span class="hljs-number">0</span>;<span class="hljs-comment">//已经 入队，待执行</span>
+<span class="hljs-keyword">const</span> PROCESSING_STATE = <span class="hljs-number">1</span>;<span class="hljs-comment">//处理中</span>
+<span class="hljs-keyword">const</span> DONE_STATE = <span class="hljs-number">2</span>;<span class="hljs-comment">//处理完成</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ArrayQueue</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>._list = [];
+    }
+    enqueue(item) {
+        <span class="hljs-keyword">this</span>._list.push(item);<span class="hljs-comment">//[1,2,3]</span>
+    }
+    dequeue() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>._list.shift();<span class="hljs-comment">//移除并返回数组中的第一个元素</span>
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AsyncQueueEntry</span> </span>{
+    <span class="hljs-keyword">constructor</span>(item, callback) {
+        <span class="hljs-keyword">this</span>.item = item;<span class="hljs-comment">//任务的描述</span>
+        <span class="hljs-keyword">this</span>.state = QUEUED_STATE;<span class="hljs-comment">//这个条目当前的状态</span>
+        <span class="hljs-keyword">this</span>.callback = callback;<span class="hljs-comment">//任务完成的回调</span>
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AsyncQueue</span> </span>{
+    <span class="hljs-keyword">constructor</span>({ name, parallelism, processor, getKey }) {
+        <span class="hljs-keyword">this</span>._name = name;<span class="hljs-comment">//队列的名字</span>
+        <span class="hljs-keyword">this</span>._parallelism = parallelism;<span class="hljs-comment">//并发执行的任务数</span>
+        <span class="hljs-keyword">this</span>._processor = processor;<span class="hljs-comment">//针对队列中的每个条目执行什么操作</span>
+        <span class="hljs-keyword">this</span>._getKey = getKey;<span class="hljs-comment">//函数，返回一个key用来唯一标识每个元素</span>
+        <span class="hljs-keyword">this</span>._entries = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>();
+        <span class="hljs-keyword">this</span>._queued = <span class="hljs-keyword">new</span> ArrayQueue();<span class="hljs-comment">//将要执行的任务数组队列 </span>
+        <span class="hljs-keyword">this</span>._activeTasks = <span class="hljs-number">0</span>;<span class="hljs-comment">//当前正在执行的数，默认值1</span>
+        <span class="hljs-keyword">this</span>._willEnsureProcessing = <span class="hljs-literal">false</span>;<span class="hljs-comment">//是否将要开始处理</span>
+    }
+    add = <span class="hljs-function">(<span class="hljs-params">item, callback</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> key = <span class="hljs-keyword">this</span>._getKey(item);<span class="hljs-comment">//获取这个条目对应的key</span>
+        <span class="hljs-keyword">const</span> entry = <span class="hljs-keyword">this</span>._entries.get(key);<span class="hljs-comment">//获取 这个key对应的老的条目</span>
+        <span class="hljs-keyword">if</span> (entry !== <span class="hljs-literal">undefined</span>) {
+            <span class="hljs-keyword">if</span> (entry.state === DONE_STATE) {
+                process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> callback(entry.error, entry.result));
+            } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (entry.callbacks === <span class="hljs-literal">undefined</span>) {
+                entry.callbacks = [callback];
+            } <span class="hljs-keyword">else</span> {
+                entry.callbacks.push(callback);
+            }
+            <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-keyword">const</span> newEntry = <span class="hljs-keyword">new</span> AsyncQueueEntry(item, callback);<span class="hljs-comment">//创建一个新的条目</span>
+        <span class="hljs-keyword">this</span>._entries.set(key, newEntry);<span class="hljs-comment">//放到_entries</span>
+        <span class="hljs-keyword">this</span>._queued.enqueue(newEntry);<span class="hljs-comment">//把这个新条目放放队列</span>
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>._willEnsureProcessing === <span class="hljs-literal">false</span>) {
+            <span class="hljs-keyword">this</span>._willEnsureProcessing = <span class="hljs-literal">true</span>;
+            setImmediate(<span class="hljs-keyword">this</span>._ensureProcessing);
+        }
+    }
+    _ensureProcessing = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-comment">//如果当前的激活的或者 说正在执行任务数行小于并发数</span>
+        <span class="hljs-keyword">while</span> (<span class="hljs-keyword">this</span>._activeTasks &lt; <span class="hljs-keyword">this</span>._parallelism) {
+            <span class="hljs-keyword">const</span> entry = <span class="hljs-keyword">this</span>._queued.dequeue();<span class="hljs-comment">//出队 先入先出</span>
+            <span class="hljs-keyword">if</span> (entry === <span class="hljs-literal">undefined</span>) <span class="hljs-keyword">break</span>;
+            <span class="hljs-keyword">this</span>._activeTasks++;<span class="hljs-comment">//先让正在执行的任务数++</span>
+            entry.state = PROCESSING_STATE;<span class="hljs-comment">//条目的状态设置为执行中</span>
+            <span class="hljs-keyword">this</span>._startProcessing(entry);
+        }
+        <span class="hljs-keyword">this</span>._willEnsureProcessing = <span class="hljs-literal">false</span>;
+    }
+    _startProcessing = <span class="hljs-function">(<span class="hljs-params">entry</span>) =&gt;</span> {
+        <span class="hljs-keyword">this</span>._processor(entry.item, (e, r) =&gt; {
+            <span class="hljs-keyword">this</span>._handleResult(entry, e, r);
+        });
+    }
+    _handleResult = <span class="hljs-function">(<span class="hljs-params">entry, error, result</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> callback = entry.callback;
+        <span class="hljs-keyword">const</span> callbacks = entry.callbacks;
+        entry.state = DONE_STATE;<span class="hljs-comment">//把条目的状态设置为已经完成</span>
+        entry.callback = <span class="hljs-literal">undefined</span>;<span class="hljs-comment">//把callback</span>
+        entry.callbacks = <span class="hljs-literal">undefined</span>;
+        entry.result = result;<span class="hljs-comment">//把结果赋给entry</span>
+        entry.error = error;<span class="hljs-comment">//把错误对象赋给entry</span>
+        callback(error, result);
+        <span class="hljs-keyword">if</span> (callbacks !== <span class="hljs-literal">undefined</span>) {
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> callback <span class="hljs-keyword">of</span> callbacks) {
+                callback(error, result);
+            }
+        }
+        <span class="hljs-keyword">this</span>._activeTasks--;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>._willEnsureProcessing === <span class="hljs-literal">false</span>) {
+            <span class="hljs-keyword">this</span>._willEnsureProcessing = <span class="hljs-literal">true</span>;
+            setImmediate(<span class="hljs-keyword">this</span>._ensureProcessing);
+        }
+    }
+}
+<span class="hljs-built_in">module</span>.exports = AsyncQueue;
+</code></pre>
+<h2 id="t2811. 参考">11. 参考 <a href="#t2811. 参考"> # </a></h2>
+<ul>
+<li><a href="https://developer.qiniu.com/kodo/sdk/1289/nodejs">Node.js SDK</a></li>
+<li><a href="https://webpack.js.org/contribute/writing-a-plugin/">writing-a-plugin</a></li>
+<li><a href="https://webpack.js.org/api/plugins/">api/plugins</a></li>
+</ul>
+
+    

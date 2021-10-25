@@ -1,0 +1,1094 @@
+
+        <h2 id="t01.dva介绍">1.dva介绍 <a href="#t01.dva介绍"> # </a></h2>
+<p><img src="https://zos.alipayobjects.com/rmsportal/PPrerEAKbIoDZYr.png" alt="dva"></p>
+<h3 id="t11.1 前置知识">1.1 前置知识 <a href="#t11.1 前置知识"> # </a></h3>
+<ul>
+<li>react</li>
+<li>react-router-dom</li>
+<li>redux</li>
+<li>react-redux</li>
+<li>connected-react-router</li>
+<li>history</li>
+<li>dva</li>
+</ul>
+<h2 id="t22. 初始化项目">2. 初始化项目 <a href="#t22. 初始化项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app zhufeng-dva-source
+cd  zhufeng-dva-source
+cnpm install dva redux react-redux react-router-dom connected-react-router history
+npm start
+</code></pre>
+<h2 id="t33. 基本计数器">3. 基本计数器 <a href="#t33. 基本计数器"> # </a></h2>
+<h3 id="t43.1 src\index.js">3.1 src\index.js <a href="#t43.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> dva,{connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">const</span> app = dva();
+app.model({
+    <span class="hljs-attr">namespace</span>:<span class="hljs-string">'counter'</span>,
+    <span class="hljs-attr">state</span>:{<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>},
+    <span class="hljs-attr">reducers</span>:{
+        add(state){
+            <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>:state.number+<span class="hljs-number">1</span>};
+        }
+    }
+});
+<span class="hljs-keyword">const</span> Counter = connect(
+    <span class="hljs-function"><span class="hljs-params">state</span>=&gt;</span>state.counter
+)(<span class="hljs-function"><span class="hljs-params">props</span>=&gt;</span>(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{props.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>props.dispatch({type:"counter/add"})}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+));
+app.router(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span>/&gt;</span></span>);
+app.start(<span class="hljs-string">'#root'</span>);
+</code></pre>
+<h3 id="t53.2 src\dva\index.js">3.2 src\dva\index.js <a href="#t53.2 src\dva\index.js"> # </a></h3>
+<p>src\dva\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {createStore,combineReducers} <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">import</span> {connect,Provider} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">export</span> {connect};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">const</span> app = {
+        <span class="hljs-attr">_models</span>:[],
+        model,
+        <span class="hljs-attr">_router</span>:<span class="hljs-literal">null</span>,
+        router,
+        start
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">model</span>(<span class="hljs-params">model</span>)</span>{
+        app._models.push(model);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">router</span>(<span class="hljs-params">routerConfig</span>)</span>{
+        app._router = routerConfig;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span>(<span class="hljs-params">root</span>)</span>{
+        <span class="hljs-keyword">let</span> reducers = {};
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i=<span class="hljs-number">0</span>;i&lt;app._models.length;i++){
+            <span class="hljs-keyword">let</span> model = app._models[i];
+            model.reducers = prefixNamespace(model.reducers,model.namespace);
+            reducers[model.namespace] = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">state = model.state, action</span>) </span>{
+                <span class="hljs-keyword">let</span> actionType = action.type;
+                <span class="hljs-keyword">let</span> reducer = model.reducers[actionType];
+                <span class="hljs-keyword">if</span> (reducer) {
+                    <span class="hljs-keyword">return</span> reducer(state, action);
+                }
+                <span class="hljs-keyword">return</span> state;
+            };
+        }
+        <span class="hljs-keyword">let</span> rootReducer = combineReducers(reducers);
+        <span class="hljs-keyword">let</span> store = createStore(rootReducer);
+        <span class="hljs-keyword">let</span> App = app._router;
+        ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">App</span>/&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>,<span class="hljs-built_in">document</span>.querySelector(root));
+    }
+    <span class="hljs-keyword">return</span> app;
+}
+<span class="hljs-comment">//https://github.com/dvajs/dva/blob/master/packages/dva-core/src/prefixNamespace.js</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">prefixNamespace</span>(<span class="hljs-params">reducers,namespace</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.keys(reducers).reduce(<span class="hljs-function">(<span class="hljs-params">memo, key</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> newKey = <span class="hljs-string">`<span class="hljs-subst">${namespace}</span><span class="hljs-subst">${NAMESPACE_SEPARATOR}</span><span class="hljs-subst">${key}</span>`</span>;
+        memo[newKey] = reducers[key];
+        <span class="hljs-keyword">return</span> memo;
+    }, {});
+}
+</code></pre>
+<h2 id="t64. 支持effects">4. 支持effects <a href="#t64. 支持effects"> # </a></h2>
+<h3 id="t74.1 src\index.js">4.1 src\index.js <a href="#t74.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import dva,{connect} from 'dva';
+const app = dva();
+<span class="hljs-addition">+ function delay(ms) {</span>
+<span class="hljs-addition">+    return new Promise((resolve,reject) =&gt; {</span>
+<span class="hljs-addition">+        setTimeout(function () {</span>
+<span class="hljs-addition">+            resolve();</span>
+<span class="hljs-addition">+        },ms);</span>
+<span class="hljs-addition">+    });</span>
+<span class="hljs-addition">+ }</span>
+app.model({
+    namespace:'counter',
+    state:{number:0},
+    reducers:{
+        add(state){
+            return {number:state.number+1};
+        }
+    },
+<span class="hljs-addition">+    effects:{</span>
+<span class="hljs-addition">+        *asyncAdd(action,{call,put}){</span>
+<span class="hljs-addition">+          yield call(delay,1000);</span>
+<span class="hljs-addition">+          yield put({type:'counter/add'});</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+});
+const Counter = connect(
+    state=&gt;state.counter
+)(props=&gt;(
+    &lt;div&gt;
+        &lt;p&gt;{props.number}&lt;/p&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/add"})}&gt;+&lt;/button&gt;
+<span class="hljs-addition">+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/asyncAdd"})}&gt;异步+&lt;/button&gt;</span>
+    &lt;/div&gt;
+));
+app.router(()=&gt;&lt;Counter/&gt;);
+app.start('#root');
+</code></pre>
+<h3 id="t84.2 src\dva\index.js">4.2 src\dva\index.js <a href="#t84.2 src\dva\index.js"> # </a></h3>
+<p>src\dva\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+<span class="hljs-addition">+import {createStore,combineReducers,applyMiddleware} from 'redux';</span>
+import {connect,Provider} from 'react-redux';
+<span class="hljs-addition">+import createSagaMiddleware from 'redux-saga';</span>
+<span class="hljs-addition">+import * as sagaEffects from 'redux-saga/effects';</span>
+export {connect};
+export default function(){
+    const app = {
+        _models:[],
+        model,
+        _router:null,
+        router,
+        start
+    }
+    function model(model){
+        app._models.push(model);
+    }
+    function router(routerConfig){
+        app._router = routerConfig;
+    }
+    function start(root){
+        let reducers = {};
+        for(let i=0;i&lt;app._models.length;i++){
+            let model = app._models[i];
+            reducers[model.namespace] = function(state=model.state,action){
+                 let actionType = action.type;
+                 let values = actionType.split('/');
+                 if(values[0] <span class="hljs-comment">=== model.namespace){</span>
+                    let reducer = model.reducers[values[1]];
+                    if(reducer){
+                        return reducer(state,action);
+                    }
+                 }
+                 return state;
+            }
+        }
+        let rootReducer = combineReducers(reducers);
+<span class="hljs-addition">+        let sagaMiddleware = createSagaMiddleware();</span>
+<span class="hljs-addition">+        function* rootSaga(){</span>
+<span class="hljs-addition">+            let {takeEvery} =  sagaEffects;</span>
+<span class="hljs-addition">+            for(const model of app._models){</span>
+<span class="hljs-addition">+                for(const key in model.effects){</span>
+<span class="hljs-addition">+                    yield takeEvery(model.namespace+'/'+key,function*(action){</span>
+<span class="hljs-addition">+                        yield model.effects[key](action,sagaEffects);</span>
+<span class="hljs-addition">+                    });</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        let store = createStore(rootReducer,applyMiddleware(sagaMiddleware));</span>
+<span class="hljs-addition">+        sagaMiddleware.run(rootSaga);</span>
+        let App = app._router;
+        ReactDOM.render(&lt;Provider store={store}&gt;&lt;App/&gt;&lt;/Provider&gt;,document.querySelector(root));
+    }
+    return app;
+}
+</code></pre>
+<h2 id="t95.支持路由">5.支持路由 <a href="#t95.支持路由"> # </a></h2>
+<h3 id="t105.1 src\index.js">5.1 src\index.js <a href="#t105.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import dva,{connect} from 'dva';
+<span class="hljs-addition">+import {Router,Route} from 'dva/router';</span>
+const app = dva();
+function delay(ms) {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(function () {
+            resolve();
+        },ms);
+    });
+}
+app.model({
+    namespace:'counter',
+    state:{number:0},
+    reducers:{
+        add(state){
+            return {number:state.number+1};
+        }
+    },
+    effects:{
+        *asyncAdd(action,{call,put}){
+          yield call(delay,1000);
+          yield put({type:'counter/add'});
+        }
+    }
+});
+const Counter = connect(
+    state=&gt;state.counter
+)(props=&gt;(
+    &lt;div&gt;
+        &lt;p&gt;{props.number}&lt;/p&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/add"})}&gt;+&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/asyncAdd"})}&gt;异步+&lt;/button&gt;
+    &lt;/div&gt;
+));
+//index.js:1375 Warning: Please use `require("history").createHashHistory` instead of `require("history/createHashHistory")`. Support for the latter will be removed in the next major release.
+//index.js:1375 Warning: [sagaEffects.put] counter/add should not be prefixed with namespace counter
+<span class="hljs-addition">+const Home = ()=&gt;&lt;div&gt;Home&lt;/div&gt;</span>
+<span class="hljs-addition">+app.router(({history})=&gt;(</span>
+<span class="hljs-addition">+    &lt;Router history={history}&gt;</span>
+<span class="hljs-addition">+        &lt;&gt;</span>
+<span class="hljs-addition">+            &lt;Route path="/" exact={true} component={Home}/&gt;</span>
+<span class="hljs-addition">+            &lt;Route path="/counter" component={Counter}/&gt;</span>
+<span class="hljs-addition">+        &lt;/&gt;</span>
+<span class="hljs-addition">+    &lt;/Router&gt;</span>
+<span class="hljs-addition">+));</span>
+app.start('#root');
+</code></pre>
+<h3 id="t115.2 src\dva\index.js">5.2 src\dva\index.js <a href="#t115.2 src\dva\index.js"> # </a></h3>
+<p>src\dva\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import {createStore,combineReducers,applyMiddleware} from 'redux';
+import {connect,Provider} from 'react-redux';
+import createSagaMiddleware from 'redux-saga';
+import * as sagaEffects from 'redux-saga/effects';
+<span class="hljs-addition">+import {createHashHistory} from 'history';</span>
+export {connect};
+export default function(){
+    const app = {
+        _models:[],
+        model,
+        _router:null,
+        router,
+        start
+    }
+    function model(model){
+        app._models.push(model);
+    }
+    function router(routerConfig){
+        app._router = routerConfig;
+    }
+    function start(root){
+        let reducers = {};
+        for(let i=0;i&lt;app._models.length;i++){
+            let model = app._models[i];
+            reducers[model.namespace] = function(state=model.state,action){
+                 let actionType = action.type;
+                 let values = actionType.split('/');
+                 if(values[0] <span class="hljs-comment">=== model.namespace){</span>
+                    let reducer = model.reducers[values[1]];
+                    if(reducer){
+                        return reducer(state,action);
+                    }
+                 }
+                 return state;
+            }
+        }
+        let rootReducer = combineReducers(reducers);
+        let sagaMiddleware = createSagaMiddleware();
+        function* rootSaga(){
+            let {takeEvery} =  sagaEffects;
+            for(const model of app._models){
+                for(const key in model.effects){
+                    yield takeEvery(model.namespace+'/'+key,function*(action){
+                        yield model.effects[key](action,sagaEffects);
+                    });
+                }
+            }
+        }
+        let store = createStore(rootReducer,applyMiddleware(sagaMiddleware));
+        sagaMiddleware.run(rootSaga);
+<span class="hljs-addition">+        let history = createHashHistory();</span>
+<span class="hljs-addition">+        let App = app._router({history});</span>
+<span class="hljs-addition">+        ReactDOM.render(&lt;Provider store={store}&gt;{App}&lt;/Provider&gt;,document.querySelector(root));</span>
+    }
+    return app;
+}
+</code></pre>
+<h3 id="t125.3 src\dva\router.js">5.3 src\dva\router.js <a href="#t125.3 src\dva\router.js"> # </a></h3>
+<p>src\dva\router.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router-dom'</span>;
+</code></pre>
+<h2 id="t136.支持跳转">6.支持跳转 <a href="#t136.支持跳转"> # </a></h2>
+<h3 id="t146.1 src\index.js">6.1 src\index.js <a href="#t146.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import dva,{connect} from './dva';
+<span class="hljs-addition">+ import {Router,Route,routerRedux} from './dva/router';</span>
+const app = dva();
+function delay(ms) {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(function () {
+            resolve();
+        },ms);
+    });
+}
+app.model({
+    namespace:'counter',
+    state:{number:0},
+    reducers:{
+        add(state){
+            return {number:state.number+1};
+        }
+    },
+    effects:{
+        *asyncAdd(action,{call,put}){
+          yield call(delay,1000);
+          yield put({type:'counter/add'});
+        },
+<span class="hljs-addition">+       *goto({to}, { put }) {</span>
+<span class="hljs-addition">+         yield put(routerRedux.push(to));</span>
+<span class="hljs-addition">+       }</span>
+    }
+});
+const Counter = connect(
+    state=&gt;state.counter
+)(props=&gt;(
+    &lt;div&gt;
+        &lt;p&gt;{props.number}&lt;/p&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/add"})}&gt;+&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/asyncAdd"})}&gt;异步+&lt;/button&gt;
+<span class="hljs-addition">+       &lt;button onClick={()=&gt;props.dispatch({type:"counter/goto",to:'/'})}&gt;跳转到/&lt;/button&gt;</span>
+    &lt;/div&gt;
+));
+//index.js:1375 Warning: Please use `require("history").createHashHistory` instead of `require("history/createHashHistory")`. Support for the latter will be removed in the next major release.
+//index.js:1375 Warning: [sagaEffects.put] counter/add should not be prefixed with namespace counter
+const Home = ()=&gt;&lt;div&gt;Home&lt;/div&gt;
+app.router(({history})=&gt;(
+        &lt;&gt;
+            &lt;Route path="/" exact={true} component={Home}/&gt;
+            &lt;Route path="/counter" component={Counter}/&gt;
+        &lt;/&gt;
+));
+app.start('#root');
+</code></pre>
+<h3 id="t156.2 src\dva\index.js">6.2 src\dva\index.js <a href="#t156.2 src\dva\index.js"> # </a></h3>
+<p>src\dva\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import {createStore,combineReducers,applyMiddleware} from 'redux';
+import {connect,Provider} from 'react-redux';
+import createSagaMiddleware from 'redux-saga';
+import * as sagaEffects from 'redux-saga/effects';
+import {createHashHistory} from 'history';
+<span class="hljs-addition">+import {</span>
+<span class="hljs-addition">+  routerMiddleware,</span>
+<span class="hljs-addition">+  connectRouter,</span>
+<span class="hljs-addition">+  ConnectedRouter</span>
+<span class="hljs-addition">+} from "connected-react-router";</span>
+<span class="hljs-addition">+const NAMESPACE_SEPARATOR = "/";</span>
+export {connect};
+export default function(){
+    const app = {
+        _models:[],
+        model,
+        _router:null,
+        router,
+        start
+    }
+    function model(model){
+        app._models.push(model);
+    }
+    function router(routerConfig){
+        app._router = routerConfig;
+    }
+    function start(root){
+<span class="hljs-addition">+        let history = createHashHistory();</span>
+<span class="hljs-addition">+        const reducers = {</span>
+<span class="hljs-addition">+            router: connectRouter(history)</span>
+<span class="hljs-addition">+        };</span>
+        for(let i=0;i&lt;app._models.length;i++){
+            let model = app._models[i];
+            reducers[model.namespace] = function(state=model.state,action){
+                 let actionType = action.type;
+                 let [namespace,type] = actionType.split(NAMESPACE_SEPARATOR);
+                 if(!type){
+                   type = namespace;
+                   namespace = model.namespace;
+                 }
+                 if(namespace <span class="hljs-comment">=== model.namespace){</span>
+                    let reducer = model.reducers[type];
+                    if(reducer){
+                        return reducer(state,action);
+                    }
+                 }
+                 return state;
+            }
+        }
+        let rootReducer = combineReducers(reducers);
+        let sagaMiddleware = createSagaMiddleware();
+        function* rootSaga(){
+            let {takeEvery} =  sagaEffects;
+            for(const model of app._models){
+                for(const key in model.effects){
+<span class="hljs-addition">+                    yield takeEvery(model.namespace+NAMESPACE_SEPARATOR+key,function*(action){</span>
+<span class="hljs-addition">+                        yield model.effects[key](action,sagaEffects);</span>
+<span class="hljs-addition">+                    });</span>
+                }
+            }
+        }
+<span class="hljs-addition">+        let store = createStore(rootReducer,applyMiddleware(routerMiddleware(history),sagaMiddleware));</span>
+        sagaMiddleware.run(rootSaga);
+<span class="hljs-addition">+        let App = app._router({history,app});</span>
+<span class="hljs-addition">+        ReactDOM.render(</span>
+<span class="hljs-addition">+        &lt;Provider store={store}&gt;</span>
+<span class="hljs-addition">+            &lt;ConnectedRouter history={history}&gt;</span>
+<span class="hljs-addition">+              {App}</span>
+<span class="hljs-addition">+            &lt;/ConnectedRouter &gt;</span>
+<span class="hljs-addition">+        &lt;/Provider&gt;,document.querySelector(root));</span>
+    }
+    return app;
+}
+</code></pre>
+<h3 id="t166.3 src\dva\router.js">6.3 src\dva\router.js <a href="#t166.3 src\dva\router.js"> # </a></h3>
+<p>src\dva\router.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+module.exports = require('react-router-dom');</span>
+<span class="hljs-addition">+module.exports.routerRedux = require('connected-react-router');</span>
+</code></pre>
+<h2 id="t177.支持自定义effects">7.支持自定义effects <a href="#t177.支持自定义effects"> # </a></h2>
+<h3 id="t187.1 src\index.js">7.1 src\index.js <a href="#t187.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import dva,{connect} from 'dva';
+import {Router,Route,routerRedux} from 'dva/router';
+const app = dva();
+function delay(ms) {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(function () {
+            resolve();
+        },ms);
+    });
+}
+app.model({
+    namespace:'counter',
+    state:{number:0},
+    reducers:{
+        add(state,){
+            return {number:state.number+1};
+        },
+        increment(state,{payload}){
+           return {number:state.number+payload||1};
+        }
+    },
+    effects:{
+       *asyncAdd(action,{call,put}){
+          yield call(delay,1000);
+          yield put({type:'counter/add'});
+       },
+       *goto({to}, { put }) {
+         yield put(routerRedux.push(to));
+       },
+<span class="hljs-addition">+       addWatchers:[</span>
+<span class="hljs-addition">+           function*({take,put,call}){</span>
+<span class="hljs-addition">+               for(let i=0;i&lt;3;i++){</span>
+<span class="hljs-addition">+                   const {payload} = yield take('counter/addWatcher');</span>
+<span class="hljs-addition">+                   yield call(delay,1000);</span>
+<span class="hljs-addition">+                   yield put({type:'counter/increment',payload});</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+               alert('不能再加了');</span>
+<span class="hljs-addition">+           },</span>
+<span class="hljs-addition">+           {type:'watcher'}</span>
+<span class="hljs-addition">+       ]</span>
+    }
+});
+const Counter = connect(
+    state=&gt;state.counter
+)(props=&gt;(
+    &lt;div&gt;
+        &lt;p&gt;{props.number}&lt;/p&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/add"})}&gt;+&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/asyncAdd"})}&gt;异步+&lt;/button&gt;
+<span class="hljs-addition">+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/addWatcher",payload:2})}&gt;自定义异步+2&lt;/button&gt;</span>
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/goto",to:'/'})}&gt;跳转到/&lt;/button&gt;
+    &lt;/div&gt;
+));
+const Home = ()=&gt;&lt;div&gt;Home&lt;/div&gt;
+app.router(({history})=&gt;(
+    &lt;Router history={history}&gt;
+        &lt;&gt;
+            &lt;Route path="/" exact={true} component={Home}/&gt;
+            &lt;Route path="/counter" component={Counter}/&gt;
+        &lt;/&gt;
+    &lt;/Router&gt;
+));
+app.start('#root');
+</code></pre>
+<h3 id="t197.2 src\dva\index.js">7.2 src\dva\index.js <a href="#t197.2 src\dva\index.js"> # </a></h3>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import {createStore,combineReducers,applyMiddleware} from 'redux';
+import {connect,Provider} from 'react-redux';
+import createSagaMiddleware from 'redux-saga';
+import * as sagaEffects from 'redux-saga/effects';
+import {createHashHistory} from 'history';
+import {
+  routerMiddleware,
+  connectRouter,
+  ConnectedRouter
+} from "connected-react-router";
+export {connect};
+export default function(){
+    const app = {
+        _models:[],
+        model,
+        _router:null,
+        router,
+        start
+    }
+    function model(model){
+        app._models.push(model);
+    }
+    function router(routerConfig){
+        app._router = routerConfig;
+    }
+    function start(root){
+        let history = createHashHistory();
+        const reducers = {
+            router: connectRouter(history)
+        };
+        for(let i=0;i&lt;app._models.length;i++){
+            let model = app._models[i];
+            reducers[model.namespace] = function(state=model.state,action){
+                 let actionType = action.type;
+                 let values = actionType.split('/');
+                 if(values[0] <span class="hljs-comment">=== model.namespace){</span>
+                    let reducer = model.reducers[values[1]];
+                    if(reducer){
+                        return reducer(state,action);
+                    }
+                 }
+                 return state;
+            }
+        }
+        let rootReducer = combineReducers(reducers);
+         let sagaMiddleware = createSagaMiddleware();
+        function* rootSaga(){
+            let {takeEvery} =  sagaEffects;
+            for(const model of app._models){
+<span class="hljs-addition">+                for(const key in model.effects){</span>
+<span class="hljs-addition">+                    let effect = model.effects[key];</span>
+<span class="hljs-addition">+                    if(Array.isArray(effect) &amp;&amp; effect[1].type == 'watcher'){</span>
+<span class="hljs-addition">+                       yield sagaEffects.fork(effect[0],sagaEffects);</span>
+<span class="hljs-addition">+                    }else{</span>
+<span class="hljs-addition">+                      yield takeEvery(model.namespace+'/'+key,function*(action){</span>
+<span class="hljs-addition">+                        yield model.effects[key](action,sagaEffects);</span>
+<span class="hljs-addition">+                      });</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+        }
+        let store = createStore(rootReducer,applyMiddleware(routerMiddleware(history),sagaMiddleware));
+        sagaMiddleware.run(rootSaga);
+        let App = app._router({history,app});
+        ReactDOM.render(
+        &lt;Provider store={store}&gt;
+            &lt;ConnectedRouter history={history}&gt;
+              {App}
+            &lt;/ConnectedRouter &gt;
+        &lt;/Provider&gt;,document.querySelector(root));
+    }
+    return app;
+}
+</code></pre>
+<h2 id="t208.支持钩子">8.支持钩子 <a href="#t208.支持钩子"> # </a></h2>
+<h3 id="t218.1 src\index.js">8.1 src\index.js <a href="#t218.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import dva,{connect} from 'dva';
+import {Router,Route,routerRedux} from 'dva/router';
+<span class="hljs-addition">+import { message } from 'antd';</span>
+<span class="hljs-addition">+import logger from 'redux-logger';</span>
+<span class="hljs-addition">+import {createBrowserHistory} from 'history';</span>
+<span class="hljs-addition">+import 'antd/dist/antd.css'</span>
+<span class="hljs-addition">+const SHOW = 'SHOW';</span>
+<span class="hljs-addition">+const HIDE = 'HIDE';</span>
+<span class="hljs-addition">+const initialState = {</span>
+<span class="hljs-addition">+    global: false,</span>
+<span class="hljs-addition">+    models: {},</span>
+<span class="hljs-addition">+    effects: {}</span>
+<span class="hljs-addition">+};</span>
+<span class="hljs-addition">+const app = dva({</span>
+<span class="hljs-addition">+    history:createBrowserHistory(),//自定义history</span>
+<span class="hljs-addition">+    initialState:{counter:{number:5}},//自定义初始状态</span>
+<span class="hljs-addition">+    //effect 执行错误或 subscription 通过 done 主动抛错时触发，可用于管理全局出错状态</span>
+<span class="hljs-addition">+    onError:((err, dispatch) =&gt; {message.error(err.message)}),</span>
+<span class="hljs-addition">+    //在 action 被 dispatch 时触发，用于注册 redux 中间件。支持函数或函数数组格式</span>
+<span class="hljs-addition">+    onAction:logger,</span>
+<span class="hljs-addition">+    //state 改变时触发，可用于同步 state 到 localStorage，服务器端等</span>
+<span class="hljs-addition">+    onStateChange:(state)=&gt;{console.log(state)},</span>
+<span class="hljs-addition">+    //封装 reducer 执行。比如借助 redux-undo 实现 redo/undo</span>
+<span class="hljs-addition">+    onReducer:reducer=&gt;(state,action)=&gt;{//增加额外的reducer</span>
+<span class="hljs-addition">+      localStorage.setItem('action',JSON.stringify(action));</span>
+<span class="hljs-addition">+      return reducer(state,action);</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    //封装 effect 执行。比如 dva-loading 基于此实现了自动处理 loading 状态。</span>
+<span class="hljs-addition">+    onEffect:(effect, { put }, model, actionType)=&gt;{</span>
+<span class="hljs-addition">+      const { namespace } = model;</span>
+<span class="hljs-addition">+      return function*(...args) {</span>
+<span class="hljs-addition">+        yield put({ type: SHOW, payload: { namespace, actionType } });</span>
+<span class="hljs-addition">+        yield effect(...args);</span>
+<span class="hljs-addition">+        yield put({ type: HIDE, payload: { namespace, actionType } });</span>
+<span class="hljs-addition">+      };</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    //指定额外的 reducer，比如 redux-form 需要指定额外的 form reducer：</span>
+<span class="hljs-addition">+    extraReducers:{</span>
+<span class="hljs-addition">+      loading(state = initialState, { type, payload }) {</span>
+<span class="hljs-addition">+        const { namespace, actionType } = payload || {};</span>
+<span class="hljs-addition">+        switch(type){</span>
+<span class="hljs-addition">+          case SHOW:</span>
+<span class="hljs-addition">+            return {global:true,models: { ...state.models, [namespace]: true }, effects: { ...state.effects, [actionType]: true },};</span>
+<span class="hljs-addition">+          case HIDE:</span>
+<span class="hljs-addition">+            const effects = { ...state.effects, [actionType]: false };</span>
+<span class="hljs-addition">+            const models = { ...state.models, [namespace]: false };</span>
+<span class="hljs-addition">+            const global = Object.keys(models).some(namespace =&gt; {</span>
+<span class="hljs-addition">+                return models[namespace];</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+            return {global,models,effects};</span>
+<span class="hljs-addition">+          default:</span>
+<span class="hljs-addition">+            return state;  </span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    //指定额外的 StoreEnhancer ，比如结合 redux-persist 的使用：</span>
+<span class="hljs-addition">+    //指定额外的 StoreEnhancer</span>
+<span class="hljs-addition">+    //它的参数是创建store的函数（store creator），返回值是一个可以创建功能更加强大的store的函数(enhanced store creator)</span>
+<span class="hljs-addition">+    extraEnhancers:(createStore)=&gt;{</span>
+<span class="hljs-addition">+       return (...args)=&gt;{</span>
+<span class="hljs-addition">+           let store = createStore(...args);</span>
+<span class="hljs-addition">+           console.log('返回更强大的store')</span>
+<span class="hljs-addition">+           return {...store,more(){console.log('更强大的强能')}};</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+});</span>
+function delay(ms) {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(function () {
+            resolve();
+        },ms);
+    });
+}
+app.model({
+    namespace:'counter',
+    state:{number:0},
+    reducers:{
+        add(state,){
+            return {number:state.number+1};
+        },
+        increment(state,{payload}){
+           return {number:state.number+payload||1};
+        }
+    },
+    effects:{
+       *asyncAdd(action,{call,put}){
+          yield call(delay,1000);
+          yield put({type:'counter/add'});
+       },
+       *goto({to}, { put }) {
+         yield put(routerRedux.push(to));
+       },
+       addWatchers:[
+           function*({take,put,call}){
+               for(let i=0;i&lt;3;i++){
+                   const {payload} = yield take('counter/addWatcher');
+                   yield call(delay,1000);
+                   yield put({type:'counter/increment',payload});
+               }
+               alert('不能再加了');
+           },
+           {type:'watcher'}
+       ]
+    }
+});
+const Counter = connect(
+    state=&gt;state.counter
+)(props=&gt;(
+    &lt;div&gt;
+        &lt;p&gt;{props.number}&lt;/p&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/add"})}&gt;+&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/asyncAdd"})}&gt;异步+&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/addWatcher",payload:2})}&gt;自定义异步+2&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:"counter/goto",to:'/'})}&gt;跳转到/&lt;/button&gt;
+    &lt;/div&gt;
+));
+const Home = ()=&gt;&lt;div&gt;Home&lt;/div&gt;
+app.router(({history})=&gt;(
+    &lt;Router history={history}&gt;
+        &lt;&gt;
+            &lt;Route path="/" exact={true} component={Home}/&gt;
+            &lt;Route path="/counter" component={Counter}/&gt;
+        &lt;/&gt;
+    &lt;/Router&gt;
+));
+app.start('#root');
+</code></pre>
+<h3 id="t228.2 src\dva\index.js">8.2 src\dva\index.js <a href="#t228.2 src\dva\index.js"> # </a></h3>
+<p>src\dva\index.js</p>
+<pre><code class="lang-diff">import React from "react";
+import ReactDOM from "react-dom";
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import { connect, Provider } from "react-redux";
+import createSagaMiddleware from "redux-saga";
+import * as sagaEffects from "redux-saga/effects";
+import { createHashHistory } from "history";
+import {
+  routerMiddleware,
+  connectRouter,
+  ConnectedRouter
+} from "connected-react-router";
+const NAMESPACE_SEPARATOR = "/";
+export { connect };
+export default function(options) {
+  const app = {
+    _models: [],
+    model,
+    _router: null,
+    router,
+    start
+  };
+  function model(model) {
+    app._models.push(model);
+  }
+  function router(routerConfig) {
+    app._router = routerConfig;
+  }
+<span class="hljs-addition">+  let history = options.history||createHashHistory();</span>
+  function start(root) {
+<span class="hljs-deletion">-  let history = createHashHistory();</span>
+<span class="hljs-addition">+    let reducers = {</span>
+<span class="hljs-addition">+      router: connectRouter(history)</span>
+<span class="hljs-addition">+    };</span>
+<span class="hljs-addition">+    if(options.extraReducers){</span>
+<span class="hljs-addition">+        reducers = {...reducers,...options.extraReducers};</span>
+<span class="hljs-addition">+    }</span>
+    for (let i = 0; i &lt; app._models.length; i++) {
+      let model = app._models[i];
+      reducers[model.namespace] = function(state = model.state, action) {
+        let actionType = action.type;
+        let values = actionType.split(NAMESPACE_SEPARATOR);
+        if (values[0] <span class="hljs-comment">=== model.namespace) {</span>
+          let reducer = model.reducers[values[1]];
+          if (reducer) {
+            return reducer(state, action);
+          }
+        }
+        return state;
+      };
+    }
+<span class="hljs-addition">+    let combinedReducer  = combineReducers(reducers);</span>
+<span class="hljs-addition">+    let rootReducer = function(state,action){</span>
+<span class="hljs-addition">+        let newState =  combinedReducer(state,action);</span>
+<span class="hljs-addition">+        options.onStateChange&amp;&amp;options.onStateChange(newState);</span>
+<span class="hljs-addition">+        return newState;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    if(options.onReducer){</span>
+<span class="hljs-addition">+        rootReducer = options.onReducer(rootReducer);</span>
+<span class="hljs-addition">+    }</span>
+    let sagaMiddleware = createSagaMiddleware();
+    function* rootSaga() {
+      let { takeEvery } = sagaEffects;
+      for (const model of app._models) {
+        for (const key in model.effects) {
+          let effect = model.effects[key];
+          if (Array.isArray(effect) &amp;&amp; effect[1].type == "watcher") {
+            yield sagaEffects.fork(effect[0], sagaEffects);
+          } else {
+            yield takeEvery(
+              model.namespace + NAMESPACE_SEPARATOR + key,
+              function*(action) {
+                yield model.effects[key](action, sagaEffects);
+              }
+            );
+          }
+        }
+      }
+    }
+<span class="hljs-addition">+    if(options.onAction){</span>
+<span class="hljs-addition">+        if(typeof options.onAction == 'function'){</span>
+<span class="hljs-addition">+            options.onAction = [options.onAction];</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }else{</span>
+<span class="hljs-addition">+        options.onAction=[];</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    let enhancedCreateStore;</span>
+<span class="hljs-addition">+    if(options.extraEnhancers){</span>
+<span class="hljs-addition">+        enhancedCreateStore = options.extraEnhancers(createStore);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    let store = enhancedCreateStore(</span>
+<span class="hljs-addition">+      rootReducer,</span>
+<span class="hljs-addition">+      applyMiddleware(routerMiddleware(history), sagaMiddleware,...options.onAction)</span>
+<span class="hljs-addition">+    );</span>
+    sagaMiddleware.run(rootSaga);
+    let App = app._router({ history, app });
+    ReactDOM.render(
+      &lt;Provider store={store}&gt;
+        &lt;ConnectedRouter history={history}&gt;{App}&lt;/ConnectedRouter&gt;
+      &lt;/Provider&gt;,
+      document.querySelector(root)
+    );
+  }
+  return app;
+}
+</code></pre>
+<h2 id="t238.版本">8.版本 <a href="#t238.版本"> # </a></h2>
+<h3 id="t248.1 src\index.js">8.1 src\index.js <a href="#t248.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js">import React from 'react';
+import dva,{connect} from './dva';
+import {Router,Route,routerRedux} from './dva/router';
+import {createBrowserHistory} from 'history';
+import {message} from 'antd';
+import 'antd/dist/antd.css';
+import logger from 'redux-logger';
+const SHOW = 'SHOW';
+const HIDE = 'HIDE';
+const initialLoadingState = {
+    global:false,//只有有任何一个saga执行的它就是为true,只有所有的saga都不执行它才为false
+    models:{},//里面放着哪个model有saga正在执行
+    effects:{},//model中的哪个saga正在执行
+}
+//routerRedux= connected-react-redux导出对象
+const app = dva({
+    history:createBrowserHistory(),//指定用哪个历史对象
+    initialState:{counter:{number:5}}, //初始状态
+    //当effect执行错误会走到这里
+    onError:(err,dispatch)=&gt;{message.error(err.toString())},
+    //值可能是一个中间件函数，也可能是一个中间件的数组
+    onAction:logger,
+    //当仓库中状态发生改变的时候，执行此函数
+    onStateChange:state=&gt;console.log('onStateChange',state),
+    //onReducer 是用来增强reducer的
+    onReducer:reducer=&gt;(state,action)=&gt;{
+        let newState =  reducer(state,action);
+        //newState.counter.number*=2;
+        return newState;
+    },
+    //封闭effect的执行 dva-loading 老的saga effects model 动作类型
+    onEffect:(effect,{put},model,actionType)=&gt;{
+        const {namespace} = model;
+        return function*(...args){
+            yield put({type:SHOW,payload:{namespace,actionType}});//namespace=counter actionType asyncAdd
+            yield effect(...args);
+            yield put({type:HIDE,payload:{namespace,actionType}});
+        }
+    },
+    //额外的reducer对象 
+    extraReducers:{
+        //当向仓库派发动作的时候
+        loading(state=initialLoadingState,{type,payload}){
+            const {namespace,actionType} = payload||{};//namespace =counter actionType -counter/asyncAdd
+            switch(type){
+                case SHOW:
+                  return {
+                      global:true,//只要有一个effect执行了，它就为true
+                      models:{...state.models,[namespace]:true},
+                      effects:{...state.effects,[actionType]:true}
+                  }
+                case HIDE:
+                  const effects =  {...state.effects,[actionType]:false};
+                  const models = {...state.models,[namespace]:false};
+                  const global = Object.keys(models).some(namespace=&gt;models[namespace]);
+                  return {effects,models,global};
+                default:
+                  return state;
+            }
+
+        }
+    },
+    //额外的增强器  用来增强createStore
+    extraEnhancers:createStore=&gt;{
+        return (...args)=&gt;{
+            let store = createStore(...args);
+            console.log('我正在创建仓库');
+            return store;
+        }
+    }
+});
+const delay = ms=&gt;new Promise(function(resolve){
+    setTimeout(() =&gt; {resolve();}, ms);
+});
+app.model({
+    namespace:'counter',
+    state:{number:0},
+    reducers:{
+        add(state,{payload}){
+            return {number:state.number+(payload||1)};
+        }
+    },
+    effects:{
+        *asyncAdd(action,{put,call}){
+            yield call(delay,1000);
+            throw new Error('异步加1失败');
+            yield put({type:'counter/add'});
+        },
+        *goto({payload},{put}){
+            yield put(routerRedux.push(payload));//connected-react-router
+        },
+        addWatcher:[
+            function*({take,put,call}){
+                for(let i=0;i&lt;3;i++){
+                    const {payload} = yield take('counter/addWatcher');
+                    yield call(delay,1000);
+                    yield put({type:'counter/add',payload});
+                }
+                console.log('已经到加最大值了，不能再加了')
+            },
+            {type:'watcher'}//监听器
+        ]
+    }
+});
+let Counter = connect(
+    state=&gt;state.counter
+)(
+  props=&gt;(
+      &lt;div&gt;
+        &lt;p&gt;{props.number}&lt;/p&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:'counter/add'})}&gt;+&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:'counter/asyncAdd'})}&gt;异步加1&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:'counter/addWatcher'})}&gt;addWatcher&lt;/button&gt;
+        &lt;button onClick={()=&gt;props.dispatch({type:'counter/goto',payload:'/'})}&gt;跳转到/路径里&lt;/button&gt;
+      &lt;/div&gt;
+  )
+);
+const Home = props=&gt;&lt;div&gt;首页&lt;/div&gt;;
+app.router(({history})=&gt;(
+     &lt;Router history={history}&gt;
+      &lt;&gt;
+        &lt;Route path="/" exact component={Home}/&gt;
+        &lt;Route path="/counter" exact component={Counter}/&gt;
+      &lt;/&gt;
+      &lt;/Router&gt;
+));
+app.start('#root');
+</code></pre>
+<h3 id="t258.2 dva\index.js">8.2 dva\index.js <a href="#t258.2 dva\index.js"> # </a></h3>
+<p>src\dva\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> {createStore,combineReducers,applyMiddleware} <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">import</span> {connect,Provider} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-redux'</span>;
+<span class="hljs-keyword">import</span> createSagaMiddleware <span class="hljs-keyword">from</span> <span class="hljs-string">'redux-saga'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> effects <span class="hljs-keyword">from</span> <span class="hljs-string">'redux-saga/effects'</span>;
+<span class="hljs-keyword">import</span> createRootSaga <span class="hljs-keyword">from</span> <span class="hljs-string">'./createRootSaga'</span>;
+<span class="hljs-keyword">import</span> createReducers <span class="hljs-keyword">from</span> <span class="hljs-string">'./createReducers'</span>;
+<span class="hljs-keyword">import</span> {createHashHistory} <span class="hljs-keyword">from</span> <span class="hljs-string">'history'</span>;
+<span class="hljs-keyword">import</span> {routerMiddleware,connectRouter,ConnectedRouter} <span class="hljs-keyword">from</span> <span class="hljs-string">'connected-react-router'</span>;
+<span class="hljs-keyword">import</span> {prefix} <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+<span class="hljs-keyword">export</span> {connect}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">opts</span>)</span>{
+    <span class="hljs-keyword">const</span> app = {
+        <span class="hljs-attr">_models</span>:[],<span class="hljs-comment">//存放着所有的模型</span>
+        model,<span class="hljs-comment">//添加模型的方法</span>
+        <span class="hljs-attr">_router</span>:<span class="hljs-literal">null</span>,<span class="hljs-comment">//此处存放着路由定义</span>
+        router,<span class="hljs-comment">//定义路由的方法</span>
+        start
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">model</span>(<span class="hljs-params">model</span>)</span>{
+        app._models.push(model);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">router</span>(<span class="hljs-params">routerConfig</span>)</span>{
+        app._router = routerConfig;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">start</span>(<span class="hljs-params">selector</span>)</span>{
+        <span class="hljs-keyword">let</span> history = opts.history||createHashHistory();
+        <span class="hljs-keyword">let</span> rootReducer = createReducers(app._models,history,opts.extraReducers);<span class="hljs-comment">//router</span>
+        <span class="hljs-keyword">let</span> finalReducer = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">state,action</span>)</span>{
+            <span class="hljs-keyword">let</span> newRootReducer = opts.onReducer(rootReducer);
+            <span class="hljs-keyword">let</span> newState = newRootReducer(state,action);
+            <span class="hljs-keyword">if</span>(opts.onStateChange){
+                 opts.onStateChange(newState);
+            }
+            <span class="hljs-keyword">return</span> newState;
+        }
+        <span class="hljs-keyword">let</span> sagaMiddleware = createSagaMiddleware();
+        <span class="hljs-keyword">let</span> rootSaga = createRootSaga(app._models,opts.onError||<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{},opts.onEffect);
+        <span class="hljs-keyword">if</span>(opts.onAction){
+            <span class="hljs-keyword">if</span>(!<span class="hljs-built_in">Array</span>.isArray(opts.onAction)){
+                opts.onAction=[opts.onAction];
+            }
+        }<span class="hljs-keyword">else</span> {
+         opts.onAction=[]
+        }
+        <span class="hljs-keyword">let</span> newCreateStore = createStore;
+        <span class="hljs-keyword">if</span>(opts.extraEnhancers){
+            newCreateStore = opts.extraEnhancers(createStore);
+        }
+        <span class="hljs-keyword">let</span> store = newCreateStore(finalReducer,opts.initialState||<span class="hljs-literal">undefined</span>,
+        applyMiddleware(routerMiddleware(history),sagaMiddleware,...opts.onAction));
+        sagaMiddleware.run(rootSaga);<span class="hljs-comment">//开始启动rootSaga执行</span>
+        <span class="hljs-keyword">let</span> App = app._router({history});
+        ReactDOM.render(
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">ConnectedRouter</span> <span class="hljs-attr">history</span>=<span class="hljs-string">{history}</span>&gt;</span>
+                    {App}
+                <span class="hljs-tag">&lt;/<span class="hljs-name">ConnectedRouter</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>
+            ,<span class="hljs-built_in">document</span>.querySelector(selector));
+    }
+    <span class="hljs-keyword">return</span> app;
+}
+</code></pre>
+<h3 id="t268.3 router.js">8.3 router.js <a href="#t268.3 router.js"> # </a></h3>
+<p>src\dva\router.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react-router-dom'</span>);
+<span class="hljs-built_in">module</span>.exports.routerRedux = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connected-react-router'</span>);
+</code></pre>
+<h3 id="t278.4 createReducers.js">8.4 createReducers.js <a href="#t278.4 createReducers.js"> # </a></h3>
+<p>src\dva\createReducers.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {combineReducers} <span class="hljs-keyword">from</span> <span class="hljs-string">'redux'</span>;
+<span class="hljs-keyword">import</span> {prefix} <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+<span class="hljs-keyword">import</span> {connectRouter} <span class="hljs-keyword">from</span> <span class="hljs-string">'connected-react-router'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createReducers</span>(<span class="hljs-params">models,history,extraReducers</span>) </span>{
+  <span class="hljs-keyword">let</span> reducers = {<span class="hljs-attr">router</span>:connectRouter(history),...extraReducers};
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> model <span class="hljs-keyword">of</span> models) {
+    <span class="hljs-keyword">let</span> { namespace, <span class="hljs-attr">state</span>: initialState, <span class="hljs-attr">reducers</span>: modelReducers } = model;
+    <span class="hljs-keyword">let</span> reducersWithPrefix = prefix(modelReducers, namespace); <span class="hljs-comment">//key已经增加了命名空间前缀了</span>
+    reducers[namespace] = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">state = initialState, action</span>) </span>{
+      <span class="hljs-keyword">let</span> reducer = reducersWithPrefix[action.type]; <span class="hljs-comment">//type ='counter/add'</span>
+      <span class="hljs-keyword">if</span> (reducer) {
+        <span class="hljs-keyword">return</span> reducer(state, action);
+      } <span class="hljs-comment">//如果reducer没有匹配上，说明这个action不是给我处理的，直接返回老状态</span>
+      <span class="hljs-keyword">return</span> state; <span class="hljs-comment">//总状态的counter 属性</span>
+    };
+  }
+  <span class="hljs-keyword">return</span>  combineReducers(reducers);
+}
+</code></pre>
+<h3 id="t288.5 createRootSaga.js">8.5 createRootSaga.js <a href="#t288.5 createRootSaga.js"> # </a></h3>
+<p>src\dva\createRootSaga.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {prefix} <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> sagaEffects <span class="hljs-keyword">from</span> <span class="hljs-string">'redux-saga/effects'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createRootSaga</span>(<span class="hljs-params">models,onError,onEffect</span>)</span>{
+   <span class="hljs-function"><span class="hljs-keyword">function</span>* <span class="hljs-title">rootSaga</span>(<span class="hljs-params"></span>)</span>{
+       <span class="hljs-keyword">try</span>{
+         <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> model <span class="hljs-keyword">of</span> models){
+           model.effects = prefix(model.effects,model.namespace);
+           <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> key <span class="hljs-keyword">in</span> model.effects){<span class="hljs-comment">//key counter/asyncAdd</span>
+              <span class="hljs-keyword">let</span> effect = model.effects[key];
+              <span class="hljs-keyword">if</span>(<span class="hljs-built_in">Array</span>.isArray(effect)&amp;&amp;effect[<span class="hljs-number">1</span>].type == <span class="hljs-string">'watcher'</span>){
+                  <span class="hljs-keyword">let</span> effect = model.effects[key];
+                  <span class="hljs-keyword">yield</span> sagaEffects.fork(effect[<span class="hljs-number">0</span>],sagaEffects);
+              }<span class="hljs-keyword">else</span>{
+                <span class="hljs-keyword">yield</span> sagaEffects.takeEvery(key,<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params">action</span>)</span>{
+                    <span class="hljs-keyword">let</span> oldEffect = model.effects[key];
+                    <span class="hljs-keyword">let</span> newEffect = onEffect(oldEffect,sagaEffects,model,action.type);
+                    <span class="hljs-keyword">yield</span> newEffect(action,sagaEffects);
+                });
+              }  
+           }
+       }
+       }<span class="hljs-keyword">catch</span>(error){
+           onError(error);
+       }
+
+   }
+   <span class="hljs-keyword">return</span> rootSaga;
+}
+</code></pre>
+<h2 id="t298.参考">8.参考 <a href="#t298.参考"> # </a></h2>
+<ul>
+<li><a href="https://dvajs.com/">dvajs</a></li>
+<li><a href="https://gitee.com/zhufengpeixun/zhufeng-dva-source4.git">zhufeng-dva-source4</a></li>
+</ul>
+
+    

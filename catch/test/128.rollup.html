@@ -1,0 +1,2076 @@
+
+        <h2 id="t01. rollup实战">1. rollup实战 <a href="#t01. rollup实战"> # </a></h2>
+<ul>
+<li><a href="https://rollupjs.org/guide/en/">rollupjs</a>是下一代ES模块捆绑器<h3 id="t11.1 背景">1.1 背景 <a href="#t11.1 背景"> # </a></h3>
+</li>
+<li>webpack打包非常繁琐，打包体积比较大</li>
+<li>rollup主要是用来打包JS库的</li>
+<li>vue/react/angular都在用rollup作为打包工具</li>
+</ul>
+<h3 id="t21.2 安装依赖">1.2 安装依赖 <a href="#t21.2 安装依赖"> # </a></h3>
+<pre><code class="lang-js">cnpm i @babel/core @babel/preset-env  @rollup/plugin-commonjs @rollup/plugin-node-resolve @rollup/plugin-typescript lodash rollup rollup-plugin-babel postcss rollup-plugin-postcss rollup-plugin-terser tslib typescript rollup-plugin-serve rollup-plugin-livereload -D
+</code></pre>
+<h3 id="t31.3 初次使用">1.3 初次使用 <a href="#t31.3 初次使用"> # </a></h3>
+<h4 id="t41.3.1 rollup.config.js">1.3.1 rollup.config.js <a href="#t41.3.1 rollup.config.js"> # </a></h4>
+<ul>
+<li><code>Asynchronous Module Definition</code>异步模块定义</li>
+<li>ES6 module是es6提出了新的模块化方案</li>
+<li><code>IIFE(Immediately Invoked Function Expression)</code>即立即执行函数表达式，所谓立即执行，就是声明一个函数，声明完了立即执行</li>
+<li>UMD全称为<code>Universal Module Definition</code>,也就是通用模块定义</li>
+<li><code>cjs</code>是nodejs采用的模块化标准，commonjs使用方法<code>require</code>来引入模块,这里<code>require()</code>接收的参数是模块名或者是模块文件的路径</li>
+</ul>
+<p>rollup.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+    <span class="hljs-attr">input</span>:<span class="hljs-string">'src/main.js'</span>,
+    <span class="hljs-attr">output</span>:{
+        <span class="hljs-attr">file</span>:<span class="hljs-string">'dist/bundle.cjs.js'</span>,<span class="hljs-comment">//输出文件的路径和名称</span>
+        <span class="hljs-attr">format</span>:<span class="hljs-string">'cjs'</span>,<span class="hljs-comment">//五种输出格式：amd/es6/iife/umd/cjs</span>
+        <span class="hljs-attr">name</span>:<span class="hljs-string">'bundleName'</span><span class="hljs-comment">//当format为iife和umd时必须提供，将作为全局变量挂在window下</span>
+    }
+}
+</code></pre>
+<h4 id="t51.3.2 src\main.js">1.3.2 src\main.js <a href="#t51.3.2 src\main.js"> # </a></h4>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>);
+</code></pre>
+<h4 id="t61.3.3 package.json">1.3.3 package.json <a href="#t61.3.3 package.json"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-json">{
+ <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"rollup --config"</span>
+  },
+}
+</code></pre>
+<h4 id="t71.3.4 dist\index.html">1.3.4 dist\index.html <a href="#t71.3.4 dist\index.html"> # </a></h4>
+<p>dist\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>rollup<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"bundle.cjs.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t81.4 支持babel">1.4 支持babel <a href="#t81.4 支持babel"> # </a></h3>
+<ul>
+<li>为了使用新的语法，可以使用babel来进行编译输出</li>
+</ul>
+<h4 id="t91.4.1 安装依赖">1.4.1 安装依赖 <a href="#t91.4.1 安装依赖"> # </a></h4>
+<ul>
+<li>@babel/core是babel的核心包</li>
+<li>@babel/preset-env是预设</li>
+<li>rollup-plugin-babel是babel插件</li>
+</ul>
+<pre><code class="lang-js">cnpm install rollup-plugin-babel @babel/core @babel/preset-env --save-dev
+</code></pre>
+<h4 id="t101.4.2 src\main.js">1.4.2 src\main.js <a href="#t101.4.2 src\main.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> sum = <span class="hljs-function">(<span class="hljs-params">a,b</span>)=&gt;</span>{
+    <span class="hljs-keyword">return</span> a+b;
+}
+<span class="hljs-keyword">let</span> result = sum(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>);
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+<h4 id="t111.4.3 .babelrc">1.4.3 .babelrc <a href="#t111.4.3 .babelrc"> # </a></h4>
+<p>.babelrc</p>
+<pre><code class="lang-js">{
+    <span class="hljs-string">"presets"</span>: [
+       [
+        <span class="hljs-string">"@babel/env"</span>,
+        {
+            <span class="hljs-string">"modules"</span>:<span class="hljs-literal">false</span>
+        }
+       ]
+    ]
+}
+</code></pre>
+<h4 id="t121.4.4 rollup.config.js">1.4.4 rollup.config.js <a href="#t121.4.4 rollup.config.js"> # </a></h4>
+<p>rollup.config.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import babel from 'rollup-plugin-babel';</span>
+export default {
+    input:'src/main.js',
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+        format:'cjs',//五种输出格式：amd/es6/iife/umd/cjs
+        name:'bundleName'//当format为iife和umd时必须提供，将作为全局变量挂在window下
+    },
+<span class="hljs-addition">+   plugins:[</span>
+<span class="hljs-addition">+       babel({</span>
+<span class="hljs-addition">+           exclude:"node_modules/**"</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+   ]</span>
+}
+</code></pre>
+<h3 id="t131.5 tree-shaking">1.5 tree-shaking <a href="#t131.5 tree-shaking"> # </a></h3>
+<ul>
+<li>Tree-shaking的本质是消除无用的js代码</li>
+<li>rollup只处理函数和顶层的import/export变量</li>
+</ul>
+<h4 id="t141.5.1 src\main.js">1.5.1 src\main.js <a href="#t141.5.1 src\main.js"> # </a></h4>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {name,age} <span class="hljs-keyword">from</span> <span class="hljs-string">'./msg'</span>;
+<span class="hljs-built_in">console</span>.log(name);
+</code></pre>
+<h4 id="t151.5.2 src\msg.js">1.5.2 src\msg.js <a href="#t151.5.2 src\msg.js"> # </a></h4>
+<p>src\msg.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">var</span> name = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">var</span> age = <span class="hljs-number">12</span>;
+</code></pre>
+<h3 id="t161.6 使用第三方模块">1.6 使用第三方模块 <a href="#t161.6 使用第三方模块"> # </a></h3>
+<ul>
+<li>rollup.js编译源码中的模块引用默认只支持 ES6+的模块方式<code>import/export</code></li>
+</ul>
+<h4 id="t171.6.1 安装依赖">1.6.1 安装依赖 <a href="#t171.6.1 安装依赖"> # </a></h4>
+<pre><code class="lang-js">cnpm install @rollup/plugin-node-resolve @rollup/plugin-commonjs lodash  --save-dev
+</code></pre>
+<h4 id="t181.6.2 src\main.js">1.6.2 src\main.js <a href="#t181.6.2 src\main.js"> # </a></h4>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">'lodash'</span>;
+<span class="hljs-built_in">console</span>.log(_);
+</code></pre>
+<h4 id="t191.6.3 rollup.config.js">1.6.3 rollup.config.js <a href="#t191.6.3 rollup.config.js"> # </a></h4>
+<p>rollup.config.js</p>
+<pre><code class="lang-diff">import babel from 'rollup-plugin-babel';
+<span class="hljs-addition">+import resolve from '@rollup/plugin-node-resolve';</span>
+<span class="hljs-addition">+import commonjs from '@rollup/plugin-commonjs';</span>
+export default {
+    input:'src/main.js',
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+        format:'cjs',//五种输出格式：amd/es6/iife/umd/cjs
+        name:'bundleName'//当format为iife和umd时必须提供，将作为全局变量挂在window下
+    },
+    plugins:[
+        babel({
+            exclude:"node_modules/**"
+        }),
+<span class="hljs-addition">+       resolve(),</span>
+<span class="hljs-addition">+       commonjs()</span>
+    ]
+}
+</code></pre>
+<h3 id="t201.7 使用CDN">1.7 使用CDN <a href="#t201.7 使用CDN"> # </a></h3>
+<h4 id="t211.7.1 src\main.js">1.7.1 src\main.js <a href="#t211.7.1 src\main.js"> # </a></h4>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> _ <span class="hljs-keyword">from</span> <span class="hljs-string">'lodash'</span>;
+<span class="hljs-keyword">import</span> $ <span class="hljs-keyword">from</span> <span class="hljs-string">'jquery'</span>;
+<span class="hljs-built_in">console</span>.log(_.concat([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>],<span class="hljs-number">4</span>,<span class="hljs-number">5</span>));
+<span class="hljs-built_in">console</span>.log($);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-string">'main'</span>;
+</code></pre>
+<h4 id="t221.7.2 dist\index.html">1.7.2 dist\index.html <a href="#t221.7.2 dist\index.html"> # </a></h4>
+<p>dist\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>rollup<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.jsdelivr.net/npm/jquery/jquery.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"bundle.cjs.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h4 id="t231.7.3 rollup.config.js">1.7.3 rollup.config.js <a href="#t231.7.3 rollup.config.js"> # </a></h4>
+<p>rollup.config.js</p>
+<pre><code class="lang-diff">import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+export default {
+    input:'src/main.js',
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+<span class="hljs-addition">+       format:'iife',//五种输出格式：amd/es6/iife/umd/cjs</span>
+<span class="hljs-addition">+       name:'bundleName',//当format为iife和umd时必须提供，将作为全局变量挂在window下</span>
+<span class="hljs-addition">+       globals:{</span>
+<span class="hljs-addition">+           lodash:'_', //告诉rollup全局变量_即是lodash</span>
+<span class="hljs-addition">+           jquery:'$' //告诉rollup全局变量$即是jquery</span>
+<span class="hljs-addition">+       }</span>
+    },
+    plugins:[
+        babel({
+            exclude:"node_modules/**"
+        }),
+        resolve(),
+        commonjs()
+    ],
+<span class="hljs-addition">+   external:['lodash','jquery']</span>
+}
+</code></pre>
+<h3 id="t241.8 使用typescript">1.8 使用typescript <a href="#t241.8 使用typescript"> # </a></h3>
+<h4 id="t251.8.1 安装">1.8.1 安装 <a href="#t251.8.1 安装"> # </a></h4>
+<pre><code class="lang-js">cnpm install tslib typescript @rollup/plugin-typescript --save-dev
+</code></pre>
+<h4 id="t261.8.2 src\main.ts">1.8.2 src\main.ts <a href="#t261.8.2 src\main.ts"> # </a></h4>
+<p>src\main.ts</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> myName:string = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">let</span> age:number=<span class="hljs-number">12</span>;
+<span class="hljs-built_in">console</span>.log(myName,age);
+</code></pre>
+<h4 id="t271.8.3 rollup.config.js">1.8.3 rollup.config.js <a href="#t271.8.3 rollup.config.js"> # </a></h4>
+<p>rollup.config.js</p>
+<pre><code class="lang-diff">import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+<span class="hljs-addition">+import typescript from '@rollup/plugin-typescript';</span>
+export default {
+<span class="hljs-addition">+   input:'src/main.ts',</span>
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+        format:'iife',//五种输出格式：amd/es6/iife/umd/cjs
+        name:'bundleName',//当format为iife和umd时必须提供，将作为全局变量挂在window下
+        globals:{
+            lodash:'_', //告诉rollup全局变量_即是lodash
+            jquery:'$' //告诉rollup全局变量$即是jquery
+        }
+    },
+    plugins:[
+        babel({
+            exclude:"node_modules/**"
+        }),
+        resolve(),
+        commonjs(),
+<span class="hljs-addition">+       typescript()</span>
+    ],
+    external:['lodash','jquery']
+}
+</code></pre>
+<h4 id="t281.8.4 tsconfig.json">1.8.4 tsconfig.json <a href="#t281.8.4 tsconfig.json"> # </a></h4>
+<p>tsconfig.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"compilerOptions"</span>: {  
+    <span class="hljs-attr">"target"</span>: <span class="hljs-string">"es5"</span>,                          
+    <span class="hljs-attr">"module"</span>: <span class="hljs-string">"ESNext"</span>,                     
+    <span class="hljs-attr">"strict"</span>: <span class="hljs-literal">true</span>,                         
+    <span class="hljs-attr">"skipLibCheck"</span>: <span class="hljs-literal">true</span>,                    
+    <span class="hljs-attr">"forceConsistentCasingInFileNames"</span>: <span class="hljs-literal">true</span> 
+  }
+}
+</code></pre>
+<h3 id="t291.9 压缩JS">1.9 压缩JS <a href="#t291.9 压缩JS"> # </a></h3>
+<ul>
+<li>terser是支持ES6 +的JavaScript压缩器工具包</li>
+</ul>
+<h4 id="t301.9.1 安装">1.9.1 安装 <a href="#t301.9.1 安装"> # </a></h4>
+<pre><code class="lang-js">cnpm install rollup-plugin-terser --save-dev
+</code></pre>
+<h4 id="t311.9.2 rollup.config.js">1.9.2 rollup.config.js <a href="#t311.9.2 rollup.config.js"> # </a></h4>
+<p>rollup.config.js</p>
+<pre><code class="lang-diff">import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import typescript from '@rollup/plugin-typescript';
+<span class="hljs-addition">+import {terser} from 'rollup-plugin-terser';</span>
+export default {
+    input:'src/main.ts',
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+        format:'iife',//五种输出格式：amd/es6/iife/umd/cjs
+        name:'bundleName',//当format为iife和umd时必须提供，将作为全局变量挂在window下
+        globals:{
+            lodash:'_', //告诉rollup全局变量_即是lodash
+            jquery:'$' //告诉rollup全局变量$即是jquery
+        }
+    },
+    plugins:[
+        babel({
+            exclude:"node_modules/**"
+        }),
+        resolve(),
+        commonjs(),
+        typescript(),
+<span class="hljs-addition">+       terser(),</span>
+    ],
+    external:['lodash','jquery']
+}
+</code></pre>
+<h3 id="t321.10 编译css">1.10 编译css <a href="#t321.10 编译css"> # </a></h3>
+<ul>
+<li>terser是支持ES6 +的JavaScript压缩器工具包</li>
+</ul>
+<h4 id="t331.10.1 安装">1.10.1 安装 <a href="#t331.10.1 安装"> # </a></h4>
+<pre><code class="lang-js">cnpm install  postcss rollup-plugin-postcss --save-dev
+</code></pre>
+<h4 id="t341.10.2 rollup.config.js">1.10.2 rollup.config.js <a href="#t341.10.2 rollup.config.js"> # </a></h4>
+<p>rollup.config.js</p>
+<pre><code class="lang-diff">import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import typescript from '@rollup/plugin-typescript';
+import {terser} from 'rollup-plugin-terser';
+<span class="hljs-addition">+import postcss from 'rollup-plugin-postcss';</span>
+export default {
+    input:'src/main.js',
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+        format:'iife',//五种输出格式：amd/es6/iife/umd/cjs
+        name:'bundleName',//当format为iife和umd时必须提供，将作为全局变量挂在window下
+        globals:{
+            lodash:'_', //告诉rollup全局变量_即是lodash
+            jquery:'$' //告诉rollup全局变量$即是jquery
+        }
+    },
+    plugins:[
+        babel({
+            exclude:"node_modules/**"
+        }),
+        resolve(),
+        commonjs(),
+        typescript(),
+        //terser(),
+<span class="hljs-addition">+       postcss()</span>
+    ],
+    external:['lodash','jquery']
+}
+</code></pre>
+<h4 id="t351.10.3 src\main.js">1.10.3 src\main.js <a href="#t351.10.3 src\main.js"> # </a></h4>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">'./main.css'</span>;
+</code></pre>
+<h4 id="t361.10.4 src\main.css">1.10.4 src\main.css <a href="#t361.10.4 src\main.css"> # </a></h4>
+<p>src\main.css</p>
+<pre><code class="lang-js">body{
+    background-color: green;
+}
+</code></pre>
+<h3 id="t371.11 本地服务器">1.11 本地服务器 <a href="#t371.11 本地服务器"> # </a></h3>
+<h4 id="t381.11.1 安装">1.11.1 安装 <a href="#t381.11.1 安装"> # </a></h4>
+<pre><code class="lang-js">cnpm install rollup-plugin-serve --save-dev
+</code></pre>
+<h4 id="t391.11.2 rollup.config.dev.js">1.11.2 rollup.config.dev.js <a href="#t391.11.2 rollup.config.dev.js"> # </a></h4>
+<p>rollup.config.dev.js</p>
+<pre><code class="lang-diff">import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import typescript from '@rollup/plugin-typescript';
+import postcss from 'rollup-plugin-postcss';
+<span class="hljs-addition">+import serve from 'rollup-plugin-serve';</span>
+export default {
+    input:'src/main.js',
+    output:{
+        file:'dist/bundle.cjs.js',//输出文件的路径和名称
+        format:'iife',//五种输出格式：amd/es6/iife/umd/cjs
+        name:'bundleName',//当format为iife和umd时必须提供，将作为全局变量挂在window下
+        sourcemap:true,
+        globals:{
+            lodash:'_', //告诉rollup全局变量_即是lodash
+            jquery:'$' //告诉rollup全局变量$即是jquery
+        }
+    },
+    plugins:[
+        babel({
+            exclude:"node_modules/**"
+        }),
+        resolve(),
+        commonjs(),
+        typescript(),
+        postcss(),
+<span class="hljs-addition">+       serve({</span>
+<span class="hljs-addition">+           open:true,</span>
+<span class="hljs-addition">+           port:8080,</span>
+<span class="hljs-addition">+           contentBase:'./dist'</span>
+<span class="hljs-addition">+       })</span>
+    ],
+    external:['lodash','jquery']
+}
+</code></pre>
+<h4 id="t401.11.3 package.json">1.11.3 package.json <a href="#t401.11.3 package.json"> # </a></h4>
+<p>package.json</p>
+<pre><code class="lang-diff">{
+  "scripts": {
+    "build": "rollup --config rollup.config.build.js",
+    "dev": "rollup --config rollup.config.dev.js -w"
+  },
+}
+</code></pre>
+<h2 id="t412.前置知识">2.前置知识 <a href="#t412.前置知识"> # </a></h2>
+<h3 id="t422.1. 初始化项目">2.1. 初始化项目 <a href="#t422.1. 初始化项目"> # </a></h3>
+<pre><code class="lang-js">cnpm install magic-string acorn --save
+</code></pre>
+<h3 id="t432.2. magic-string">2.2. magic-string <a href="#t432.2. magic-string"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/magic-string">magic-string</a>是一个操作字符串和生成source-map的工具<pre><code class="lang-js"><span class="hljs-keyword">var</span> MagicString = <span class="hljs-built_in">require</span>(<span class="hljs-string">'magic-string'</span>);
+<span class="hljs-keyword">var</span> magicString = <span class="hljs-keyword">new</span> MagicString(<span class="hljs-string">'export var name = "zhufeng"'</span>);
+<span class="hljs-comment">//返回magicString的克隆，删除原始字符串开头和结尾字符之前的所有内容</span>
+<span class="hljs-built_in">console</span>.log(magicString.snip(<span class="hljs-number">0</span>, <span class="hljs-number">6</span>).toString());
+<span class="hljs-comment">//从开始到结束删除字符(原始字符串,而不是生成的字符串)</span>
+<span class="hljs-built_in">console</span>.log(magicString.remove(<span class="hljs-number">0</span>,<span class="hljs-number">7</span>).toString());
+<span class="hljs-comment">//使用MagicString.Bundle可以联合多个源代码</span>
+<span class="hljs-keyword">let</span> bundleString = <span class="hljs-keyword">new</span> MagicString.Bundle();
+bundleString.addSource({
+  <span class="hljs-attr">content</span>: <span class="hljs-string">'var a = 1;'</span>,
+  <span class="hljs-attr">separator</span>: <span class="hljs-string">'\n'</span>
+})
+bundleString.addSource({
+  <span class="hljs-attr">content</span>: <span class="hljs-string">'var b = 2;'</span>,
+  <span class="hljs-attr">separator</span>: <span class="hljs-string">'\n'</span>
+})
+<span class="hljs-built_in">console</span>.log(bundleString.toString());
+</code></pre>
+</li>
+</ul>
+<h3 id="t442.3. AST">2.3. AST <a href="#t442.3. AST"> # </a></h3>
+<ul>
+<li>通过<code>JavaScript Parser</code>可以把代码转化为一颗抽象语法树AST,这颗树定义了代码的结构，通过操纵这颗树，我们可以精准的定位到声明语句、赋值语句、运算语句等等，实现对代码的分析、优化、变更等操作</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/868f60df0f5227621151031e261678a9" alt="868f60df0f5227621151031e261678a9"></p>
+<h4 id="t452.3.1 AST工作流">2.3.1 AST工作流 <a href="#t452.3.1 AST工作流"> # </a></h4>
+<ul>
+<li>Parse(解析) 将源代码转换成抽象语法树，树上有很多的estree节点</li>
+<li>Transform(转换) 对抽象语法树进行转换</li>
+<li>Generate(代码生成) 将上一步经过转换过的抽象语法树生成新的代码</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/1d821a22ff221e924731a6d8c8a654c4" alt="1d821a22ff221e924731a6d8c8a654c4"></p>
+<h4 id="t462.3.2 acorn">2.3.2 acorn <a href="#t462.3.2 acorn"> # </a></h4>
+<ul>
+<li><a href="https://astexplorer.net/">astexplorer</a>可以把代码转成语法树</li>
+<li>acorn 解析结果符合<code>The Estree Spec</code>规范</li>
+</ul>
+<p><img src="https://img.zhufengpeixun.com/d434186f338a42917a8ef3835df3a28f" alt="d434186f338a42917a8ef3835df3a28f"></p>
+<h5 id="t472.3.2.1 walk.js">2.3.2.1 walk.js <a href="#t472.3.2.1 walk.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">walk</span>(<span class="hljs-params">ast, { enter, leave }</span>) </span>{
+    visit(ast, <span class="hljs-literal">null</span>, enter, leave)
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">visit</span>(<span class="hljs-params">node, parent, enter, leave</span>) </span>{
+    <span class="hljs-keyword">if</span> (enter) {
+        enter.call(<span class="hljs-literal">null</span>, node, parent)
+    }
+    <span class="hljs-keyword">let</span> keys = <span class="hljs-built_in">Object</span>.keys(node).filter(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> <span class="hljs-keyword">typeof</span> node[key] === <span class="hljs-string">'object'</span>);
+    keys.forEach(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> {
+        <span class="hljs-keyword">let</span> value = node[key];
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(value)) {
+            value.forEach(<span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> {
+                visit(val, node, enter, leave);
+            });
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (value &amp;&amp; value.type) {
+            visit(value, node, enter, leave);
+        }
+    });
+    <span class="hljs-keyword">if</span> (leave) {
+        leave(node, parent)
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = walk
+</code></pre>
+<h5 id="t482.3.2.2 use.js">2.3.2.2 use.js <a href="#t482.3.2.2 use.js"> # </a></h5>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> acorn = <span class="hljs-built_in">require</span>(<span class="hljs-string">"acorn"</span>)
+<span class="hljs-keyword">let</span> walk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./walk'</span>);
+<span class="hljs-keyword">const</span> ast = acorn.parse(<span class="hljs-string">`
+import $ from 'jquery';
+`</span>, { <span class="hljs-attr">locations</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">ranges</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">sourceType</span>: <span class="hljs-string">'module'</span>, <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">8</span> });
+<span class="hljs-keyword">let</span> ident = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">const</span> padding = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-string">" "</span>.repeat(ident);
+ast.body.forEach(<span class="hljs-function"><span class="hljs-params">statement</span> =&gt;</span> {
+    walk(statement, {
+        enter(node) {
+            <span class="hljs-keyword">if</span> (node.type){
+                <span class="hljs-built_in">console</span>.log(padding() +node.type);
+                ident+=<span class="hljs-number">2</span>;
+            }  
+        },
+        leave(node) {
+            <span class="hljs-keyword">if</span> (node.type){
+                ident-=<span class="hljs-number">2</span>;
+                <span class="hljs-built_in">console</span>.log(padding() +node.type);
+            }
+        }
+    });
+});
+
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/d39f73349c0580b4bfe6aa106ef0b1ae" alt="d39f73349c0580b4bfe6aa106ef0b1ae"></p>
+<pre><code class="lang-js">ImportDeclaration
+  ImportDefaultSpecifier
+    Identifier
+    Identifier
+  ImportDefaultSpecifier
+  Literal
+  Literal
+ImportDeclaration
+</code></pre>
+<h3 id="t492.4  作用域">2.4  作用域 <a href="#t492.4  作用域"> # </a></h3>
+<h4 id="t502.4.1 作用域">2.4.1 作用域 <a href="#t502.4.1 作用域"> # </a></h4>
+<ul>
+<li>在JS中，作用域是用来规定变量访问范围的规则<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+}
+<span class="hljs-built_in">console</span>.log(a);
+</code></pre>
+</li>
+</ul>
+<h4 id="t512.4.2 作用域链">2.4.2 作用域链 <a href="#t512.4.2 作用域链"> # </a></h4>
+<ul>
+<li>作用域链是由当前执行环境与上层执行环境的一系列变量对象组成的，它保证了当前执行环境对符合访问权限的变量和函数的有序访问</li>
+</ul>
+<h5 id="t522.4.2.1 scope.js">2.4.2.1 scope.js <a href="#t522.4.2.1 scope.js"> # </a></h5>
+<p>scope.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Scope</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options = {}) {
+        <span class="hljs-keyword">this</span>.name = options.name;
+        <span class="hljs-keyword">this</span>.parent = options.parent;
+        <span class="hljs-keyword">this</span>.names = options.params || [];<span class="hljs-comment">//存放着这个作用域内的所有变量</span>
+    }
+    add(name) {
+        <span class="hljs-keyword">this</span>.names.push(name);
+    }
+    findDefiningScope(name) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.names.includes(name)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.parent) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.parent.findDefiningScope(name)
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Scope;
+</code></pre>
+<h5 id="t532.4.2.2 useScope.js">2.4.2.2 useScope.js <a href="#t532.4.2.2 useScope.js"> # </a></h5>
+<p>useScope.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> Scope = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./scope'</span>);
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> c = <span class="hljs-number">3</span>;
+        <span class="hljs-built_in">console</span>.log(a, b, c);
+    }
+    two();
+}
+one();
+<span class="hljs-keyword">let</span> globalScope = <span class="hljs-keyword">new</span> Scope({ <span class="hljs-attr">name</span>: <span class="hljs-string">'global'</span>, <span class="hljs-attr">params</span>: [<span class="hljs-string">'a'</span>], <span class="hljs-attr">parent</span>: <span class="hljs-literal">null</span> });
+<span class="hljs-keyword">let</span> oneScope = <span class="hljs-keyword">new</span> Scope({ <span class="hljs-attr">name</span>: <span class="hljs-string">'one'</span>, <span class="hljs-attr">params</span>: [<span class="hljs-string">'b'</span>], <span class="hljs-attr">parent</span>: globalScope });
+<span class="hljs-keyword">let</span> twoScope = <span class="hljs-keyword">new</span> Scope({ <span class="hljs-attr">name</span>: <span class="hljs-string">'two'</span>, <span class="hljs-attr">params</span>: [<span class="hljs-string">'c'</span>], <span class="hljs-attr">parent</span>: oneScope });
+
+<span class="hljs-keyword">let</span> aScope = twoScope.findDefiningScope(<span class="hljs-string">'a'</span>);
+<span class="hljs-built_in">console</span>.log(aScope.name);
+<span class="hljs-keyword">let</span> bScope = twoScope.findDefiningScope(<span class="hljs-string">'b'</span>);
+<span class="hljs-built_in">console</span>.log(bScope.name);
+<span class="hljs-keyword">let</span> cScope = twoScope.findDefiningScope(<span class="hljs-string">'c'</span>);
+<span class="hljs-built_in">console</span>.log(cScope.name);
+<span class="hljs-keyword">let</span> dScope = twoScope.findDefiningScope(<span class="hljs-string">'d'</span>);
+<span class="hljs-built_in">console</span>.log(dScope);
+</code></pre>
+<h2 id="t543. 实现rollup">3. 实现rollup <a href="#t543. 实现rollup"> # </a></h2>
+<h3 id="t553.1 目录结构">3.1 目录结构 <a href="#t553.1 目录结构"> # </a></h3>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/rollup">rollup代码仓库地址</a></li>
+</ul>
+<pre><code class="lang-js">.
+├── package.json
+├── README.md
+├── src
+    ├── ast
+    │   ├── analyse.js <span class="hljs-comment">//分析AST节点的作用域和依赖项</span>
+    │   ├── Scope.js <span class="hljs-comment">//有些语句会创建新的作用域实例</span>
+    │   └── walk.js <span class="hljs-comment">//提供了递归遍历AST语法树的功能</span>
+    ├── Bundle<span class="hljs-comment">//打包工具，在打包的时候会生成一个Bundle实例，并收集其它模块，最后把所有代码打包在一起输出</span>
+    │   └── index.js 
+    ├── Module<span class="hljs-comment">//每个文件都是一个模块</span>
+    │   └── index.js
+    ├── rollup.js <span class="hljs-comment">//打包的入口模块</span>
+    └── utils
+        ├── map-helpers.js
+        ├── object.js
+        └── promise.js
+
+</code></pre>
+<h3 id="t563.2 src\main.js">3.2 src\main.js <a href="#t563.2 src\main.js"> # </a></h3>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>);
+</code></pre>
+<h3 id="t573.3 debugger.js">3.3 debugger.js <a href="#t573.3 debugger.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> rollup = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./lib/rollup'</span>);
+<span class="hljs-keyword">let</span> entry = path.resolve(__dirname, <span class="hljs-string">'src/main.js'</span>);
+rollup(entry,<span class="hljs-string">'bundle.js'</span>);
+</code></pre>
+<h3 id="t583.4 rollup.js">3.4 rollup.js <a href="#t583.4 rollup.js"> # </a></h3>
+<p>lib\rollup.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Bundle = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./bundle'</span>)
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rollup</span>(<span class="hljs-params">entry, filename</span>) </span>{
+    <span class="hljs-keyword">const</span> bundle = <span class="hljs-keyword">new</span> Bundle({ entry });
+    bundle.build(filename);
+}
+<span class="hljs-built_in">module</span>.exports = rollup;
+</code></pre>
+<h3 id="t593.5 bundle.js">3.5 bundle.js <a href="#t593.5 bundle.js"> # </a></h3>
+<p>lib\bundle.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> Module = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./module'</span>);
+<span class="hljs-keyword">let</span> MagicString = <span class="hljs-built_in">require</span>(<span class="hljs-string">'magic-string'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bundle</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-comment">//入口文件数据</span>
+        <span class="hljs-keyword">this</span>.entryPath = path.resolve(options.entry.replace(<span class="hljs-regexp">/\.js$/</span>, <span class="hljs-string">''</span>) + <span class="hljs-string">'.js'</span>);
+        <span class="hljs-keyword">this</span>.modules = {};<span class="hljs-comment">//存放所有的模块</span>
+    }
+    build(filename) {
+        <span class="hljs-keyword">let</span> entryModule = <span class="hljs-keyword">this</span>.fetchModule(<span class="hljs-keyword">this</span>.entryPath);
+        <span class="hljs-keyword">this</span>.statements = entryModule.expandAllStatements(<span class="hljs-literal">true</span>);
+        <span class="hljs-keyword">const</span> { code } = <span class="hljs-keyword">this</span>.generate({});
+        fs.writeFileSync(filename, code);
+    }
+    fetchModule(importee) {
+        <span class="hljs-keyword">let</span> route = importee;
+        <span class="hljs-keyword">if</span> (route) {
+            <span class="hljs-keyword">let</span> code = fs.readFileSync(route, <span class="hljs-string">'utf8'</span>);
+            <span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = <span class="hljs-keyword">new</span> Module({
+                code,
+                <span class="hljs-attr">path</span>: importee,
+                <span class="hljs-attr">bundle</span>: <span class="hljs-keyword">this</span>
+            })
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>;
+        }
+    }
+    generate(options) {
+        <span class="hljs-keyword">let</span> magicString = <span class="hljs-keyword">new</span> MagicString.Bundle();
+        <span class="hljs-keyword">this</span>.statements.forEach(<span class="hljs-function"><span class="hljs-params">statement</span> =&gt;</span> {
+            <span class="hljs-keyword">const</span> source = statement._source.clone();
+            magicString.addSource({
+                <span class="hljs-attr">content</span>: source,
+                <span class="hljs-attr">separator</span>: <span class="hljs-string">'\n'</span>
+            })
+
+        })
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">code</span>: magicString.toString() }
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Bundle;
+</code></pre>
+<h3 id="t603.6 module.js">3.6 module.js <a href="#t603.6 module.js"> # </a></h3>
+<p>lib\module.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> MagicString = <span class="hljs-built_in">require</span>(<span class="hljs-string">'magic-string'</span>);
+<span class="hljs-keyword">const</span> { parse } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'acorn'</span>);
+<span class="hljs-keyword">let</span> analyse = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./ast/analyse'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Module</span> </span>{
+    <span class="hljs-keyword">constructor</span>({ code, path, bundle }) {
+        <span class="hljs-keyword">this</span>.code = <span class="hljs-keyword">new</span> MagicString(code, { <span class="hljs-attr">filename</span>: path });
+        <span class="hljs-keyword">this</span>.path = path;
+        <span class="hljs-keyword">this</span>.bundle = bundle;
+        <span class="hljs-keyword">this</span>.ast = parse(code, {
+            <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">7</span>,
+            <span class="hljs-attr">sourceType</span>: <span class="hljs-string">'module'</span>
+        })
+        <span class="hljs-keyword">this</span>.analyse();
+    }
+    analyse() {
+        analyse(<span class="hljs-keyword">this</span>.ast, <span class="hljs-keyword">this</span>.code, <span class="hljs-keyword">this</span>);
+    }
+    expandAllStatements() {
+        <span class="hljs-keyword">let</span> allStatements = [];
+        <span class="hljs-keyword">this</span>.ast.body.forEach(<span class="hljs-function"><span class="hljs-params">statement</span> =&gt;</span> {
+            <span class="hljs-keyword">let</span> statements = <span class="hljs-keyword">this</span>.expandStatement(statement);
+            allStatements.push(...statements);
+        });
+        <span class="hljs-keyword">return</span> allStatements;
+    }
+    expandStatement(statement) {
+        statement._included = <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">let</span> result = [];
+        result.push(statement);
+        <span class="hljs-keyword">return</span> result;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Module;
+</code></pre>
+<h3 id="t613.7 analyse.js">3.7 analyse.js <a href="#t613.7 analyse.js"> # </a></h3>
+<p>lib\ast\analyse.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">analyse</span>(<span class="hljs-params">ast, magicString</span>) </span>{
+    ast.body.forEach(<span class="hljs-function"><span class="hljs-params">statement</span> =&gt;</span> {
+        <span class="hljs-built_in">Object</span>.defineProperties(statement, {
+            <span class="hljs-attr">_source</span>: { <span class="hljs-attr">value</span>: magicString.snip(statement.start, statement.end) }
+        })
+    });
+}
+<span class="hljs-built_in">module</span>.exports = analyse;
+</code></pre>
+<h2 id="t624. 实现tree-shaking">4. 实现tree-shaking <a href="#t624. 实现tree-shaking"> # </a></h2>
+<h3 id="t634.1 msg.js">4.1 msg.js <a href="#t634.1 msg.js"> # </a></h3>
+<p>src\msg.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">var</span> name = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">var</span> age = <span class="hljs-number">12</span>;
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/4324fd261744db779245477d4cc336a6" alt="4324fd261744db779245477d4cc336a6"></p>
+<h3 id="t644.2 src\main.js">4.2 src\main.js <a href="#t644.2 src\main.js"> # </a></h3>
+<p>src\main.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {name,age} <span class="hljs-keyword">from</span> <span class="hljs-string">'./msg'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">say</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'hello'</span>,name);
+}
+say();
+</code></pre>
+<p><img src="https://img.zhufengpeixun.com/d6bcbc174f98e9aa834ea48397efb177" alt="d6bcbc174f98e9aa834ea48397efb177"></p>
+<h3 id="t654.3 bundle.js">4.3 bundle.js <a href="#t654.3 bundle.js"> # </a></h3>
+<p>lib\bundle.js</p>
+<pre><code class="lang-diff">let fs = require('fs');
+let path = require('path');
+let Module = require('./module');
+let MagicString = require('magic-string');
+class Bundle {
+    constructor(options) {
+        //入口文件数据
+        this.entryPath = path.resolve(options.entry.replace(/\.js$/, '') + '.js');
+        this.modules = {};//存放所有的模块
+    }
+    build(filename) {
+        let entryModule = this.fetchModule(this.entryPath);
+        this.statements = entryModule.expandAllStatements(true);
+        const { code } = this.generate({});
+        fs.writeFileSync(filename, code);
+    }
+<span class="hljs-addition">+   fetchModule(importee,importer) {</span>
+<span class="hljs-addition">+       let route;</span>
+<span class="hljs-addition">+       if (!importer) {</span>
+<span class="hljs-addition">+           route = importee;</span>
+<span class="hljs-addition">+       }else{</span>
+<span class="hljs-addition">+           if (path.isAbsolute(importee)) {</span>
+<span class="hljs-addition">+               route = importee;</span>
+<span class="hljs-addition">+           } else if (importee[0] == '.') {</span>
+<span class="hljs-addition">+               route = path.resolve(path.dirname(importer), importee.replace(/\.js$/, '') + '.js')</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       }</span>
+        if (route) {
+            let code = fs.readFileSync(route, 'utf8');
+            const module = new Module({
+                code,
+                path: importee,
+                bundle: this
+            })
+            return module;
+        }
+    }
+    generate(options) {
+        let magicString = new MagicString.Bundle();
+        this.statements.forEach(statement =&gt; {
+            const source = statement._source.clone();
+<span class="hljs-addition">+           if (/^Export/.test(statement.type)) {</span>
+<span class="hljs-addition">+               if (statement.type === 'ExportNamedDeclaration' </span>
+<span class="hljs-addition">+                   &amp;&amp; statement.declaration.type === 'VariableDeclaration') {</span>
+<span class="hljs-addition">+                   source.remove(statement.start, statement.declaration.start);</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           }</span>
+            magicString.addSource({
+                content: source,
+                separator: '\n'
+            })
+
+        })
+        return { code: magicString.toString() }
+    }
+}
+module.exports = Bundle
+</code></pre>
+<h3 id="t664.4 scope.js">4.4 scope.js <a href="#t664.4 scope.js"> # </a></h3>
+<p>lib\ast\scope.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Scope</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options = {}) {
+        <span class="hljs-keyword">this</span>.parent = options.parent;
+        <span class="hljs-keyword">this</span>.names = options.params || [];<span class="hljs-comment">//存放着这个作用域内的所有变量</span>
+    }
+    add(name) {
+        <span class="hljs-keyword">this</span>.names.push(name);
+    }
+    findDefiningScope(name) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.names.includes(name)) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>
+        }
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.parent) {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.parent.findDefiningScope(name)
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Scope;
+</code></pre>
+<h3 id="t674.5 module.js">4.5 module.js <a href="#t674.5 module.js"> # </a></h3>
+<p>lib\module.js</p>
+<pre><code class="lang-diff">const MagicString = require('magic-string');
+const { parse } = require('acorn');
+let analyse = require('./ast/analyse');
+<span class="hljs-addition">+function hasOwnProperty(obj, prop) {</span>
+<span class="hljs-addition">+    return Object.prototype.hasOwnProperty.call(obj, prop);</span>
+<span class="hljs-addition">+}</span>
+class Module {
+    constructor({ code, path, bundle }) {
+        this.code = new MagicString(code, { filename: path });
+        this.path = path;
+        this.bundle = bundle;
+        this.ast = parse(code, {
+            ecmaVersion: 7,
+            sourceType: 'module'
+        })
+        this.analyse();
+    }
+    analyse() {
+<span class="hljs-addition">+        this.imports = {};//导入</span>
+<span class="hljs-addition">+        this.exports = {};//导出</span>
+<span class="hljs-addition">+        this.ast.body.forEach(node =&gt; {</span>
+<span class="hljs-addition">+            if (node.type === 'ImportDeclaration') {</span>
+<span class="hljs-addition">+                let source = node.source.value;//./title</span>
+<span class="hljs-addition">+                node.specifiers.forEach(specifier =&gt; {</span>
+<span class="hljs-addition">+                    const localName = specifier.local.name;//name</span>
+<span class="hljs-addition">+                    const name = specifier.imported.name;//name</span>
+<span class="hljs-addition">+                    //this.imports['name']= {source:'./title',name:'name',localName:'name'};</span>
+<span class="hljs-addition">+                    //从哪个模块导入了哪个变量，本地变量叫什么</span>
+<span class="hljs-addition">+                    this.imports[localName] = { source, name, localName };</span>
+<span class="hljs-addition">+                })</span>
+<span class="hljs-addition">+            } else if (/^Export/.test(node.type)) {</span>
+<span class="hljs-addition">+                if (node.type === 'ExportNamedDeclaration') {</span>
+<span class="hljs-addition">+                    const declaration = node.declaration;</span>
+<span class="hljs-addition">+                    if (declaration.type === 'VariableDeclaration') {</span>
+<span class="hljs-addition">+                        let name = declaration.declarations[0].id.name;//name</span>
+<span class="hljs-addition">+                        //this.exports['name']={node:ExportNamedDeclaration,localName:'name',expression:VariableDeclaration}</span>
+<span class="hljs-addition">+                        //导出了哪个变量，通过哪个变量声明声明的，叫什么名字,导出节点是什么</span>
+<span class="hljs-addition">+                        this.exports[name] = { node, localName: name, expression: declaration };</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        })</span>
+        analyse(this.ast, this.code, this);
+<span class="hljs-addition">+       this.definitions = {};//存着所有的变量定义语句</span>
+<span class="hljs-addition">+       this.ast.body.forEach(statement =&gt; {//收集所有语句上定义的变量,建立变量和声明语句之间的对应关系</span>
+<span class="hljs-addition">+           Object.keys(statement._defines).forEach(name =&gt; {</span>
+<span class="hljs-addition">+               this.definitions[name] = statement;</span>
+<span class="hljs-addition">+           })</span>
+<span class="hljs-addition">+       })</span>
+    }
+    expandAllStatements() {
+        let allStatements = [];
+        this.ast.body.forEach(statement =&gt; {
+<span class="hljs-addition">+           if (statement.type === 'ImportDeclaration') return;</span>
+            let statements = this.expandStatement(statement);
+            allStatements.push(...statements);
+        });
+        return allStatements;
+    }
+    expandStatement(statement) {
+        statement._included = true;
+        let result = [];
+<span class="hljs-addition">+       const dependencies = Object.keys(statement._dependsOn);</span>
+<span class="hljs-addition">+       dependencies.forEach(name =&gt; {</span>
+<span class="hljs-addition">+           let definition = this.define(name);</span>
+<span class="hljs-addition">+           result.push(...definition)</span>
+<span class="hljs-addition">+       });</span>
+        result.push(statement);
+        return result;
+    }
+<span class="hljs-addition">+   define(name) {</span>
+<span class="hljs-addition">+       if (hasOwnProperty(this.imports, name)) {</span>
+<span class="hljs-addition">+           const importDeclaration = this.imports[name];//获取 导入语句</span>
+<span class="hljs-addition">+           let module = this.bundle.fetchModule(importDeclaration.source, this.path);//获取导入模块</span>
+<span class="hljs-addition">+           const exportDeclaration = module.exports[importDeclaration.name];//获取那个模块的导出语句</span>
+<span class="hljs-addition">+           if (!exportDeclaration) {</span>
+<span class="hljs-addition">+               throw new Error(`Module ${module.path} does not export ${importDeclaration.name} (imported by ${this.path})`)</span>
+<span class="hljs-addition">+           };</span>
+<span class="hljs-addition">+           return module.define(exportDeclaration.localName);</span>
+<span class="hljs-addition">+       } else {</span>
+<span class="hljs-addition">+           let statement;</span>
+<span class="hljs-addition">+           statement = this.definitions[name];</span>
+<span class="hljs-addition">+           if (statement &amp;&amp; !statement._included) {</span>
+<span class="hljs-addition">+               return this.expandStatement(statement);</span>
+<span class="hljs-addition">+           } else {</span>
+<span class="hljs-addition">+               return [];</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+   }</span>
+}
+module.exports = Module
+</code></pre>
+<h3 id="t684.6 walk.js">4.6 walk.js <a href="#t684.6 walk.js"> # </a></h3>
+<p>lib\ast\walk.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">walk</span>(<span class="hljs-params">ast, { enter, leave }</span>) </span>{
+    visit(ast, <span class="hljs-literal">null</span>, enter, leave)
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">visit</span>(<span class="hljs-params">node, parent, enter, leave</span>) </span>{
+    <span class="hljs-keyword">if</span> (enter) {
+        enter.call(<span class="hljs-literal">null</span>, node, parent)
+    }
+    <span class="hljs-keyword">let</span> keys = <span class="hljs-built_in">Object</span>.keys(node).filter(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> <span class="hljs-keyword">typeof</span> node[key] === <span class="hljs-string">'object'</span>);
+    keys.forEach(<span class="hljs-function"><span class="hljs-params">key</span> =&gt;</span> {
+        <span class="hljs-keyword">let</span> value = node[key];
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(value)) {
+            value.forEach(<span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> {
+                visit(val, node, enter, leave);
+            });
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (value &amp;&amp; value.type) {
+            visit(value, node, enter, leave);
+        }
+    });
+    <span class="hljs-keyword">if</span> (leave) {
+        leave(node, parent)
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = walk
+</code></pre>
+<h3 id="t694.7 analyse.js">4.7 analyse.js <a href="#t694.7 analyse.js"> # </a></h3>
+<p>lib\ast\analyse.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+const Scope = require('./scope');</span>
+<span class="hljs-addition">+let walk = require('./walk');</span>
+function analyse(ast, magicString) {
+<span class="hljs-addition">+   let scope = new Scope();//创建作用域</span>
+<span class="hljs-addition">+   ast.body.forEach(statement =&gt; {</span>
+<span class="hljs-addition">+       function addToScope(declarator) {</span>
+<span class="hljs-addition">+           var name = declarator.id.name;//声明的变量名</span>
+<span class="hljs-addition">+           scope.add(name);//添加当前作用作用域中</span>
+<span class="hljs-addition">+           if (!scope.parent) {//如果没有低级作用作用域说明是模块内的顶级作用域</span>
+<span class="hljs-addition">+               statement._defines[name] = true;</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+       Object.defineProperties(statement, {</span>
+<span class="hljs-addition">+           _defines: { value: {} },//定义的变量</span>
+<span class="hljs-addition">+           _dependsOn: { value: {} },//当前模块没有定义的变量，也就是外部依赖的变量</span>
+<span class="hljs-addition">+           _included: { value: false, writable: true },//是否已经包含在输出语句中</span>
+<span class="hljs-addition">+           _source: { value: magicString.snip(statement.start, statement.end) },</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+       //收集每个statement上的定义的变量，创建作用域链</span>
+<span class="hljs-addition">+       walk(statement, {</span>
+<span class="hljs-addition">+           enter(node) {</span>
+<span class="hljs-addition">+               let newScope;</span>
+<span class="hljs-addition">+               switch (node.type) {</span>
+<span class="hljs-addition">+                   case 'FunctionExpression':</span>
+<span class="hljs-addition">+                       const names = node.params.map(getName);</span>
+<span class="hljs-addition">+                       if (node.type === 'FunctionDeclaration') {</span>
+<span class="hljs-addition">+                           addToScope(node)</span>
+<span class="hljs-addition">+                       }</span>
+<span class="hljs-addition">+                       newScope = new Scope({</span>
+<span class="hljs-addition">+                           parent: scope,</span>
+<span class="hljs-addition">+                           params: names</span>
+<span class="hljs-addition">+                       })</span>
+<span class="hljs-addition">+                       break;</span>
+<span class="hljs-addition">+                   case 'VariableDeclaration':</span>
+<span class="hljs-addition">+                       node.declarations.forEach(addToScope);</span>
+<span class="hljs-addition">+                       break;</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+               if (newScope) {</span>
+<span class="hljs-addition">+                   Object.defineProperty(node, '_scope', { value: newScope })</span>
+<span class="hljs-addition">+                   scope = newScope;</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           },</span>
+<span class="hljs-addition">+           leave(node) {</span>
+<span class="hljs-addition">+               if (node._scope) {</span>
+<span class="hljs-addition">+                   scope = scope.parent;</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       });</span>
+<span class="hljs-addition">+   });</span>
+<span class="hljs-addition">+   ast.body.forEach(statement =&gt; {</span>
+<span class="hljs-addition">+       walk(statement, {</span>
+<span class="hljs-addition">+           enter(node) {</span>
+<span class="hljs-addition">+               if (node.type === 'Identifier') {</span>
+<span class="hljs-addition">+                   const definingScope = scope.findDefiningScope(node.name);</span>
+<span class="hljs-addition">+                   //上级使用域内找不到，并且当前语句是没有定义这个变量</span>
+<span class="hljs-addition">+                   if (!definingScope) {</span>
+<span class="hljs-addition">+                       statement._dependsOn[node.name] = true;//添加外部依赖</span>
+<span class="hljs-addition">+                   }</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+   });</span>
+}
+module.exports = analyse;
+</code></pre>
+<h2 id="t705. 包含修改语句">5. 包含修改语句 <a href="#t705. 包含修改语句"> # </a></h2>
+<h3 id="t715.1 src\index.js">5.1 src\index.js <a href="#t715.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {name,age} <span class="hljs-keyword">from</span> <span class="hljs-string">'./msg'</span>;
+<span class="hljs-built_in">console</span>.log(name);
+</code></pre>
+<h3 id="t725.2 msg.js">5.2 msg.js <a href="#t725.2 msg.js"> # </a></h3>
+<p>src\msg.js</p>
+<pre><code class="lang-diff">export var name = 'zhufeng';
+<span class="hljs-addition">+name += 'jiagou';</span>
+export var age = 12;
+</code></pre>
+<h3 id="t735.3 lib\module.js">5.3 lib\module.js <a href="#t735.3 lib\module.js"> # </a></h3>
+<p>lib\module.js</p>
+<pre><code class="lang-diff">const MagicString = require('magic-string');
+const { parse } = require('acorn');
+let analyse = require('./ast/analyse');
+function hasOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+class Module {
+    constructor({ code, path, bundle }) {
+        this.code = new MagicString(code, { filename: path });
+        this.path = path;
+        this.bundle = bundle;
+        this.ast = parse(code, {
+            ecmaVersion: 7,
+            sourceType: 'module'
+        })
+        this.analyse();
+    }
+    analyse() {
+        this.imports = {};//导入
+        this.exports = {};//导出
+<span class="hljs-addition">+       this.modifications = {};</span>
+        this.ast.body.forEach(node =&gt; {
+            if (node.type <span class="hljs-comment">=== 'ImportDeclaration') {</span>
+                let source = node.source.value;//./title
+                node.specifiers.forEach(specifier =&gt; {
+                    const localName = specifier.local.name;//name
+                    const name = specifier.imported.name;//name
+                    //this.imports['name']= {source:'./title',name:'name',localName:'name'};
+                    //从哪个模块导入了哪个变量，本地变量叫什么
+                    this.imports[localName] = { source, name, localName };
+                })
+            } else if (/^Export/.test(node.type)) {
+                if (node.type <span class="hljs-comment">=== 'ExportNamedDeclaration') {</span>
+                    const declaration = node.declaration;
+                    if (declaration.type <span class="hljs-comment">=== 'VariableDeclaration') {</span>
+                        let name = declaration.declarations[0].id.name;//name
+                        //this.exports['name']={node:ExportNamedDeclaration,localName:'name',expression:VariableDeclaration}
+                        //导出了哪个变量，通过哪个变量声明声明的，叫什么名字,导出节点是什么
+                        this.exports[name] = { node, localName: name, expression: declaration };
+                    }
+                }
+            }
+        })
+        analyse(this.ast, this.code, this);
+        this.definitions = {};//存着所有的变量定义语句
+        this.ast.body.forEach(statement =&gt; {//收集所有语句上定义的变量,建立变量和声明语句之间的对应关系
+            Object.keys(statement._defines).forEach(name =&gt; {
+                this.definitions[name] = statement;
+            })
+<span class="hljs-addition">+           Object.keys(statement._modifies).forEach(name =&gt; {</span>
+<span class="hljs-addition">+               if (!hasOwnProperty(this.modifications, name)) {</span>
+<span class="hljs-addition">+                   this.modifications[name] = [];</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+               this.modifications[name].push(statement);</span>
+<span class="hljs-addition">+           })</span>
+<span class="hljs-addition">+       })</span>
+    }
+    expandAllStatements() {
+        let allStatements = [];
+        this.ast.body.forEach(statement =&gt; {
+            if (statement.type <span class="hljs-comment">=== 'ImportDeclaration') return;</span>
+            let statements = this.expandStatement(statement);
+            allStatements.push(...statements);
+        });
+        return allStatements;
+    }
+    expandStatement(statement) {
+        statement._included = true;
+        let result = [];
+        const dependencies = Object.keys(statement._dependsOn);
+        dependencies.forEach(name =&gt; {
+            let definition = this.define(name);
+            result.push(...definition);
+        });
+        result.push(statement);
+<span class="hljs-addition">+       const defines = Object.keys(statement._defines);</span>
+<span class="hljs-addition">+       defines.forEach(name =&gt; {</span>
+<span class="hljs-addition">+           const modifications = hasOwnProperty(this.modifications, name) &amp;&amp; this.modifications[name];</span>
+<span class="hljs-addition">+            if (modifications) {</span>
+<span class="hljs-addition">+                modifications.forEach(statement =&gt; {</span>
+<span class="hljs-addition">+                    if (!statement._included) {</span>
+<span class="hljs-addition">+                        let statements = this.expandStatement(statement);</span>
+<span class="hljs-addition">+                        result.push(...statements);</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                });</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        });</span>
+        return result;
+    }
+    define(name) {
+        if (hasOwnProperty(this.imports, name)) {
+            const importDeclaration = this.imports[name];//获取 导入语句
+            let module = this.bundle.fetchModule(importDeclaration.source, this.path);//获取导入模块
+            const exportDeclaration = module.exports[importDeclaration.name];//获取那个模块的导出语句
+            if (!exportDeclaration) {
+                throw new Error(`Module ${module.path} does not export ${importDeclaration.name} (imported by ${this.path})`)
+            };
+            return module.define(exportDeclaration.localName);
+        } else {
+            let statement;
+            statement = this.definitions[name];
+            if (statement &amp;&amp; !statement._included) {
+                return this.expandStatement(statement);
+            } else {
+                return [];
+            }
+        }
+    }
+}
+module.exports = Module
+</code></pre>
+<h3 id="t745.4 analyse.js">5.4 analyse.js <a href="#t745.4 analyse.js"> # </a></h3>
+<p>lib\ast\analyse.js</p>
+<pre><code class="lang-diff">const Scope = require('./scope');
+let walk = require('./walk');
+function analyse(ast, magicString) {
+    let scope = new Scope();//创建作用域
+    ast.body.forEach(statement =&gt; {
+        function addToScope(declarator) {
+            var name = declarator.id.name;//声明的变量名
+            scope.add(name);//添加当前作用作用域中
+            if (!scope.parent) {//如果没有低级作用作用域说明是模块内的顶级作用域
+                statement._defines[name] = true;
+            }
+        }
+        Object.defineProperties(statement, {
+            _defines: { value: {} },//定义的变量
+<span class="hljs-addition">+           _modifies:{ value: {} },//修改</span>
+            _dependsOn: { value: {} },//当前模块没有定义的变量，也就是外部依赖的变量
+            _included: { value: false, writable: true },//是否已经包含在输出语句中
+            _source: { value: magicString.snip(statement.start, statement.end) },
+        })
+        //收集每个statement上的定义的变量，创建作用域链
+        walk(statement, {
+            enter(node) {
+                let newScope;
+                switch (node.type) {
+                    case 'FunctionExpression':
+                        const names = node.params.map(getName);
+                        if (node.type <span class="hljs-comment">=== 'FunctionDeclaration') {</span>
+                            addToScope(node)
+                        }
+                        newScope = new Scope({
+                            parent: scope,
+                            params: names
+                        })
+                        break;
+                    case 'VariableDeclaration':
+                        node.declarations.forEach(addToScope);
+                        break;
+                }
+                if (newScope) {
+                    Object.defineProperty(node, '_scope', { value: newScope })
+                    scope = newScope;
+                }
+            },
+            leave(node) {
+                if (node._scope) {
+                    scope = scope.parent;
+                }
+            }
+        });
+    });
+    ast.body.forEach(statement =&gt; {
+<span class="hljs-addition">+        function checkForReads (node) {</span>
+<span class="hljs-addition">+            if (node.type === 'Identifier') {</span>
+<span class="hljs-addition">+                const definingScope = scope.findDefiningScope(node.name);</span>
+<span class="hljs-addition">+                //上级使用域内找不到，并且当前语句是没有定义这个变量</span>
+<span class="hljs-addition">+                if (!definingScope) {</span>
+<span class="hljs-addition">+                    statement._dependsOn[node.name] = true;//添加外部依赖</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        function checkForWrites(node) {</span>
+<span class="hljs-addition">+            function addNode (node){</span>
+<span class="hljs-addition">+                while (node.type === 'MemberExpression') {</span>
+<span class="hljs-addition">+                    node = node.object;</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+                if (node.type !== 'Identifier') {</span>
+<span class="hljs-addition">+                    return</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+                statement._modifies[node.name] = true;</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+            if (node.type === 'AssignmentExpression') {// name='jiagou'</span>
+<span class="hljs-addition">+                addNode(node.left, true)</span>
+<span class="hljs-addition">+            }else if (node.type === 'UpdateExpression') {//name+='jiagou'</span>
+<span class="hljs-addition">+                addNode(node.argument, true)</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+        walk(statement, {
+<span class="hljs-addition">+           enter(node) {</span>
+<span class="hljs-addition">+               if (node._scope) scope = node._scope;</span>
+<span class="hljs-addition">+               checkForReads(node)</span>
+<span class="hljs-addition">+                checkForWrites(node)</span>
+<span class="hljs-addition">+           },</span>
+<span class="hljs-addition">+            leave (node) {</span>
+<span class="hljs-addition">+              if (node._scope) scope = scope.parent</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+       })</span>
+    });
+}
+module.exports = analyse;
+</code></pre>
+<h2 id="t756. 支持块级作用域">6. 支持块级作用域 <a href="#t756. 支持块级作用域"> # </a></h2>
+<h3 id="t766.1 src\index.js">6.1 src\index.js <a href="#t766.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">if</span>(<span class="hljs-literal">true</span>){
+    <span class="hljs-keyword">var</span> age = <span class="hljs-number">12</span>;
+}
+<span class="hljs-built_in">console</span>.log(age);
+</code></pre>
+<h3 id="t776.2 scope.js">6.2 scope.js <a href="#t776.2 scope.js"> # </a></h3>
+<p>lib\ast\scope.js</p>
+<pre><code class="lang-diff">class Scope {
+    constructor(options = {}) {
+        this.parent = options.parent;
+        this.names = options.params || [];//存放着这个作用域内的所有变量
+<span class="hljs-addition">+       this.isBlockScope = !!options.block// 是否块作用域</span>
+    }
+<span class="hljs-addition">+    add(name,isBlockDeclaration) {</span>
+<span class="hljs-addition">+        if (!isBlockDeclaration &amp;&amp; this.isBlockScope) {</span>
+<span class="hljs-addition">+            //这是一个var或者函数声明，并且这是一个块级作用域，所以我们需要向上提升</span>
+<span class="hljs-addition">+            this.parent.add(name, isBlockDeclaration)</span>
+<span class="hljs-addition">+        } else {</span>
+<span class="hljs-addition">+            this.names.push(name)</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+    findDefiningScope(name) {
+        if (this.names.includes(name)) {
+            return this
+        }
+        if (this.parent) {
+            return this.parent.findDefiningScope(name)
+        }
+        return null;
+    }
+}
+module.exports = Scope;
+</code></pre>
+<h3 id="t786.3 analyse.js">6.3 analyse.js <a href="#t786.3 analyse.js"> # </a></h3>
+<p>lib\ast\analyse.js</p>
+<pre><code class="lang-diff">const Scope = require('./scope');
+let walk = require('./walk');
+function analyse(ast, magicString) {
+    let scope = new Scope();//创建作用域
+    ast.body.forEach(statement =&gt; {
+<span class="hljs-addition">+       function addToScope(declarator,isBlockDeclaration=false) {</span>
+            var name = declarator.id.name;//声明的变量名
+<span class="hljs-addition">+           scope.add(name,isBlockDeclaration);//添加当前作用作用域中</span>
+            if (!scope.parent) {//如果没有低级作用作用域说明是模块内的顶级作用域
+                statement._defines[name] = true;
+            }
+        }
+        Object.defineProperties(statement, {
+            _defines: { value: {} },//定义的变量
+            _modifies:{ value: {} },//修改
+            _dependsOn: { value: {} },//当前模块没有定义的变量，也就是外部依赖的变量
+            _included: { value: false, writable: true },//是否已经包含在输出语句中
+            _source: { value: magicString.snip(statement.start, statement.end) },
+        })
+        //收集每个statement上的定义的变量，创建作用域链
+        walk(statement, {
+            enter(node) {
+                let newScope;
+                switch (node.type) {
+                    case 'FunctionExpression':
+                        const names = node.params.map(getName);
+                        if (node.type <span class="hljs-comment">=== 'FunctionDeclaration') {</span>
+                            addToScope(node)
+                        }
+                        newScope = new Scope({
+                            parent: scope,
+                            params: names,
+<span class="hljs-addition">+                           block: false</span>
+                        })
+                        break;
+<span class="hljs-addition">+                   case 'BlockStatement':</span>
+<span class="hljs-addition">+                       newScope = new Scope({</span>
+<span class="hljs-addition">+                           parent: scope,</span>
+<span class="hljs-addition">+                           block: true</span>
+<span class="hljs-addition">+                       })</span>
+<span class="hljs-addition">+                       break;</span>
+                    case 'VariableDeclaration':
+<span class="hljs-addition">+                        node.declarations.forEach((variableDeclarator)=&gt;{</span>
+<span class="hljs-addition">+                            if(node.kind === 'let'||node.kind === 'const'){</span>
+<span class="hljs-addition">+                                addToScope(variableDeclarator,true);</span>
+<span class="hljs-addition">+                            }else{</span>
+<span class="hljs-addition">+                                addToScope(variableDeclarator)</span>
+<span class="hljs-addition">+                            }</span>
+<span class="hljs-addition">+                        });</span>
+                        break;
+                }
+                if (newScope) {
+                    Object.defineProperty(node, '_scope', { value: newScope })
+                    scope = newScope;
+                }
+            },
+            leave(node) {
+                if (node._scope) {
+                    scope = scope.parent;
+                }
+            }
+        });
+    });
+    ast.body.forEach(statement =&gt; {
+        function checkForReads (node) {
+            if (node.type <span class="hljs-comment">=== 'Identifier') {</span>
+                const definingScope = scope.findDefiningScope(node.name);
+                //上级使用域内找不到，并且当前语句是没有定义这个变量
+                if (!definingScope) {
+                    statement._dependsOn[node.name] = true;//添加外部依赖
+                }
+            }
+        }
+        function checkForWrites(node) {
+            function addNode (node){
+                while (node.type <span class="hljs-comment">=== 'MemberExpression') {</span>
+                    node = node.object;
+                }
+                if (node.type !== 'Identifier') {
+                    return
+                }
+                statement._modifies[node.name] = true;
+            }
+            if (node.type <span class="hljs-comment">=== 'AssignmentExpression') {// name='jiagou'</span>
+                addNode(node.left, true)
+            }else if (node.type <span class="hljs-comment">=== 'UpdateExpression') {//name+='jiagou'</span>
+                addNode(node.argument, true)
+            }
+        }
+        walk(statement, {
+            enter(node) {
+                if (node._scope) scope = node._scope;
+                checkForReads(node);
+                checkForWrites(node);
+            },
+            leave (node) {
+                if (node._scope) scope = scope.parent
+            }
+        })
+    });
+}
+module.exports = analyse;
+</code></pre>
+<h3 id="t796.4 module.js">6.4 module.js <a href="#t796.4 module.js"> # </a></h3>
+<p>lib\module.js</p>
+<pre><code class="lang-diff">const MagicString = require('magic-string');
+const { parse } = require('acorn');
+let analyse = require('./ast/analyse');
+<span class="hljs-addition">+const SYSTEM_VARIABLE = ['console','log'];</span>
+function hasOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+class Module {
+    constructor({ code, path, bundle }) {
+        this.code = new MagicString(code, { filename: path });
+        this.path = path;
+        this.bundle = bundle;
+        this.ast = parse(code, {
+            ecmaVersion: 7,
+            sourceType: 'module'
+        })
+        this.analyse();
+    }
+    analyse() {
+        this.imports = {};//导入
+        this.exports = {};//导出
+        this.modifications = {};
+        this.ast.body.forEach(node =&gt; {
+            if (node.type <span class="hljs-comment">=== 'ImportDeclaration') {</span>
+                let source = node.source.value;//./title
+                node.specifiers.forEach(specifier =&gt; {
+                    const localName = specifier.local.name;//name
+                    const name = specifier.imported.name;//name
+                    //this.imports['name']= {source:'./title',name:'name',localName:'name'};
+                    //从哪个模块导入了哪个变量，本地变量叫什么
+                    this.imports[localName] = { source, name, localName };
+                })
+            } else if (/^Export/.test(node.type)) {
+                if (node.type <span class="hljs-comment">=== 'ExportNamedDeclaration') {</span>
+                    const declaration = node.declaration;
+                    if (declaration.type <span class="hljs-comment">=== 'VariableDeclaration') {</span>
+                        let name = declaration.declarations[0].id.name;//name
+                        //this.exports['name']={node:ExportNamedDeclaration,localName:'name',expression:VariableDeclaration}
+                        //导出了哪个变量，通过哪个变量声明声明的，叫什么名字,导出节点是什么
+                        this.exports[name] = { node, localName: name, expression: declaration };
+                    }
+                }
+            }
+        })
+        analyse(this.ast, this.code, this);
+        this.definitions = {};//存着所有的变量定义语句
+        this.ast.body.forEach(statement =&gt; {//收集所有语句上定义的变量,建立变量和声明语句之间的对应关系
+            Object.keys(statement._defines).forEach(name =&gt; {
+                this.definitions[name] = statement;
+            })
+            Object.keys(statement._modifies).forEach(name =&gt; {
+                if (!hasOwnProperty(this.modifications, name)) {
+                    this.modifications[name] = []
+                }
+                this.modifications[name].push(statement)
+            })
+        })
+    }
+    expandAllStatements() {
+        let allStatements = [];
+        this.ast.body.forEach(statement =&gt; {
+            if (statement.type <span class="hljs-comment">=== 'ImportDeclaration') return;</span>
+            let statements = this.expandStatement(statement);
+            allStatements.push(...statements);
+        });
+        return allStatements;
+    }
+    expandStatement(statement) {
+        statement._included = true;
+        let result = [];
+        const dependencies = Object.keys(statement._dependsOn);
+        dependencies.forEach(name =&gt; {
+            let definition = this.define(name);
+            result.push(...definition);
+        });
+        result.push(statement);
+        const defines = Object.keys(statement._defines);
+        defines.forEach(name =&gt; {
+            const modifications = hasOwnProperty(this.modifications, name) &amp;&amp; this.modifications[name];
+            if (modifications) {
+                modifications.forEach(statement =&gt; {
+                    if (!statement._included) {
+                        let statements = this.expandStatement(statement);
+                        result.push(...statements);
+                    }
+                });
+            }
+        });
+        return result;
+    }
+    define(name) {
+        if (hasOwnProperty(this.imports, name)) {
+            const importDeclaration = this.imports[name];//获取 导入语句
+            let module = this.bundle.fetchModule(importDeclaration.source, this.path);//获取导入模块
+            const exportDeclaration = module.exports[importDeclaration.name];//获取那个模块的导出语句
+            if (!exportDeclaration) {
+                throw new Error(`Module ${module.path} does not export ${importDeclaration.name} (imported by ${this.path})`)
+            };
+            return module.define(exportDeclaration.localName);
+        } else {
+            let statement;
+            statement = this.definitions[name];
+            if (statement &amp;&amp; !statement._included) {
+                return this.expandStatement(statement);
+<span class="hljs-addition">+           } else if(SYSTEM_VARIABLE.includes(name)) {</span>
+                return [];
+<span class="hljs-addition">+           }else{</span>
+<span class="hljs-addition">+                throw new Error(`变量${name}没有既没有从外部导入，也没有在当前模块内声明！`)</span>
+<span class="hljs-addition">+           }</span>
+        }
+    }
+}
+module.exports = Module
+</code></pre>
+<h2 id="t807. 入口tree-shaking">7. 入口tree-shaking <a href="#t807. 入口tree-shaking"> # </a></h2>
+<h3 id="t817.1 src\index.js">7.1 src\index.js <a href="#t817.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> name = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">var</span> age = <span class="hljs-number">12</span>;
+<span class="hljs-built_in">console</span>.log(age);
+</code></pre>
+<h3 id="t827.2 analyse.js">7.2 analyse.js <a href="#t827.2 analyse.js"> # </a></h3>
+<p>lib\ast\analyse.js</p>
+<pre><code class="lang-diff">const Scope = require('./scope');
+let walk = require('./walk');
+function analyse(ast, magicString) {
+    let scope = new Scope();//创建作用域
+    ast.body.forEach(statement =&gt; {
+        function addToScope(declarator,isBlockDeclaration=false) {
+            var name = declarator.id.name;//声明的变量名
+            scope.add(name,isBlockDeclaration);//添加当前作用作用域中
+            if (!scope.parent) {//如果没有低级作用作用域说明是模块内的顶级作用域
+                statement._defines[name] = true;
+            }
+        }
+        Object.defineProperties(statement, {
+            _defines: { value: {} },//定义的变量
+            _modifies:{ value: {} },//修改
+            _dependsOn: { value: {} },//当前模块没有定义的变量，也就是外部依赖的变量
+            _included: { value: false, writable: true },//是否已经包含在输出语句中
+            _source: { value: magicString.snip(statement.start, statement.end) },
+        })
+        //收集每个statement上的定义的变量，创建作用域链
+        walk(statement, {
+            enter(node) {
+                let newScope;
+                switch (node.type) {
+                    case 'FunctionExpression':
+                        const names = node.params.map(getName);
+                        if (node.type <span class="hljs-comment">=== 'FunctionDeclaration') {</span>
+                            addToScope(node)
+                        }
+                        newScope = new Scope({
+                            parent: scope,
+                            params: names,
+                            block: false
+                        })
+                        break;
+                    case 'BlockStatement':
+                        newScope = new Scope({
+                            parent: scope,
+                            block: true
+                        })
+                        break;
+                    case 'VariableDeclaration':
+                        node.declarations.forEach((variableDeclarator)=&gt;{
+                            if(node.kind <span class="hljs-comment">=== 'let'||node.kind === 'const'){</span>
+                                addToScope(variableDeclarator,true);
+                            }else{
+                                addToScope(variableDeclarator)
+                            }
+                        });
+                        break;
+                }
+                if (newScope) {
+                    Object.defineProperty(node, '_scope', { value: newScope })
+                    scope = newScope;
+                }
+            },
+            leave(node) {
+                if (node._scope) {
+                    scope = scope.parent;
+                }
+            }
+        });
+    });
+    ast.body.forEach(statement =&gt; {
+        function checkForReads (node) {
+            if (node.type <span class="hljs-comment">=== 'Identifier') {</span>
+                const definingScope = scope.findDefiningScope(node.name);
+                //上级使用域内找不到，并且当前语句是没有定义这个变量
+<span class="hljs-addition">+               //if (!definingScope) {</span>
+                    statement._dependsOn[node.name] = true;//添加外部依赖
+<span class="hljs-addition">+               //}</span>
+            }
+        }
+        function checkForWrites(node) {
+            function addNode (node){
+                while (node.type <span class="hljs-comment">=== 'MemberExpression') {</span>
+                    node = node.object;
+                }
+                if (node.type !== 'Identifier') {
+                    return
+                }
+                statement._modifies[node.name] = true;
+            }
+            if (node.type <span class="hljs-comment">=== 'AssignmentExpression') {// name='jiagou'</span>
+                addNode(node.left, true)
+            }else if (node.type <span class="hljs-comment">=== 'UpdateExpression') {//name+='jiagou'</span>
+                addNode(node.argument, true)
+            }
+        }
+        walk(statement, {
+            enter(node) {
+                if (node._scope) scope = node._scope;
+                checkForReads(node);
+                checkForWrites(node);
+            },
+            leave (node) {
+                if (node._scope) scope = scope.parent
+            }
+        })
+    });
+}
+module.exports = analyse;
+</code></pre>
+<h3 id="t837.3 module.js">7.3 module.js <a href="#t837.3 module.js"> # </a></h3>
+<p>lib\module.js</p>
+<pre><code class="lang-diff">const MagicString = require('magic-string');
+const { parse } = require('acorn');
+let analyse = require('./ast/analyse');
+const SYSTEM_VARIABLE = ['console','log'];
+function hasOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+class Module {
+    constructor({ code, path, bundle }) {
+        this.code = new MagicString(code, { filename: path });
+        this.path = path;
+        this.bundle = bundle;
+        this.ast = parse(code, {
+            ecmaVersion: 7,
+            sourceType: 'module'
+        })
+        this.analyse();
+    }
+    analyse() {
+        this.imports = {};//导入
+        this.exports = {};//导出
+        this.modifications = {};
+        this.ast.body.forEach(node =&gt; {
+            if (node.type <span class="hljs-comment">=== 'ImportDeclaration') {</span>
+                let source = node.source.value;//./title
+                node.specifiers.forEach(specifier =&gt; {
+                    const localName = specifier.local.name;//name
+                    const name = specifier.imported.name;//name
+                    //this.imports['name']= {source:'./title',name:'name',localName:'name'};
+                    //从哪个模块导入了哪个变量，本地变量叫什么
+                    this.imports[localName] = { source, name, localName };
+                })
+            } else if (/^Export/.test(node.type)) {
+                if (node.type <span class="hljs-comment">=== 'ExportNamedDeclaration') {</span>
+                    const declaration = node.declaration;
+                    if (declaration.type <span class="hljs-comment">=== 'VariableDeclaration') {</span>
+                        let name = declaration.declarations[0].id.name;//name
+                        //this.exports['name']={node:ExportNamedDeclaration,localName:'name',expression:VariableDeclaration}
+                        //导出了哪个变量，通过哪个变量声明声明的，叫什么名字,导出节点是什么
+                        this.exports[name] = { node, localName: name, expression: declaration };
+                    }
+                }
+            }
+        })
+        analyse(this.ast, this.code, this);
+        this.definitions = {};//存着所有的变量定义语句
+        this.ast.body.forEach(statement =&gt; {//收集所有语句上定义的变量,建立变量和声明语句之间的对应关系
+            Object.keys(statement._defines).forEach(name =&gt; {
+                this.definitions[name] = statement;
+            })
+            Object.keys(statement._modifies).forEach(name =&gt; {
+                if (!hasOwnProperty(this.modifications, name)) {
+                    this.modifications[name] = []
+                }
+                this.modifications[name].push(statement)
+            })
+        })
+    }
+    expandAllStatements() {
+        let allStatements = [];
+        this.ast.body.forEach(statement =&gt; {
+            if (statement.type <span class="hljs-comment">=== 'ImportDeclaration') return;</span>
+<span class="hljs-addition">+           if (statement.type === 'VariableDeclaration') return;</span>
+            let statements = this.expandStatement(statement);
+            allStatements.push(...statements);
+        });
+        return allStatements;
+    }
+    expandStatement(statement) {
+        statement._included = true;
+        let result = [];
+        const dependencies = Object.keys(statement._dependsOn);
+        dependencies.forEach(name =&gt; {
+            let definition = this.define(name);
+            result.push(...definition);
+        });
+        result.push(statement);
+        const defines = Object.keys(statement._defines);
+        defines.forEach(name =&gt; {
+            const modifications = hasOwnProperty(this.modifications, name) &amp;&amp; this.modifications[name];
+            if (modifications) {
+                modifications.forEach(statement =&gt; {
+                    if (!statement._included) {
+                        let statements = this.expandStatement(statement);
+                        result.push(...statements);
+                    }
+                });
+            }
+        });
+        return result;
+    }
+    define(name) {
+        if (hasOwnProperty(this.imports, name)) {
+            const importDeclaration = this.imports[name];//获取 导入语句
+            let module = this.bundle.fetchModule(importDeclaration.source, this.path);//获取导入模块
+            const exportDeclaration = module.exports[importDeclaration.name];//获取那个模块的导出语句
+            if (!exportDeclaration) {
+                throw new Error(`Module ${module.path} does not export ${importDeclaration.name} (imported by ${this.path})`)
+            };
+            return module.define(exportDeclaration.localName);
+        } else {
+            let statement;
+<span class="hljs-addition">+           statement = this.definitions[name];</span>
+<span class="hljs-addition">+           if (statement) {</span>
+<span class="hljs-addition">+               if(statement._included){</span>
+<span class="hljs-addition">+                   return [];</span>
+<span class="hljs-addition">+               }else{</span>
+<span class="hljs-addition">+                   return this.expandStatement(statement);</span>
+<span class="hljs-addition">+               }</span>
+            } else if(SYSTEM_VARIABLE.includes(name)) {
+                return [];
+            }else{
+                throw new Error(`变量${name}没有既没有从外部导入，也没有在当前模块内声明！`)
+            }
+        }
+    }
+}
+module.exports = Module
+</code></pre>
+<h2 id="t848. 实现变量名重命名">8. 实现变量名重命名 <a href="#t848. 实现变量名重命名"> # </a></h2>
+<h3 id="t858.1 src\index.js">8.1 src\index.js <a href="#t858.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {age1} <span class="hljs-keyword">from</span> <span class="hljs-string">'./age1'</span>;
+<span class="hljs-keyword">import</span> {age2} <span class="hljs-keyword">from</span> <span class="hljs-string">'./age2'</span>;
+<span class="hljs-built_in">console</span>.log(age1,age2);
+</code></pre>
+<h3 id="t868.2 src\index.js">8.2 src\index.js <a href="#t868.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> name = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> name1 = name+<span class="hljs-string">'1'</span>;
+</code></pre>
+<h3 id="t878.3 src\index.js">8.3 src\index.js <a href="#t878.3 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> name = <span class="hljs-string">'zhufeng'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> name2 = name+<span class="hljs-string">'1'</span>;
+</code></pre>
+<h3 id="t888.4 bundle.js">8.4 bundle.js <a href="#t888.4 bundle.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> _age = <span class="hljs-string">'年龄'</span>;
+<span class="hljs-keyword">const</span> age2 = _age+<span class="hljs-string">'2'</span>;
+<span class="hljs-keyword">const</span> age = <span class="hljs-string">'年龄'</span>;
+<span class="hljs-keyword">const</span> age1 = age+<span class="hljs-string">'1'</span>;
+<span class="hljs-built_in">console</span>.log(age1,age2);
+</code></pre>
+<h3 id="t898.4 lib\utils.js">8.4 lib\utils.js <a href="#t898.4 lib\utils.js"> # </a></h3>
+<p>lib\utils.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> walk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./ast/walk'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">has</span>(<span class="hljs-params">obj, prop</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(obj, prop);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">keys</span>(<span class="hljs-params">obj</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.keys(obj);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">replaceIdentifiers</span>(<span class="hljs-params">statement, source, replacements</span>) </span>{
+    walk(statement, {
+        enter(node) {
+            <span class="hljs-keyword">if</span> (node.type === <span class="hljs-string">'Identifier'</span>) {
+                <span class="hljs-keyword">if</span>(node.name &amp;&amp; replacements[node.name]){
+                    source.overwrite(node.start, node.end, replacements[node.name]);
+                }
+            }
+        }
+    })
+}
+<span class="hljs-built_in">module</span>.exports = {has,keys,replaceIdentifiers};
+</code></pre>
+<h3 id="t908.5 analyse.js">8.5 analyse.js <a href="#t908.5 analyse.js"> # </a></h3>
+<p>lib\ast\analyse.js</p>
+<pre><code class="lang-diff">const Scope = require('./scope');
+let walk = require('./walk');
+<span class="hljs-addition">+function analyse(ast, magicString,module) {</span>
+    let scope = new Scope();//创建作用域
+    ast.body.forEach(statement =&gt; {
+        function addToScope(declarator,isBlockDeclaration=false) {
+            var name = declarator.id.name;//声明的变量名
+            scope.add(name,isBlockDeclaration);//添加当前作用作用域中
+            if (!scope.parent) {//如果没有低级作用作用域说明是模块内的顶级作用域
+                statement._defines[name] = true;
+            }
+        }
+        Object.defineProperties(statement, {
+<span class="hljs-addition">+           _module: { value: module },</span>
+            _defines: { value: {} },//定义的变量
+            _modifies:{ value: {} },//修改
+            _dependsOn: { value: {} },//当前模块没有定义的变量，也就是外部依赖的变量
+            _included: { value: false, writable: true },//是否已经包含在输出语句中
+            _source: { value: magicString.snip(statement.start, statement.end) },
+        })
+        //收集每个statement上的定义的变量，创建作用域链
+        walk(statement, {
+            enter(node) {
+                let newScope;
+                switch (node.type) {
+                    case 'FunctionExpression':
+                        const names = node.params.map(getName);
+                        if (node.type <span class="hljs-comment">=== 'FunctionDeclaration') {</span>
+                            addToScope(node)
+                        }
+                        newScope = new Scope({
+                            parent: scope,
+                            params: names,
+                            block: false
+                        })
+                        break;
+                    case 'BlockStatement':
+                        newScope = new Scope({
+                            parent: scope,
+                            block: true
+                        })
+                        break;
+                    case 'VariableDeclaration':
+                        node.declarations.forEach((variableDeclarator)=&gt;{
+                            if(node.kind <span class="hljs-comment">=== 'let'||node.kind === 'const'){</span>
+                                addToScope(variableDeclarator,true);
+                            }else{
+                                addToScope(variableDeclarator)
+                            }
+                        });
+                        break;
+                }
+                if (newScope) {
+                    Object.defineProperty(node, '_scope', { value: newScope })
+                    scope = newScope;
+                }
+            },
+            leave(node) {
+                if (node._scope) {
+                    scope = scope.parent;
+                }
+            }
+        });
+    });
+    ast.body.forEach(statement =&gt; {
+        function checkForReads (node) {
+            if (node.type <span class="hljs-comment">=== 'Identifier') {</span>
+                const definingScope = scope.findDefiningScope(node.name);
+                //上级使用域内找不到，并且当前语句是没有定义这个变量
+                //if (!definingScope) {
+                    statement._dependsOn[node.name] = true;//添加外部依赖
+                //}
+            }
+        }
+        function checkForWrites(node) {
+            function addNode (node){
+                while (node.type <span class="hljs-comment">=== 'MemberExpression') {</span>
+                    node = node.object;
+                }
+                if (node.type !== 'Identifier') {
+                    return
+                }
+                statement._modifies[node.name] = true;
+            }
+            if (node.type <span class="hljs-comment">=== 'AssignmentExpression') {// name='jiagou'</span>
+                addNode(node.left, true)
+            }else if (node.type <span class="hljs-comment">=== 'UpdateExpression') {//name+='jiagou'</span>
+                addNode(node.argument, true)
+            }
+        }
+        walk(statement, {
+            enter(node) {
+                if (node._scope) scope = node._scope;
+                checkForReads(node);
+                checkForWrites(node);
+            },
+            leave (node) {
+                if (node._scope) scope = scope.parent
+            }
+        })
+    });
+}
+module.exports = analyse;
+</code></pre>
+<h3 id="t918.6 module.js">8.6 module.js <a href="#t918.6 module.js"> # </a></h3>
+<p>lib\module.js</p>
+<pre><code class="lang-diff">const MagicString = require('magic-string');
+const { parse } = require('acorn');
+let analyse = require('./ast/analyse');
+const SYSTEM_VARIABLE = ['console','log'];
+<span class="hljs-addition">+let {has} = require('./utils');</span>
+class Module {
+    constructor({ code, path, bundle }) {
+        this.code = new MagicString(code, { filename: path });
+        this.path = path;
+        this.bundle = bundle;
+<span class="hljs-addition">+       this.canonicalNames = {};</span>
+        this.ast = parse(code, {
+            ecmaVersion: 7,
+            sourceType: 'module'
+        })
+        this.analyse();
+    }
+    analyse() {
+        this.imports = {};//导入
+        this.exports = {};//导出
+        this.modifications = {};
+        this.ast.body.forEach(node =&gt; {
+            if (node.type <span class="hljs-comment">=== 'ImportDeclaration') {</span>
+                let source = node.source.value;//./title
+                node.specifiers.forEach(specifier =&gt; {
+                    const localName = specifier.local.name;//name
+                    const name = specifier.imported.name;//name
+                    //this.imports['name']= {source:'./title',name:'name',localName:'name'};
+                    //从哪个模块导入了哪个变量，本地变量叫什么
+                    this.imports[localName] = { source, name, localName };
+                })
+            } else if (/^Export/.test(node.type)) {
+                if (node.type <span class="hljs-comment">=== 'ExportNamedDeclaration') {</span>
+                    const declaration = node.declaration;
+                    if (declaration.type <span class="hljs-comment">=== 'VariableDeclaration') {</span>
+                        let name = declaration.declarations[0].id.name;//name
+                        //this.exports['name']={node:ExportNamedDeclaration,localName:'name',expression:VariableDeclaration}
+                        //导出了哪个变量，通过哪个变量声明声明的，叫什么名字,导出节点是什么
+                        this.exports[name] = { node, localName: name, expression: declaration };
+                    }
+                }
+            }
+        })
+        analyse(this.ast, this.code, this);
+        this.definitions = {};//存着所有的变量定义语句
+        this.ast.body.forEach(statement =&gt; {//收集所有语句上定义的变量,建立变量和声明语句之间的对应关系
+            Object.keys(statement._defines).forEach(name =&gt; {
+                this.definitions[name] = statement;
+            })
+            Object.keys(statement._modifies).forEach(name =&gt; {
+                if (!has(this.modifications, name)) {
+                    this.modifications[name] = []
+                }
+                this.modifications[name].push(statement)
+            })
+        })
+    }
+    expandAllStatements() {
+        let allStatements = [];
+        this.ast.body.forEach(statement =&gt; {
+            if (statement.type <span class="hljs-comment">=== 'ImportDeclaration') return;</span>
+            if (statement.type <span class="hljs-comment">=== 'VariableDeclaration') return;</span>
+            let statements = this.expandStatement(statement);
+            allStatements.push(...statements);
+        });
+        return allStatements;
+    }
+    expandStatement(statement) {
+        statement._included = true;
+        let result = [];
+        const dependencies = Object.keys(statement._dependsOn);
+        dependencies.forEach(name =&gt; {
+            let definition = this.define(name);
+            result.push(...definition);
+        });
+        result.push(statement);
+        const defines = Object.keys(statement._defines);
+        defines.forEach(name =&gt; {
+            const modifications = has(this.modifications, name) &amp;&amp; this.modifications[name];
+            if (modifications) {
+                modifications.forEach(statement =&gt; {
+                    if (!statement._included) {
+                        let statements = this.expandStatement(statement);
+                        result.push(...statements);
+                    }
+                });
+            }
+        });
+        return result;
+    }
+    define(name) {
+        if (has(this.imports, name)) {
+            const importDeclaration = this.imports[name];//获取 导入语句
+            let module = this.bundle.fetchModule(importDeclaration.source, this.path);//获取导入模块
+            const exportDeclaration = module.exports[importDeclaration.name];//获取那个模块的导出语句
+            if (!exportDeclaration) {
+                throw new Error(`Module ${module.path} does not export ${importDeclaration.name} (imported by ${this.path})`)
+            };
+            return module.define(exportDeclaration.localName);
+        } else {
+            let statement;
+            statement = this.definitions[name];
+            if (statement) {
+                if(statement._included){
+                    return [];
+                }else{
+                    return this.expandStatement(statement);
+                }
+            } else if(SYSTEM_VARIABLE.includes(name)) {
+                return [];
+            }else{
+                throw new Error(`变量${name}没有既没有从外部导入，也没有在当前模块内声明！`)
+            }
+        }
+    }
+<span class="hljs-addition">+    rename(name, replacement) {</span>
+<span class="hljs-addition">+        this.canonicalNames[name] = replacement;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    //获取规范定义的格式输出</span>
+<span class="hljs-addition">+    getCanonicalName(localName) {</span>
+<span class="hljs-addition">+        if (!has(this.canonicalNames, localName)) {</span>
+<span class="hljs-addition">+            this.canonicalNames[localName] = localName;</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        return this.canonicalNames[localName];</span>
+<span class="hljs-addition">+    }</span>
+}
+module.exports = Module
+</code></pre>
+<h3 id="t928.7 lib\bundle.js">8.7 lib\bundle.js <a href="#t928.7 lib\bundle.js"> # </a></h3>
+<p>lib\bundle.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+let {has,keys,replaceIdentifiers} = require('./utils');</span>
+let fs = require('fs');
+let path = require('path');
+let Module = require('./module');
+let MagicString = require('magic-string');
+class Bundle {
+    constructor(options) {
+        //入口文件数据
+        this.entryPath = path.resolve(options.entry.replace(/\.js$/, '') + '.js');
+    }
+    build(filename) {
+        let entryModule = this.fetchModule(this.entryPath);
+        this.statements = entryModule.expandAllStatements(true);
+<span class="hljs-addition">+        this.deConflict();</span>
+        const { code } = this.generate({});
+        fs.writeFileSync(filename, code);
+    }
+<span class="hljs-addition">+   deConflict() {</span>
+<span class="hljs-addition">+       const defines = {};</span>
+<span class="hljs-addition">+       const conflicts = {};</span>
+<span class="hljs-addition">+       this.statements.forEach(statement =&gt; {</span>
+<span class="hljs-addition">+           keys(statement._defines).forEach(name =&gt; {</span>
+<span class="hljs-addition">+               if (has(defines, name)) {</span>
+<span class="hljs-addition">+                   conflicts[name] = true;</span>
+<span class="hljs-addition">+               } else {</span>
+<span class="hljs-addition">+                   defines[name] = [];</span>
+<span class="hljs-addition">+               }</span>
+<span class="hljs-addition">+               defines[name].push(statement._module);</span>
+<span class="hljs-addition">+           })</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+       Object.keys(conflicts).forEach(name =&gt; {</span>
+<span class="hljs-addition">+           const modules = defines[name];</span>
+<span class="hljs-addition">+           modules.pop();</span>
+<span class="hljs-addition">+           modules.forEach(module =&gt; {</span>
+<span class="hljs-addition">+               const replacement = getSafeName(name)</span>
+<span class="hljs-addition">+               module.rename(name, replacement)</span>
+<span class="hljs-addition">+           })</span>
+<span class="hljs-addition">+       })</span>
+<span class="hljs-addition">+       function getSafeName(name) {</span>
+<span class="hljs-addition">+           while (has(conflicts, name)) {</span>
+<span class="hljs-addition">+               name = `_${name}`;</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+           conflicts[name] = true;</span>
+<span class="hljs-addition">+           return name;</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+   }</span>
+    fetchModule(importee, importer) {
+        let route;
+        if (!importer) {
+            route = importee;
+        } else {
+            if (path.isAbsolute(importee)) {
+                route = importee;
+            } else if (importee[0] == '.') {
+                route = path.resolve(path.dirname(importer), importee.replace(/\.js$/, '') + '.js')
+            }
+        }
+        if (route) {
+            let code = fs.readFileSync(route, 'utf8');
+            const module = new Module({
+                code,
+                path: importee,
+                bundle: this
+            })
+            return module;
+        }
+    }
+    generate(options) {
+        let magicString = new MagicString.Bundle();
+        this.statements.forEach(statement =&gt; {
+<span class="hljs-addition">+           let replacements = {};</span>
+<span class="hljs-addition">+           Object.keys(statement._dependsOn)</span>
+<span class="hljs-addition">+               .concat(Object.keys(statement._defines))</span>
+<span class="hljs-addition">+               .forEach(name =&gt; {</span>
+<span class="hljs-addition">+                   const canonicalName = statement._module.getCanonicalName(name)</span>
+<span class="hljs-addition">+                   if (name !== canonicalName) {</span>
+<span class="hljs-addition">+                       replacements[name] = canonicalName;</span>
+<span class="hljs-addition">+                   }</span>
+<span class="hljs-addition">+               })</span>
+            const source = statement._source.clone();
+            if (/^Export/.test(statement.type)) {
+                if (statement.type <span class="hljs-comment">=== 'ExportNamedDeclaration'</span>
+                    &amp;&amp; statement.declaration.type <span class="hljs-comment">=== 'VariableDeclaration') {</span>
+                    source.remove(statement.start, statement.declaration.start);
+                }
+            }
+<span class="hljs-addition">+           replaceIdentifiers(statement, source, replacements);</span>
+            magicString.addSource({
+                content: source,
+                separator: '\n'
+            })
+
+        })
+        return { code: magicString.toString() }
+    }
+}
+module.exports = Bundle
+</code></pre>
+
+    

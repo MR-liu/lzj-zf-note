@@ -1,0 +1,422 @@
+
+        <h2 id="t01. 安装 dva-cli">1. 安装 dva-cli <a href="#t01. 安装 dva-cli"> # </a></h2>
+<ul>
+<li><a href="https://dvajs.com/guide/getting-started.html#connect-%E8%B5%B7%E6%9D%A5">dvajs</a></li>
+<li><a href="https://ant.design/docs/react/getting-started-cn">ant.design</a></li>
+</ul>
+<pre><code class="lang-js">$ mkdir  zhufeng-umi-dva4
+$ cd zhufeng-umi-dva4
+$ yarn create umi
+</code></pre>
+<h2 id="t12. 创建新应用">2. 创建新应用 <a href="#t12. 创建新应用"> # </a></h2>
+<pre><code class="lang-js">$ dva <span class="hljs-keyword">new</span> zhufeng-umi-dva
+$ cd zhufeng-umi-dva
+$ npm start
+</code></pre>
+<blockquote>
+<p>在浏览器里打开 <a href="http://localhost:8000">http://localhost:8000</a> ，你会看到 dva 的欢迎界面。</p>
+</blockquote>
+<h2 id="t23. 使用 antd">3. 使用 antd <a href="#t23. 使用 antd"> # </a></h2>
+<ul>
+<li>babel-plugin-import 是用来按需加载 antd 的脚本和样式的</li>
+<li>编辑 .webpackrc，使 babel-plugin-import 插件生效。</li>
+</ul>
+<pre><code class="lang-js">cnpm i antd -S
+cnpm i babel-plugin-<span class="hljs-keyword">import</span> -D
+</code></pre>
+<pre><code class="lang-js">{
+  <span class="hljs-string">"extraBabelPlugins"</span>: [
+    [<span class="hljs-string">"import"</span>, { <span class="hljs-string">"libraryName"</span>: <span class="hljs-string">"antd"</span>, <span class="hljs-string">"libraryDirectory"</span>: <span class="hljs-string">"es"</span>, <span class="hljs-string">"style"</span>: <span class="hljs-string">"css"</span> }]
+  ]
+}
+</code></pre>
+<h2 id="t34. 首页导航">4. 首页导航 <a href="#t34. 首页导航"> # </a></h2>
+<h3 id="t44.1 router.js">4.1 router.js <a href="#t44.1 router.js"> # </a></h3>
+<p>src/router.js</p>
+<ul>
+<li>去掉exact属性</li>
+</ul>
+<pre><code class="lang-js">+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{IndexPage}</span> /&gt;</span></span>
+</code></pre>
+<h3 id="t54.2 src/routes/IndexPage.less">4.2 src/routes/IndexPage.less <a href="#t54.2 src/routes/IndexPage.less"> # </a></h3>
+<p>src/routes/IndexPage.less</p>
+<pre><code class="lang-less">
+</code></pre>
+<h3 id="t64.3 routes\IndexPage.js">4.3 routes\IndexPage.js <a href="#t64.3 routes\IndexPage.js"> # </a></h3>
+<p>src\routes\IndexPage.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./IndexPage.less'</span>;
+<span class="hljs-keyword">import</span> {Layout} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> NavBar <span class="hljs-keyword">from</span> <span class="hljs-string">'../components/NavBar'</span>;
+<span class="hljs-keyword">const</span> {Content} = Layout;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">IndexPage</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">NavBar</span> {<span class="hljs-attr">...props</span>}/&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Content</span>&gt;</span>内容<span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+  );
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect()(IndexPage);
+</code></pre>
+<h3 id="t74.4 components\NavBar\index.js">4.4 components\NavBar\index.js <a href="#t74.4 components\NavBar\index.js"> # </a></h3>
+<p>src\components\NavBar\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Menu} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./index.less'</span>;
+<span class="hljs-keyword">import</span> {Link} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Layout} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">let</span> logo = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../../assets/logo.png'</span>);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NavBar</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout.Header</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.header}</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{logo}/</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Menu</span>  <span class="hljs-attr">className</span>=<span class="hljs-string">{styles.menu}</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">"horizontal"</span> <span class="hljs-attr">selectedKeys</span>=<span class="hljs-string">{[this.props.location.pathname]}</span> &gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/home"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/home"</span>&gt;</span>主页<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/user"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/user"</span>&gt;</span>用户管理<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/profile"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/profile"</span>&gt;</span>个人中心<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/login"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/login"</span>&gt;</span>登录<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">Menu.Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">"/register"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/register"</span>&gt;</span>注册<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Menu.Item</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">Menu</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Layout.Header</span>&gt;</span></span> 
+    )
+  }
+}
+
+</code></pre>
+<h3 id="t84.5 components\NavBar\index.less">4.5 components\NavBar\index.less <a href="#t84.5 components\NavBar\index.less"> # </a></h3>
+<p>src\components\NavBar\index.less</p>
+<pre><code class="lang-less"><span class="hljs-selector-class">.header</span>{
+    <span class="hljs-attribute">height</span>:<span class="hljs-number">48px</span>;
+    <span class="hljs-attribute">line-height</span>: <span class="hljs-number">48px</span>;
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-number">#FFF</span>;
+    <span class="hljs-selector-tag">img</span>{
+        <span class="hljs-attribute">height</span>:<span class="hljs-number">48px</span>;
+    }
+    <span class="hljs-selector-class">.menu</span>{
+        <span class="hljs-attribute">display</span>:inline-block;
+        <span class="hljs-attribute">height</span>:<span class="hljs-number">48px</span>;
+    }
+
+}
+</code></pre>
+<h2 id="t95. 实现路由">5. 实现路由 <a href="#t95. 实现路由"> # </a></h2>
+<h3 id="t105.1 routes/IndexPage.js">5.1 routes/IndexPage.js <a href="#t105.1 routes/IndexPage.js"> # </a></h3>
+<p>src/routes/IndexPage.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./IndexPage.less'</span>;
+<span class="hljs-keyword">import</span> {Layout} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> NavBar <span class="hljs-keyword">from</span> <span class="hljs-string">'../components/NavBar'</span>;
+<span class="hljs-keyword">import</span> {Route,Switch,Redirect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> Home <span class="hljs-keyword">from</span> <span class="hljs-string">'./Home'</span>;
+<span class="hljs-keyword">import</span> User <span class="hljs-keyword">from</span> <span class="hljs-string">'./User'</span>;
+<span class="hljs-keyword">import</span> Profile <span class="hljs-keyword">from</span> <span class="hljs-string">'./Profile'</span>;
+<span class="hljs-keyword">import</span> Register <span class="hljs-keyword">from</span> <span class="hljs-string">'./Register'</span>;
+<span class="hljs-keyword">import</span> Login <span class="hljs-keyword">from</span> <span class="hljs-string">'./Login'</span>;
+<span class="hljs-keyword">const</span> {Content} = Layout;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">IndexPage</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">NavBar</span> {<span class="hljs-attr">...props</span>}/&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Content</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/home"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Home}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/user"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{User}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/profile"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Profile}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/register"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Register}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">"/login"</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{Login}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Redirect</span>  <span class="hljs-attr">to</span>=<span class="hljs-string">"/home"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+  );
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect()(IndexPage);
+</code></pre>
+<h2 id="t116. 配置式路由">6. 配置式路由 <a href="#t116. 配置式路由"> # </a></h2>
+<h3 id="t126.1 src/router.js">6.1 src/router.js <a href="#t126.1 src/router.js"> # </a></h3>
+<p>src/router.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { Router, Switch } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> {renderRoutes} <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils/routes'</span>;
+<span class="hljs-keyword">import</span> routesConfig <span class="hljs-keyword">from</span> <span class="hljs-string">'./routeConfig'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">RouterConfig</span>(<span class="hljs-params">{ history }</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span> <span class="hljs-attr">history</span>=<span class="hljs-string">{history}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+        {renderRoutes(routesConfig)}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> RouterConfig;
+</code></pre>
+<h3 id="t136.2 routes/IndexPage.js">6.2 routes/IndexPage.js <a href="#t136.2 routes/IndexPage.js"> # </a></h3>
+<p>src/routes/IndexPage.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> {Layout} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> NavBar <span class="hljs-keyword">from</span> <span class="hljs-string">'../components/NavBar'</span>;
+<span class="hljs-keyword">import</span> {Switch} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> NoMatch <span class="hljs-keyword">from</span> <span class="hljs-string">'../components/NoMatch'</span>;
+<span class="hljs-keyword">import</span> {renderRoutes,renderRedirect} <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils/routes'</span>;
+<span class="hljs-keyword">const</span> {Content} = Layout;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">IndexPage</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">NavBar</span> {<span class="hljs-attr">...props</span>}/&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Content</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+          {renderRoutes(props.routes)}
+          {renderRedirect('/',true,props.routes)}
+          <span class="hljs-tag">&lt;<span class="hljs-name">NoMatch</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect()(IndexPage);
+</code></pre>
+<h3 id="t146.3 utils/routes.js">6.3 utils/routes.js <a href="#t146.3 utils/routes.js"> # </a></h3>
+<p>src/utils/routes.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Route,Redirect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderRoutes</span>(<span class="hljs-params">routesConfig</span>)</span>{
+    <span class="hljs-keyword">return</span> routesConfig.map(<span class="hljs-function">(<span class="hljs-params">{path,exact=<span class="hljs-literal">false</span>,component:Component,routes=[]},index</span>)=&gt;</span>(
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">{path}</span> <span class="hljs-attr">exact</span>=<span class="hljs-string">{exact}</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">render</span>=<span class="hljs-string">{props</span>=&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> {<span class="hljs-attr">...props</span>} <span class="hljs-attr">routes</span>=<span class="hljs-string">{routes}/</span>&gt;</span>}/&gt;</span>
+    ))
+}
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderRedirect</span>(<span class="hljs-params">from,exact,routesConfig</span>)</span>{
+    <span class="hljs-keyword">let</span> {path} = routesConfig.find(<span class="hljs-function"><span class="hljs-params">route</span>=&gt;</span>route.redirect)||routesConfig[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Redirect</span> <span class="hljs-attr">exact</span>=<span class="hljs-string">{exact}</span> <span class="hljs-attr">from</span>=<span class="hljs-string">{from}</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{path}/</span>&gt;</span></span>
+}
+</code></pre>
+<h3 id="t156.4  routeConfig.js">6.4  routeConfig.js <a href="#t156.4  routeConfig.js"> # </a></h3>
+<p>src/routeConfig.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> IndexPage <span class="hljs-keyword">from</span> <span class="hljs-string">'./routes/IndexPage'</span>;
+<span class="hljs-keyword">import</span> Home <span class="hljs-keyword">from</span> <span class="hljs-string">'./routes/Home'</span>;
+<span class="hljs-keyword">import</span> User <span class="hljs-keyword">from</span> <span class="hljs-string">'./routes/User'</span>;
+<span class="hljs-keyword">import</span> Profile <span class="hljs-keyword">from</span> <span class="hljs-string">'./routes/Profile'</span>;
+<span class="hljs-keyword">import</span> Register <span class="hljs-keyword">from</span> <span class="hljs-string">'./routes/Register'</span>;
+<span class="hljs-keyword">import</span> Login <span class="hljs-keyword">from</span> <span class="hljs-string">'./routes/Login'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span>  [
+  {
+    <span class="hljs-attr">path</span>:<span class="hljs-string">'/'</span>,
+    <span class="hljs-attr">component</span>:IndexPage,
+    <span class="hljs-attr">routes</span>:[
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/home'</span>,
+        <span class="hljs-attr">component</span>:Home
+      },
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/user'</span>,
+        <span class="hljs-attr">component</span>:User
+      },
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/profile'</span>,
+        <span class="hljs-attr">component</span>:Profile
+      },
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/login'</span>,
+        <span class="hljs-attr">component</span>:Login
+      }, {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/register'</span>,
+        <span class="hljs-attr">component</span>:Register
+      }
+    ]
+  }
+]
+</code></pre>
+<h3 id="t166.5 components\NoMatch\index.js">6.5 components\NoMatch\index.js <a href="#t166.5 components\NoMatch\index.js"> # </a></h3>
+<p>src\components\NoMatch\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> () =&gt; {
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      此页面不存在
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  )
+}
+
+</code></pre>
+<h2 id="t177. 按需加载">7. 按需加载 <a href="#t177. 按需加载"> # </a></h2>
+<h3 id="t187.1 src/routeConfig.js">7.1 src/routeConfig.js <a href="#t187.1 src/routeConfig.js"> # </a></h3>
+<p>src/routeConfig.js</p>
+<pre><code class="lang-js"><span class="hljs-comment">/* import IndexPage from './routes/IndexPage';
+import Home from './routes/Home';
+import User from './routes/User';
+import Profile from './routes/Profile';
+import Register from './routes/Register';
+import Login from './routes/Login'; */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span>  [
+  {
+    <span class="hljs-attr">path</span>:<span class="hljs-string">'/'</span>,
+    <span class="hljs-attr">component</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-string">'./routes/IndexPage'</span>),
+    <span class="hljs-attr">routes</span>:[
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/home'</span>,
+        <span class="hljs-attr">models</span>:[<span class="hljs-keyword">import</span>(<span class="hljs-string">'./models/home'</span>)],
+        <span class="hljs-attr">component</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-string">'./routes/Home'</span>)
+      },
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/user'</span>,
+        <span class="hljs-attr">component</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-string">'./routes/User'</span>)
+      },
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/profile'</span>,
+        <span class="hljs-attr">component</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-string">'./routes/Profile'</span>)
+      },
+      {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/login'</span>,
+        <span class="hljs-attr">component</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-string">'./routes/Login'</span>)
+      }, {
+        <span class="hljs-attr">path</span>:<span class="hljs-string">'/register'</span>,
+        <span class="hljs-attr">component</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span><span class="hljs-keyword">import</span>(<span class="hljs-string">'./routes/Register'</span>)
+      }
+    ]
+  }
+]
+</code></pre>
+<h3 id="t197.2 src/router.js">7.2 src/router.js <a href="#t197.2 src/router.js"> # </a></h3>
+<p>src/router.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { Router, Switch } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> {renderRoutes} <span class="hljs-keyword">from</span> <span class="hljs-string">'./utils/routes'</span>;
+<span class="hljs-keyword">import</span> routesConfig <span class="hljs-keyword">from</span> <span class="hljs-string">'./routeConfig'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">RouterConfig</span>(<span class="hljs-params">{ history,app }</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span> <span class="hljs-attr">history</span>=<span class="hljs-string">{history}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+        {renderRoutes(routesConfig,app)}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> RouterConfig;
+</code></pre>
+<h3 id="t207.3 routes/Home/index.js">7.3 routes/Home/index.js <a href="#t207.3 routes/Home/index.js"> # </a></h3>
+<p>src/routes/Home/index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'./index.less'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">componentName</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        {this.props.title}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(<span class="hljs-function"><span class="hljs-params">state</span>=&gt;</span>state.home)(componentName);
+
+</code></pre>
+<h3 id="t217.4 routes/IndexPage.js">7.4 routes/IndexPage.js <a href="#t217.4 routes/IndexPage.js"> # </a></h3>
+<p>src/routes/IndexPage.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'dva'</span>;
+<span class="hljs-keyword">import</span> {Layout} <span class="hljs-keyword">from</span> <span class="hljs-string">'antd'</span>;
+<span class="hljs-keyword">import</span> NavBar <span class="hljs-keyword">from</span> <span class="hljs-string">'../components/NavBar'</span>;
+<span class="hljs-keyword">import</span> {Switch} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> NoMatch <span class="hljs-keyword">from</span> <span class="hljs-string">'../components/NoMatch'</span>;
+<span class="hljs-keyword">import</span> {renderRoutes,renderRedirect} <span class="hljs-keyword">from</span> <span class="hljs-string">'../utils/routes'</span>;
+<span class="hljs-keyword">const</span> {Content} = Layout;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">IndexPage</span>(<span class="hljs-params">props</span>) </span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Layout</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">NavBar</span> {<span class="hljs-attr">...props</span>}/&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Content</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+          {renderRoutes(props.routes,props.app)}
+          {renderRedirect('/',true,props.routes)}
+          <span class="hljs-tag">&lt;<span class="hljs-name">NoMatch</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Content</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Layout</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect()(IndexPage);
+</code></pre>
+<h3 id="t227.5 src/utils/routes.js">7.5 src/utils/routes.js <a href="#t227.5 src/utils/routes.js"> # </a></h3>
+<p>src/utils/routes.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {Route,Redirect} <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/router'</span>;
+<span class="hljs-keyword">import</span> dynamic <span class="hljs-keyword">from</span> <span class="hljs-string">'dva/dynamic'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderRoutes</span>(<span class="hljs-params">routesConfig,app</span>)</span>{
+    <span class="hljs-keyword">return</span> routesConfig.map(<span class="hljs-function">(<span class="hljs-params">{path,exact=<span class="hljs-literal">false</span>,component,routes=[],models=[]},index</span>)=&gt;</span>(
+        <span class="hljs-comment">//&lt;Route path={path} exact={exact} key={index} render={props=&gt;&lt;Component {...props} routes={routes}/&gt;}/&gt;</span>
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Route</span>
+         <span class="hljs-attr">path</span>=<span class="hljs-string">{path}</span> <span class="hljs-attr">exact</span>=<span class="hljs-string">{exact}</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>
+         <span class="hljs-attr">component</span>=<span class="hljs-string">{dynamic({</span>
+           <span class="hljs-attr">app</span>,
+           <span class="hljs-attr">models:</span>()=&gt;</span>models,
+           component:()=&gt;{
+              return component().then(result=&gt;{
+                   let Component = result.default || result;
+                   return props=&gt;<span class="hljs-tag">&lt;<span class="hljs-name">Component</span> {<span class="hljs-attr">...props</span>} <span class="hljs-attr">routes</span>=<span class="hljs-string">{routes}</span> <span class="hljs-attr">app</span>=<span class="hljs-string">{app}/</span>&gt;</span>;
+             })
+           }
+         })}
+        /&gt;</span>
+    ))
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderRedirect</span>(<span class="hljs-params">from,exact,routesConfig</span>)</span>{
+    <span class="hljs-keyword">let</span> {path} = routesConfig.find(<span class="hljs-function"><span class="hljs-params">route</span>=&gt;</span>route.redirect)||routesConfig[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Redirect</span> <span class="hljs-attr">exact</span>=<span class="hljs-string">{exact}</span> <span class="hljs-attr">from</span>=<span class="hljs-string">{from}</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{path}/</span>&gt;</span></span>
+}
+</code></pre>
+<h3 id="t237.6 models/home.js">7.6 models/home.js <a href="#t237.6 models/home.js"> # </a></h3>
+<p>src/models/home.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+
+  <span class="hljs-attr">namespace</span>: <span class="hljs-string">'home'</span>,
+
+  <span class="hljs-attr">state</span>: {
+    <span class="hljs-attr">title</span>:<span class="hljs-string">'我是首页'</span>
+  },
+
+  <span class="hljs-attr">subscriptions</span>: {
+    setup({ dispatch, history }) {  <span class="hljs-comment">// eslint-disable-line</span>
+    },
+  },
+
+  <span class="hljs-attr">effects</span>: {
+    *fetch({ payload }, { call, put }) {  <span class="hljs-comment">// eslint-disable-line</span>
+      <span class="hljs-keyword">yield</span> put({ <span class="hljs-attr">type</span>: <span class="hljs-string">'save'</span> });
+    },
+  },
+
+  <span class="hljs-attr">reducers</span>: {
+    save(state, action) {
+      <span class="hljs-keyword">return</span> { ...state, ...action.payload };
+    },
+  },
+
+};
+
+</code></pre>
+<h2 id="t248. 路由守卫">8. 路由守卫 <a href="#t248. 路由守卫"> # </a></h2>
+<h3 id="t258.1 src/utils/routes.js">8.1 src/utils/routes.js <a href="#t258.1 src/utils/routes.js"> # </a></h3>
+<pre><code class="lang-diff">component:()=&gt;{
+<span class="hljs-addition">+  if(authority &amp;&amp; !localStorage.getItem('token')){</span>
+<span class="hljs-addition">+                return ()=&gt;&lt;Redirect to="/login"/&gt;;</span>
+<span class="hljs-addition">+  }</span>
+</code></pre>
+<h3 id="t268.2 routeConfig.js">8.2 routeConfig.js <a href="#t268.2 routeConfig.js"> # </a></h3>
+<p>src/routeConfig.js</p>
+<pre><code class="lang-diff">{
+        path:'/profile',
+        component:()=&gt;import('./routes/Profile'),
+<span class="hljs-addition">+        authority:true</span>
+},
+</code></pre>
+
+    

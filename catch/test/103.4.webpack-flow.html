@@ -1,0 +1,968 @@
+
+        <h2 id="t01.调试 webpack">1.调试 webpack <a href="#t01.调试 webpack"> # </a></h2>
+<h3 id="t11.1 通过chrome调试">1.1 通过chrome调试 <a href="#t11.1 通过chrome调试"> # </a></h3>
+<pre><code class="lang-js">node --inspect-brk ./node_modules/webpack-cli/bin/cli.js
+</code></pre>
+<h3 id="t21.2 通过执行命令调试">1.2 通过执行命令调试 <a href="#t21.2 通过执行命令调试"> # </a></h3>
+<ul>
+<li>打开工程目录，点击调试按钮，再点击小齿轮的配置按钮系统就会生成 <code>launch.json</code> 配置文件</li>
+<li>修改好了以后直接点击 F5 就可以启动调试</li>
+</ul>
+<p>.vscode\launch.json</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"0.2.0"</span>,
+  <span class="hljs-attr">"configurations"</span>: [
+    {
+      <span class="hljs-attr">"type"</span>: <span class="hljs-string">"node"</span>,
+      <span class="hljs-attr">"request"</span>: <span class="hljs-string">"launch"</span>,
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"debug webpack"</span>,
+      <span class="hljs-attr">"cwd"</span>: <span class="hljs-string">"${workspaceFolder}"</span>,
+      <span class="hljs-attr">"program"</span>: <span class="hljs-string">"${workspaceFolder}/node_modules/webpack-cli/bin/cli.js"</span>
+    }
+  ]
+}
+</code></pre>
+<h3 id="t31.3 debugger.js">1.3 debugger.js <a href="#t31.3 debugger.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.config"</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+<span class="hljs-comment">//4.执行对象的run方法开始执行编译</span>
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-built_in">console</span>.log(stats.toJson(
+        {
+            <span class="hljs-attr">assets</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">chunks</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">modules</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">entries</span>: <span class="hljs-literal">true</span>,
+        }
+    ));
+});
+</code></pre>
+<h3 id="t41.4 调试webpack-cli源码">1.4 调试webpack-cli源码 <a href="#t41.4 调试webpack-cli源码"> # </a></h3>
+<pre><code class="lang-js">git clone https:<span class="hljs-comment">//github.com/webpack/webpack.git</span>
+git reset --hard vx.x.x
+yarn 
+yarn link
+
+git clone https:<span class="hljs-comment">//github.com/webpack/webpack-cli.git</span>
+git reset --hard webpack-cli@x.x.x
+cd packages\webpack-cli
+yarn link webpack
+yarn link
+</code></pre>
+<pre><code class="lang-js">yarn link webpack
+yarn link webpack-cli
+
+yarn unlink webpack
+yarn unlink webpack-cli
+</code></pre>
+<h2 id="t52. tapable.js">2. tapable.js <a href="#t52. tapable.js"> # </a></h2>
+<ul>
+<li>tapable 是一个类似于 Node.js 中的 EventEmitter的库，但更专注于自定义事件的触发和处理</li>
+<li>webpack 通过 tapable 将实现与流程解耦，所有具体实现通过插件的形式存在</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SyncHook</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">this</span>.taps = []
+    }
+    tap(name, fn) {
+        <span class="hljs-keyword">this</span>.taps.push(fn);
+    }
+    call() {
+        <span class="hljs-keyword">this</span>.taps.forEach(<span class="hljs-function"><span class="hljs-params">tap</span> =&gt;</span> tap());
+    }
+}
+
+<span class="hljs-keyword">let</span> hook = <span class="hljs-keyword">new</span> SyncHook();
+hook.tap(<span class="hljs-string">'some name'</span>,()=&gt;{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"some name"</span>);
+});
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Plugin</span> </span>{
+    apply() {
+        hook.tap(<span class="hljs-string">'Plugin'</span>, () =&gt; {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Plugin '</span>);
+        });
+    }
+}
+<span class="hljs-keyword">new</span> Plugin().apply();
+hook.call();
+</code></pre>
+<h2 id="t63. webpack 编译流程">3. webpack 编译流程 <a href="#t63. webpack 编译流程"> # </a></h2>
+<ol>
+<li>初始化参数：从配置文件和Shell语句中读取并合并参数,得出最终的配置对象</li>
+<li>用上一步得到的参数初始化Compiler对象</li>
+<li>加载所有配置的插件</li>
+<li>执行对象的run方法开始执行编译</li>
+<li>根据配置中的<code>entry</code>找出入口文件</li>
+<li>从入口文件出发,调用所有配置的<code>Loader</code>对模块进行编译</li>
+<li>再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理</li>
+<li>根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk</li>
+<li>再把每个Chunk转换成一个单独的文件加入到输出列表</li>
+<li>在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统</li>
+</ol>
+<blockquote>
+<p>在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果</p>
+</blockquote>
+<p><img src="http://img.zhufengpeixun.cn/webpackflow2020.jpg" alt="2020webpackflow"></p>
+<h3 id="t73.1 debugger.js">3.1 debugger.js <a href="#t73.1 debugger.js"> # </a></h3>
+<p>debugger.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack'</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack.config'</span>);
+<span class="hljs-comment">//compiler代表整个编译过程.</span>
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+<span class="hljs-comment">//调用它的run方法可以启动编译</span>
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err,stats</span>)=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-keyword">let</span> result = stats.toJson({
+        <span class="hljs-attr">files</span>:<span class="hljs-literal">true</span>,<span class="hljs-comment">//产出了哪些文件</span>
+        <span class="hljs-attr">assets</span>:<span class="hljs-literal">true</span>,<span class="hljs-comment">//生成了那些资源</span>
+        <span class="hljs-attr">chunk</span>:<span class="hljs-literal">true</span>,<span class="hljs-comment">//生成哪些代码块</span>
+        <span class="hljs-attr">module</span>:<span class="hljs-literal">true</span>,<span class="hljs-comment">//模块信息</span>
+        <span class="hljs-attr">entries</span>:<span class="hljs-literal">true</span> <span class="hljs-comment">//入口信息</span>
+    });
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(result,<span class="hljs-literal">null</span>,<span class="hljs-number">2</span>));
+});
+</code></pre>
+<h3 id="t83.2 webpack.config.js">3.2 webpack.config.js <a href="#t83.2 webpack.config.js"> # </a></h3>
+<p>webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> RunPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./plugins/run-plugin'</span>);
+<span class="hljs-keyword">const</span> DonePlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./plugins/done-plugin'</span>);
+<span class="hljs-keyword">const</span> AssetPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./plugins/assets-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>:<span class="hljs-literal">false</span>,
+    <span class="hljs-attr">context</span>:process.cwd(),<span class="hljs-comment">//上下文目录, ./src .默认代表根目录 默认值其实就是当前命令执行的时候所在的目录</span>
+    <span class="hljs-attr">entry</span>:{
+        <span class="hljs-attr">entry1</span>:<span class="hljs-string">'./src/entry1.js'</span>,
+        <span class="hljs-attr">entry2</span>:<span class="hljs-string">'./src/entry2.js'</span>
+    },
+    <span class="hljs-attr">output</span>:{
+        <span class="hljs-attr">path</span>:path.join(__dirname,<span class="hljs-string">'dist'</span>),
+        <span class="hljs-attr">filename</span>:<span class="hljs-string">'[name].js'</span>
+    },
+    <span class="hljs-attr">resolve</span>:{
+        <span class="hljs-attr">extensions</span>:[<span class="hljs-string">'.js'</span>,<span class="hljs-string">'.jsx'</span>,<span class="hljs-string">'.json'</span>]
+    },
+    <span class="hljs-attr">module</span>:{
+        <span class="hljs-attr">rules</span>:[
+            {
+                <span class="hljs-attr">test</span>:<span class="hljs-regexp">/\.js$/</span>,
+                <span class="hljs-attr">use</span>:[
+                    path.resolve(__dirname,<span class="hljs-string">'loaders'</span>,<span class="hljs-string">'logger1-loader.js'</span>),
+                    path.resolve(__dirname,<span class="hljs-string">'loaders'</span>,<span class="hljs-string">'logger2-loader.js'</span>)
+                ]
+            }
+        ]
+    },
+    <span class="hljs-attr">plugins</span>:[
+        <span class="hljs-keyword">new</span> RunPlugin(),
+        <span class="hljs-keyword">new</span> DonePlugin(),
+        <span class="hljs-keyword">new</span> AssetPlugin()
+    ]
+}
+</code></pre>
+<h3 id="t93.3 webpack.js">3.3 webpack.js <a href="#t93.3 webpack.js"> # </a></h3>
+<p>webpack.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> Compiler = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./Compiler'</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpack</span>(<span class="hljs-params">options</span>)</span>{
+    <span class="hljs-comment">//1. 初始化参数：从配置文件和Shell语句中读取并合并参数,得出最终的配置对象</span>
+    <span class="hljs-keyword">let</span> shellConfig= process.argv.slice(<span class="hljs-number">2</span>).reduce(<span class="hljs-function">(<span class="hljs-params">shellConfig,item</span>)=&gt;</span>{
+        <span class="hljs-comment">//item=   --mode=development</span>
+        <span class="hljs-keyword">let</span> [key,value] = item.split(<span class="hljs-string">'='</span>);
+        shellConfig[key.slice(<span class="hljs-number">2</span>)]=value;
+        <span class="hljs-keyword">return</span> shellConfig;
+    },{});
+    <span class="hljs-keyword">let</span> finalConfig = {...options,...shellConfig};
+    <span class="hljs-comment">//2. 用上一步得到的参数初始化Compiler对象</span>
+    <span class="hljs-keyword">let</span> compiler = <span class="hljs-keyword">new</span> Compiler(finalConfig);
+    <span class="hljs-comment">//3. 加载所有配置的插件</span>
+    <span class="hljs-keyword">let</span> {plugins} = finalConfig;
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> plugin <span class="hljs-keyword">of</span> plugins){
+        plugin.apply(compiler);
+    }
+    <span class="hljs-keyword">return</span> compiler;
+}
+<span class="hljs-built_in">module</span>.exports = webpack;
+</code></pre>
+<h3 id="t103.4 Compiler.js">3.4 Compiler.js <a href="#t103.4 Compiler.js"> # </a></h3>
+<p>Compiler.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> {SyncHook} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'tapable'</span>);
+<span class="hljs-keyword">let</span> Complication = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./Complication'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compiler</span></span>{
+  <span class="hljs-keyword">constructor</span>(options){
+    <span class="hljs-keyword">this</span>.options = options;
+    <span class="hljs-keyword">this</span>.hooks = {
+        <span class="hljs-attr">run</span>:<span class="hljs-keyword">new</span> SyncHook(),<span class="hljs-comment">//开始启动编译 刚刚开始</span>
+        <span class="hljs-attr">emit</span>:<span class="hljs-keyword">new</span> SyncHook([<span class="hljs-string">'assets'</span>]),<span class="hljs-comment">//会在将要写入文件的时候触发</span>
+        <span class="hljs-attr">done</span>:<span class="hljs-keyword">new</span> SyncHook()<span class="hljs-comment">//将会在完成编译的时候触发 全部完成</span>
+    }
+  }
+  <span class="hljs-comment">//4. 执行Compiler对象的run方法开始执行编译</span>
+  run(callback){
+    <span class="hljs-keyword">this</span>.hooks.run.call();<span class="hljs-comment">//触发run钩子</span>
+    <span class="hljs-comment">//5. 根据配置中的entry找出入口文件</span>
+    <span class="hljs-keyword">this</span>.compile(<span class="hljs-function">(<span class="hljs-params">err,stats</span>)=&gt;</span>{
+      <span class="hljs-keyword">this</span>.hooks.emit.call(stats.assets);
+      <span class="hljs-comment">//10. 在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统</span>
+      <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> filename <span class="hljs-keyword">in</span> stats.assets){
+          <span class="hljs-keyword">let</span> filePath = path.join(<span class="hljs-keyword">this</span>.options.output.path,filename);
+          fs.writeFileSync(filePath,stats.assets[filename],<span class="hljs-string">'utf8'</span>);
+      }
+      callback(<span class="hljs-literal">null</span>,{
+        <span class="hljs-attr">toJson</span>:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>stats
+      });
+    });
+    <span class="hljs-comment">//监听入口的文件变化,如果文件变化了,重新再开始编译</span>
+   <span class="hljs-comment">/*  Object.values(this.options.entry).forEach(entry=&gt;{
+      fs.watchFile(entry,()=&gt;this.compile(callback));
+    }); */</span>
+    <span class="hljs-comment">//中间是我们编译流程</span>
+    <span class="hljs-keyword">this</span>.hooks.done.call();<span class="hljs-comment">//编译之后触发done钩子</span>
+  }
+  compile(callback){
+    <span class="hljs-keyword">let</span> complication = <span class="hljs-keyword">new</span> Complication(<span class="hljs-keyword">this</span>.options);
+    complication.build(callback);
+  }
+}
+<span class="hljs-built_in">module</span>.exports = Compiler;
+</code></pre>
+<h3 id="t113.5 Complication.js">3.5 Complication.js <a href="#t113.5 Complication.js"> # </a></h3>
+<p>Complication.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> types = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">const</span> parser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/parser'</span>);
+<span class="hljs-keyword">const</span> traverse = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/traverse'</span>).default;
+<span class="hljs-keyword">const</span> generator = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@babel/generator'</span>).default;
+<span class="hljs-keyword">const</span> baseDir = toUnitPath(process.cwd());<span class="hljs-comment">//\</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toUnitPath</span>(<span class="hljs-params">filePath</span>) </span>{
+    <span class="hljs-keyword">return</span> filePath.replace(<span class="hljs-regexp">/\\/g</span>, <span class="hljs-string">'/'</span>);
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Complication</span> </span>{
+    <span class="hljs-keyword">constructor</span>(options) {
+        <span class="hljs-keyword">this</span>.options = options;
+        <span class="hljs-comment">//webpack4 数组  webpack5 set</span>
+        <span class="hljs-keyword">this</span>.entries = [];<span class="hljs-comment">//存放所有的入口</span>
+        <span class="hljs-keyword">this</span>.modules = [];<span class="hljs-comment">// 存放所有的模块</span>
+        <span class="hljs-keyword">this</span>.chunks = [];<span class="hljs-comment">//存放所的代码块</span>
+        <span class="hljs-keyword">this</span>.assets = {};<span class="hljs-comment">//所有产出的资源</span>
+        <span class="hljs-keyword">this</span>.files = [];<span class="hljs-comment">//所有产出的文件</span>
+    }
+    build(callback) {
+        <span class="hljs-comment">//5. 根据配置中的entry找出入口文件</span>
+        <span class="hljs-keyword">let</span> entry = {};
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-keyword">this</span>.options.entry === <span class="hljs-string">'string'</span>) {
+            entry.main = <span class="hljs-keyword">this</span>.options.entry;
+        } <span class="hljs-keyword">else</span> {
+            entry = <span class="hljs-keyword">this</span>.options.entry;
+        }
+        <span class="hljs-comment">//entry={entry1:'./src/entry1.js',entry2:'./src/entry2.js'}</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> entryName <span class="hljs-keyword">in</span> entry) {
+            <span class="hljs-comment">//5.获取 entry1的绝对路径</span>
+            <span class="hljs-keyword">let</span> entryFilePath = toUnitPath(path.join(<span class="hljs-keyword">this</span>.options.context, entry[entryName]));
+            <span class="hljs-comment">//6.从入口文件出发,调用所有配置的Loader对模块进行编译</span>
+            <span class="hljs-keyword">let</span> entryModule = <span class="hljs-keyword">this</span>.buildModule(entryName, entryFilePath);
+            <span class="hljs-comment">//this.modules.push(entryModule);</span>
+            <span class="hljs-comment">//8. 根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk</span>
+            <span class="hljs-keyword">let</span> chunk = {
+                <span class="hljs-attr">name</span>: entryName, entryModule, <span class="hljs-attr">modules</span>: <span class="hljs-keyword">this</span>.modules.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+                    <span class="hljs-keyword">return</span> item.name === entryName || item.extraNames.includes(entryName);
+                })
+            };
+            <span class="hljs-keyword">this</span>.entries.push(chunk);
+            <span class="hljs-keyword">this</span>.chunks.push(chunk);
+        }
+        <span class="hljs-comment">//9. 再把每个Chunk转换成一个单独的文件加入到输出列表</span>
+        <span class="hljs-keyword">this</span>.chunks.forEach(<span class="hljs-function"><span class="hljs-params">chunk</span> =&gt;</span> {
+            <span class="hljs-keyword">let</span> filename = <span class="hljs-keyword">this</span>.options.output.filename.replace(<span class="hljs-string">'[name]'</span>, chunk.name);
+            <span class="hljs-comment">// this.assets就是输出列表 key输出的文件名 值就是输出的内容</span>
+            <span class="hljs-keyword">this</span>.assets[filename] = getSource(chunk);
+        });
+
+        callback(<span class="hljs-literal">null</span>, {
+            <span class="hljs-attr">entries</span>: <span class="hljs-keyword">this</span>.entries,
+            <span class="hljs-attr">chunks</span>: <span class="hljs-keyword">this</span>.chunks,
+            <span class="hljs-attr">modules</span>: <span class="hljs-keyword">this</span>.modules,
+            <span class="hljs-attr">files</span>: <span class="hljs-keyword">this</span>.files,
+            <span class="hljs-attr">assets</span>: <span class="hljs-keyword">this</span>.assets
+        });
+    }
+    <span class="hljs-comment">//name=名称,modulePath=模块的绝对路径</span>
+    buildModule(name, modulePath) {
+        <span class="hljs-comment">//6. 从入口文件出发,调用所有配置的Loader对模块进行编译</span>
+        <span class="hljs-comment">//1.读取模块文件的内容 </span>
+        <span class="hljs-keyword">let</span> sourceCode = fs.readFileSync(modulePath, <span class="hljs-string">'utf8'</span>);<span class="hljs-comment">//console.log('entry1');</span>
+        <span class="hljs-keyword">let</span> rules = <span class="hljs-keyword">this</span>.options.module.rules;
+        <span class="hljs-keyword">let</span> loaders = [];<span class="hljs-comment">///寻找匹配的loader</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; rules.length; i++) {
+            <span class="hljs-keyword">let</span> { test } = rules[i];
+            <span class="hljs-comment">//如果此rule的正则和模块的路径匹配的话</span>
+            <span class="hljs-keyword">if</span> (modulePath.match(test)) {
+                loaders = [...loaders, ...rules[i].use];
+            }
+        }
+        sourceCode = loaders.reduceRight(<span class="hljs-function">(<span class="hljs-params">sourceCode, loader</span>) =&gt;</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">require</span>(loader)(sourceCode);
+        }, sourceCode);
+
+        <span class="hljs-comment">/*  for(let i=loaders.length-1;i&gt;=0;i--){
+             let loader = loaders[i];
+             sourceCode = require(loader)(sourceCode);
+         } */</span>
+        <span class="hljs-comment">//console.log('entry1');//2//1</span>
+        <span class="hljs-comment">//console.log(sourceCode);</span>
+        <span class="hljs-comment">//7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理</span>
+        <span class="hljs-comment">//获得当前模块模块ID ./src/index.js</span>
+        <span class="hljs-keyword">let</span> moduleId = <span class="hljs-string">'./'</span> + path.posix.relative(baseDir, modulePath);
+        <span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> = { <span class="hljs-attr">id</span>: moduleId, <span class="hljs-attr">dependencies</span>: [], name, <span class="hljs-attr">extraNames</span>: [] };
+        <span class="hljs-keyword">let</span> ast = parser.parse(sourceCode, { <span class="hljs-attr">sourceType</span>: <span class="hljs-string">'module'</span> });
+        traverse(ast, {
+            <span class="hljs-attr">CallExpression</span>: <span class="hljs-function">(<span class="hljs-params">{ node }</span>) =&gt;</span> {
+                <span class="hljs-keyword">if</span> (node.callee.name === <span class="hljs-string">'require'</span>) {
+                    <span class="hljs-comment">//依赖的模块的相对路径</span>
+                    <span class="hljs-keyword">let</span> moduleName = node.arguments[<span class="hljs-number">0</span>].value;<span class="hljs-comment">//./title1</span>
+                    <span class="hljs-comment">//获取当前模块的所有的目录</span>
+                    <span class="hljs-keyword">let</span> dirname = path.posix.dirname(modulePath);<span class="hljs-comment">// /</span>
+                    <span class="hljs-comment">//C:/aproject/zhufengwebpack202106/4.flow/src/title1</span>
+                    <span class="hljs-keyword">let</span> depModulePath = path.posix.join(dirname, moduleName);
+                    <span class="hljs-keyword">let</span> extensions = <span class="hljs-keyword">this</span>.options.resolve.extensions;
+                    depModulePath = tryExtensions(depModulePath, extensions);<span class="hljs-comment">//已经包含了拓展名了</span>
+                    <span class="hljs-comment">//得到依赖的模块ID C:/aproject/zhufengwebpack202106/4.flow/src/title1.js</span>
+                    <span class="hljs-comment">//相对于项目根目录 的相对路径 ./src/title1.js</span>
+                    <span class="hljs-keyword">let</span> depModuleId = <span class="hljs-string">'./'</span> + path.posix.relative(baseDir, depModulePath);
+                    <span class="hljs-comment">//require('./title1');=&gt;require('./src/title1.js');</span>
+                    node.arguments = [types.stringLiteral(depModuleId)];
+                    <span class="hljs-comment">//依赖的模块绝对路径放到当前的模块的依赖数组里</span>
+                    <span class="hljs-built_in">module</span>.dependencies.push({ depModuleId, depModulePath });
+                }
+            }
+        });
+        <span class="hljs-keyword">let</span> { code } = generator(ast);
+        <span class="hljs-built_in">module</span>._source = code;<span class="hljs-comment">//模块源代码指向语法树转换后的新生成的源代码</span>
+        <span class="hljs-comment">//7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理</span>
+        <span class="hljs-built_in">module</span>.dependencies.forEach(<span class="hljs-function">(<span class="hljs-params">{ depModuleId, depModulePath }</span>) =&gt;</span> {
+            <span class="hljs-keyword">let</span> depModule = <span class="hljs-keyword">this</span>.modules.find(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.id === depModuleId);
+            <span class="hljs-keyword">if</span> (depModule) {
+                depModule.extraNames.push(name);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">let</span> dependencyModule = <span class="hljs-keyword">this</span>.buildModule(name, depModulePath);
+                <span class="hljs-keyword">this</span>.modules.push(dependencyModule);
+            }
+        });
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>;
+    }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSource</span>(<span class="hljs-params">chunk</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`
+    (() =&gt; {
+        var modules = ({
+            <span class="hljs-subst">${chunk.modules.map(<span class="hljs-built_in">module</span> =&gt; <span class="hljs-string">`
+                    "<span class="hljs-subst">${<span class="hljs-built_in">module</span>.id}</span>":(module,exports,require)=&gt;{
+                        <span class="hljs-subst">${<span class="hljs-built_in">module</span>._source}</span>
+                    }
+                `</span>).join(<span class="hljs-string">','</span>)
+        }</span>
+        });
+        var cache = {};
+        function require(moduleId) {
+          var cachedModule = cache[moduleId];
+          if (cachedModule !== undefined) {
+            return cachedModule.exports;
+          }
+          var module = cache[moduleId] = {
+            exports: {}
+          };
+          modules[moduleId](module, module.exports, require);
+          return module.exports;
+        }
+        var exports = {};
+        (() =&gt; {
+         <span class="hljs-subst">${chunk.entryModule._source}</span>
+        })();
+      })()
+        ;
+    `</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tryExtensions</span>(<span class="hljs-params">modulePath, extensions</span>) </span>{
+    extensions.unshift(<span class="hljs-string">''</span>);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; extensions.length; i++) {
+        <span class="hljs-keyword">let</span> filePath = modulePath + extensions[i];<span class="hljs-comment">// ./title.js</span>
+        <span class="hljs-keyword">if</span> (fs.existsSync(filePath)) {
+            <span class="hljs-keyword">return</span> filePath;
+        }
+    }
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">`Module not found`</span>);
+}
+<span class="hljs-built_in">module</span>.exports = Complication;
+</code></pre>
+<h3 id="t123.6 run-plugin.js">3.6 run-plugin.js <a href="#t123.6 run-plugin.js"> # </a></h3>
+<p>plugins\run-plugin.js</p>
+<pre><code class="lang-js">
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RunPlugin</span></span>{
+    apply(compiler){
+        <span class="hljs-comment">//对于代码执行来说没有用,但是对于阅读代码的人来说可以起到提示的作用</span>
+        compiler.hooks.run.tap(<span class="hljs-string">'RunPlugin'</span>,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'开始编译了'</span>);
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = RunPlugin;
+</code></pre>
+<h3 id="t133.7 assets-plugin.js">3.7 assets-plugin.js <a href="#t133.7 assets-plugin.js"> # </a></h3>
+<p>plugins\assets-plugin.js</p>
+<pre><code class="lang-js">
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AssetPlugin</span></span>{
+    apply(compiler){
+        <span class="hljs-comment">//对于代码执行来说没有用,但是对于阅读代码的人来说可以起到提示的作用</span>
+        compiler.hooks.emit.tap(<span class="hljs-string">'AssetPlugin'</span>,(assets)=&gt;{
+            <span class="hljs-keyword">debugger</span>
+            assets[<span class="hljs-string">'assets.md'</span>]= <span class="hljs-built_in">Object</span>.keys(assets).join(<span class="hljs-string">'\n'</span>);
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = AssetPlugin;
+</code></pre>
+<h3 id="t143.8 done-plugin.js">3.8 done-plugin.js <a href="#t143.8 done-plugin.js"> # </a></h3>
+<p>plugins\done-plugin.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DonePlugin</span></span>{
+    apply(compiler){
+        <span class="hljs-comment">//对于代码执行来说没有用,但是对于阅读代码的人来说可以起到提示的作用</span>
+        compiler.hooks.done.tap(<span class="hljs-string">'DonePlugin'</span>,()=&gt;{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'编译结束了'</span>);
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = DonePlugin;
+</code></pre>
+<h3 id="t153.9 logger1-loader.js">3.9 logger1-loader.js <a href="#t153.9 logger1-loader.js"> # </a></h3>
+<p>loaders\logger1-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>)</span>{
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'logger1-loader.js'</span>);
+   <span class="hljs-keyword">return</span> source+<span class="hljs-string">'//1'</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h3 id="t163.10 logger2-loader.js">3.10 logger2-loader.js <a href="#t163.10 logger2-loader.js"> # </a></h3>
+<p>loaders\logger2-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loader</span>(<span class="hljs-params">source</span>)</span>{
+   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'logger2-loader.js'</span>);
+   <span class="hljs-keyword">return</span> source+<span class="hljs-string">'//2'</span>;
+}
+<span class="hljs-built_in">module</span>.exports = loader;
+</code></pre>
+<h3 id="t173.11 src\entry1.js">3.11 src\entry1.js <a href="#t173.11 src\entry1.js"> # </a></h3>
+<p>src\entry1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title1 = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./title1'</span>);
+<span class="hljs-built_in">console</span>.log(title1);
+</code></pre>
+<h3 id="t183.12 src\entry2.js">3.12 src\entry2.js <a href="#t183.12 src\entry2.js"> # </a></h3>
+<p>src\entry2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title1 = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./title1'</span>);
+<span class="hljs-built_in">console</span>.log(title1);
+</code></pre>
+<h3 id="t193.13 src\title1.js">3.13 src\title1.js <a href="#t193.13 src\title1.js"> # </a></h3>
+<p>src\title1.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'title1'</span>;
+</code></pre>
+<h3 id="t203.14 src\title2.js">3.14 src\title2.js <a href="#t203.14 src\title2.js"> # </a></h3>
+<p>src\title2.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'title2'</span>;
+</code></pre>
+<h2 id="t214.Stats 对象">4.Stats 对象 <a href="#t214.Stats 对象"> # </a></h2>
+<ul>
+<li>在 Webpack 的回调函数中会得到 stats 对象</li>
+<li>这个对象实际来自于<code>Compilation.getStats()</code>，返回的是主要含有<code>modules</code>、<code>chunks</code>和<code>assets</code>三个属性值的对象。</li>
+<li>Stats 对象本质上来自于<a href="https://github.com/webpack/webpack/blob/v4.39.3/lib/Stats.js">lib/Stats.js</a>的类实例</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">字段</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">modules</td>
+<td style="text-align:left">记录了所有解析后的模块</td>
+</tr>
+<tr>
+<td style="text-align:left">chunks</td>
+<td style="text-align:left">记录了所有 chunk</td>
+</tr>
+<tr>
+<td style="text-align:left">assets</td>
+<td style="text-align:left">记录了所有要生成的文件</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">npx webpack --profile --json &gt; stats.json
+</code></pre>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"780231fa9b9ce4460c8a"</span>,     <span class="hljs-comment">//编译使用的 hash</span>
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"5.8.0"</span>,                 <span class="hljs-comment">// 用来编译的 webpack 的版本</span>
+  <span class="hljs-attr">"time"</span>: <span class="hljs-number">83</span>,                         <span class="hljs-comment">// 编译耗时 (ms)</span>
+  <span class="hljs-attr">"builtAt"</span>: <span class="hljs-number">1606538839612</span>,           <span class="hljs-comment">//编译的时间</span>
+  <span class="hljs-attr">"publicPath"</span>: <span class="hljs-string">"auto"</span>,               <span class="hljs-comment">//资源访问路径</span>
+  <span class="hljs-attr">"outputPath"</span>: <span class="hljs-string">"C:\\webpack5\\dist"</span>, <span class="hljs-comment">//输出目录</span>
+  <span class="hljs-attr">"assetsByChunkName"</span>: {              <span class="hljs-comment">//代码块和文件名的映射</span>
+    <span class="hljs-attr">"main"</span>: [<span class="hljs-string">"main.js"</span>]
+  },
+  <span class="hljs-attr">"assets"</span>: [                         <span class="hljs-comment">//资源数组</span>
+    {
+      <span class="hljs-attr">"type"</span>: <span class="hljs-string">"asset"</span>,                <span class="hljs-comment">//资源类型</span>
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"main.js"</span>,              <span class="hljs-comment">//文件名称</span>
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">2418</span>,                   <span class="hljs-comment">//文件大小</span>
+      <span class="hljs-attr">"chunkNames"</span>: [                 <span class="hljs-comment">//对应的代码块名称</span>
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"chunkIdHints"</span>: [],
+      <span class="hljs-attr">"auxiliaryChunkNames"</span>: [],
+      <span class="hljs-attr">"auxiliaryChunkIdHints"</span>: [],
+      <span class="hljs-attr">"emitted"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"comparedForEmit"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"cached"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"info"</span>: {
+        <span class="hljs-attr">"javascriptModule"</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">"size"</span>: <span class="hljs-number">2418</span>
+      },
+      <span class="hljs-attr">"related"</span>: {},
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"auxiliaryChunks"</span>: [],
+      <span class="hljs-attr">"isOverSizeLimit"</span>: <span class="hljs-literal">false</span>
+    }
+  ],
+  <span class="hljs-attr">"chunks"</span>: [                      <span class="hljs-comment">//代码块数组</span>
+    {
+      <span class="hljs-attr">"rendered"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"initial"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"entry"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"recorded"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">80</span>,
+      <span class="hljs-attr">"sizes"</span>: {
+        <span class="hljs-attr">"javascript"</span>: <span class="hljs-number">80</span>
+      },
+      <span class="hljs-attr">"names"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"idHints"</span>: [],
+      <span class="hljs-attr">"runtime"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"files"</span>: [
+        <span class="hljs-string">"main.js"</span>
+      ],
+      <span class="hljs-attr">"auxiliaryFiles"</span>: [],
+      <span class="hljs-attr">"hash"</span>: <span class="hljs-string">"d25ad7a8144077f69783"</span>,
+      <span class="hljs-attr">"childrenByOrder"</span>: {},
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"main"</span>,
+      <span class="hljs-attr">"siblings"</span>: [],
+      <span class="hljs-attr">"parents"</span>: [],
+      <span class="hljs-attr">"children"</span>: [],
+      <span class="hljs-attr">"modules"</span>: [
+        {
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"module"</span>,
+          <span class="hljs-attr">"moduleType"</span>: <span class="hljs-string">"javascript/auto"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"nameForCondition"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+          <span class="hljs-attr">"index"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"preOrderIndex"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"index2"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"postOrderIndex"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">55</span>,
+          <span class="hljs-attr">"sizes"</span>: {
+            <span class="hljs-attr">"javascript"</span>: <span class="hljs-number">55</span>
+          },
+          <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"codeGenerated"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"cached"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"orphan"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"dependent"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"issuer"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"issuerName"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"issuerPath"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"total"</span>: <span class="hljs-number">38</span>,
+            <span class="hljs-attr">"resolving"</span>: <span class="hljs-number">26</span>,
+            <span class="hljs-attr">"restoring"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">12</span>,
+            <span class="hljs-attr">"integration"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"storing"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"additionalResolving"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"additionalIntegration"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">26</span>,
+            <span class="hljs-attr">"dependencies"</span>: <span class="hljs-number">0</span>
+          },
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"issuerId"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"chunks"</span>: [
+            <span class="hljs-string">"main"</span>
+          ],
+          <span class="hljs-attr">"assets"</span>: [],
+          <span class="hljs-attr">"reasons"</span>: [
+            {
+              <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"module"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"moduleName"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"resolvedModuleIdentifier"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"resolvedModule"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"type"</span>: <span class="hljs-string">"entry"</span>,
+              <span class="hljs-attr">"active"</span>: <span class="hljs-literal">true</span>,
+              <span class="hljs-attr">"explanation"</span>: <span class="hljs-string">""</span>,
+              <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"main"</span>,
+              <span class="hljs-attr">"moduleId"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"resolvedModuleId"</span>: <span class="hljs-literal">null</span>
+            }
+          ],
+          <span class="hljs-attr">"usedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"optimizationBailout"</span>: [],
+          <span class="hljs-attr">"depth"</span>: <span class="hljs-number">0</span>
+        },
+        {
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"module"</span>,
+          <span class="hljs-attr">"moduleType"</span>: <span class="hljs-string">"javascript/auto"</span>,
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/title.js"</span>,
+          <span class="hljs-attr">"nameForCondition"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+          <span class="hljs-attr">"index"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"preOrderIndex"</span>: <span class="hljs-number">1</span>,
+          <span class="hljs-attr">"index2"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"postOrderIndex"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">25</span>,
+          <span class="hljs-attr">"sizes"</span>: {
+            <span class="hljs-attr">"javascript"</span>: <span class="hljs-number">25</span>
+          },
+          <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"codeGenerated"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"cached"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"orphan"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"dependent"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"issuer"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+          <span class="hljs-attr">"issuerName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"issuerPath"</span>: [
+            {
+              <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+              <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"profile"</span>: {
+                <span class="hljs-attr">"total"</span>: <span class="hljs-number">38</span>,
+                <span class="hljs-attr">"resolving"</span>: <span class="hljs-number">26</span>,
+                <span class="hljs-attr">"restoring"</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">"building"</span>: <span class="hljs-number">12</span>,
+                <span class="hljs-attr">"integration"</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">"storing"</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">"additionalResolving"</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">"additionalIntegration"</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-attr">"factory"</span>: <span class="hljs-number">26</span>,
+                <span class="hljs-attr">"dependencies"</span>: <span class="hljs-number">0</span>
+              },
+              <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>
+            }
+          ],
+          <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"total"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"resolving"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"restoring"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"integration"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"storing"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"additionalResolving"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"additionalIntegration"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"dependencies"</span>: <span class="hljs-number">0</span>
+          },
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/title.js"</span>,
+          <span class="hljs-attr">"issuerId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"chunks"</span>: [
+            <span class="hljs-string">"main"</span>
+          ],
+          <span class="hljs-attr">"assets"</span>: [],
+          <span class="hljs-attr">"reasons"</span>: [
+            {
+              <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+              <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"resolvedModuleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+              <span class="hljs-attr">"resolvedModule"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"type"</span>: <span class="hljs-string">"cjs require"</span>,
+              <span class="hljs-attr">"active"</span>: <span class="hljs-literal">true</span>,
+              <span class="hljs-attr">"explanation"</span>: <span class="hljs-string">""</span>,
+              <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./title.js"</span>,
+              <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"1:12-33"</span>,
+              <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+              <span class="hljs-attr">"resolvedModuleId"</span>: <span class="hljs-string">"./src/index.js"</span>
+            },
+            {
+              <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+              <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/title.js"</span>,
+              <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/title.js"</span>,
+              <span class="hljs-attr">"resolvedModuleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+              <span class="hljs-attr">"resolvedModule"</span>: <span class="hljs-string">"./src/title.js"</span>,
+              <span class="hljs-attr">"type"</span>: <span class="hljs-string">"cjs self exports reference"</span>,
+              <span class="hljs-attr">"active"</span>: <span class="hljs-literal">true</span>,
+              <span class="hljs-attr">"explanation"</span>: <span class="hljs-string">""</span>,
+              <span class="hljs-attr">"userRequest"</span>: <span class="hljs-literal">null</span>,
+              <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"1:0-14"</span>,
+              <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/title.js"</span>,
+              <span class="hljs-attr">"resolvedModuleId"</span>: <span class="hljs-string">"./src/title.js"</span>
+            }
+          ],
+          <span class="hljs-attr">"usedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"optimizationBailout"</span>: [
+            <span class="hljs-string">"CommonJS bailout: module.exports is used directly at 1:0-14"</span>
+          ],
+          <span class="hljs-attr">"depth"</span>: <span class="hljs-number">1</span>
+        }
+      ],
+      <span class="hljs-attr">"origins"</span>: [
+        {
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"main"</span>,
+          <span class="hljs-attr">"request"</span>: <span class="hljs-string">"./src/index.js"</span>
+        }
+      ]
+    }
+  ],
+  <span class="hljs-attr">"modules"</span>: [                              <span class="hljs-comment">//模块数组</span>
+    {
+      <span class="hljs-attr">"type"</span>: <span class="hljs-string">"module"</span>,
+      <span class="hljs-attr">"moduleType"</span>: <span class="hljs-string">"javascript/auto"</span>,
+      <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"nameForCondition"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+      <span class="hljs-attr">"index"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"preOrderIndex"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"index2"</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">"postOrderIndex"</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">55</span>,
+      <span class="hljs-attr">"sizes"</span>: {
+        <span class="hljs-attr">"javascript"</span>: <span class="hljs-number">55</span>
+      },
+      <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"codeGenerated"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"cached"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"orphan"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"issuer"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"issuerName"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"issuerPath"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"profile"</span>: {
+        <span class="hljs-attr">"total"</span>: <span class="hljs-number">38</span>,
+        <span class="hljs-attr">"resolving"</span>: <span class="hljs-number">26</span>,
+        <span class="hljs-attr">"restoring"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"building"</span>: <span class="hljs-number">12</span>,
+        <span class="hljs-attr">"integration"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"storing"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"additionalResolving"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"additionalIntegration"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"factory"</span>: <span class="hljs-number">26</span>,
+        <span class="hljs-attr">"dependencies"</span>: <span class="hljs-number">0</span>
+      },
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"issuerId"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [],
+      <span class="hljs-attr">"reasons"</span>: [
+        {
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"module"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"resolvedModuleIdentifier"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"resolvedModule"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"entry"</span>,
+          <span class="hljs-attr">"active"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"explanation"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"main"</span>,
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"resolvedModuleId"</span>: <span class="hljs-literal">null</span>
+        }
+      ],
+      <span class="hljs-attr">"usedExports"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"optimizationBailout"</span>: [],
+      <span class="hljs-attr">"depth"</span>: <span class="hljs-number">0</span>
+    },
+    {
+      <span class="hljs-attr">"type"</span>: <span class="hljs-string">"module"</span>,
+      <span class="hljs-attr">"moduleType"</span>: <span class="hljs-string">"javascript/auto"</span>,
+      <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/title.js"</span>,
+      <span class="hljs-attr">"nameForCondition"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+      <span class="hljs-attr">"index"</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">"preOrderIndex"</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">"index2"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"postOrderIndex"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"size"</span>: <span class="hljs-number">25</span>,
+      <span class="hljs-attr">"sizes"</span>: {
+        <span class="hljs-attr">"javascript"</span>: <span class="hljs-number">25</span>
+      },
+      <span class="hljs-attr">"cacheable"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"built"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"codeGenerated"</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">"cached"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"optional"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"orphan"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"issuer"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+      <span class="hljs-attr">"issuerName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"issuerPath"</span>: [
+        {
+          <span class="hljs-attr">"identifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"profile"</span>: {
+            <span class="hljs-attr">"total"</span>: <span class="hljs-number">38</span>,
+            <span class="hljs-attr">"resolving"</span>: <span class="hljs-number">26</span>,
+            <span class="hljs-attr">"restoring"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"building"</span>: <span class="hljs-number">12</span>,
+            <span class="hljs-attr">"integration"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"storing"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"additionalResolving"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"additionalIntegration"</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">"factory"</span>: <span class="hljs-number">26</span>,
+            <span class="hljs-attr">"dependencies"</span>: <span class="hljs-number">0</span>
+          },
+          <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/index.js"</span>
+        }
+      ],
+      <span class="hljs-attr">"failed"</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">"errors"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"warnings"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"profile"</span>: {
+        <span class="hljs-attr">"total"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"resolving"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"restoring"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"building"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"integration"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"storing"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"additionalResolving"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"additionalIntegration"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"factory"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"dependencies"</span>: <span class="hljs-number">0</span>
+      },
+      <span class="hljs-attr">"id"</span>: <span class="hljs-string">"./src/title.js"</span>,
+      <span class="hljs-attr">"issuerId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [],
+      <span class="hljs-attr">"reasons"</span>: [
+        {
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"resolvedModuleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\index.js"</span>,
+          <span class="hljs-attr">"resolvedModule"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"cjs require"</span>,
+          <span class="hljs-attr">"active"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"explanation"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"userRequest"</span>: <span class="hljs-string">"./title.js"</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"1:12-33"</span>,
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/index.js"</span>,
+          <span class="hljs-attr">"resolvedModuleId"</span>: <span class="hljs-string">"./src/index.js"</span>
+        },
+        {
+          <span class="hljs-attr">"moduleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+          <span class="hljs-attr">"module"</span>: <span class="hljs-string">"./src/title.js"</span>,
+          <span class="hljs-attr">"moduleName"</span>: <span class="hljs-string">"./src/title.js"</span>,
+          <span class="hljs-attr">"resolvedModuleIdentifier"</span>: <span class="hljs-string">"C:\\webpack5\\src\\title.js"</span>,
+          <span class="hljs-attr">"resolvedModule"</span>: <span class="hljs-string">"./src/title.js"</span>,
+          <span class="hljs-attr">"type"</span>: <span class="hljs-string">"cjs self exports reference"</span>,
+          <span class="hljs-attr">"active"</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">"explanation"</span>: <span class="hljs-string">""</span>,
+          <span class="hljs-attr">"userRequest"</span>: <span class="hljs-literal">null</span>,
+          <span class="hljs-attr">"loc"</span>: <span class="hljs-string">"1:0-14"</span>,
+          <span class="hljs-attr">"moduleId"</span>: <span class="hljs-string">"./src/title.js"</span>,
+          <span class="hljs-attr">"resolvedModuleId"</span>: <span class="hljs-string">"./src/title.js"</span>
+        }
+      ],
+      <span class="hljs-attr">"usedExports"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"providedExports"</span>: <span class="hljs-literal">null</span>,
+      <span class="hljs-attr">"optimizationBailout"</span>: [
+        <span class="hljs-string">"CommonJS bailout: module.exports is used directly at 1:0-14"</span>
+      ],
+      <span class="hljs-attr">"depth"</span>: <span class="hljs-number">1</span>
+    }
+  ],
+  <span class="hljs-attr">"entrypoints"</span>: {                        <span class="hljs-comment">//入口点</span>
+    <span class="hljs-attr">"main"</span>: {
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"main"</span>,
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [
+        {
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"main.js"</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">2418</span>
+        }
+      ],
+      <span class="hljs-attr">"filteredAssets"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"assetsSize"</span>: <span class="hljs-number">2418</span>,
+      <span class="hljs-attr">"auxiliaryAssets"</span>: [],
+      <span class="hljs-attr">"filteredAuxiliaryAssets"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"auxiliaryAssetsSize"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"children"</span>: {},
+      <span class="hljs-attr">"childAssets"</span>: {},
+      <span class="hljs-attr">"isOverSizeLimit"</span>: <span class="hljs-literal">false</span>
+    }
+  },
+  <span class="hljs-attr">"namedChunkGroups"</span>: {                   <span class="hljs-comment">//命名代码块组</span>
+    <span class="hljs-attr">"main"</span>: {
+      <span class="hljs-attr">"name"</span>: <span class="hljs-string">"main"</span>,
+      <span class="hljs-attr">"chunks"</span>: [
+        <span class="hljs-string">"main"</span>
+      ],
+      <span class="hljs-attr">"assets"</span>: [
+        {
+          <span class="hljs-attr">"name"</span>: <span class="hljs-string">"main.js"</span>,
+          <span class="hljs-attr">"size"</span>: <span class="hljs-number">2418</span>
+        }
+      ],
+      <span class="hljs-attr">"filteredAssets"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"assetsSize"</span>: <span class="hljs-number">2418</span>,
+      <span class="hljs-attr">"auxiliaryAssets"</span>: [],
+      <span class="hljs-attr">"filteredAuxiliaryAssets"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"auxiliaryAssetsSize"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"children"</span>: {},
+      <span class="hljs-attr">"childAssets"</span>: {},
+      <span class="hljs-attr">"isOverSizeLimit"</span>: <span class="hljs-literal">false</span>
+    }
+  },
+  <span class="hljs-attr">"errors"</span>: [],
+  <span class="hljs-attr">"errorsCount"</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">"warnings"</span>: [],
+  <span class="hljs-attr">"warningsCount"</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-attr">"children"</span>: []
+}
+</code></pre>
+
+    

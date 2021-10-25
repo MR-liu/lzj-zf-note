@@ -1,0 +1,161 @@
+
+        <h2 id="t0Message组件的调用方式">Message组件的调用方式 <a href="#t0Message组件的调用方式"> # </a></h2>
+<pre><code>&lt;template&gt;
+    &lt;button @click="showMessage"&gt;点我啊&lt;/button&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    methods:{
+        showMessage(){
+            Message.info({ // 直接调用
+                content:'hello 我帅不帅',
+                duration:3000
+            });
+            this.$message.info({ // 通过实例调用
+                content:'hello 你很帅',
+                duration:3000
+            })
+        }
+    }
+}
+&lt;/script&gt;
+</code></pre><h2 id="t1编写Message组件">编写Message组件 <a href="#t1编写Message组件"> # </a></h2>
+<p>要考虑数据驱动视图，多次点击显示多个弹层,给每个层增加 id号,延迟时间和内容</p>
+<pre><code>&lt;template&gt;
+    &lt;div class="messages"&gt;
+        &lt;!-- 显示在数组中的层 --&gt;
+        &lt;div v-for="message in messages" :key="message.id"&gt;
+            {{message.content}}
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+    data(){
+        return {messages:[]}
+    },
+    mounted(){
+        // 给所有弹层增加唯一标示 方便弹层的卸载
+        this.id = 0;
+    },
+    methods:{
+        add(option){
+            let id = this.id++; // id号
+            let layer = {...option,id}
+            this.messages.push(layer); // 将层存储起来
+            layer.timer = setTimeout(()=&gt;{
+                this.remove(layer);
+            },option.duration)
+        },
+        remove(layer){
+            clearTimeout(layer.timer); // 清除定时器
+            // 移除层 
+            this.messages = this.messages.filter(message=&gt;layer.id !== message.id);
+        }
+    }
+}   
+&lt;/script&gt;
+</code></pre><h2 id="t2通过js文件控制显示Message弹层">通过js文件控制显示Message弹层 <a href="#t2通过js文件控制显示Message弹层"> # </a></h2>
+<ul>
+<li>步骤一:暴露调用方法<pre><code>// 暴露 不同类型的弹层方法
+const Message = {
+  info(options){
+      // 调用增加弹层方法
+      getInstance(options).add(options);
+  },
+  warn(){},
+  danger(){},
+  success(){}
+}
+export {
+  Message
+}
+</code></pre></li>
+</ul>
+<ul>
+<li>步骤二:生产实例     </li>
+</ul>
+<pre><code>import Vue from 'vue';
+import MessageComponent from './Message.vue';
+let getInstance = () =&gt;{
+    let vm = new Vue({
+        render:h=&gt;h(MessageComponent)
+    }).$mount();
+    let messageComponent = vm.$children[0];
+    // 获取真实dom元素，将其挂在页面上
+    document.body.appendChild(vm.$el);
+    return {
+        add(options){ // 调用组件的add方法
+            messageComponent.add(options);
+        }
+    }
+}
+const Message = {
+    info(options){
+        // 调用增加弹层方法
+        getInstance().add(options);
+    },
+    warn(){},
+    danger(){},
+    success(){}
+}
+// 暴露 不同类型的弹层方法
+export {
+    Message
+}
+</code></pre><ul>
+<li>步骤三: 实现单例  </li>
+</ul>
+<pre><code>let instance;
+let inst = () =&gt; {
+    instance = instance || getInstance();
+    return instance;
+}
+const Message = {
+    info(options){
+        // 调用增加弹层方法
+        inst().add(options);
+    },
+    warn(){},
+    danger(){},
+    success(){}
+}
+// 暴露 不同类型的弹层方法
+export {
+    Message
+}
+</code></pre><h2 id="t3封装插件">封装插件 <a href="#t3封装插件"> # </a></h2>
+<p>install方法和use方法的应用  </p>
+<pre><code>let _Vue;
+export default {
+    install(Vue,options){
+        if(!_Vue){
+            _Vue = Vue;
+            let $message = {}
+            Object.keys(Message).forEach(type =&gt; {
+                $message[type] = Message[type]
+            });
+            Vue.prototype.$message = $message
+        }
+    }
+}
+// 组件中使用插件
+import {Message} from './components/Message';
+this.$message.info({
+        content:'hello 你很帅',
+        duration:3000
+})
+</code></pre><h2 id="t4Minx方法可以注入数据">Minx方法可以注入数据 <a href="#t4Minx方法可以注入数据"> # </a></h2>
+<p>给每个组件增加公用属性  </p>
+<pre><code>Vue.mixin({
+    beforeCreate() {
+        if(this.$options.info){
+            // 把数据挂在自己的_info上
+            this._info = this.$options.info;
+        }else{
+            this._info = this.$parent &amp;&amp; this.$parent._info;
+        }
+    },
+})
+</code></pre>
+    

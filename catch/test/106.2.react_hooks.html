@@ -1,0 +1,655 @@
+
+        <h2 id="t01. React Hooks">1. React Hooks <a href="#t01. React Hooks"> # </a></h2>
+<ul>
+<li>Hook可以让你在不编写 <code>class</code> 的情况下使用 <code>state</code> 以及其他的 React 特性</li>
+</ul>
+<h2 id="t12. useState">2. useState <a href="#t12. useState"> # </a></h2>
+<ul>
+<li>useState 就是一个 Hook</li>
+<li>通过在函数组件里调用它来给组件添加一些内部 state,React 会在重复渲染时保留这个 state</li>
+<li>useState 会返回一对值：当前状态和一个让你更新它的函数，你可以在事件处理函数中或其他一些地方调用这个函数。它类似 class 组件的 this.setState，但是它不会把新的 state 和旧的 state 进行合并</li>
+<li>useState 唯一的参数就是初始 state</li>
+<li>返回一个 state，以及更新 state 的函数<ul>
+<li>在初始渲染期间，返回的状态 (state) 与传入的第一个参数 (initialState) 值相同</li>
+<li>setState 函数用于更新 state。它接收一个新的 state 值并将组件的一次重新渲染加入队列</li>
+</ul>
+</li>
+</ul>
+<h3 id="t22.1 计数器">2.1 计数器 <a href="#t22.1 计数器"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">const</span>[number,setNumber]=React.useState(<span class="hljs-number">0</span>);
+  <span class="hljs-keyword">let</span> handleClick = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> setNumber(number+<span class="hljs-number">1</span>)
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleClick}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  )
+}
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t32.2 src\react-dom.js">2.2 src\react-dom.js <a href="#t32.2 src\react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+let hookStates = [];</span>
+<span class="hljs-addition">+let hookIndex = 0;</span>
+<span class="hljs-addition">+let scheduleUpdate;</span>
+<span class="hljs-addition">+function render(vdom, container) {</span>
+<span class="hljs-addition">+    mount(vdom,container);</span>
+<span class="hljs-addition">+    scheduleUpdate = ()=&gt;{</span>
+<span class="hljs-addition">+      hookIndex = 0;</span>
+<span class="hljs-addition">+      compareTwoVdom(container,vdom,vdom);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export function useState(initialState){</span>
+<span class="hljs-addition">+    hookStates[hookIndex] = hookStates[hookIndex]||initialState;</span>
+<span class="hljs-addition">+    let currentIndex = hookIndex; </span>
+<span class="hljs-addition">+    function setState(newState){</span>
+<span class="hljs-addition">+      if(typeof newState === 'function') newState=newState(hookStates[currentIndex]);</span>
+<span class="hljs-addition">+      hookStates[currentIndex]=newState;</span>
+<span class="hljs-addition">+      scheduleUpdate();</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return [hookStates[hookIndex++],setState];</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t42.3 src\react.js">2.3 src\react.js <a href="#t42.3 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import {useState} from './react-dom';</span>
+
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+<span class="hljs-addition">+   useState</span>
+};
+export default React;
+</code></pre>
+<h2 id="t53.useCallback+useMemo">3.useCallback+useMemo <a href="#t53.useCallback+useMemo"> # </a></h2>
+<ul>
+<li>把内联回调函数及依赖项数组作为参数传入 <code>useCallback</code>，它将返回该回调函数的 memoized 版本，该回调函数仅在某个依赖项改变时才会更新</li>
+<li>把创建函数和依赖项数组作为参数传入 <code>useMemo</code>，它仅会在某个依赖项改变时才重新计算 memoized 值。这种优化有助于避免在每次渲染时都进行高开销的计算</li>
+</ul>
+<h3 id="t63.1 src\index.js">3.1 src\index.js <a href="#t63.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+
+
+<span class="hljs-keyword">let</span>  Child = <span class="hljs-function">(<span class="hljs-params">{data,handleClick}</span>)=&gt;</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Child render'</span>);
+  <span class="hljs-keyword">return</span> (
+     <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleClick}</span>&gt;</span>{data.number}<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+  )
+}
+Child = React.memo(Child);
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'App render'</span>);
+  <span class="hljs-keyword">const</span>[name,setName]=React.useState(<span class="hljs-string">'zhufeng'</span>);
+  <span class="hljs-keyword">const</span>[number,setNumber]=React.useState(<span class="hljs-number">0</span>);
+  <span class="hljs-keyword">let</span> data = React.useMemo(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>({number}),[number]);
+  <span class="hljs-keyword">let</span> handleClick = React.useCallback(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> setNumber(number+<span class="hljs-number">1</span>),[number]);
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{name}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{event</span>=&gt;</span>setName(event.target.value)}/&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">Child</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{data}</span> <span class="hljs-attr">handleClick</span>=<span class="hljs-string">{handleClick}/</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  )
+}
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t73.2 src\react-dom.js">3.2 src\react-dom.js <a href="#t73.2 src\react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff">let hookStates = [];
+let hookIndex = 0;
+let scheduleUpdate;
+function render(vdom,container){
+   mount(vdom,container);
+   scheduleUpdate = ()=&gt;{
+    hookIndex = 0;
+    compareTwoVdom(container,vdom,vdom);
+   }
+}
+export function useState(initialState){
+    hookStates[hookIndex] = hookStates[hookIndex]||initialState;
+    let currentIndex = hookIndex; 
+    function setState(newState){
+      if(typeof newState <span class="hljs-comment">=== 'function') newState=newState(hookStates[currentIndex]);</span>
+      hookStates[currentIndex]=newState;
+      scheduleUpdate();
+    }
+    return [hookStates[hookIndex++],setState];
+  }
+<span class="hljs-addition">+export  function useMemo(factory,deps){</span>
+<span class="hljs-addition">+    if(hookStates[hookIndex]){</span>
+<span class="hljs-addition">+      let [lastMemo,lastDeps] = hookStates[hookIndex];</span>
+<span class="hljs-addition">+      let same = deps.every((item,index)=&gt;item === lastDeps[index]);</span>
+<span class="hljs-addition">+      if(same){</span>
+<span class="hljs-addition">+        hookIndex++;</span>
+<span class="hljs-addition">+        return lastMemo;</span>
+<span class="hljs-addition">+      }else{</span>
+<span class="hljs-addition">+        let newMemo = factory();</span>
+<span class="hljs-addition">+        hookStates[hookIndex++]=[newMemo,deps];</span>
+<span class="hljs-addition">+        return newMemo;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    }else{</span>
+<span class="hljs-addition">+      let newMemo = factory();</span>
+<span class="hljs-addition">+      hookStates[hookIndex++]=[newMemo,deps];</span>
+<span class="hljs-addition">+      return newMemo;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export function useCallback(callback,deps){</span>
+<span class="hljs-addition">+    if(hookStates[hookIndex]){</span>
+<span class="hljs-addition">+      let [lastCallback,lastDeps] = hookStates[hookIndex];</span>
+<span class="hljs-addition">+      let same = deps.every((item,index)=&gt;item === lastDeps[index]);</span>
+<span class="hljs-addition">+      if(same){</span>
+<span class="hljs-addition">+        hookIndex++;</span>
+<span class="hljs-addition">+        return lastCallback;</span>
+<span class="hljs-addition">+      }else{</span>
+<span class="hljs-addition">+        hookStates[hookIndex++]=[callback,deps];</span>
+<span class="hljs-addition">+        return callback;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    }else{</span>
+<span class="hljs-addition">+      hookStates[hookIndex++]=[callback,deps];</span>
+<span class="hljs-addition">+      return callback;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+const ReactDOM =  {
+    render
+};
+export default ReactDOM;
+</code></pre>
+<h3 id="t83.3 src\react.js">3.3 src\react.js <a href="#t83.3 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff">import {wrapToVdom} from './utils';
+import {Component,PureComponent} from './Component';
+<span class="hljs-addition">+import {useState,useMemo,useCallback} from './react-dom';</span>
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+<span class="hljs-addition">+   useMemo,</span>
+<span class="hljs-addition">+   useCallback,</span>
+    useState
+};
+export default React;
+</code></pre>
+<h2 id="t94. useReducer">4. useReducer <a href="#t94. useReducer"> # </a></h2>
+<ul>
+<li>useState 的替代方案。它接收一个形如 (state, action) =&gt; newState 的 reducer，并返回当前的 state 以及与其配套的 dispatch 方法</li>
+<li>在某些场景下，useReducer 会比 useState 更适用，例如 state 逻辑较复杂且包含多个子值，或者下一个 state 依赖于之前的 state 等</li>
+</ul>
+<h3 id="t104.1 src\index.js">4.1 src\index.js <a href="#t104.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reducer</span>(<span class="hljs-params">state={number:<span class="hljs-number">0</span>}, action</span>) </span>{
+  <span class="hljs-keyword">switch</span> (action.type) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'ADD'</span>:
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span>};
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'MINUS'</span>:
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span>};
+    <span class="hljs-keyword">default</span>:
+      <span class="hljs-keyword">return</span> state;
+  }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Counter</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">const</span> [state, dispatch] = React.useReducer(reducer,{<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>});
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+          Count: {state.number}
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> dispatch({type: 'ADD'})}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> dispatch({type: 'MINUS'})}&gt;-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span>/&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
+</code></pre>
+<h3 id="t114.2 src\react-dom.js">4.2 src\react-dom.js <a href="#t114.2 src\react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+export function useReducer(reducer, initialState) {</span>
+<span class="hljs-addition">+    hookStates[hookIndex]=hookStates[hookIndex]||initialState;</span>
+<span class="hljs-addition">+    let currentIndex = hookIndex;</span>
+<span class="hljs-addition">+    function dispatch(action) {</span>
+<span class="hljs-addition">+      hookStates[currentIndex]=reducer?reducer(hookStates[currentIndex],action):action;</span>
+<span class="hljs-addition">+      scheduleUpdate();</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return [hookStates[hookIndex++], dispatch];</span>
+<span class="hljs-addition">+}</span>
+const ReactDOM =  {
+    render
+};
+export default ReactDOM;
+</code></pre>
+<h3 id="t124.3 src\react.js">4.3 src\react.js <a href="#t124.3 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import {useState,useMemo,useCallback,useReducer} from './react-dom';</span>
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+    useMemo,
+    useCallback,
+    useState,
+<span class="hljs-addition">+   useReducer</span>
+};
+export default React;
+</code></pre>
+<h2 id="t135. useContext">5. useContext <a href="#t135. useContext"> # </a></h2>
+<ul>
+<li>接收一个 context 对象（React.createContext 的返回值）并返回该 context 的当前值</li>
+<li>当前的 context 值由上层组件中距离当前组件最近的 &lt;MyContext.Provider&gt; 的 value prop 决定</li>
+<li>当组件上层最近的 &lt;MyContext.Provider&gt; 更新时，该 Hook 会触发重渲染，并使用最新传递给 MyContext provider 的 context value 值</li>
+<li>useContext(MyContext) 相当于 class 组件中的 <code>static contextType = MyContext</code> 或者 <code>&lt;MyContext.Consumer&gt;</code></li>
+<li>useContext(MyContext) 只是让你能够读取 context 的值以及订阅 context 的变化。你仍然需要在上层组件树中使用 &lt;MyContext.Provider&gt; 来为下层组件提供 context</li>
+</ul>
+<h3 id="t145.1 src\index.js">5.1 src\index.js <a href="#t145.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+
+<span class="hljs-keyword">const</span> CounterContext = React.createContext();
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">reducer</span>(<span class="hljs-params">state, action</span>) </span>{
+  <span class="hljs-keyword">switch</span> (action.type) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'add'</span>:
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span>};
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'minus'</span>:
+      <span class="hljs-keyword">return</span> {<span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span>};
+    <span class="hljs-keyword">default</span>:
+      <span class="hljs-keyword">return</span> state;
+  }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Counter</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">let</span> {state,dispatch} = React.useContext(CounterContext);
+  <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{state.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> dispatch({type: 'add'})}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> dispatch({type: 'minus'})}&gt;-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  )
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">App</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">const</span> [state, dispatch] = React.useReducer(reducer, {<span class="hljs-attr">number</span>:<span class="hljs-number">0</span>});
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">CounterContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{{state,dispatch}}</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">Counter</span>/&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">CounterContext.Provider</span>&gt;</span></span>
+    )
+}
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span>/&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t155.2 src\react.js">5.2 src\react.js <a href="#t155.2 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff">import {wrapToVdom} from './utils';
+import {Component,PureComponent} from './Component';
+import {useState,useMemo,useCallback,useReducer} from './react-dom';
+function createElement(type, config, children) {
+    let ref;
+    if (config) {
+        delete config._owner;
+        delete config._store;
+        delete config.__self;
+        delete config.__source;
+        ref=config.ref;
+        delete config.ref;
+    }
+    let props = { ...config };
+    if (arguments.length &gt; 3) {
+        props.children = Array.prototype.slice.call(arguments,2).map(wrapToVdom);
+    }else{
+        props.children = wrapToVdom(children);
+    }
+    return {
+        type,
+        ref,
+        props
+    };
+}
+function createRef() {
+    return { current: null };
+}
+function createContext(initialValue={}){
+    let context = {Provider,Consumer};
+    function Provider(props){
+      context._currentValue=context._currentValue||initialValue;
+      Object.assign(context._currentValue,props.value);
+      return props.children;
+    }
+    function Consumer(props){
+      return props.children(context._currentValue);
+    }
+    return context;
+}
+function cloneElement(element,newProps,...newChildren){
+  let oldChildren = element.props&amp;&amp;element.props.children;
+  let children = [...(Array.isArray(oldChildren)?oldChildren:[oldChildren]),...newChildren]
+  .filter(item=&gt;item!==undefined)
+  .map(wrapToVdom);
+  if(children.length<span class="hljs-comment">===1) children=children[0];</span>
+  let props = {...element.props,...newProps,children};
+  return {...element,props};
+}
+function memo(OldComponent){
+    return class extends React.PureComponent{
+      render(){
+        return &lt;OldComponent {...this.props}/&gt;
+      }
+    }
+}
+<span class="hljs-addition">+function useContext(context){</span>
+<span class="hljs-addition">+  return context._currentValue;</span>
+<span class="hljs-addition">+}</span>
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+    useMemo,
+    useCallback,
+    useState,
+    useReducer,
+<span class="hljs-addition">+   useContext</span>
+};
+export default React;
+</code></pre>
+<h2 id="t166. useEffect">6. useEffect <a href="#t166. useEffect"> # </a></h2>
+<ul>
+<li>在函数组件主体内（这里指在 React 渲染阶段）改变 DOM、添加订阅、设置定时器、记录日志以及执行其他包含副作用的操作都是不被允许的，因为这可能会产生莫名其妙的 bug 并破坏 UI 的一致性</li>
+<li>使用 useEffect 完成副作用操作。赋值给 useEffect 的函数会在组件渲染到屏幕之后执行。你可以把 effect 看作从 React 的纯函数式世界通往命令式世界的逃生通道</li>
+<li>useEffect 就是一个 Effect Hook，给函数组件增加了操作副作用的能力。它跟 class 组件中的 <code>componentDidMount</code>、<code>componentDidUpdate</code> 和 <code>componentWillUnmount</code> 具有相同的用途，只不过被合并成了一个 API</li>
+<li>该 Hook 接收一个包含命令式、且可能有副作用代码的函数</li>
+</ul>
+<h3 id="t176.1 src\index.js">6.1 src\index.js <a href="#t176.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Counter</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> [number, setNumber] = React.useState(<span class="hljs-number">0</span>);
+    React.useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'开启一个新的定时器'</span>)
+        <span class="hljs-keyword">const</span> $timer = setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            setNumber(<span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> number + <span class="hljs-number">1</span>);
+        }, <span class="hljs-number">1000</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'销毁老的定时器'</span>);
+            clearInterval($timer);
+        }
+    });
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>
+    )
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t186.2 src\react-dom.js">6.2 src\react-dom.js <a href="#t186.2 src\react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+export function useEffect(callback,dependencies){</span>
+<span class="hljs-addition">+  if(hookStates[hookIndex]){</span>
+<span class="hljs-addition">+      let [lastCallback,lastDeps] = hookStates[hookIndex];</span>
+<span class="hljs-addition">+      let same = dependencies&amp;&amp;dependencies.every((item,index)=&gt;item === lastDeps[index]);</span>
+<span class="hljs-addition">+      if(same){</span>
+<span class="hljs-addition">+        hookIndex++;</span>
+<span class="hljs-addition">+      }else{</span>
+<span class="hljs-addition">+        lastCallback&amp;&amp;lastCallback();</span>
+<span class="hljs-addition">+        setTimeout(()=&gt;{</span>
+<span class="hljs-addition">+            lastCallback = callback();</span>
+<span class="hljs-addition">+            hookStates[hookIndex++]=[lastCallback,dependencies];</span>
+<span class="hljs-addition">+        });</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+  }else{</span>
+<span class="hljs-addition">+    setTimeout(()=&gt;{</span>
+<span class="hljs-addition">+        hookStates[hookIndex++]=[callback(),dependencies];</span>
+<span class="hljs-addition">+    });</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+const ReactDOM =  {
+    render
+};
+export default ReactDOM;
+</code></pre>
+<h3 id="t196.3 src\react.js">6.3 src\react.js <a href="#t196.3 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff">import {wrapToVdom} from './utils';
+import {Component,PureComponent} from './Component';
+<span class="hljs-addition">+import {useState,useMemo,useCallback,useReducer,useEffect} from './react-dom';</span>
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+    useMemo,
+    useCallback,
+    useState,
+    useReducer,
+    useContext,
+<span class="hljs-addition">+   useEffect</span>
+};
+export default React;
+</code></pre>
+<h2 id="t207. useLayoutEffect+useRef">7. useLayoutEffect+useRef <a href="#t207. useLayoutEffect+useRef"> # </a></h2>
+<ul>
+<li>其函数签名与 <code>useEffect</code> 相同，但它会在所有的 <code>DOM</code> 变更之后同步调用 effect</li>
+<li><code>useEffect</code>不会阻塞浏览器渲染，而 <code>useLayoutEffect</code> 会浏览器渲染</li>
+<li><code>useEffect</code>会在浏览器渲染结束后执行,<code>useLayoutEffect</code> 则是在 <code>DOM</code> 更新完成后,浏览器绘制之前执行</li>
+</ul>
+<h3 id="t217.1 事件循环">7.1 事件循环 <a href="#t217.1 事件循环"> # </a></h3>
+<p><img src="http://img.zhufengpeixun.cn/useLayoutEffect.jpg" style="width:60%;"></p>
+<h3 id="t227.2 src\index.js">7.2 src\index.js <a href="#t227.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+
+<span class="hljs-keyword">const</span> Animate = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">const</span> ref = React.useRef();
+    React.useLayoutEffect(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        ref.current.style.WebkitTransform = <span class="hljs-string">`translate(500px)`</span>;
+        ref.current.style.transition  = <span class="hljs-string">`all 500ms`</span>;
+    });
+    <span class="hljs-keyword">let</span> style = {
+        <span class="hljs-attr">width</span>:<span class="hljs-string">'100px'</span>,
+        <span class="hljs-attr">height</span>:<span class="hljs-string">'100px'</span>,
+        <span class="hljs-attr">backgroundColor</span>:<span class="hljs-string">'red'</span>
+    }
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{style}</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{ref}</span>&gt;</span>我是内容<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Animate</span>/&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t237.3 src\react-dom.js">7.3 src\react-dom.js <a href="#t237.3 src\react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+export function useLayoutEffect(callback,dependencies){</span>
+<span class="hljs-addition">+    if(hookStates[hookIndex]){</span>
+<span class="hljs-addition">+        let [lastCallback,lastDeps] = hookStates[hookIndex];</span>
+<span class="hljs-addition">+        let same = dependencies&amp;&amp;dependencies.every((item,index)=&gt;item === lastDeps[index]);</span>
+<span class="hljs-addition">+        if(same){</span>
+<span class="hljs-addition">+          hookIndex++;</span>
+<span class="hljs-addition">+        }else{</span>
+<span class="hljs-addition">+          lastCallback&amp;&amp;lastCallback();</span>
+<span class="hljs-addition">+          queueMicrotask(()=&gt;{</span>
+<span class="hljs-addition">+              lastCallback = callback();</span>
+<span class="hljs-addition">+              hookStates[hookIndex++]=[lastCallback,dependencies];</span>
+<span class="hljs-addition">+          });</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }else{</span>
+<span class="hljs-addition">+        queueMicrotask(()=&gt;{</span>
+<span class="hljs-addition">+          hookStates[hookIndex++]=[callback(),dependencies];</span>
+<span class="hljs-addition">+      });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+export function useRef(initialState) {</span>
+<span class="hljs-addition">+    hookStates[hookIndex] =  hookStates[hookIndex] || { current: initialState };</span>
+<span class="hljs-addition">+    return hookStates[hookIndex++];</span>
+<span class="hljs-addition">+}</span>
+</code></pre>
+<h3 id="t247.4 src\react.js">7.4 src\react.js <a href="#t247.4 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff">import {wrapToVdom} from './utils';
+import {Component,PureComponent} from './Component';
+<span class="hljs-addition">+import {useState,useMemo,useCallback,useReducer,useEffect,useRef,useLayoutEffect} from './react-dom';</span>
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+    useMemo,
+    useCallback,
+    useState,
+    useReducer,
+    useContext,
+    useEffect,
+    useRef,
+<span class="hljs-addition">+   useLayoutEffect</span>
+};
+export default React;
+</code></pre>
+<h2 id="t258. forwardRef+useImperativeHandle">8. forwardRef+useImperativeHandle <a href="#t258. forwardRef+useImperativeHandle"> # </a></h2>
+<ul>
+<li>forwardRef将ref从父组件中转发到子组件中的dom元素上,子组件接受props和ref作为参数</li>
+<li><code>useImperativeHandle</code> 可以让你在使用 ref 时自定义暴露给父组件的实例值</li>
+</ul>
+<h3 id="t268.1 src\index.js">8.1 src\index.js <a href="#t268.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'./react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-dom'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Child</span>(<span class="hljs-params">props, ref</span>) </span>{
+    <span class="hljs-keyword">const</span> inputRef = React.useRef();
+    React.useImperativeHandle(ref, () =&gt; (
+        {
+            focus() {
+                inputRef.current.focus();
+            }
+        }
+    ));
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{inputRef}</span> /&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">const</span> ForwardChild = React.forwardRef(Child);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Parent</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> [number, setNumber] = React.useState(<span class="hljs-number">0</span>);
+    <span class="hljs-keyword">const</span> inputRef = React.useRef();
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFocus</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(inputRef.current);
+        inputRef.current.value = <span class="hljs-string">'focus'</span>;
+        inputRef.current.focus();
+    }
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">ForwardChild</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{inputRef}</span> /&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{getFocus}</span>&gt;</span>获得焦点<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> {
+                debugger
+                setNumber( number + 1)
+            }}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Parent</span>/&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t278.2 src\react-dom.js">8.2 src\react-dom.js <a href="#t278.2 src\react-dom.js"> # </a></h3>
+<p>src\react-dom.js</p>
+<pre><code class="lang-diff">function mountClassComponent(vdom){
+<span class="hljs-addition">+    const {type, props,ref} = vdom;</span>
+    const classInstance = new type(props);
+<span class="hljs-addition">+   if(ref){</span>
+<span class="hljs-addition">+       ref.current = classInstance;</span>
+<span class="hljs-addition">+       classInstance.ref = ref;</span>
+<span class="hljs-addition">+   }</span>
+    vdom.classInstance=classInstance;
+    if(type.contextType){
+        classInstance.context = type.contextType.Provider._value;
+    }
+    if(classInstance.componentWillMount)
+       classInstance.componentWillMount();
+    classInstance.state = getDerivedStateFromProps(classInstance,classInstance.props,classInstance.state)   
+    const renderVdom = classInstance.render();
+    classInstance.oldRenderVdom=vdom.oldRenderVdom=renderVdom;
+    const dom = createDOM(renderVdom);
+    if(classInstance.componentDidMount)
+      dom.componentDidMount=classInstance.componentDidMount.bind(classInstance);
+    return dom;
+}
+
+<span class="hljs-addition">+export function useImperativeHandle(ref,handler){</span>
+<span class="hljs-addition">+    ref.current = handler();</span>
+<span class="hljs-addition">+}</span>
+const ReactDOM =  {
+    render
+};
+export default ReactDOM;
+</code></pre>
+<h3 id="t288.3 src\react.js">8.3 src\react.js <a href="#t288.3 src\react.js"> # </a></h3>
+<p>src\react.js</p>
+<pre><code class="lang-diff">import {wrapToVdom} from './utils';
+import {Component,PureComponent} from './Component';
+<span class="hljs-addition">+import {useState,useMemo,useCallback,useReducer,useEffect,useRef,useLayoutEffect,useImperativeHandle} from './react-dom';</span>
+
+<span class="hljs-addition">+function forwardRef(FunctionComponent){</span>
+<span class="hljs-addition">+  return class extends Component{</span>
+<span class="hljs-addition">+    render(){</span>
+<span class="hljs-addition">+      return FunctionComponent(this.props,this.ref);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+  }</span>
+<span class="hljs-addition">+}</span>
+const React = {
+    createElement,
+    Component,
+    PureComponent,
+    createRef,
+    createContext,
+    cloneElement,
+    memo,
+    useMemo,
+    useCallback,
+    useState,
+    useReducer,
+    useContext,
+    useEffect,
+    useRef,
+    useLayoutEffect,
+<span class="hljs-addition">+   forwardRef,</span>
+<span class="hljs-addition">+   useImperativeHandle</span>
+};
+export default React;
+</code></pre>
+
+    

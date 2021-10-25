@@ -1,0 +1,2584 @@
+
+        <h2 id="t01.跑通webpack">1.跑通webpack <a href="#t01.跑通webpack"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/workflow2.jpg" alt="workflow2"></p>
+<h3 id="t11.1 webpack.config.js">1.1 webpack.config.js <a href="#t11.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">context</span>: process.cwd(),
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>: <span class="hljs-string">'none'</span>,
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">'./src/index.js'</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">'dist'</span>),
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">'[name].js'</span>
+    }
+}
+</code></pre>
+<h3 id="t21.2 src\index.js">1.2 src\index.js <a href="#t21.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./title'</span>);
+<span class="hljs-built_in">console</span>.log(title);
+</code></pre>
+<h3 id="t31.3 src\title.js">1.3 src\title.js <a href="#t31.3 src\title.js"> # </a></h3>
+<p>src\title.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'title'</span>;
+</code></pre>
+<h3 id="t41.4 cli.js">1.4 cli.js <a href="#t41.4 cli.js"> # </a></h3>
+<pre><code class="lang-js">node cli.js
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">"webpack"</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./webpack.config"</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions);
+compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(err);
+    <span class="hljs-built_in">console</span>.log(
+        stats.toJson({
+            <span class="hljs-attr">entries</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">chunks</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">modules</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">assets</span>: <span class="hljs-literal">true</span>
+        })
+    );
+});
+</code></pre>
+<pre><code class="lang-js">{
+  <span class="hljs-attr">errors</span>: [],
+  <span class="hljs-attr">warnings</span>: [],
+  <span class="hljs-attr">version</span>: <span class="hljs-string">'4.43.0'</span>,
+  <span class="hljs-attr">hash</span>: <span class="hljs-string">'b8d9a2a39e55e9ed6360'</span>,
+  <span class="hljs-attr">time</span>: <span class="hljs-number">64</span>,
+  <span class="hljs-attr">builtAt</span>: <span class="hljs-number">1589509767224</span>,
+  <span class="hljs-attr">publicPath</span>: <span class="hljs-string">''</span>,
+  <span class="hljs-attr">outputPath</span>: <span class="hljs-string">'C:\\vipdata\\prepare12\\zhufengwebpackprepare\\dist'</span>,
+  <span class="hljs-attr">assetsByChunkName</span>: { <span class="hljs-attr">main</span>: <span class="hljs-string">'main.js'</span> },
+  <span class="hljs-attr">assets</span>: [
+    {
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'main.js'</span>,
+      <span class="hljs-attr">size</span>: <span class="hljs-number">4126</span>,
+      <span class="hljs-attr">chunks</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">chunkNames</span>: [<span class="hljs-built_in">Array</span>]
+    }
+  ],
+  <span class="hljs-attr">entrypoints</span>: {
+    <span class="hljs-attr">main</span>: {
+      <span class="hljs-attr">chunks</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">assets</span>: [<span class="hljs-built_in">Array</span>],
+    }
+  },
+  <span class="hljs-attr">namedChunkGroups</span>: {
+    <span class="hljs-attr">main</span>: {
+      <span class="hljs-attr">chunks</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">assets</span>: [<span class="hljs-built_in">Array</span>]
+    }
+  },
+  <span class="hljs-attr">chunks</span>: [
+    {
+      <span class="hljs-attr">id</span>: <span class="hljs-string">'main'</span>,
+      <span class="hljs-attr">rendered</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">initial</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">entry</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">size</span>: <span class="hljs-number">77</span>,
+      <span class="hljs-attr">names</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">files</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">hash</span>: <span class="hljs-string">'1e1215aa688e72e663af'</span>,
+      <span class="hljs-attr">siblings</span>: [],
+      <span class="hljs-attr">parents</span>: [],
+      <span class="hljs-attr">children</span>: [],
+      <span class="hljs-attr">childrenByOrder</span>: [<span class="hljs-built_in">Object</span>: <span class="hljs-literal">null</span> prototype] {},
+      <span class="hljs-attr">modules</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">filteredModules</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">origins</span>: [<span class="hljs-built_in">Array</span>]
+    }
+  ],
+  <span class="hljs-attr">modules</span>: [
+    {
+      <span class="hljs-attr">id</span>: <span class="hljs-string">'./src/index.js'</span>,
+      <span class="hljs-attr">identifier</span>: <span class="hljs-string">'C:\\vipdata\\prepare12\\zhufengwebpackprepare\\src\\index.js'</span>,
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'./src/index.js'</span>,
+      <span class="hljs-attr">index</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">index2</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">size</span>: <span class="hljs-number">52</span>,
+      <span class="hljs-attr">cacheable</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">built</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">optional</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">prefetched</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">chunks</span>: [<span class="hljs-built_in">Array</span>]
+      <span class="hljs-attr">assets</span>: [],
+      <span class="hljs-attr">reasons</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">source</span>: <span class="hljs-string">"let title = require('./title');\r\nconsole.log(title);"</span>
+    },
+    {
+      <span class="hljs-attr">id</span>: <span class="hljs-string">'./src/title.js'</span>,
+      <span class="hljs-attr">identifier</span>: <span class="hljs-string">'C:\\vipdata\\prepare12\\zhufengwebpackprepare\\src\\title.js'</span>,
+      <span class="hljs-attr">name</span>: <span class="hljs-string">'./src/title.js'</span>,
+      <span class="hljs-attr">index</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">index2</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">size</span>: <span class="hljs-number">25</span>,
+      <span class="hljs-attr">cacheable</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">built</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">optional</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">prefetched</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">chunks</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">issuer</span>: <span class="hljs-string">'C:\\vipdata\\prepare12\\zhufengwebpackprepare\\src\\index.js'</span>,
+      <span class="hljs-attr">issuerId</span>: <span class="hljs-string">'./src/index.js'</span>,
+      <span class="hljs-attr">issuerName</span>: <span class="hljs-string">'./src/index.js'</span>,
+      <span class="hljs-attr">errors</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">warnings</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">assets</span>: [],
+      <span class="hljs-attr">reasons</span>: [<span class="hljs-built_in">Array</span>],
+      <span class="hljs-attr">source</span>: <span class="hljs-string">"module.exports = 'title';"</span>
+    }
+  ]
+}
+</code></pre>
+<h3 id="t51.5 main.js">1.5 main.js <a href="#t51.5 main.js"> # </a></h3>
+<ul>
+<li>^\s*(?=\r?$)\n</li>
+</ul>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+  <span class="hljs-keyword">var</span> installedModules = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+      <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+      <span class="hljs-attr">i</span>: moduleId,
+      <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+    <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  __webpack_require__.m = modules;
+  __webpack_require__.c = installedModules;
+  __webpack_require__.d = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports, name, getter</span>) </span>{
+    <span class="hljs-keyword">if</span> (!__webpack_require__.o(exports, name)) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, name, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: getter });
+    }
+  };
+  __webpack_require__.r = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.toStringTag) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    }
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value, mode</span>) </span>{
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">1</span>) value = __webpack_require__(value);
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">8</span>) <span class="hljs-keyword">return</span> value;
+    <span class="hljs-keyword">if</span> ((mode &amp; <span class="hljs-number">4</span>) &amp;&amp; <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">'object'</span> &amp;&amp; value &amp;&amp; value.__esModule) <span class="hljs-keyword">return</span> value;
+    <span class="hljs-keyword">var</span> ns = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
+    __webpack_require__.r(ns);
+    <span class="hljs-built_in">Object</span>.defineProperty(ns, <span class="hljs-string">'default'</span>, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">value</span>: value });
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">2</span> &amp;&amp; <span class="hljs-keyword">typeof</span> value != <span class="hljs-string">'string'</span>) <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> value) __webpack_require__.d(ns, key, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key</span>) </span>{ <span class="hljs-keyword">return</span> value[key]; }.bind(<span class="hljs-literal">null</span>, key));
+    <span class="hljs-keyword">return</span> ns;
+  };
+  __webpack_require__.n = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module</span>) </span>{
+    <span class="hljs-keyword">var</span> getter = <span class="hljs-built_in">module</span> &amp;&amp; <span class="hljs-built_in">module</span>.__esModule ?
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefault</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>[<span class="hljs-string">'default'</span>]; } :
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getModuleExports</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>; };
+    __webpack_require__.d(getter, <span class="hljs-string">'a'</span>, getter);
+    <span class="hljs-keyword">return</span> getter;
+  };
+  __webpack_require__.o = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">object, property</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(object, property); };
+  __webpack_require__.p = <span class="hljs-string">""</span>;
+  <span class="hljs-keyword">return</span> __webpack_require__(__webpack_require__.s = <span class="hljs-string">"./src/index.js"</span>);
+})
+  ({
+    <span class="hljs-string">"./src/index.js"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+        <span class="hljs-keyword">let</span> title = __webpack_require__(<span class="hljs-comment">/*! ./title */</span> <span class="hljs-string">"./src/title.js"</span>);
+        <span class="hljs-built_in">console</span>.log(title);
+      }),
+    <span class="hljs-string">"./src/title.js"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports</span>) </span>{
+        <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'title'</span>;
+      })
+  });
+</code></pre>
+<h2 id="t62. Compiler.run">2. Compiler.run <a href="#t62. Compiler.run"> # </a></h2>
+<h3 id="t72.1 cli.js">2.1 cli.js <a href="#t72.1 cli.js"> # </a></h3>
+<pre><code class="lang-diff"><span class="hljs-addition">+const webpack = require("./webpack");</span>
+const webpackOptions = require("./webpack.config");
+const compiler = webpack(webpackOptions);
+compiler.run((err, stats) =&gt; {
+    console.log(
+        stats.toJson({
+            entries: true,
+            chunks: true,
+            modules: true,
+            assets: true
+        })
+    );
+});
+</code></pre>
+<h3 id="t82.2 webpack\index.js">2.2 webpack\index.js <a href="#t82.2 webpack\index.js"> # </a></h3>
+<p>webpack\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> NodeEnvironmentPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./plugins/NodeEnvironmentPlugin"</span>);
+<span class="hljs-keyword">const</span> Compiler = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./Compiler"</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpack</span>(<span class="hljs-params">options</span>) </span>{
+    options.context = options.context || path.resolve(process.cwd());
+    <span class="hljs-comment">//创建compiler</span>
+    <span class="hljs-keyword">let</span> compiler = <span class="hljs-keyword">new</span> Compiler(options.context);
+    <span class="hljs-comment">//给compiler指定options</span>
+    compiler.options = <span class="hljs-built_in">Object</span>.assign(compiler.options, options);
+    <span class="hljs-comment">//插件设置读写文件的API</span>
+    <span class="hljs-keyword">new</span> NodeEnvironmentPlugin().apply(compiler);
+    <span class="hljs-comment">//调用配置文件里配置的插件并依次调用</span>
+    <span class="hljs-keyword">if</span> (options.plugins &amp;&amp; <span class="hljs-built_in">Array</span>.isArray(options.plugins)) {
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> plugin <span class="hljs-keyword">of</span> options.plugins) {
+            plugin.apply(compiler);
+        }
+    }
+    <span class="hljs-keyword">return</span> compiler;
+}
+
+<span class="hljs-built_in">module</span>.exports = webpack;
+</code></pre>
+<h3 id="t92.3 Compiler.js">2.3 Compiler.js <a href="#t92.3 Compiler.js"> # </a></h3>
+<p>webpack\Compiler.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> { Tapable } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"tapable"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compiler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Tapable</span> </span>{
+    <span class="hljs-keyword">constructor</span>(context) {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.options = {};
+        <span class="hljs-keyword">this</span>.context = context; <span class="hljs-comment">//设置上下文路径</span>
+        <span class="hljs-keyword">this</span>.hooks = {};
+    }
+    run(callback) {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Compiler run"</span>);
+        callback(<span class="hljs-literal">null</span>, {
+            toJson() {
+                <span class="hljs-keyword">return</span> {
+                    <span class="hljs-attr">entries</span>: <span class="hljs-literal">true</span>,
+                    <span class="hljs-attr">chunks</span>: <span class="hljs-literal">true</span>,
+                    <span class="hljs-attr">modules</span>: <span class="hljs-literal">true</span>,
+                    <span class="hljs-attr">assets</span>: <span class="hljs-literal">true</span>
+                }
+            }
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Compiler;
+</code></pre>
+<h3 id="t102.4 NodeEnvironmentPlugin.js">2.4 NodeEnvironmentPlugin.js <a href="#t102.4 NodeEnvironmentPlugin.js"> # </a></h3>
+<p>webpack\plugins\NodeEnvironmentPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">"fs"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NodeEnvironmentPlugin</span> </span>{
+    apply(compiler) {
+        compiler.inputFileSystem = fs; <span class="hljs-comment">//设置读文件的模块</span>
+        compiler.outputFileSystem = fs; <span class="hljs-comment">//设置写文件的模块</span>
+    }
+}
+<span class="hljs-built_in">module</span>.exports = NodeEnvironmentPlugin;
+</code></pre>
+<h2 id="t113. 监听make事件">3. 监听make事件 <a href="#t113. 监听make事件"> # </a></h2>
+<h3 id="t123.1 Compiler.js">3.1 Compiler.js <a href="#t123.1 Compiler.js"> # </a></h3>
+<p>webpack\Compiler.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+const { Tapable, SyncBailHook, AsyncParallelHook } = require("tapable");</span>
+class Compiler extends Tapable {
+    constructor(context) {
+        super();
+        this.options = {};
+        this.context = context; //设置上下文路径
+<span class="hljs-addition">+       this.hooks = {</span>
+<span class="hljs-addition">+            entryOption: new SyncBailHook(["context", "entry"]),</span>
+<span class="hljs-addition">+            make: new AsyncParallelHook(["compilation"])</span>
+<span class="hljs-addition">+       };</span>
+    }
+    run(callback) {
+        console.log("Compiler run");
+        callback(null, {
+            toJson() {
+                return {
+                    entries: true,
+                    chunks: true,
+                    modules: true,
+                    assets: true
+                }
+            }
+        });
+    }
+}
+module.exports = Compiler;
+</code></pre>
+<h3 id="t133.2 webpack\index.js">3.2 webpack\index.js <a href="#t133.2 webpack\index.js"> # </a></h3>
+<p>webpack\index.js</p>
+<pre><code class="lang-diff">const NodeEnvironmentPlugin = require("./plugins/NodeEnvironmentPlugin");
+<span class="hljs-addition">+const WebpackOptionsApply = require("./WebpackOptionsApply");</span>
+const Compiler = require("./Compiler");
+function webpack(options) {
+    options.context = options.context || path.resolve(process.cwd());
+    //创建compiler
+    let compiler = new Compiler(options.context);
+    //给compiler指定options
+    compiler.options = Object.assign(compiler.options, options);
+    //插件设置读写文件的API
+    new NodeEnvironmentPlugin().apply(compiler);
+    //调用配置文件里配置的插件并依次调用
+    if (options.plugins &amp;&amp; Array.isArray(options.plugins)) {
+        for (const plugin of options.plugins) {
+            plugin.apply(compiler);
+        }
+    }
+<span class="hljs-addition">+    new WebpackOptionsApply().process(options, compiler); //处理参数</span>
+    return compiler;
+}
+
+module.exports = webpack;
+</code></pre>
+<h3 id="t143.3 WebpackOptionsApply.js">3.3 WebpackOptionsApply.js <a href="#t143.3 WebpackOptionsApply.js"> # </a></h3>
+<p>webpack\WebpackOptionsApply.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> EntryOptionPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./plugins/EntryOptionPlugin"</span>);
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WebpackOptionsApply</span> </span>{
+    process(options, compiler) {
+        <span class="hljs-comment">//挂载入口文件插件</span>
+        <span class="hljs-keyword">new</span> EntryOptionPlugin().apply(compiler);
+        <span class="hljs-comment">//触发entryOption事件执行</span>
+        compiler.hooks.entryOption.call(options.context, options.entry);
+    }
+};
+</code></pre>
+<h3 id="t153.4 EntryOptionPlugin.js">3.4 EntryOptionPlugin.js <a href="#t153.4 EntryOptionPlugin.js"> # </a></h3>
+<p>webpack\plugins\EntryOptionPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> SingleEntryPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./SingleEntryPlugin"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EntryOptionPlugin</span> </span>{
+    apply(compiler) {
+        compiler.hooks.entryOption.tap(<span class="hljs-string">"EntryOptionPlugin"</span>, (context, entry) =&gt; {
+            <span class="hljs-keyword">new</span> SingleEntryPlugin(context, entry, <span class="hljs-string">"main"</span>).apply(compiler);
+        });
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = EntryOptionPlugin;
+</code></pre>
+<h3 id="t163.5 SingleEntryPlugin.js">3.5 SingleEntryPlugin.js <a href="#t163.5 SingleEntryPlugin.js"> # </a></h3>
+<p>webpack\plugins\SingleEntryPlugin.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EntryOptionPlugin</span> </span>{
+    <span class="hljs-keyword">constructor</span>(context, entry, name) {
+        <span class="hljs-keyword">this</span>.context = context;
+        <span class="hljs-keyword">this</span>.entry = entry;
+        <span class="hljs-keyword">this</span>.name = name;
+    }
+    apply(compiler) {
+        compiler.hooks.make.tapAsync(
+            <span class="hljs-string">"SingleEntryPlugin"</span>,
+            (compilation, callback) =&gt; {
+                <span class="hljs-comment">//入口文件 代码块的名称 context上下文绝对路径</span>
+                <span class="hljs-keyword">const</span> { entry, name, context } = <span class="hljs-keyword">this</span>;
+                compilation.addEntry(context, entry, name, callback);
+            }
+        );
+    }
+};
+<span class="hljs-built_in">module</span>.exports = EntryOptionPlugin;
+</code></pre>
+<h2 id="t174. make编译">4. make编译 <a href="#t174. make编译"> # </a></h2>
+<h3 id="t184.1 Compiler.js">4.1 Compiler.js <a href="#t184.1 Compiler.js"> # </a></h3>
+<p>webpack\Compiler.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+const { Tapable, SyncHook, SyncBailHook, AsyncParallelHook, AsyncSeriesHook } = require("tapable");</span>
+<span class="hljs-addition">+const Compilation = require('./Compilation');</span>
+<span class="hljs-addition">+const NormalModuleFactory = require('./NormalModuleFactory');</span>
+<span class="hljs-addition">+const Stats = require('./Stats');</span>
+class Compiler extends Tapable {
+    constructor(context) {
+        super();
+        this.options = {};
+        this.context = context; //设置上下文路径
+        this.hooks = {
+            entryOption: new SyncBailHook(["context", "entry"]),
+<span class="hljs-addition">+            beforeRun: new AsyncSeriesHook(["compiler"]),</span>
+<span class="hljs-addition">+            run: new AsyncSeriesHook(["compiler"]),</span>
+<span class="hljs-addition">+            beforeCompile: new AsyncSeriesHook(["params"]),</span>
+<span class="hljs-addition">+            compile: new SyncHook(["params"]),</span>
+<span class="hljs-addition">+            make: new AsyncParallelHook(["compilation"]),</span>
+<span class="hljs-addition">+            thisCompilation: new SyncHook(["compilation", "params"]),</span>
+<span class="hljs-addition">+            compilation: new SyncHook(["compilation", "params"]),</span>
+<span class="hljs-addition">+            done: new AsyncSeriesHook(["stats"])</span>
+        };
+    }
+<span class="hljs-addition">+    run(finalCallback) {</span>
+<span class="hljs-addition">+        //编译完成后的回调</span>
+<span class="hljs-addition">+        const onCompiled = (err, compilation) =&gt; {</span>
+<span class="hljs-addition">+            console.log('onCompiled');</span>
+<span class="hljs-addition">+            finalCallback(err, new Stats(compilation));</span>
+<span class="hljs-addition">+        };</span>
+<span class="hljs-addition">+        //准备运行编译</span>
+<span class="hljs-addition">+        this.hooks.beforeRun.callAsync(this, err =&gt; {</span>
+<span class="hljs-addition">+            //运行</span>
+<span class="hljs-addition">+            this.hooks.run.callAsync(this, err =&gt; {</span>
+<span class="hljs-addition">+                this.compile(onCompiled); //开始编译,编译完成后执行conCompiled回调</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+        });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    compile(onCompiled) {</span>
+<span class="hljs-addition">+        const params = this.newCompilationParams();</span>
+<span class="hljs-addition">+        this.hooks.beforeCompile.callAsync(params, err =&gt; {</span>
+<span class="hljs-addition">+            this.hooks.compile.call(params);</span>
+<span class="hljs-addition">+            const compilation = this.newCompilation(params);</span>
+<span class="hljs-addition">+            this.hooks.make.callAsync(compilation, err =&gt; {</span>
+<span class="hljs-addition">+                console.log('make完成');</span>
+<span class="hljs-addition">+                onCompiled(err, compilation);</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+        });</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    newCompilationParams() {</span>
+<span class="hljs-addition">+        const params = {</span>
+<span class="hljs-addition">+            normalModuleFactory: new NormalModuleFactory()</span>
+<span class="hljs-addition">+        };</span>
+<span class="hljs-addition">+        return params;</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    newCompilation(params) {</span>
+<span class="hljs-addition">+        const compilation = new Compilation(this);</span>
+<span class="hljs-addition">+        this.hooks.thisCompilation.call(compilation, params);</span>
+<span class="hljs-addition">+        this.hooks.compilation.call(compilation, params);</span>
+<span class="hljs-addition">+        return compilation;</span>
+<span class="hljs-addition">+    }</span>
+}
+module.exports = Compiler;
+</code></pre>
+<h3 id="t194.2 Compilation.js">4.2 Compilation.js <a href="#t194.2 Compilation.js"> # </a></h3>
+<p>webpack\Compilation.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> NormalModuleFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./NormalModuleFactory'</span>);
+<span class="hljs-keyword">const</span> { Tapable, SyncHook } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"tapable"</span>);
+<span class="hljs-keyword">const</span> Parser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./Parser'</span>);
+<span class="hljs-keyword">const</span> parser = <span class="hljs-keyword">new</span> Parser();
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compilation</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Tapable</span> </span>{
+    <span class="hljs-keyword">constructor</span>(compiler) {
+        <span class="hljs-keyword">super</span>();
+        <span class="hljs-keyword">this</span>.compiler = compiler;
+        <span class="hljs-keyword">this</span>.options = compiler.options;
+        <span class="hljs-keyword">this</span>.context = compiler.context;
+        <span class="hljs-keyword">this</span>.inputFileSystem = compiler.inputFileSystem;
+        <span class="hljs-keyword">this</span>.outputFileSystem = compiler.outputFileSystem;
+        <span class="hljs-keyword">this</span>.entries = [];
+        <span class="hljs-keyword">this</span>.modules = [];
+        <span class="hljs-keyword">this</span>.hooks = {
+            <span class="hljs-attr">succeedModule</span>: <span class="hljs-keyword">new</span> SyncHook([<span class="hljs-string">"module"</span>])
+        }
+    }
+    <span class="hljs-comment">//context ./src/index.js main callback(终级回调)</span>
+    addEntry(context, entry, name, callback) {
+        <span class="hljs-keyword">this</span>._addModuleChain(context, entry, name, (err, <span class="hljs-built_in">module</span>) =&gt; {
+            callback(err, <span class="hljs-built_in">module</span>);
+        });
+    }
+    _addModuleChain(context, entry, name, callback) {
+        <span class="hljs-keyword">const</span> moduleFactory = <span class="hljs-keyword">new</span> NormalModuleFactory();
+        <span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> = moduleFactory.create(
+            {
+                name,  <span class="hljs-comment">//模块所属的代码块的名称</span>
+                <span class="hljs-attr">context</span>: <span class="hljs-keyword">this</span>.context,<span class="hljs-comment">//上下文</span>
+                <span class="hljs-attr">rawRequest</span>: entry,
+                <span class="hljs-attr">resource</span>: path.posix.join(context, entry),
+                parser
+            });<span class="hljs-comment">//模块完整路径</span>
+
+        <span class="hljs-keyword">this</span>.modules.push(<span class="hljs-built_in">module</span>);
+        <span class="hljs-keyword">this</span>.entries.push(<span class="hljs-built_in">module</span>);<span class="hljs-comment">//把编译好的模块添加到入口列表里面</span>
+        <span class="hljs-keyword">const</span> afterBuild = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">module</span>.dependencies) {
+                <span class="hljs-keyword">this</span>.processModuleDependencies(<span class="hljs-built_in">module</span>, err =&gt; {
+                    callback(<span class="hljs-literal">null</span>, <span class="hljs-built_in">module</span>);
+                });
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, <span class="hljs-built_in">module</span>);
+            }
+        };
+        <span class="hljs-keyword">this</span>.buildModule(<span class="hljs-built_in">module</span>, afterBuild);
+
+    }
+    buildModule(<span class="hljs-built_in">module</span>, afterBuild) {
+        <span class="hljs-built_in">module</span>.build(<span class="hljs-keyword">this</span>, (err) =&gt; {
+            <span class="hljs-keyword">this</span>.hooks.succeedModule.call(<span class="hljs-built_in">module</span>);
+            <span class="hljs-keyword">return</span> afterBuild();
+        });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Compilation;
+</code></pre>
+<h3 id="t204.3 NormalModuleFactory.js">4.3 NormalModuleFactory.js <a href="#t204.3 NormalModuleFactory.js"> # </a></h3>
+<p>webpack\NormalModuleFactory.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> NormalModule = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./NormalModule'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModuleFactory</span> </span>{
+    create(data) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> NormalModule(data);
+    }
+}
+<span class="hljs-built_in">module</span>.exports = NormalModuleFactory;
+</code></pre>
+<h3 id="t214.4 NormalModule.js">4.4 NormalModule.js <a href="#t214.4 NormalModule.js"> # </a></h3>
+<p>webpack\NormalModule.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NormalModule</span> </span>{
+    <span class="hljs-keyword">constructor</span>({ name, context, rawRequest, resource, parser }) {
+        <span class="hljs-keyword">this</span>.name = name;
+        <span class="hljs-keyword">this</span>.context = context;
+        <span class="hljs-keyword">this</span>.rawRequest = rawRequest;
+        <span class="hljs-keyword">this</span>.resource = resource;
+        <span class="hljs-keyword">this</span>.parser = parser;
+        <span class="hljs-keyword">this</span>._source = <span class="hljs-literal">null</span>;
+        <span class="hljs-keyword">this</span>._ast = <span class="hljs-literal">null</span>;
+    }
+    <span class="hljs-comment">//解析依赖</span>
+    build(compilation, callback) {
+        <span class="hljs-keyword">this</span>.doBuild(compilation, err =&gt; {
+            <span class="hljs-keyword">this</span>._ast = <span class="hljs-keyword">this</span>.parser.parse(<span class="hljs-keyword">this</span>._source);
+            callback();
+        });
+    }
+    <span class="hljs-comment">//获取模块代码</span>
+    doBuild(compilation, callback) {
+        <span class="hljs-keyword">let</span> originalSource = <span class="hljs-keyword">this</span>.getSource(<span class="hljs-keyword">this</span>.resource, compilation);
+        <span class="hljs-keyword">this</span>._source = originalSource;
+        callback();
+    }
+    getSource(resource, compilation) {
+        <span class="hljs-keyword">let</span> originalSource = compilation.inputFileSystem.readFileSync(resource, <span class="hljs-string">'utf8'</span>);
+        <span class="hljs-keyword">return</span> originalSource;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = NormalModule;
+</code></pre>
+<h3 id="t224.5 Parser.js">4.5 Parser.js <a href="#t224.5 Parser.js"> # </a></h3>
+<p>webpack\Parser.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> babylon = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babylon'</span>);
+<span class="hljs-keyword">const</span> { Tapable } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"tapable"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Parser</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Tapable</span> </span>{
+    <span class="hljs-keyword">constructor</span>() {
+        <span class="hljs-keyword">super</span>();
+    }
+    parse(source) {
+        <span class="hljs-keyword">return</span> babylon.parse(source, { <span class="hljs-attr">sourceType</span>: <span class="hljs-string">'module'</span>, <span class="hljs-attr">plugins</span>: [<span class="hljs-string">'dynamicImport'</span>] });
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Parser;
+</code></pre>
+<h3 id="t234.6 Stats.js">4.6 Stats.js <a href="#t234.6 Stats.js"> # </a></h3>
+<p>webpack\Stats.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Stats</span> </span>{
+    <span class="hljs-keyword">constructor</span>(compilation) {
+        <span class="hljs-keyword">this</span>.entries = compilation.entries;
+        <span class="hljs-keyword">this</span>.modules = compilation.modules;
+    }
+    toJson() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+}
+<span class="hljs-built_in">module</span>.exports = Stats;
+</code></pre>
+<h2 id="t245. 编译模块和依赖">5. 编译模块和依赖 <a href="#t245. 编译模块和依赖"> # </a></h2>
+<h3 id="t255.1 webpack\Compilation.js">5.1 webpack\Compilation.js <a href="#t255.1 webpack\Compilation.js"> # </a></h3>
+<p>webpack\Compilation.js</p>
+<pre><code class="lang-diff">const NormalModuleFactory = require('./NormalModuleFactory');
+<span class="hljs-addition">+const async = require('neo-async');</span>
+const { Tapable, SyncHook } = require("tapable");
+const Parser = require('./Parser');
+const parser = new Parser();
+const path = require('path');
+class Compilation extends Tapable {
+    constructor(compiler) {
+        super();
+        this.compiler = compiler;
+        this.options = compiler.options;
+        this.context = compiler.context;
+        this.inputFileSystem = compiler.inputFileSystem;
+        this.outputFileSystem = compiler.outputFileSystem;
+        this.entries = [];
+        this.modules = [];
+        this.hooks = {
+            succeedModule: new SyncHook(["module"])
+        }
+    }
+    //context ./src/index.js main callback(终级回调)
+<span class="hljs-addition">+    _addModuleChain(context,entry,name,callback){</span>
+<span class="hljs-addition">+        this.createModule({</span>
+<span class="hljs-addition">+            name,//所属的代码块的名称 main</span>
+<span class="hljs-addition">+            context:this.context,//上下文</span>
+<span class="hljs-addition">+            rawRequest:entry,// ./src/index.js</span>
+<span class="hljs-addition">+            resource:path.posix.join(context,entry),//此模块entry的的绝对路径</span>
+<span class="hljs-addition">+            parser,</span>
+<span class="hljs-addition">+        },module=&gt;{this.entries.push(module)},callback);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    createModule(data,addEntry,callback){</span>
+<span class="hljs-addition">+        //先创建模块工厂</span>
+<span class="hljs-addition">+        const moduleFactory = new NormalModuleFactory();</span>
+<span class="hljs-addition">+        let module = moduleFactory.create(data);</span>
+<span class="hljs-addition">+        //非常非常重要 模块的ID如何生成? 模块的ID是一个相对于根目录的相对路径</span>
+<span class="hljs-addition">+        //index.js ./src/index.js title.js ./src/title.js</span>
+<span class="hljs-addition">+        //relative返回一个相对路径 从根目录出出到模块的绝地路径 得到一个相对路径</span>
+<span class="hljs-addition">+        module.moduleId = '.'+path.posix.sep+path.posix.relative(this.context,module.resource);</span>
+<span class="hljs-addition">+        addEntry&amp;&amp;addEntry(module);</span>
+<span class="hljs-addition">+        this.modules.push(module);//把模块添加到完整的模块数组中</span>
+<span class="hljs-addition">+        const afterBuild = (err,module)=&gt;{</span>
+<span class="hljs-addition">+            if(module.dependencies){//如果一个模块编译完成,发现它有依赖的模块,那么递归编译它的依赖模块</span>
+<span class="hljs-addition">+                this.processModuleDependencies(module,(err)=&gt;{</span>
+<span class="hljs-addition">+                    //当这个入口模块和它依赖的模块都编译完成了,才会让调用入口模块的回调</span>
+<span class="hljs-addition">+                    callback(err,module);</span>
+<span class="hljs-addition">+                });</span>
+<span class="hljs-addition">+            }else{</span>
+<span class="hljs-addition">+                callback(err,module);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        this.buildModule(module,afterBuild);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    processModuleDependencies(module,callback){</span>
+<span class="hljs-addition">+        let dependencies= module.dependencies;</span>
+<span class="hljs-addition">+        //因为我希望可以并行的同时开始编译依赖的模块,然后等所有依赖的模块全部编译完成后才结束</span>
+<span class="hljs-addition">+        async.forEach(dependencies,(dependency,done)=&gt;{</span>
+<span class="hljs-addition">+            let {name,context,rawRequest,resource,moduleId} = dependency;</span>
+<span class="hljs-addition">+            this.createModule({</span>
+<span class="hljs-addition">+                name,</span>
+<span class="hljs-addition">+                context,</span>
+<span class="hljs-addition">+                rawRequest,</span>
+<span class="hljs-addition">+                resource,</span>
+<span class="hljs-addition">+                moduleId,</span>
+<span class="hljs-addition">+                parser</span>
+<span class="hljs-addition">+            },null,done);</span>
+<span class="hljs-addition">+        },callback);</span>
+<span class="hljs-addition">+    }</span>
+    buildModule(module,afterBuild){
+        module.build(this,(err)=&gt;{
+            this.hooks.succeedModule.call(module)
+            afterBuild(null,module);
+        });
+    }
+}
+module.exports = Compilation;
+</code></pre>
+<h3 id="t265.2 NormalModule.js">5.2 NormalModule.js <a href="#t265.2 NormalModule.js"> # </a></h3>
+<p>webpack\NormalModule.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+const path = require('path');</span>
+<span class="hljs-addition">+const types = require('babel-types');</span>
+<span class="hljs-addition">+const generate = require('babel-generator').default;</span>
+<span class="hljs-addition">+const traverse = require('babel-traverse').default;</span>
+class NormalModule {
+<span class="hljs-addition">+    constructor({ name, context, rawRequest, resource, parser, moduleId }) {</span>
+        this.name = name;
+        this.context = context;
+        this.rawRequest = rawRequest;
+        this.resource = resource;
+<span class="hljs-addition">+        this.moduleId = moduleId||('./'+path.posix.relative(context,resource));</span>
+        this.parser = parser;
+        this._source = null;
+        this._ast = null;
+<span class="hljs-addition">+        this.dependencies = [];</span>
+    }
+    //解析依赖
+    build(compilation, callback) {
+        this.doBuild(compilation, err =&gt; {
+<span class="hljs-addition">+            let originalSource = this.getSource(this.resource, compilation);</span>
+<span class="hljs-addition">+            // 将 当前模块 的内容转换成 AST</span>
+<span class="hljs-addition">+            const ast = this.parser.parse(originalSource);</span>
+<span class="hljs-addition">+            traverse(ast, {</span>
+<span class="hljs-addition">+                // 如果当前节点是一个函数调用时</span>
+<span class="hljs-addition">+                CallExpression: (nodePath) =&gt; {</span>
+<span class="hljs-addition">+                    let node = nodePath.node;</span>
+<span class="hljs-addition">+                    // 当前节点是 require 时</span>
+<span class="hljs-addition">+                    if (node.callee.name === 'require') {</span>
+<span class="hljs-addition">+                        //修改require为__webpack_require__</span>
+<span class="hljs-addition">+                        node.callee.name = '__webpack_require__';</span>
+<span class="hljs-addition">+                        //获取要加载的模块ID</span>
+<span class="hljs-addition">+                        let moduleName = node.arguments[0].value;</span>
+<span class="hljs-addition">+                        //获取扩展名</span>
+<span class="hljs-addition">+                        let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';</span>
+<span class="hljs-addition">+                        //获取依赖模块的绝对路径</span>
+<span class="hljs-addition">+                        let dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);</span>
+<span class="hljs-addition">+                        //获取依赖模块的模块ID</span>
+<span class="hljs-addition">+                        let dependencyModuleId = '.' + path.posix.sep + path.posix.relative(this.context, dependencyResource);</span>
+<span class="hljs-addition">+                        //添加依赖</span>
+<span class="hljs-addition">+                        this.dependencies.push({</span>
+<span class="hljs-addition">+                            name: this.name, context: this.context, rawRequest: moduleName,</span>
+<span class="hljs-addition">+                            moduleId: dependencyModuleId, resource: dependencyResource</span>
+<span class="hljs-addition">+                        });</span>
+<span class="hljs-addition">+                        node.arguments = [types.stringLiteral(dependencyModuleId)];</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            });</span>
+<span class="hljs-addition">+            let { code } = generate(ast);</span>
+<span class="hljs-addition">+            this._source = code;</span>
+<span class="hljs-addition">+            this._ast = ast;</span>
+            callback();
+        });
+    }
+    //获取模块代码
+    doBuild(compilation, callback) {
+        let originalSource = this.getSource(this.resource, compilation);
+        this._source = originalSource;
+        callback();
+    }
+    getSource(resource, compilation) {
+        let originalSource = compilation.inputFileSystem.readFileSync(resource, 'utf8');
+        return originalSource;
+    }
+}
+module.exports = NormalModule;
+</code></pre>
+<h2 id="t276. seal">6. seal <a href="#t276. seal"> # </a></h2>
+<h3 id="t286.1 Compiler.js">6.1 Compiler.js <a href="#t286.1 Compiler.js"> # </a></h3>
+<p>webpack\Compiler.js</p>
+<pre><code class="lang-diff">const { Tapable, SyncHook, SyncBailHook, AsyncParallelHook, AsyncSeriesHook } = require("tapable");
+const Compilation = require('./Compilation');
+const NormalModuleFactory = require('./NormalModuleFactory');
+const Stats = require('./Stats');
+class Compiler extends Tapable {
+    constructor(context) {
+        super();
+        this.options = {};
+        this.context = context; //设置上下文路径
+        this.hooks = {
+            entryOption: new SyncBailHook(["context", "entry"]),
+            beforeRun: new AsyncSeriesHook(["compiler"]),
+            run: new AsyncSeriesHook(["compiler"]),
+            beforeCompile: new AsyncSeriesHook(["params"]),
+            compile: new SyncHook(["params"]),
+            make: new AsyncParallelHook(["compilation"]),
+            thisCompilation: new SyncHook(["compilation", "params"]),
+            compilation: new SyncHook(["compilation", "params"]),
+<span class="hljs-addition">+           afterCompile:new AsyncSeriesHook(["compilation"]),</span>
+            done: new AsyncSeriesHook(["stats"])
+        };
+    }
+    run(finalCallback) {
+        //编译完成后的回调
+        const onCompiled = (err, compilation) =&gt; {
+            console.log('onCompiled');
+            finalCallback(err, new Stats(compilation));
+        };
+        //准备运行编译
+        this.hooks.beforeRun.callAsync(this, err =&gt; {
+            //运行
+            this.hooks.run.callAsync(this, err =&gt; {
+                this.compile(onCompiled); //开始编译,编译完成后执行conCompiled回调
+            });
+        });
+    }
+    compile(onCompiled) {
+        const params = this.newCompilationParams();
+        this.hooks.beforeCompile.callAsync(params, err =&gt; {
+            this.hooks.compile.call(params);
+            const compilation = this.newCompilation(params);
+            this.hooks.make.callAsync(compilation, err =&gt; {
+<span class="hljs-addition">+                compilation.seal(err =&gt; {</span>
+<span class="hljs-addition">+                    this.hooks.afterCompile.callAsync(compilation, err =&gt; {</span>
+<span class="hljs-addition">+                        return onCompiled(null, compilation);</span>
+<span class="hljs-addition">+                    });</span>
+<span class="hljs-addition">+                });</span>
+            });
+        });
+    }
+    newCompilationParams() {
+        const params = {
+            normalModuleFactory: new NormalModuleFactory()
+        };
+        return params;
+    }
+    newCompilation(params) {
+        const compilation = new Compilation(this);
+        this.hooks.thisCompilation.call(compilation, params);
+        this.hooks.compilation.call(compilation, params);
+        return compilation;
+    }
+
+}
+module.exports = Compiler;
+</code></pre>
+<h3 id="t296.2 Compilation.js">6.2 Compilation.js <a href="#t296.2 Compilation.js"> # </a></h3>
+<p>webpack\Compilation.js</p>
+<pre><code class="lang-diff">const NormalModuleFactory = require('./NormalModuleFactory');
+const async = require('neo-async');
+const { Tapable, SyncHook } = require("tapable");
+const Parser = require('./Parser');
+const parser = new Parser();
+const path = require('path');
+<span class="hljs-addition">+let Chunk = require('./Chunk');</span>
+class Compilation extends Tapable {
+    constructor(compiler) {
+        super();
+        this.compiler = compiler;
+        this.options = compiler.options;
+        this.context = compiler.context;
+        this.inputFileSystem = compiler.inputFileSystem;
+        this.outputFileSystem = compiler.outputFileSystem;
+        this.entries = [];
+        this.modules = [];
+        this.chunks = [];
+        this.hooks = {
+            succeedModule: new SyncHook(["module"]),
+<span class="hljs-addition">+            seal: new SyncHook([]),</span>
+<span class="hljs-addition">+            beforeChunks: new SyncHook([]),</span>
+<span class="hljs-addition">+            afterChunks: new SyncHook(["chunks"])</span>
+        }
+    }
+<span class="hljs-addition">+    seal(callback) {</span>
+<span class="hljs-addition">+        this.hooks.seal.call();</span>
+<span class="hljs-addition">+        this.hooks.beforeChunks.call();//生成代码块之前</span>
+<span class="hljs-addition">+        for (const module of this.entries) {//循环入口模块</span>
+<span class="hljs-addition">+            const chunk = new Chunk(module);//创建代码块</span>
+<span class="hljs-addition">+            this.chunks.push(chunk);//把代码块添加到代码块数组中</span>
+<span class="hljs-addition">+            //把代码块的模块添加到代码块中</span>
+<span class="hljs-addition">+            chunk.modules = this.modules.filter(module =&gt; module.name == chunk.name);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        this.hooks.afterChunks.call(this.chunks);//生成代码块之后</span>
+<span class="hljs-addition">+        callback();//封装结束</span>
+<span class="hljs-addition">+    }</span>
+    //context ./src/index.js main callback(终级回调)
+    _addModuleChain(context,entry,name,callback){
+        this.createModule({
+            name,//所属的代码块的名称 main
+            context:this.context,//上下文
+            rawRequest:entry,// ./src/index.js
+            resource:path.posix.join(context,entry),//此模块entry的的绝对路径
+            parser,
+        },module=&gt;{this.entries.push(module)},callback);
+    }
+    createModule(data,addEntry,callback){
+        //先创建模块工厂
+        const moduleFactory = new NormalModuleFactory();
+        let module = moduleFactory.create(data);
+        //非常非常重要 模块的ID如何生成? 模块的ID是一个相对于根目录的相对路径
+        //index.js ./src/index.js title.js ./src/title.js
+        //relative返回一个相对路径 从根目录出出到模块的绝地路径 得到一个相对路径
+        module.moduleId = '.'+path.posix.sep+path.posix.relative(this.context,module.resource);
+        addEntry&amp;&amp;addEntry(module);
+        this.modules.push(module);//把模块添加到完整的模块数组中
+        const afterBuild = (err,module)=&gt;{
+            if(module.dependencies){//如果一个模块编译完成,发现它有依赖的模块,那么递归编译它的依赖模块
+                this.processModuleDependencies(module,(err)=&gt;{
+                    //当这个入口模块和它依赖的模块都编译完成了,才会让调用入口模块的回调
+                    callback(err,module);
+                });
+            }else{
+                callback(err,module);
+            }
+        }
+        this.buildModule(module,afterBuild);
+    }
+    processModuleDependencies(module,callback){
+        let dependencies= module.dependencies;
+        //因为我希望可以并行的同时开始编译依赖的模块,然后等所有依赖的模块全部编译完成后才结束
+        async.forEach(dependencies,(dependency,done)=&gt;{
+            let {name,context,rawRequest,resource,moduleId} = dependency;
+            this.createModule({
+                name,
+                context,
+                rawRequest,
+                resource,
+                moduleId,
+                parser
+            },null,done);
+        },callback);
+    }
+    buildModule(module,afterBuild){
+        module.build(this,(err)=&gt;{
+            this.hooks.succeedModule.call(module)
+            afterBuild(null,module);
+        });
+    }
+}
+module.exports = Compilation;
+</code></pre>
+<h3 id="t306.3 webpack\Chunk.js">6.3 webpack\Chunk.js <a href="#t306.3 webpack\Chunk.js"> # </a></h3>
+<p>webpack\Chunk.js</p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Chunk</span> </span>{
+    <span class="hljs-keyword">constructor</span>(module) {
+        <span class="hljs-keyword">this</span>.entryModule = <span class="hljs-built_in">module</span>;
+        <span class="hljs-keyword">this</span>.name = <span class="hljs-built_in">module</span>.name;
+        <span class="hljs-keyword">this</span>.files = [];
+        <span class="hljs-keyword">this</span>.modules = [];
+    }
+}
+
+<span class="hljs-built_in">module</span>.exports = Chunk;
+</code></pre>
+<h3 id="t316.4 Stats.js">6.4 Stats.js <a href="#t316.4 Stats.js"> # </a></h3>
+<p>webpack\Stats.js</p>
+<pre><code class="lang-diff">class Stats {
+    constructor(compilation) {
+        this.entries = compilation.entries;
+        this.modules = compilation.modules;
+<span class="hljs-addition">+        this.chunks = compilation.chunks;</span>
+    }
+    toJson() {
+        return this;
+    }
+}
+module.exports = Stats;
+</code></pre>
+<h2 id="t327.emit">7.emit <a href="#t327.emit"> # </a></h2>
+<h3 id="t337.1 Compilation.js">7.1 Compilation.js <a href="#t337.1 Compilation.js"> # </a></h3>
+<p>webpack\Compilation.js</p>
+<pre><code class="lang-diff">const NormalModuleFactory = require('./NormalModuleFactory');
+const async = require('neo-async');
+const { Tapable, SyncHook } = require("tapable");
+const Parser = require('./Parser');
+const parser = new Parser();
+const path = require('path');
+<span class="hljs-addition">+const Chunk = require('./Chunk');</span>
+<span class="hljs-addition">+const ejs = require('ejs');</span>
+<span class="hljs-addition">+const fs = require('fs');</span>
+<span class="hljs-addition">+const mainTemplate = fs.readFileSync(path.join(__dirname,'template', 'main.ejs'), 'utf8');</span>
+<span class="hljs-addition">+const mainRender = ejs.compile(mainTemplate);</span>
+class Compilation extends Tapable {
+    constructor(compiler) {
+        super();
+        this.compiler = compiler;
+        this.options = compiler.options;
+        this.context = compiler.context;
+        this.inputFileSystem = compiler.inputFileSystem;
+        this.outputFileSystem = compiler.outputFileSystem;
+        this.entries = [];
+        this.modules = [];
+        this.chunks = [];
+<span class="hljs-addition">+       this.files = [];  //生成的文件</span>
+<span class="hljs-addition">+       this.assets = {}; //资源 </span>
+        this.hooks = {
+            succeedModule: new SyncHook(["module"]),
+            seal: new SyncHook([]),
+            beforeChunks: new SyncHook([]),
+            afterChunks: new SyncHook(["chunks"])
+        }
+    }
+    seal(callback) {
+        this.hooks.seal.call();
+        this.hooks.beforeChunks.call();//生成代码块之前
+        for (const module of this.entries) {//循环入口模块
+            const chunk = new Chunk(module);//创建代码块
+            this.chunks.push(chunk);//把代码块添加到代码块数组中
+            //把代码块的模块添加到代码块中
+            chunk.modules = this.modules.filter(module =&gt; module.name == chunk.name);
+        }
+        this.hooks.afterChunks.call(this.chunks);//生成代码块之后
+<span class="hljs-addition">+       this.createChunkAssets();</span>
+        callback();//封装结束
+    }
+<span class="hljs-addition">+    createChunkAssets() {</span>
+<span class="hljs-addition">+        for (let i = 0; i &lt; this.chunks.length; i++) {</span>
+<span class="hljs-addition">+            const chunk = this.chunks[i];</span>
+<span class="hljs-addition">+            chunk.files = [];</span>
+<span class="hljs-addition">+            const file = chunk.name + '.js';</span>
+<span class="hljs-addition">+            const source = mainRender({ entryId: chunk.entryModule.moduleId, modules: chunk.modules });</span>
+<span class="hljs-addition">+            chunk.files.push(file);</span>
+<span class="hljs-addition">+            this.emitAsset(file, source);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    emitAsset(file, source) {</span>
+<span class="hljs-addition">+        this.assets[file] = source;</span>
+<span class="hljs-addition">+        this.files.push(file);</span>
+<span class="hljs-addition">+    }</span>
+    //context ./src/index.js main callback(终级回调)
+    addEntry(context, entry, name, finalCallback) {
+        this._addModuleChain(context, entry, name, (err, module) =&gt; {
+        finalCallback(err, module);
+        });
+    }
+    _addModuleChain(context, rawRequest, name, callback) {
+        this.createModule({
+        name,context,rawRequest,parser,
+        resource:path.posix.join(context,rawRequest),
+        moduleId:'./'+path.posix.relative(context,path.posix.join(context,rawRequest))
+        },entryModule=&gt;this.entries.push(entryModule),callback);
+    }
+    /**
+    * 创建并编译一个模块
+    * @param {*} data 要编译的模块信息
+    * @param {*} addEntry  可选的增加入口的方法 如果这个模块是入口模块,如果不是的话,就什么不做
+    * @param {*} callback 编译完成后可以调用callback回调
+    */
+    createModule(data, addEntry, callback) {
+        //通过模块工厂创建一个模块
+        let module = normalModuleFactory.create(data);
+        addEntry&amp;&amp;addEntry(module);//如果是入口模块,则添加入口里去
+        this.modules.push(module);//给普通模块数组添加一个模块
+        const afterBuild = (err, module) =&gt; {
+        //如果大于0,说明有依赖
+        if (module.dependencies.length &gt; 0) {
+            this.processModuleDependencies(module, err =&gt; {
+            callback(err, module);
+            });
+        } else {
+            callback(err, module);
+        }
+        }
+        this.buildModule(module, afterBuild);
+    }
+    /**
+    * 处理编译模块依赖
+    * @param {*} module ./src/index.js
+    * @param {*} callback 
+    */
+    processModuleDependencies(module, callback) {
+        //1.获取当前模块的依赖模块
+        let dependencies = module.dependencies;
+        //遍历依赖模块,全部开始编译,当所有的依赖模块全部编译完成后才调用callback
+        async.forEach(dependencies, (dependency, done) =&gt; {
+        let { name, context, rawRequest, resource, moduleId } = dependency;
+        this.createModule({
+            name,context,rawRequest,parser,
+            resource,moduleId
+        },null,done);
+        }, callback);
+    }
+    buildModule(module,afterBuild){
+        module.build(this,(err)=&gt;{
+            this.hooks.succeedModule.call(module)
+            afterBuild(null,module);
+        });
+    }
+}
+module.exports = Compilation;
+</code></pre>
+<h3 id="t347.2 Compiler.js">7.2 Compiler.js <a href="#t347.2 Compiler.js"> # </a></h3>
+<p>webpack\Compiler.js</p>
+<pre><code class="lang-diff">const { Tapable, SyncHook, SyncBailHook, AsyncParallelHook, AsyncSeriesHook } = require("tapable");
+const Compilation = require('./Compilation');
+const NormalModuleFactory = require('./NormalModuleFactory');
+const Stats = require('./Stats');
+<span class="hljs-addition">+const mkdirp = require('mkdirp');</span>
+<span class="hljs-addition">+const path = require('path');</span>
+class Compiler extends Tapable {
+    constructor(context) {
+        super();
+        this.options = {};
+        this.context = context; //设置上下文路径
+        this.hooks = {
+            entryOption: new SyncBailHook(["context", "entry"]),
+            beforeRun: new AsyncSeriesHook(["compiler"]),
+            run: new AsyncSeriesHook(["compiler"]),
+            beforeCompile: new AsyncSeriesHook(["params"]),
+            compile: new SyncHook(["params"]),
+            make: new AsyncParallelHook(["compilation"]),
+            thisCompilation: new SyncHook(["compilation", "params"]),
+            compilation: new SyncHook(["compilation", "params"]),
+            afterCompile:new AsyncSeriesHook(["compilation"]),
+<span class="hljs-addition">+            emit: new AsyncSeriesHook(["compilation"]),</span>
+            done: new AsyncSeriesHook(["stats"])
+        };
+    }
+<span class="hljs-addition">+    emitAssets(compilation, callback) {</span>
+<span class="hljs-addition">+        const emitFiles = (err)=&gt;{</span>
+<span class="hljs-addition">+              const assets = compilation.assets;</span>
+<span class="hljs-addition">+              let outputPath = this.options.output.path;//dist</span>
+<span class="hljs-addition">+              for(let file in assets){</span>
+<span class="hljs-addition">+                let source = assets[file];//得到文件名和文件内容 </span>
+<span class="hljs-addition">+                let targetPath = path.posix.join(outputPath,file);//得到输出的路径 targetPath</span>
+<span class="hljs-addition">+                this.outputFileSystem.writeFileSync(targetPath,source,'utf8');//NodeEnvironmentPlugin</span>
+<span class="hljs-addition">+              }</span>
+<span class="hljs-addition">+            callback();</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        this.hooks.emit.callAsync(compilation, err =&gt; {</span>
+<span class="hljs-addition">+            mkdirp(this.options.output.path, emitFiles);</span>
+<span class="hljs-addition">+        });</span>
+<span class="hljs-addition">+    }</span>
+    run(finalCallback) {
+        //编译完成后的回调
+        const onCompiled = (err, compilation) =&gt; {
+<span class="hljs-addition">+            this.emitAssets(compilation,err=&gt;{</span>
+<span class="hljs-addition">+                 let stats = new Stats(compilation);//stats是一 个用来描述打包后结果的对象</span>
+<span class="hljs-addition">+                  this.hooks.done.callAsync(stats,err=&gt;{//done表示整个流程结束了</span>
+<span class="hljs-addition">+                  callback(err,stats);</span>
+<span class="hljs-addition">+                  });</span>
+<span class="hljs-addition">+            });</span>
+        };
+        //准备运行编译
+        this.hooks.beforeRun.callAsync(this, err =&gt; {
+            //运行
+            this.hooks.run.callAsync(this, err =&gt; {
+                this.compile(onCompiled); //开始编译,编译完成后执行conCompiled回调
+            });
+        });
+    }
+    compile(onCompiled) {
+        const params = this.newCompilationParams();
+        this.hooks.beforeCompile.callAsync(params, err =&gt; {
+            this.hooks.compile.call(params);
+            const compilation = this.newCompilation(params);
+            this.hooks.make.callAsync(compilation, err =&gt; {
+                compilation.seal(err =&gt; {
+                    this.hooks.afterCompile.callAsync(compilation, err =&gt; {
+                        return onCompiled(null, compilation);
+                    });
+                });
+            });
+        });
+    }
+    newCompilationParams() {
+        const params = {
+            normalModuleFactory: new NormalModuleFactory()
+        };
+        return params;
+    }
+    newCompilation(params) {
+        const compilation = new Compilation(this);
+        this.hooks.thisCompilation.call(compilation, params);
+        this.hooks.compilation.call(compilation, params);
+        return compilation;
+    }
+
+}
+module.exports = Compiler;
+</code></pre>
+<h3 id="t357.3 main.ejs">7.3 main.ejs <a href="#t357.3 main.ejs"> # </a></h3>
+<p>webpack\main.ejs</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+    <span class="hljs-keyword">var</span> installedModules = {};
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+      <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+        <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+      }
+      <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+        <span class="hljs-attr">i</span>: moduleId,
+        <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">exports</span>: {}
+      };
+      modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+      <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+    }
+    <span class="hljs-keyword">return</span> __webpack_require__(<span class="hljs-string">"&lt;%-entryModuleId%&gt;"</span>);
+  })
+    ({
+      &lt;%
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> <span class="hljs-keyword">of</span> modules)
+        {%&gt;
+            <span class="hljs-string">"&lt;%-module.moduleId%&gt;"</span>:
+            (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+              &lt;%-<span class="hljs-built_in">module</span>._source%&gt;
+            }),
+        &lt;%}
+      %&gt; 
+    });
+</code></pre>
+<h2 id="t368.动态import">8.动态import <a href="#t368.动态import"> # </a></h2>
+<h3 id="t378.1 webpack.config.js">8.1 webpack.config.js <a href="#t378.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">    output:{
+        path:path.resolve(__dirname,'dist'),
+        filename:'[name].js',
+<span class="hljs-addition">+        chunkFilename:'[name].js'</span>
+    }
+</code></pre>
+<h3 id="t388.2 src\index.js">8.2 src\index.js <a href="#t388.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">require</span>(<span class="hljs-string">'./sync'</span>);
+<span class="hljs-comment">//如果遇到了import,那么import的模块会成为一个单独的入口,会生成一个单独的代码块,会生成一个单独的文件</span>
+<span class="hljs-comment">//如果import调用了一个模 块,那么这个模块和它依赖的模块会成一个单独的的异步代码块,里面所有的模块async=true</span>
+<span class="hljs-keyword">import</span>(<span class="hljs-comment">/*webpackChunkName: 'title'*/</span> <span class="hljs-string">'./title'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(result.default);
+});
+<span class="hljs-keyword">import</span>(<span class="hljs-comment">/*webpackChunkName: 'sum'*/</span> <span class="hljs-string">'./sum'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span>=&gt;</span>{
+    <span class="hljs-built_in">console</span>.log(result.default);
+});
+</code></pre>
+<h3 id="t398.3 Chunk.js">8.3 Chunk.js <a href="#t398.3 Chunk.js"> # </a></h3>
+<p>webpack\Chunk.js</p>
+<pre><code class="lang-diff">class Chunk {
+    constructor(entryModule) {
+        this.entryModule = entryModule;
+        this.name = entryModule.name;
+        this.files = [];
+        this.modules = [];
+<span class="hljs-addition">+       this.async = entryModule.async;</span>
+    }
+}
+
+module.exports = Chunk;
+</code></pre>
+<h3 id="t408.4 Compilation.js">8.4 Compilation.js <a href="#t408.4 Compilation.js"> # </a></h3>
+<p>webpack\Compilation.js</p>
+<pre><code class="lang-diff">const NormalModuleFactory = require('./NormalModuleFactory');
+const async = require('neo-async');
+const { Tapable, SyncHook } = require("tapable");
+const Parser = require('./Parser');
+const parser = new Parser();
+const path = require('path');
+const Chunk = require('./Chunk');
+const ejs = require('ejs');
+const fs = require('fs');
+<span class="hljs-addition">+const mainTemplate = fs.readFileSync(path.join(__dirname, 'template', 'mainTemplate.ejs'), 'utf8');</span>
+<span class="hljs-addition">+const mainRender = ejs.compile(mainTemplate);</span>
+<span class="hljs-addition">+const chunkTemplate = fs.readFileSync(path.join(__dirname, 'template', 'chunkTemplate.ejs'), 'utf8');</span>
+<span class="hljs-addition">+const chunkRender = ejs.compile(chunkTemplate);</span>
+class Compilation extends Tapable {
+    constructor(compiler) {
+        super();
+        this.compiler = compiler;
+        this.options = compiler.options;
+        this.context = compiler.context;
+        this.inputFileSystem = compiler.inputFileSystem;
+        this.outputFileSystem = compiler.outputFileSystem;
+        this.entries = [];
+        this.modules = [];
+        this.chunks = [];
+        this.files = [];  //生成的文件
+        this.assets = {}; //资源 
+        this.hooks = {
+            succeedModule: new SyncHook(["module"]),
+            seal: new SyncHook([]),
+            beforeChunks: new SyncHook([]),
+            afterChunks: new SyncHook(["chunks"])
+        }
+    }
+    seal(callback) {
+        this.hooks.seal.call();
+        this.hooks.beforeChunks.call();//生成代码块之前
+        for (const entryModule of this.entries) {//循环入口模块
+            const chunk = new Chunk(entryModule);//创建代码块
+            this.chunks.push(chunk);//把代码块添加到代码块数组中
+            //把代码块的模块添加到代码块中
+            chunk.modules = this.modules.filter(module =&gt; module.name == chunk.name);
+        }
+        this.hooks.afterChunks.call(this.chunks);//生成代码块之后
+        this.createChunkAssets();
+        callback();//封装结束
+    }
+    createChunkAssets() {
+        for (let i = 0; i &lt; this.chunks.length; i++) {
+            const chunk = this.chunks[i];
+            chunk.files = [];
+            const file = chunk.name + '.js';
+<span class="hljs-addition">+            let source;</span>
+<span class="hljs-addition">+            if (chunk.async) {</span>
+<span class="hljs-addition">+                source = chunkRender({ chunkName: chunk.name, modules: chunk.modules });</span>
+<span class="hljs-addition">+            } else {</span>
+<span class="hljs-addition">+                source = mainRender({ entryModuleId: chunk.entryModule.moduleId, modules: chunk.modules });</span>
+<span class="hljs-addition">+            }</span>
+            chunk.files.push(file);
+            this.emitAsset(file, source);
+        }
+    }
+    emitAsset(file, source) {
+        this.assets[file] = source;
+        this.files.push(file);
+    }
+    //context ./src/index.js main callback(终级回调)
+    addEntry(context, entry, name, finalCallback) {
+        this._addModuleChain(context, entry, name,false, (err, module) =&gt; {
+        finalCallback(err, module);
+        });
+    }
+    _addModuleChain(context, rawRequest, name,async, callback) {
+        this.createModule({
+        name,context,rawRequest,parser,
+        resource:path.posix.join(context,rawRequest),
+        moduleId:'./'+path.posix.relative(context,path.posix.join(context,rawRequest)),
+        async
+        },entryModule=&gt;this.entries.push(entryModule),callback);
+    }
+    /**
+    * 创建并编译一个模块
+    * @param {*} data 要编译的模块信息
+    * @param {*} addEntry  可选的增加入口的方法 如果这个模块是入口模块,如果不是的话,就什么不做
+    * @param {*} callback 编译完成后可以调用callback回调
+    */
+    createModule(data, addEntry, callback) {
+        //通过模块工厂创建一个模块
+        let module = normalModuleFactory.create(data);
+        addEntry&amp;&amp;addEntry(module);//如果是入口模块,则添加入口里去
+        this.modules.push(module);//给普通模块数组添加一个模块
+        const afterBuild = (err, module) =&gt; {
+        //如果大于0,说明有依赖
+        if (module.dependencies.length &gt; 0) {
+            this.processModuleDependencies(module, err =&gt; {
+            callback(err, module);
+            });
+        } else {
+            callback(err, module);
+        }
+        }
+        this.buildModule(module, afterBuild);
+    }
+    /**
+    * 处理编译模块依赖
+    * @param {*} module ./src/index.js
+    * @param {*} callback 
+    */
+    processModuleDependencies(module, callback) {
+        //1.获取当前模块的依赖模块
+        let dependencies = module.dependencies;
+        //遍历依赖模块,全部开始编译,当所有的依赖模块全部编译完成后才调用callback
+        async.forEach(dependencies, (dependency, done) =&gt; {
+        let { name, context, rawRequest, resource, moduleId } = dependency;
+        this.createModule({
+            name,context,rawRequest,parser,
+            resource,moduleId
+        },null,done);
+        }, callback);
+    }
+    buildModule(module, afterBuild) {
+        module.build(this, (err) =&gt; {
+            this.hooks.succeedModule.call(module);
+            return afterBuild();
+        });
+    }
+}
+module.exports = Compilation;
+</code></pre>
+<h3 id="t418.5 NormalModule.js">8.5 NormalModule.js <a href="#t418.5 NormalModule.js"> # </a></h3>
+<p>webpack\NormalModule.js</p>
+<pre><code class="lang-diff">const types = require('babel-types');
+const generate = require('babel-generator').default;
+const traverse = require('babel-traverse').default;
+const path = require('path');
+const async = require('neo-async');
+class NormalModule {
+<span class="hljs-addition">+    constructor({ name, context, rawRequest, resource, parser, moduleId, async }) {</span>
+        this.name = name;
+        this.context = context;
+        this.rawRequest = rawRequest;
+        this.resource = resource;
+         this.moduleId = moduleId||('./'+path.posix.relative(context,resource));
+        this.parser = parser;
+        this._source = null;
+        this._ast = null;
+        this.dependencies = [];
+<span class="hljs-addition">+       this.blocks = [];</span>
+<span class="hljs-addition">+       this.async = async;</span>
+    }
+    //解析依赖
+    build(compilation, callback) {
+        this.doBuild(compilation, err =&gt; {
+            let originalSource = this.getSource(this.resource, compilation);
+            // 将 当前模块 的内容转换成 AST
+            const ast = this.parser.parse(originalSource);
+            traverse(ast, {
+                // 如果当前节点是一个函数调用时
+                CallExpression: (nodePath) =&gt; {
+                    let node = nodePath.node;
+                    // 当前节点是 require 时
+                    if (node.callee.name <span class="hljs-comment">=== 'require') {</span>
+                        //修改require为__webpack_require__
+                        node.callee.name = '__webpack_require__';
+                        //获取要加载的模块ID
+                        let moduleName = node.arguments[0].value;
+                        //获取扩展名
+                        let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';
+                        //获取依赖模块的绝对路径
+                        let dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);
+                        //获取依赖模块的模块ID
+                        let dependencyModuleId = '.' + path.posix.sep + path.posix.relative(this.context, dependencyResource);
+                        //添加依赖
+                        this.dependencies.push({
+                            name: this.name, context: this.context, rawRequest: moduleName,
+                            moduleId: dependencyModuleId, resource: dependencyResource
+                        });
+                        node.arguments = [types.stringLiteral(dependencyModuleId)];
+<span class="hljs-addition">+                    } else if (types.isImport(nodePath.node.callee)) {</span>
+<span class="hljs-addition">+                        //获取要加载的模块ID</span>
+<span class="hljs-addition">+                        let moduleName = node.arguments[0].value;</span>
+<span class="hljs-addition">+                        //获取扩展名</span>
+<span class="hljs-addition">+                        let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';</span>
+<span class="hljs-addition">+                        //获取依赖模块的绝对路径</span>
+<span class="hljs-addition">+                        let dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);</span>
+<span class="hljs-addition">+                        //获取依赖模块的模块ID</span>
+<span class="hljs-addition">+                        let dependencyModuleId = '.' + path.posix.sep + path.posix.relative(this.context, dependencyResource);</span>
+<span class="hljs-addition">+                        //获取代码块的ID</span>
+<span class="hljs-addition">+                      let chunkName = compilation.asyncChunkCounter++;</span>
+<span class="hljs-addition">+                        if(Array.isArray(node.arguments[0].leadingComments)&amp;&amp;</span>
+<span class="hljs-addition">+                        node.arguments[0].leadingComments.length&gt;0){</span>
+<span class="hljs-addition">+                            let leadingComments = node.arguments[0].leadingComments[0].value;</span>
+<span class="hljs-addition">+                            let regexp = /webpackChunkName:\s*['"]([^'"]+)['"]/;</span>
+<span class="hljs-addition">+                            chunkName = leadingComments.match(regexp)[1];</span>
+<span class="hljs-addition">+                        }</span>
+<span class="hljs-addition">+                        nodePath.replaceWithSourceString(`__webpack_require__.e("${chunkName}").then(__webpack_require__.t.bind(null,"${depModuleId}", 7))`);</span>
+<span class="hljs-addition">+                        `);</span>
+<span class="hljs-addition">+                        this.blocks.push({</span>
+<span class="hljs-addition">+                            context: this.context,</span>
+<span class="hljs-addition">+                            entry: dependencyModuleId,</span>
+<span class="hljs-addition">+                            name: dependencyChunkId,</span>
+<span class="hljs-addition">+                            async: true</span>
+<span class="hljs-addition">+                        });</span>
+                    }
+                },
+            });
+            let { code } = generate(ast);
+            this._source = code;
+            this._ast = ast;
+<span class="hljs-addition">+           async.forEach(this.blocks, ({ context, entry, name, async }, done) =&gt; {</span>
+<span class="hljs-addition">+                compilation._addModuleChain(context, entry, name, async, done);</span>
+<span class="hljs-addition">+           }, callback);</span>
+        });
+    }
+    //获取模块代码
+    doBuild(compilation, callback) {
+        let originalSource = this.getSource(this.resource, compilation);
+        this._source = originalSource;
+        callback();
+    }
+    getSource(resource, compilation) {
+        let originalSource = compilation.inputFileSystem.readFileSync(resource, 'utf8');
+        return originalSource;
+    }
+}
+module.exports = NormalModule;
+</code></pre>
+<h3 id="t428.6 webpack\mainTemplate.ejs">8.6 webpack\mainTemplate.ejs <a href="#t428.6 webpack\mainTemplate.ejs"> # </a></h3>
+<p>webpack\mainTemplate.ejs</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpackJsonpCallback</span>(<span class="hljs-params">data</span>) </span>{
+      <span class="hljs-keyword">var</span> chunkIds = data[<span class="hljs-number">0</span>];
+      <span class="hljs-keyword">var</span> moreModules = data[<span class="hljs-number">1</span>];
+      <span class="hljs-keyword">var</span> moduleId, chunkId, i = <span class="hljs-number">0</span>, resolves = [];
+      <span class="hljs-keyword">for</span> (; i &lt; chunkIds.length; i++) {
+        chunkId = chunkIds[i];
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(installedChunks, chunkId) &amp;&amp; installedChunks[chunkId]) {
+          resolves.push(installedChunks[chunkId][<span class="hljs-number">0</span>]);
+        }
+        installedChunks[chunkId] = <span class="hljs-number">0</span>;
+      }
+      <span class="hljs-keyword">for</span> (moduleId <span class="hljs-keyword">in</span> moreModules) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(moreModules, moduleId)) {
+          modules[moduleId] = moreModules[moduleId];
+        }
+      }
+      <span class="hljs-keyword">if</span> (parentJsonpFunction) parentJsonpFunction(data);
+      <span class="hljs-keyword">while</span> (resolves.length) {
+        resolves.shift()();
+      }
+    };
+    <span class="hljs-keyword">var</span> installedModules = {};
+    <span class="hljs-keyword">var</span> installedChunks = {
+      <span class="hljs-string">"main"</span>: <span class="hljs-number">0</span>
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">jsonpScriptSrc</span>(<span class="hljs-params">chunkId</span>) </span>{
+      <span class="hljs-keyword">return</span> __webpack_require__.p + <span class="hljs-string">""</span> + ({ <span class="hljs-string">"sum"</span>: <span class="hljs-string">"sum"</span>, <span class="hljs-string">"title"</span>: <span class="hljs-string">"title"</span> }[chunkId] || chunkId) + <span class="hljs-string">".js"</span>
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+      <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+        <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+      }
+      <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+        <span class="hljs-attr">i</span>: moduleId,
+        <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">exports</span>: {}
+      };
+      modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+      <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+    }
+    __webpack_require__.e = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">requireEnsure</span>(<span class="hljs-params">chunkId</span>) </span>{
+      <span class="hljs-keyword">var</span> promises = [];
+      <span class="hljs-keyword">var</span> installedChunkData = installedChunks[chunkId];
+      <span class="hljs-keyword">if</span> (installedChunkData !== <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">if</span> (installedChunkData) {
+          promises.push(installedChunkData[<span class="hljs-number">2</span>]);
+        } <span class="hljs-keyword">else</span> {
+          <span class="hljs-keyword">var</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+            installedChunkData = installedChunks[chunkId] = [resolve, reject];
+          });
+          promises.push(installedChunkData[<span class="hljs-number">2</span>] = promise);
+          <span class="hljs-keyword">var</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+          <span class="hljs-keyword">var</span> onScriptComplete;
+          script.charset = <span class="hljs-string">'utf-8'</span>;
+          script.timeout = <span class="hljs-number">120</span>;
+          <span class="hljs-keyword">if</span> (__webpack_require__.nc) {
+            script.setAttribute(<span class="hljs-string">"nonce"</span>, __webpack_require__.nc);
+          }
+          script.src = jsonpScriptSrc(chunkId);
+          <span class="hljs-keyword">var</span> error = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>();
+          onScriptComplete = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+            script.onerror = script.onload = <span class="hljs-literal">null</span>;
+            clearTimeout(timeout);
+            <span class="hljs-keyword">var</span> chunk = installedChunks[chunkId];
+            <span class="hljs-keyword">if</span> (chunk !== <span class="hljs-number">0</span>) {
+              <span class="hljs-keyword">if</span> (chunk) {
+                <span class="hljs-keyword">var</span> errorType = event &amp;&amp; (event.type === <span class="hljs-string">'load'</span> ? <span class="hljs-string">'missing'</span> : event.type);
+                <span class="hljs-keyword">var</span> realSrc = event &amp;&amp; event.target &amp;&amp; event.target.src;
+                error.message = <span class="hljs-string">'Loading chunk '</span> + chunkId + <span class="hljs-string">' failed.\n('</span> + errorType + <span class="hljs-string">': '</span> + realSrc + <span class="hljs-string">')'</span>;
+                error.name = <span class="hljs-string">'ChunkLoadError'</span>;
+                error.type = errorType;
+                error.request = realSrc;
+                chunk[<span class="hljs-number">1</span>](error);
+              }
+              installedChunks[chunkId] = <span class="hljs-literal">undefined</span>;
+            }
+          };
+          <span class="hljs-keyword">var</span> timeout = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            onScriptComplete({ <span class="hljs-attr">type</span>: <span class="hljs-string">'timeout'</span>, <span class="hljs-attr">target</span>: script });
+          }, <span class="hljs-number">120000</span>);
+          script.onerror = script.onload = onScriptComplete;
+          <span class="hljs-built_in">document</span>.head.appendChild(script);
+        }
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(promises);
+    };
+    __webpack_require__.m = modules;
+    __webpack_require__.c = installedModules;
+    __webpack_require__.d = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports, name, getter</span>) </span>{
+      <span class="hljs-keyword">if</span> (!__webpack_require__.o(exports, name)) {
+        <span class="hljs-built_in">Object</span>.defineProperty(exports, name, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: getter });
+      }
+    };
+    __webpack_require__.r = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports</span>) </span>{
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.toStringTag) {
+        <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+      }
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+    };
+    __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value, mode</span>) </span>{
+      <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">1</span>) value = __webpack_require__(value);
+      <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">8</span>) <span class="hljs-keyword">return</span> value;
+      <span class="hljs-keyword">if</span> ((mode &amp; <span class="hljs-number">4</span>) &amp;&amp; <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">'object'</span> &amp;&amp; value &amp;&amp; value.__esModule) <span class="hljs-keyword">return</span> value;
+      <span class="hljs-keyword">var</span> ns = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
+      __webpack_require__.r(ns);
+      <span class="hljs-built_in">Object</span>.defineProperty(ns, <span class="hljs-string">'default'</span>, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">value</span>: value });
+      <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">2</span> &amp;&amp; <span class="hljs-keyword">typeof</span> value != <span class="hljs-string">'string'</span>) <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> value) __webpack_require__.d(ns, key, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key</span>) </span>{ <span class="hljs-keyword">return</span> value[key]; }.bind(<span class="hljs-literal">null</span>, key));
+      <span class="hljs-keyword">return</span> ns;
+    };
+    __webpack_require__.n = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module</span>) </span>{
+      <span class="hljs-keyword">var</span> getter = <span class="hljs-built_in">module</span> &amp;&amp; <span class="hljs-built_in">module</span>.__esModule ?
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefault</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>[<span class="hljs-string">'default'</span>]; } :
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getModuleExports</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>; };
+      __webpack_require__.d(getter, <span class="hljs-string">'a'</span>, getter);
+      <span class="hljs-keyword">return</span> getter;
+    };
+    __webpack_require__.o = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">object, property</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(object, property); };
+    __webpack_require__.p = <span class="hljs-string">""</span>;
+    __webpack_require__.oe = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{ <span class="hljs-built_in">console</span>.error(err); <span class="hljs-keyword">throw</span> err; };
+    <span class="hljs-keyword">var</span> jsonpArray = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] || [];
+    <span class="hljs-keyword">var</span> oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
+    jsonpArray.push = webpackJsonpCallback;
+    jsonpArray = jsonpArray.slice();
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; jsonpArray.length; i++) webpackJsonpCallback(jsonpArray[i]);
+    <span class="hljs-keyword">var</span> parentJsonpFunction = oldJsonpFunction;
+    <span class="hljs-keyword">return</span> __webpack_require__(__webpack_require__.s = <span class="hljs-string">"&lt;%-entryModuleId%&gt;"</span>);
+  })
+    ({
+        &lt;%
+        <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> <span class="hljs-keyword">of</span> modules)
+        {%&gt;
+            <span class="hljs-string">"&lt;%-module.moduleId%&gt;"</span>:
+            (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+              &lt;%-<span class="hljs-built_in">module</span>._source%&gt;
+            }),
+        &lt;%}
+      %&gt; 
+    });
+</code></pre>
+<h3 id="t438.7 chunkTemplate.ejs">8.7 chunkTemplate.ejs <a href="#t438.7 chunkTemplate.ejs"> # </a></h3>
+<p>webpack\chunkTemplate.ejs</p>
+<pre><code class="lang-js">(<span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] || []).push([[<span class="hljs-string">"&lt;%-chunkName%&gt;"</span>], {
+    &lt;%
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> <span class="hljs-built_in">module</span> <span class="hljs-keyword">of</span> modules)
+    {%&gt;
+        <span class="hljs-string">"&lt;%-module.moduleId%&gt;"</span>:
+        (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+          &lt;%-<span class="hljs-built_in">module</span>._source%&gt;
+        }),
+    &lt;%}
+  %&gt; 
+  }]);
+</code></pre>
+<h3 id="t448.8 dist\main.js">8.8 dist\main.js <a href="#t448.8 dist\main.js"> # </a></h3>
+<p>dist\main.js</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpackJsonpCallback</span>(<span class="hljs-params">data</span>) </span>{
+    <span class="hljs-keyword">var</span> chunkIds = data[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">var</span> moreModules = data[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">var</span> moduleId, chunkId, i = <span class="hljs-number">0</span>, resolves = [];
+    <span class="hljs-keyword">for</span> (; i &lt; chunkIds.length; i++) {
+      chunkId = chunkIds[i];
+      <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(installedChunks, chunkId) &amp;&amp; installedChunks[chunkId]) {
+        resolves.push(installedChunks[chunkId][<span class="hljs-number">0</span>]);
+      }
+      installedChunks[chunkId] = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">for</span> (moduleId <span class="hljs-keyword">in</span> moreModules) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(moreModules, moduleId)) {
+        modules[moduleId] = moreModules[moduleId];
+      }
+    }
+    <span class="hljs-keyword">if</span> (parentJsonpFunction) parentJsonpFunction(data);
+    <span class="hljs-keyword">while</span> (resolves.length) {
+      resolves.shift()();
+    }
+  };
+  <span class="hljs-keyword">var</span> installedModules = {};
+  <span class="hljs-keyword">var</span> installedChunks = {
+    <span class="hljs-string">"main"</span>: <span class="hljs-number">0</span>
+  };
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">jsonpScriptSrc</span>(<span class="hljs-params">chunkId</span>) </span>{
+    <span class="hljs-keyword">return</span> __webpack_require__.p + <span class="hljs-string">""</span> + ({ <span class="hljs-string">"sum"</span>: <span class="hljs-string">"sum"</span>, <span class="hljs-string">"title"</span>: <span class="hljs-string">"title"</span> }[chunkId] || chunkId) + <span class="hljs-string">".js"</span>
+  }
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+      <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+      <span class="hljs-attr">i</span>: moduleId,
+      <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+    <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  __webpack_require__.e = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">requireEnsure</span>(<span class="hljs-params">chunkId</span>) </span>{
+    <span class="hljs-keyword">var</span> promises = [];
+    <span class="hljs-keyword">var</span> installedChunkData = installedChunks[chunkId];
+    <span class="hljs-keyword">if</span> (installedChunkData !== <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">if</span> (installedChunkData) {
+        promises.push(installedChunkData[<span class="hljs-number">2</span>]);
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">var</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+          installedChunkData = installedChunks[chunkId] = [resolve, reject];
+        });
+        promises.push(installedChunkData[<span class="hljs-number">2</span>] = promise);
+        <span class="hljs-keyword">var</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+        <span class="hljs-keyword">var</span> onScriptComplete;
+        script.charset = <span class="hljs-string">'utf-8'</span>;
+        script.timeout = <span class="hljs-number">120</span>;
+        <span class="hljs-keyword">if</span> (__webpack_require__.nc) {
+          script.setAttribute(<span class="hljs-string">"nonce"</span>, __webpack_require__.nc);
+        }
+        script.src = jsonpScriptSrc(chunkId);
+        <span class="hljs-keyword">var</span> error = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>();
+        onScriptComplete = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+          script.onerror = script.onload = <span class="hljs-literal">null</span>;
+          clearTimeout(timeout);
+          <span class="hljs-keyword">var</span> chunk = installedChunks[chunkId];
+          <span class="hljs-keyword">if</span> (chunk !== <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">if</span> (chunk) {
+              <span class="hljs-keyword">var</span> errorType = event &amp;&amp; (event.type === <span class="hljs-string">'load'</span> ? <span class="hljs-string">'missing'</span> : event.type);
+              <span class="hljs-keyword">var</span> realSrc = event &amp;&amp; event.target &amp;&amp; event.target.src;
+              error.message = <span class="hljs-string">'Loading chunk '</span> + chunkId + <span class="hljs-string">' failed.\n('</span> + errorType + <span class="hljs-string">': '</span> + realSrc + <span class="hljs-string">')'</span>;
+              error.name = <span class="hljs-string">'ChunkLoadError'</span>;
+              error.type = errorType;
+              error.request = realSrc;
+              chunk[<span class="hljs-number">1</span>](error);
+            }
+            installedChunks[chunkId] = <span class="hljs-literal">undefined</span>;
+          }
+        };
+        <span class="hljs-keyword">var</span> timeout = setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          onScriptComplete({ <span class="hljs-attr">type</span>: <span class="hljs-string">'timeout'</span>, <span class="hljs-attr">target</span>: script });
+        }, <span class="hljs-number">120000</span>);
+        script.onerror = script.onload = onScriptComplete;
+        <span class="hljs-built_in">document</span>.head.appendChild(script);
+      }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(promises);
+  };
+  __webpack_require__.m = modules;
+  __webpack_require__.c = installedModules;
+  __webpack_require__.d = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports, name, getter</span>) </span>{
+    <span class="hljs-keyword">if</span> (!__webpack_require__.o(exports, name)) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, name, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: getter });
+    }
+  };
+  __webpack_require__.r = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.toStringTag) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    }
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value, mode</span>) </span>{
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">1</span>) value = __webpack_require__(value);
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">8</span>) <span class="hljs-keyword">return</span> value;
+    <span class="hljs-keyword">if</span> ((mode &amp; <span class="hljs-number">4</span>) &amp;&amp; <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">'object'</span> &amp;&amp; value &amp;&amp; value.__esModule) <span class="hljs-keyword">return</span> value;
+    <span class="hljs-keyword">var</span> ns = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
+    __webpack_require__.r(ns);
+    <span class="hljs-built_in">Object</span>.defineProperty(ns, <span class="hljs-string">'default'</span>, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">value</span>: value });
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">2</span> &amp;&amp; <span class="hljs-keyword">typeof</span> value != <span class="hljs-string">'string'</span>) <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> value) __webpack_require__.d(ns, key, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key</span>) </span>{ <span class="hljs-keyword">return</span> value[key]; }.bind(<span class="hljs-literal">null</span>, key));
+    <span class="hljs-keyword">return</span> ns;
+  };
+  __webpack_require__.n = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module</span>) </span>{
+    <span class="hljs-keyword">var</span> getter = <span class="hljs-built_in">module</span> &amp;&amp; <span class="hljs-built_in">module</span>.__esModule ?
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefault</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>[<span class="hljs-string">'default'</span>]; } :
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getModuleExports</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>; };
+    __webpack_require__.d(getter, <span class="hljs-string">'a'</span>, getter);
+    <span class="hljs-keyword">return</span> getter;
+  };
+  __webpack_require__.o = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">object, property</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(object, property); };
+  __webpack_require__.p = <span class="hljs-string">""</span>;
+  __webpack_require__.oe = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{ <span class="hljs-built_in">console</span>.error(err); <span class="hljs-keyword">throw</span> err; };
+  <span class="hljs-keyword">var</span> jsonpArray = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] || [];
+  <span class="hljs-keyword">var</span> oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
+  jsonpArray.push = webpackJsonpCallback;
+  jsonpArray = jsonpArray.slice();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; jsonpArray.length; i++) webpackJsonpCallback(jsonpArray[i]);
+  <span class="hljs-keyword">var</span> parentJsonpFunction = oldJsonpFunction;
+  <span class="hljs-keyword">return</span> __webpack_require__(__webpack_require__.s = <span class="hljs-string">"./src/index.js"</span>);
+})
+  ({
+
+    <span class="hljs-string">"./src/index.js"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+        __webpack_require__(<span class="hljs-string">"./src/sync.js"</span>);
+        <span class="hljs-comment">//如果遇到了import,那么import的模块会成为一个单独的入口,会生成一个单独的代码块,会生成一个单独的文件</span>
+        <span class="hljs-comment">//如果import调用了一个模 块,那么这个模块和它依赖的模块会成一个单独的的异步代码块,里面所有的模块async=true</span>
+        __webpack_require__.e(<span class="hljs-string">"title"</span>).then(__webpack_require__.t.bind(<span class="hljs-literal">null</span>, <span class="hljs-string">"./src/title.js"</span>, <span class="hljs-number">7</span>)).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+          <span class="hljs-built_in">console</span>.log(result.default);
+        });
+        __webpack_require__.e(<span class="hljs-string">"sum"</span>).then(__webpack_require__.t.bind(<span class="hljs-literal">null</span>, <span class="hljs-string">"./src/sum.js"</span>, <span class="hljs-number">7</span>)).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+          <span class="hljs-built_in">console</span>.log(result.default);
+        });
+      }),
+
+    <span class="hljs-string">"./src/sync.js"</span>:
+      (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+        <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'sync'</span>;
+      }),
+
+  });
+</code></pre>
+<h3 id="t458.9 sum.js">8.9 sum.js <a href="#t458.9 sum.js"> # </a></h3>
+<p>dist\sum.js</p>
+<pre><code class="lang-js">(<span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] || []).push([[<span class="hljs-string">"sum"</span>], {
+        <span class="hljs-string">"./src/sum.js"</span>:
+        (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+          <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'sum'</span>;
+        }),
+  }]);
+</code></pre>
+<h3 id="t468.10 title.js">8.10 title.js <a href="#t468.10 title.js"> # </a></h3>
+<p>dist\title.js</p>
+<pre><code class="lang-js">(<span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] || []).push([[<span class="hljs-string">"title"</span>], {
+  <span class="hljs-string">"./src/title.js"</span>:
+    (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+      <span class="hljs-keyword">let</span> inner_title = __webpack_require__(<span class="hljs-string">"./src/inner_title.js"</span>);
+      <span class="hljs-built_in">module</span>.exports = inner_title;
+    }),
+  <span class="hljs-string">"./src/inner_title.js"</span>:
+    (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+      <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'inner_title'</span>;
+    }),
+}]);
+</code></pre>
+<h2 id="t479.加载第三方模块">9.加载第三方模块 <a href="#t479.加载第三方模块"> # </a></h2>
+<h3 id="t489.1 src\index.js">9.1 src\index.js <a href="#t489.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-built_in">console</span>.log(_.join([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]));
+</code></pre>
+<h3 id="t499.2 NormalModule.js">9.2 NormalModule.js <a href="#t499.2 NormalModule.js"> # </a></h3>
+<p>webpack\NormalModule.js</p>
+<pre><code class="lang-diff">const types = require('babel-types');
+const generate = require('babel-generator').default;
+const traverse = require('babel-traverse').default;
+const path = require('path');
+const async = require('neo-async');
+class NormalModule {
+    constructor({ name, context, rawRequest, resource, parser, moduleId, async }) {
+        this.name = name;
+        this.context = context;
+        this.rawRequest = rawRequest;
+        this.resource = resource;
+        this.moduleId = moduleId||('./'+path.posix.relative(context,resource));
+        this.parser = parser;
+        this._source = null;
+        this._ast = null;
+        this.dependencies = [];
+        this.blocks = [];
+        this.async = async;
+    }
+    //解析依赖
+    build(compilation, callback) {
+        this.doBuild(compilation, err =&gt; {
+            let originalSource = this.getSource(this.resource, compilation);
+            // 将 当前模块 的内容转换成 AST
+            const ast = this.parser.parse(originalSource);
+            traverse(ast, {
+                // 如果当前节点是一个函数调用时
+                CallExpression: (nodePath) =&gt; {
+                    let node = nodePath.node;
+                    debugger
+                    // 当前节点是 require 时
+                    if (node.callee.name <span class="hljs-comment">=== 'require') {</span>
+                        //修改require为__webpack_require__
+                        node.callee.name = '__webpack_require__';
+                        //获取要加载的模块ID
+                        let moduleName = node.arguments[0].value;
+<span class="hljs-addition">+                        let dependencyResource;</span>
+<span class="hljs-addition">+                        if (moduleName.startsWith('.')) {</span>
+<span class="hljs-addition">+                            //获取扩展名</span>
+<span class="hljs-addition">+                            let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';</span>
+<span class="hljs-addition">+                            //获取依赖模块的绝对路径</span>
+<span class="hljs-addition">+                            dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);</span>
+<span class="hljs-addition">+                        } else {</span>
+<span class="hljs-addition">+                            dependencyResource = require.resolve(path.posix.join(this.context, 'node_modules', moduleName));</span>
+<span class="hljs-addition">+                            dependencyResource = dependencyResource.replace(/\\/g, path.posix.sep);</span>
+<span class="hljs-addition">+                        }</span>
+<span class="hljs-addition">+                        //获取依赖模块的模块ID</span>
+<span class="hljs-addition">+                        let dependencyModuleId = '.' + dependencyResource.slice(this.context.length);</span>
+                        //添加依赖
+                        this.dependencies.push({
+                            name: this.name, context: this.context, rawRequest: moduleName,
+                            moduleId: dependencyModuleId, resource: dependencyResource
+                        });
+                        node.arguments = [types.stringLiteral(dependencyModuleId)];
+                    } else if (types.isImport(nodePath.node.callee)) {
+                        //获取要加载的模块ID
+                        let moduleName = node.arguments[0].value;
+                        //获取扩展名
+                        let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';
+                        //获取依赖模块的绝对路径
+                        let dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);
+                        //获取依赖模块的模块ID
+                        let dependencyModuleId = '.' + path.posix.sep + path.posix.relative(this.context, dependencyResource);
+                        //获取代码块的ID
+                        let dependencyChunkId = dependencyModuleId.slice(2, dependencyModuleId.lastIndexOf('.')).replace(path.posix.sep, '_', 'g');
+                        // chunkId 不需要带 .js 后缀
+                        nodePath.replaceWithSourceString(`
+                            __webpack_require__.e("${dependencyChunkId}").then(__webpack_require__.t.bind(null,"${dependencyModuleId}",7))
+                        `);
+                        this.blocks.push({
+                            context: this.context,
+                            entry: dependencyModuleId,
+                            name: dependencyChunkId,
+                            async: true
+                        });
+                    }
+                },
+            });
+            let { code } = generate(ast);
+            this._source = code;
+            this._ast = ast;
+            async.forEach(this.blocks, ({ context, entry, name, async }, done) =&gt; {
+                compilation._addModuleChain(context, entry, name, async, done);
+            }, callback);
+        });
+    }
+    //获取模块代码
+    doBuild(compilation, callback) {
+        let originalSource = this.getSource(this.resource, compilation);
+        this._source = originalSource;
+        callback();
+    }
+    getSource(resource, compilation) {
+        let originalSource = compilation.inputFileSystem.readFileSync(resource, 'utf8');
+        return originalSource;
+    }
+}
+module.exports = NormalModule;
+</code></pre>
+<h2 id="t5010.分离commons和vendor">10.分离commons和vendor <a href="#t5010.分离commons和vendor"> # </a></h2>
+<h3 id="t5110.1 webpack.config.js">10.1 webpack.config.js <a href="#t5110.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">const path = require('path');
+module.exports = {
+    context: process.cwd(),
+    mode: 'development',
+    devtool: 'none',
+<span class="hljs-addition">+   entry: {</span>
+<span class="hljs-addition">+       entry1: './src/entry1.js',</span>
+<span class="hljs-addition">+       entry2: './src/entry2.js',</span>
+<span class="hljs-addition">+   },</span>
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js'
+    }
+}
+</code></pre>
+<h3 id="t5210.2 src\entry1.js">10.2 src\entry1.js <a href="#t5210.2 src\entry1.js"> # </a></h3>
+<p>src\entry1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./title'</span>);
+<span class="hljs-keyword">let</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-built_in">console</span>.log(_.upperCase(title));
+</code></pre>
+<h3 id="t5310.3 src\entry2.js">10.3 src\entry2.js <a href="#t5310.3 src\entry2.js"> # </a></h3>
+<p>src\entry2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./title'</span>);
+<span class="hljs-keyword">let</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+<span class="hljs-built_in">console</span>.log(_.upperCase(title));
+</code></pre>
+<h3 id="t5410.4 EntryOptionPlugin.js">10.4 EntryOptionPlugin.js <a href="#t5410.4 EntryOptionPlugin.js"> # </a></h3>
+<p>webpack\plugins\EntryOptionPlugin.js</p>
+<pre><code class="lang-diff">const SingleEntryPlugin = require("./SingleEntryPlugin");
+class EntryOptionPlugin {
+    apply(compiler) {
+        compiler.hooks.entryOption.tap("EntryOptionPlugin", (context, entry) =&gt; {
+<span class="hljs-addition">+            if (typeof entry == 'string') {</span>
+<span class="hljs-addition">+                new SingleEntryPlugin(context, entry, 'main').apply(compiler);</span>
+<span class="hljs-addition">+            } else {</span>
+<span class="hljs-addition">+                // 处理多入口</span>
+<span class="hljs-addition">+                for (let entryName in entry) {</span>
+<span class="hljs-addition">+                    new SingleEntryPlugin(context, entry[entryName], entryName).apply(compiler);</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+        });
+    }
+}
+module.exports = EntryOptionPlugin;
+</code></pre>
+<h3 id="t5510.5 Compilation.js">10.5 Compilation.js <a href="#t5510.5 Compilation.js"> # </a></h3>
+<p>webpack\Compilation.js</p>
+<pre><code class="lang-diff">const NormalModuleFactory = require('./NormalModuleFactory');
+const async = require('neo-async');
+const { Tapable, SyncHook } = require("tapable");
+const Parser = require('./Parser');
+const parser = new Parser();
+const path = require('path');
+const Chunk = require('./Chunk');
+const ejs = require('ejs');
+const fs = require('fs');
+<span class="hljs-addition">+const mainTemplate = fs.readFileSync(path.join(__dirname, 'template', 'mainDeferTemplate.ejs'), 'utf8');</span>
+const mainRender = ejs.compile(mainTemplate);
+const chunkTemplate = fs.readFileSync(path.join(__dirname, 'template', 'chunkTemplate.ejs'), 'utf8');
+const chunkRender = ejs.compile(chunkTemplate);
+class Compilation extends Tapable {
+    constructor(compiler) {
+        super();
+        this.compiler = compiler;
+        this.options = compiler.options;
+        this.context = compiler.context;
+        this.inputFileSystem = compiler.inputFileSystem;
+        this.outputFileSystem = compiler.outputFileSystem;
+        this.entries = [];
+        this.modules = [];
+        this.chunks = [];
+        this.files = [];  //生成的文件
+        this.assets = {}; //资源 
+<span class="hljs-addition">+        this.vendors = [];//第三方模块</span>
+<span class="hljs-addition">+        this.commons = [];//不在node_modules,调用次数大于1的模块</span>
+<span class="hljs-addition">+        this.commonsCountMap = {};//map</span>
+        this.hooks = {
+            succeedModule: new SyncHook(["module"]),
+            seal: new SyncHook([]),
+            beforeChunks: new SyncHook([]),
+            afterChunks: new SyncHook(["chunks"])
+        }
+    }
+    seal(callback) {
+        this.hooks.seal.call();
+        this.hooks.beforeChunks.call();//生成代码块之前
+<span class="hljs-addition">+        for (const module of this.modules) {//循环入口模块</span>
+<span class="hljs-addition">+            if (/node_modules/.test(module.moduleId)) {</span>
+<span class="hljs-addition">+                module.name = 'vendors';</span>
+<span class="hljs-addition">+                this.vendors.push(module);</span>
+<span class="hljs-addition">+            } else {</span>
+<span class="hljs-addition">+                if (this.commonsCountMap[module.moduleId]) {</span>
+<span class="hljs-addition">+                    this.commonsCountMap[module.moduleId].count++;</span>
+<span class="hljs-addition">+                } else {</span>
+<span class="hljs-addition">+                    this.commonsCountMap[module.moduleId] = { count: 1, module };</span>
+<span class="hljs-addition">+                }</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        for (let moduleId in this.commonsCountMap) {</span>
+<span class="hljs-addition">+            const moduleCount = this.commonsCountMap[moduleId];</span>
+<span class="hljs-addition">+            let { module, count } = moduleCount;</span>
+<span class="hljs-addition">+            if (count &gt;= 2) {</span>
+<span class="hljs-addition">+                module.name = 'commons';</span>
+<span class="hljs-addition">+                this.commons.push(module);</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        let excludeModuleIds = [...this.vendors, ...this.commons].map(item =&gt; item.moduleId);</span>
+<span class="hljs-addition">+        this.modules = this.modules.filter(item =&gt; !excludeModuleIds.includes(item.moduleId));</span>
+
+        for (const module of this.entries) {//循环入口模块
+            const chunk = new Chunk(module);//创建代码块
+            this.chunks.push(chunk);//把代码块添加到代码块数组中
+            //把代码块的模块添加到代码块中
+            chunk.modules = this.modules.filter(module =&gt; module.name == chunk.name);
+        }
+<span class="hljs-addition">+        if (this.vendors.length) {</span>
+<span class="hljs-addition">+            const chunk = new Chunk(this.vendors[0]);</span>
+<span class="hljs-addition">+            chunk.async = true;</span>
+<span class="hljs-addition">+            this.chunks.push(chunk);</span>
+<span class="hljs-addition">+            chunk.modules = this.vendors;</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        if (this.commons.length) {</span>
+<span class="hljs-addition">+            const chunk = new Chunk(this.commons[0]);</span>
+<span class="hljs-addition">+            chunk.async = true;</span>
+<span class="hljs-addition">+            this.chunks.push(chunk);</span>
+<span class="hljs-addition">+            chunk.modules = this.commons;</span>
+<span class="hljs-addition">+        }</span>
+        this.hooks.afterChunks.call(this.chunks);//生成代码块之后
+        this.createChunkAssets();
+        callback();//封装结束
+    }
+    createChunkAssets() {
+        for (let i = 0; i &lt; this.chunks.length; i++) {
+            const chunk = this.chunks[i];
+            chunk.files = [];
+            const file = chunk.name + '.js';
+            let source;
+            if (chunk.async) {
+                source = chunkRender({ chunkName: chunk.name, modules: chunk.modules });
+            } else {
+<span class="hljs-addition">+                let deferredChunks = [];</span>
+<span class="hljs-addition">+                if (this.commons.length) deferredChunks.push('commons');</span>
+<span class="hljs-addition">+                if (this.vendors.length) deferredChunks.push('vendors');</span>
+<span class="hljs-addition">+                source = mainRender({ entryId: chunk.entryModule.moduleId, modules: chunk.modules, deferredChunks });</span>
+            }
+            chunk.files.push(file);
+            this.emitAsset(file, source);
+        }
+
+    }
+    emitAsset(file, source) {
+        this.assets[file] = source;
+        this.files.push(file);
+    }
+    //context ./src/index.js main callback(终级回调)
+    _addModuleChain(context,entry,name,async,callback){
+        this.createModule({
+            name,//所属的代码块的名称 main
+            context:this.context,//上下文
+            rawRequest:entry,// ./src/index.js
+            resource:path.posix.join(context,entry),//此模块entry的的绝对路径
+            parser,
+            async
+        },module=&gt;{this.entries.push(module)},callback);
+    }
+    createModule(data,addEntry,callback){
+        //先创建模块工厂
+        const moduleFactory = new NormalModuleFactory();
+        let module = moduleFactory.create(data);
+        //非常非常重要 模块的ID如何生成? 模块的ID是一个相对于根目录的相对路径
+        //index.js ./src/index.js title.js ./src/title.js
+        //relative返回一个相对路径 从根目录出出到模块的绝地路径 得到一个相对路径
+        module.moduleId = '.'+path.posix.sep+path.posix.relative(this.context,module.resource);
+        addEntry&amp;&amp;addEntry(module);
+        this.modules.push(module);//把模块添加到完整的模块数组中
+        const afterBuild = (err,module)=&gt;{
+            if(module.dependencies){//如果一个模块编译完成,发现它有依赖的模块,那么递归编译它的依赖模块
+                this.processModuleDependencies(module,(err)=&gt;{
+                    //当这个入口模块和它依赖的模块都编译完成了,才会让调用入口模块的回调
+                    callback(err,module);
+                });
+            }else{
+                callback(err,module);
+            }
+        }
+        this.buildModule(module,afterBuild);
+    }
+    processModuleDependencies(module,callback){
+        let dependencies= module.dependencies;
+        //因为我希望可以并行的同时开始编译依赖的模块,然后等所有依赖的模块全部编译完成后才结束
+        async.forEach(dependencies,(dependency,done)=&gt;{
+            let {name,context,rawRequest,resource,moduleId} = dependency;
+            this.createModule({
+                name,
+                context,
+                rawRequest,
+                resource,
+                moduleId,
+                parser
+            },null,done);
+        },callback);
+    }
+    buildModule(module,afterBuild){
+        module.build(this,(err)=&gt;{
+            this.hooks.succeedModule.call(module)
+            afterBuild(null,module);
+        });
+    }
+}
+module.exports = Compilation;
+</code></pre>
+<h3 id="t5610.6 mainDeferTemplate.ejs">10.6 mainDeferTemplate.ejs <a href="#t5610.6 mainDeferTemplate.ejs"> # </a></h3>
+<p>webpack\template\mainDeferTemplate.ejs</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">modules</span>) </span>{
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpackJsonpCallback</span>(<span class="hljs-params">data</span>) </span>{
+    <span class="hljs-keyword">var</span> chunkIds = data[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">var</span> moreModules = data[<span class="hljs-number">1</span>];
+    <span class="hljs-keyword">var</span> executeModules = data[<span class="hljs-number">2</span>];
+    <span class="hljs-keyword">var</span> moduleId, chunkId, i = <span class="hljs-number">0</span>, resolves = [];
+    <span class="hljs-keyword">for</span> (; i &lt; chunkIds.length; i++) {
+      chunkId = chunkIds[i];
+      <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(installedChunks, chunkId) &amp;&amp; installedChunks[chunkId]) {
+        resolves.push(installedChunks[chunkId][<span class="hljs-number">0</span>]);
+      }
+      installedChunks[chunkId] = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">for</span> (moduleId <span class="hljs-keyword">in</span> moreModules) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(moreModules, moduleId)) {
+        modules[moduleId] = moreModules[moduleId];
+      }
+    }
+    <span class="hljs-keyword">if</span> (parentJsonpFunction) parentJsonpFunction(data);
+    <span class="hljs-keyword">while</span> (resolves.length) {
+      resolves.shift()();
+    }
+    deferredModules.push.apply(deferredModules, executeModules || []);
+    <span class="hljs-keyword">return</span> checkDeferredModules();
+  };
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">checkDeferredModules</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">debugger</span>
+    <span class="hljs-keyword">var</span> result;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; deferredModules.length; i++) {
+      <span class="hljs-keyword">var</span> deferredModule = deferredModules[i];
+      <span class="hljs-keyword">var</span> fulfilled = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> j = <span class="hljs-number">1</span>; j &lt; deferredModule.length; j++) {
+        <span class="hljs-keyword">var</span> depId = deferredModule[j];
+        <span class="hljs-keyword">if</span> (installedChunks[depId] !== <span class="hljs-number">0</span>) fulfilled = <span class="hljs-literal">false</span>;
+      }
+      <span class="hljs-keyword">if</span> (fulfilled) {
+        deferredModules.splice(i--, <span class="hljs-number">1</span>);
+        result = __webpack_require__(__webpack_require__.s = deferredModule[<span class="hljs-number">0</span>]);
+      }
+    }
+    <span class="hljs-keyword">return</span> result;
+  }
+  <span class="hljs-keyword">var</span> installedModules = {};
+  <span class="hljs-keyword">var</span> installedChunks = {
+    <span class="hljs-string">"entry1"</span>: <span class="hljs-number">0</span>
+  };
+  <span class="hljs-keyword">var</span> deferredModules = [];
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+      <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+      <span class="hljs-attr">i</span>: moduleId,
+      <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+    <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  __webpack_require__.m = modules;
+  __webpack_require__.c = installedModules;
+  __webpack_require__.d = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports, name, getter</span>) </span>{
+    <span class="hljs-keyword">if</span> (!__webpack_require__.o(exports, name)) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, name, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: getter });
+    }
+  };
+  __webpack_require__.r = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">exports</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.toStringTag) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    }
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value, mode</span>) </span>{
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">1</span>) value = __webpack_require__(value);
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">8</span>) <span class="hljs-keyword">return</span> value;
+    <span class="hljs-keyword">if</span> ((mode &amp; <span class="hljs-number">4</span>) &amp;&amp; <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">'object'</span> &amp;&amp; value &amp;&amp; value.__esModule) <span class="hljs-keyword">return</span> value;
+    <span class="hljs-keyword">var</span> ns = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
+    __webpack_require__.r(ns);
+    <span class="hljs-built_in">Object</span>.defineProperty(ns, <span class="hljs-string">'default'</span>, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">value</span>: value });
+    <span class="hljs-keyword">if</span> (mode &amp; <span class="hljs-number">2</span> &amp;&amp; <span class="hljs-keyword">typeof</span> value != <span class="hljs-string">'string'</span>) <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> value) __webpack_require__.d(ns, key, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">key</span>) </span>{ <span class="hljs-keyword">return</span> value[key]; }.bind(<span class="hljs-literal">null</span>, key));
+    <span class="hljs-keyword">return</span> ns;
+  };
+  __webpack_require__.n = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module</span>) </span>{
+    <span class="hljs-keyword">var</span> getter = <span class="hljs-built_in">module</span> &amp;&amp; <span class="hljs-built_in">module</span>.__esModule ?
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefault</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>[<span class="hljs-string">'default'</span>]; } :
+      <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getModuleExports</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>; };
+    __webpack_require__.d(getter, <span class="hljs-string">'a'</span>, getter);
+    <span class="hljs-keyword">return</span> getter;
+  };
+  __webpack_require__.o = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">object, property</span>) </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(object, property); };
+  __webpack_require__.p = <span class="hljs-string">""</span>;
+  <span class="hljs-keyword">var</span> jsonpArray = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpackJsonp"</span>] || [];
+  <span class="hljs-keyword">var</span> oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
+  jsonpArray.push = webpackJsonpCallback;
+  jsonpArray = jsonpArray.slice();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; jsonpArray.length; i++) webpackJsonpCallback(jsonpArray[i]);
+  <span class="hljs-keyword">var</span> parentJsonpFunction = oldJsonpFunction;
+  deferredModules.push([<span class="hljs-string">"&lt;%=entryId%&gt;"</span>&lt;%-deferredChunks.length&gt;<span class="hljs-number">0</span>?<span class="hljs-string">',"'</span>+deferredChunks.join(<span class="hljs-string">'","'</span>)+<span class="hljs-string">'"'</span>:<span class="hljs-string">""</span>%&gt;]);
+  <span class="hljs-keyword">return</span> checkDeferredModules();
+})
+  ({
+    &lt;%
+          <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> id <span class="hljs-keyword">in</span> modules){
+              <span class="hljs-keyword">let</span> {moduleId,_source} = modules[id];%&gt;
+              <span class="hljs-string">"&lt;%-moduleId%&gt;"</span>:
+              (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">module, exports,__webpack_require__</span>) </span>{
+                &lt;%-_source%&gt;
+              }),
+           &lt;%}
+        %&gt;
+  });
+</code></pre>
+<h2 id="t5711.支持loader">11.支持loader <a href="#t5711.支持loader"> # </a></h2>
+<h3 id="t5811.1 webpack.config.js">11.1 webpack.config.js <a href="#t5811.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">const path = require('path');
+module.exports = {
+    context: process.cwd(),
+    mode: 'development',
+    devtool: 'none',
+<span class="hljs-addition">+    entry: './src/index.js',</span>
+    module: {
+        rules: [
+            {
+                test: /\.less$/,
+                use: ['style-loader', 'less-loader']
+            }
+        ]
+    },
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js'
+    }
+}
+</code></pre>
+<h3 id="t5911.2 src\index.js">11.2 src\index.js <a href="#t5911.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+require('./index.less');</span>
+let title = require('./title');
+let _ = require('lodash');
+console.log(_.upperCase(title));
+</code></pre>
+<h3 id="t6011.3 NormalModule.js">11.3 NormalModule.js <a href="#t6011.3 NormalModule.js"> # </a></h3>
+<p>webpack\NormalModule.js</p>
+<pre><code class="lang-diff">const types = require('babel-types');
+const generate = require('babel-generator').default;
+const traverse = require('babel-traverse').default;
+const path = require('path');
+const async = require('neo-async');
+const runLoaders = require('./loader-runner');
+const fs = require('fs');
+class NormalModule {
+    constructor({ name, context, rawRequest, resource, parser, moduleId, async }) {
+        this.name = name;
+        this.context = context;
+        this.rawRequest = rawRequest;
+        this.resource = resource;
+        this.moduleId = moduleId||('./'+path.posix.relative(context,resource));
+        this.parser = parser;
+        this._source = null;
+        this._ast = null;
+        this.dependencies = [];
+        this.blocks = [];
+        this.async = async;
+    }
+    //解析依赖
+    build(compilation, callback) {
+        this.doBuild(compilation, err =&gt; {
+<span class="hljs-addition">+            const afterSource = (err, source) =&gt; {</span>
+                // 将 当前模块 的内容转换成 AST
+                const ast = this.parser.parse(source);
+                traverse(ast, {
+                    // 如果当前节点是一个函数调用时
+                    CallExpression: (nodePath) =&gt; {
+                        let node = nodePath.node;
+                        // 当前节点是 require 时
+                        if (node.callee.name <span class="hljs-comment">=== 'require') {</span>
+                            //修改require为__webpack_require__
+                            node.callee.name = '__webpack_require__';
+                            //获取要加载的模块ID
+                            let moduleName = node.arguments[0].value;
+                            let dependencyResource;
+                            if (moduleName.startsWith('.')) {
+                                //获取扩展名
+                                let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';
+                                //获取依赖模块的绝对路径
+                                dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);
+                            } else {
+                                dependencyResource = require.resolve(path.posix.join(this.context, 'node_modules', moduleName));
+                                dependencyResource = dependencyResource.replace(/\\/g, path.posix.sep);
+                            }
+                            //获取依赖模块的模块ID
+                            let dependencyModuleId = '.' + dependencyResource.slice(this.context.length);
+                            //添加依赖
+                            this.dependencies.push({
+                                name: this.name, context: this.context, rawRequest: moduleName,
+                                moduleId: dependencyModuleId, resource: dependencyResource
+                            });
+                            node.arguments = [types.stringLiteral(dependencyModuleId)];
+                        } else if (types.isImport(nodePath.node.callee)) {
+                            //获取要加载的模块ID
+                            let moduleName = node.arguments[0].value;
+                            //获取扩展名
+                            let extension = moduleName.split(path.posix.sep).pop().indexOf('.') == -1 ? '.js' : '';
+                            //获取依赖模块的绝对路径
+                            let dependencyResource = path.posix.join(path.posix.dirname(this.resource), moduleName + extension);
+                            //获取依赖模块的模块ID
+                            let dependencyModuleId = '.' + path.posix.sep + path.posix.relative(this.context, dependencyResource);
+                            //获取代码块的ID
+                            let dependencyChunkId = dependencyModuleId.slice(2, dependencyModuleId.lastIndexOf('.')).replace(path.posix.sep, '_', 'g');
+                            // chunkId 不需要带 .js 后缀
+                            nodePath.replaceWithSourceString(`
+                 __webpack_require__.e("${dependencyChunkId}").then(__webpack_require__.t.bind(null,"${dependencyModuleId}",7))
+             `);
+                            this.blocks.push({
+                                context: this.context,
+                                entry: dependencyModuleId,
+                                name: dependencyChunkId,
+                                async: true
+                            });
+                        }
+                    },
+                });
+                let { code } = generate(ast);
+                this._source = code;
+                this._ast = ast;
+                async.forEach(this.blocks, ({ context, entry, name, async }, done) =&gt; {
+                    compilation._addModuleChain(context, entry, name, async, done);
+                }, callback);
+            }
+<span class="hljs-addition">+            this.getSource(this.resource, compilation, afterSource);</span>
+        });
+    }
+    //获取模块代码
+    doBuild(compilation, callback) {
+<span class="hljs-addition">+        this.getSource(this.resource, compilation, (err, source) =&gt; {</span>
+<span class="hljs-addition">+            this._source = source;</span>
+<span class="hljs-addition">+            callback();</span>
+<span class="hljs-addition">+        });</span>
+    }
+<span class="hljs-addition">+    getSource(resource, compilation, callback) {</span>
+<span class="hljs-addition">+        let { module: { rules } } = compilation.options;</span>
+<span class="hljs-addition">+        let loaders = [];</span>
+<span class="hljs-addition">+        for (let i = 0; i &lt; rules.length; i++) {</span>
+<span class="hljs-addition">+            let rule = rules[i];</span>
+<span class="hljs-addition">+            if (rule.test.test(resource)) {</span>
+<span class="hljs-addition">+                let useLoaders = rule.use;</span>
+<span class="hljs-addition">+                loaders = [...loaders, ...useLoaders];</span>
+<span class="hljs-addition">+            }</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+        loaders = loaders.map(loader =&gt; require.resolve(path.posix.join(this.context, 'loaders', loader)));</span>
+<span class="hljs-addition">+        let source = runLoaders({</span>
+<span class="hljs-addition">+            resource,</span>
+<span class="hljs-addition">+            loaders,</span>
+<span class="hljs-addition">+            context: {},</span>
+<span class="hljs-addition">+            readResource: fs</span>
+<span class="hljs-addition">+        }, function (err, result) {</span>
+<span class="hljs-addition">+            callback(err, result);</span>
+<span class="hljs-addition">+        });</span>
+<span class="hljs-addition">+        return source;</span>
+    }
+}
+module.exports = NormalModule;
+</code></pre>
+<h3 id="t6111.4 less-loader.js">11.4 less-loader.js <a href="#t6111.4 less-loader.js"> # </a></h3>
+<p>loaders\less-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> less = <span class="hljs-built_in">require</span>(<span class="hljs-string">'less'</span>);
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">let</span> css;
+    less.render(source, (err, output) =&gt; {
+        css = output.css;
+    });
+    <span class="hljs-keyword">return</span> css;
+}
+</code></pre>
+<h3 id="t6211.5 style-loader.js">11.5 style-loader.js <a href="#t6211.5 style-loader.js"> # </a></h3>
+<p>loaders\style-loader.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">let</span> str = <span class="hljs-string">`
+      let style = document.createElement('style');
+      style.innerHTML = <span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(source)}</span>;
+      document.head.appendChild(style);
+    `</span>;
+    <span class="hljs-keyword">return</span> str;
+}
+</code></pre>
+<h3 id="t6311.6 index.less">11.6 index.less <a href="#t6311.6 index.less"> # </a></h3>
+<p>src\index.less</p>
+<pre><code class="lang-js">@color:red;
+body{
+    background-color:@color;
+}
+</code></pre>
+<h3 id="t6411.7 loader-runner.js">11.7 loader-runner.js <a href="#t6411.7 loader-runner.js"> # </a></h3>
+<p>webpack\loader-runner.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> readFile = fs.readFile.bind(fs);
+<span class="hljs-keyword">const</span> PATH_QUERY_FRAGMENT_REGEXP = <span class="hljs-regexp">/^([^?#]*)(\?[^#]*)?(#.*)?$/</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">parsePathQueryFragment</span>(<span class="hljs-params">resource</span>)</span>{<span class="hljs-comment">//resource =./src/index.js?name=zhufeng#top</span>
+  <span class="hljs-keyword">let</span> result = PATH_QUERY_FRAGMENT_REGEXP.exec(resource);
+  <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">path</span>:result[<span class="hljs-number">1</span>],  <span class="hljs-comment">//路径名 ./src/index.js</span>
+      <span class="hljs-attr">query</span>:result[<span class="hljs-number">2</span>],  <span class="hljs-comment">//   ?name=zhufeng</span>
+      <span class="hljs-attr">fragment</span>:result[<span class="hljs-number">3</span>]<span class="hljs-comment">// #top</span>
+  }
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">loadLoader</span>(<span class="hljs-params">loaderObject</span>)</span>{
+  <span class="hljs-keyword">let</span> normal = <span class="hljs-built_in">require</span>(loaderObject.path);
+  loaderObject.normal = normal;
+  loaderObject.pitch = normal.pitch;
+  loaderObject.raw = normal.raw;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">convertArgs</span>(<span class="hljs-params">args,raw</span>)</span>{
+  <span class="hljs-keyword">if</span>(raw&amp;&amp;!Buffer.isBuffer(args[<span class="hljs-number">0</span>])){<span class="hljs-comment">//如果这个loader需要 buffer,args[0]不是,需要转成buffer</span>
+    args[<span class="hljs-number">0</span>] = Buffer.from(args[<span class="hljs-number">0</span>],<span class="hljs-string">'utf8'</span>);
+  }<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(!raw &amp;&amp; Buffer.isBuffer(args[<span class="hljs-number">0</span>])){
+    args[<span class="hljs-number">0</span>] = args[<span class="hljs-number">0</span>].toString(<span class="hljs-string">'utf8'</span>);
+  }
+}
+<span class="hljs-comment">//loader绝对路径 C:\aproject\zhufeng202009webpack\3.loader\loaders\inline-loader1.js</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createLoaderObject</span>(<span class="hljs-params">loader</span>)</span>{
+  <span class="hljs-keyword">let</span> obj = {
+      <span class="hljs-attr">path</span>:<span class="hljs-string">''</span>,<span class="hljs-comment">//当前loader的绝对路径</span>
+      <span class="hljs-attr">query</span>:<span class="hljs-string">''</span>,<span class="hljs-comment">//当前loader的查询参数</span>
+      <span class="hljs-attr">fragment</span>:<span class="hljs-string">''</span>,<span class="hljs-comment">//当前loader的片段</span>
+      <span class="hljs-attr">normal</span>:<span class="hljs-literal">null</span>,<span class="hljs-comment">//当前loader的normal函数</span>
+      <span class="hljs-attr">pitch</span>:<span class="hljs-literal">null</span>,<span class="hljs-comment">//当前loader的pitch函数</span>
+      <span class="hljs-attr">raw</span>:<span class="hljs-literal">null</span>,<span class="hljs-comment">//是否是Buffer</span>
+      <span class="hljs-attr">data</span>:{},<span class="hljs-comment">//自定义对象 每个loader都会有一个data自定义对象</span>
+      <span class="hljs-attr">pitchExecuted</span>:<span class="hljs-literal">false</span>,<span class="hljs-comment">//当前 loader的pitch函数已经执行过了,不需要再执行了</span>
+      <span class="hljs-attr">normalExecuted</span>:<span class="hljs-literal">false</span><span class="hljs-comment">//当前loader的normal函数已经执行过了,不需要再执行</span>
+  }
+  <span class="hljs-built_in">Object</span>.defineProperty(obj,<span class="hljs-string">'request'</span>,{
+      <span class="hljs-keyword">get</span>(){
+          <span class="hljs-keyword">return</span> obj.path + obj.query+obj.fragment;
+      },
+      <span class="hljs-keyword">set</span>(value){
+        <span class="hljs-keyword">let</span> splittedRequest = parsePathQueryFragment(value);
+        obj.path = splittedRequest.path;
+        obj.query = splittedRequest.query;
+        obj.fragment = splittedRequest.fragment;
+      }
+  });
+  obj.request = loader;
+  <span class="hljs-keyword">return</span> obj;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processResource</span>(<span class="hljs-params">options,loaderContext,callback</span>)</span>{
+    <span class="hljs-comment">//重置loaderIndex 改为loader长度减1</span>
+    loaderContext.loaderIndex = loaderContext.loaders.length<span class="hljs-number">-1</span>;
+    <span class="hljs-keyword">let</span> resourcePath = loaderContext.resourcePath;
+    <span class="hljs-comment">//调用 fs.readFile方法读取资源内容</span>
+    options.readResource(resourcePath,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,buffer</span>)</span>{
+        <span class="hljs-keyword">if</span>(err) <span class="hljs-keyword">return</span> callback(error);
+        options.resourceBuffer = buffer;<span class="hljs-comment">//resourceBuffer放的是资源的原始内容</span>
+        iterateNormalLoaders(options,loaderContext,[buffer],callback);
+    });
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iterateNormalLoaders</span>(<span class="hljs-params">options,loaderContext,args,callback</span>)</span>{
+    <span class="hljs-keyword">if</span>(loaderContext.loaderIndex&lt;<span class="hljs-number">0</span>){<span class="hljs-comment">//如果正常的normal loader全部执行完了</span>
+        <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>,args);
+    }
+    <span class="hljs-keyword">let</span> currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];
+    <span class="hljs-comment">//如果说当这个normal已经执行过了,让索引减少1</span>
+    <span class="hljs-keyword">if</span>(currentLoaderObject.normalExecuted){
+        loaderContext.loaderIndex--;
+        <span class="hljs-keyword">return</span> iterateNormalLoaders(options,loaderContext,args,callback)
+    }
+    <span class="hljs-keyword">let</span> normalFn = currentLoaderObject.normal;
+    currentLoaderObject.normalExecuted=<span class="hljs-literal">true</span>;
+    convertArgs(args,currentLoaderObject.raw);
+    runSyncOrAsync(normalFn,loaderContext,args,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>)</span>{
+        <span class="hljs-keyword">if</span>(err) <span class="hljs-keyword">return</span> callback(err);
+        <span class="hljs-keyword">let</span> args = <span class="hljs-built_in">Array</span>.prototype.slice.call(<span class="hljs-built_in">arguments</span>,<span class="hljs-number">1</span>);
+        iterateNormalLoaders(options,loaderContext,args,callback);
+    });
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iteratePitchingLoaders</span>(<span class="hljs-params">options,loaderContext,callback</span>)</span>{
+    <span class="hljs-keyword">if</span>(loaderContext.loaderIndex&gt;=loaderContext.loaders.length){
+        <span class="hljs-keyword">return</span> processResource(options,loaderContext,callback);
+    }
+    <span class="hljs-comment">//获取当前的loader loaderIndex=0 loader1</span>
+   <span class="hljs-keyword">let</span> currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];
+   <span class="hljs-keyword">if</span>(currentLoaderObject.pitchExecuted){
+    loaderContext.loaderIndex++;
+    <span class="hljs-keyword">return</span> iteratePitchingLoaders(options,loaderContext,callback)
+   }
+   loadLoader(currentLoaderObject);
+   <span class="hljs-keyword">let</span> pitchFunction = currentLoaderObject.pitch;
+   currentLoaderObject.pitchExecuted = <span class="hljs-literal">true</span>;
+   <span class="hljs-keyword">if</span>(!pitchFunction){
+    <span class="hljs-keyword">return</span> iteratePitchingLoaders(options,loaderContext,callback)
+   }
+   runSyncOrAsync(
+    pitchFunction,<span class="hljs-comment">//要执行的pitch函数</span>
+    loaderContext,<span class="hljs-comment">//上下文对象</span>
+    <span class="hljs-comment">//这是要传递给pitchFunction的参数数组</span>
+    [loaderContext.remainingRequest,loaderContext.previousRequest,loaderContext.data={}],
+    <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,...args</span>)</span>{
+        <span class="hljs-keyword">if</span>(args.length&gt;<span class="hljs-number">0</span>){<span class="hljs-comment">//如果 args有值,说明这个pitch有返回值</span>
+            loaderContext.loaderIndex--;<span class="hljs-comment">//索引减1,开始回退了</span>
+            iterateNormalLoaders(options,loaderContext,args,callback);
+        }<span class="hljs-keyword">else</span>{<span class="hljs-comment">//如果没有返回值,则执行下一个loader的pitch函数</span>
+            iteratePitchingLoaders(options,loaderContext,callback)
+        }
+    }
+   );
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">runSyncOrAsync</span>(<span class="hljs-params">fn,context,args,callback</span>)</span>{
+   <span class="hljs-keyword">let</span> isSync = <span class="hljs-literal">true</span>;<span class="hljs-comment">//默认是同步</span>
+   <span class="hljs-keyword">let</span> isDone = <span class="hljs-literal">false</span>;<span class="hljs-comment">//是否完成,是否执行过此函数了,默认是false</span>
+   <span class="hljs-comment">//调用context.async this.async 可以把同步把异步,表示这个loader里的代码是异步的</span>
+   context.async = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+      isSync = <span class="hljs-literal">false</span>;<span class="hljs-comment">//改为异步</span>
+      <span class="hljs-keyword">return</span> innerCallback;
+   }
+   <span class="hljs-keyword">const</span> innerCallback = context.callback = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+       isDone = <span class="hljs-literal">true</span>;<span class="hljs-comment">//表示当前函数已经完成</span>
+       isSync=<span class="hljs-literal">false</span>;<span class="hljs-comment">//改为异步</span>
+       callback.apply(<span class="hljs-literal">null</span>,<span class="hljs-built_in">arguments</span>);<span class="hljs-comment">//执行 callback</span>
+   }
+   <span class="hljs-comment">//第一次fn=pitch1,执行pitch1</span>
+   <span class="hljs-keyword">let</span> result = fn.apply(context,args);
+   <span class="hljs-comment">//在执行pitch2的时候,还没有执行到pitch1 这行代码</span>
+   <span class="hljs-keyword">if</span>(isSync){
+       isDone = <span class="hljs-literal">true</span>;
+       <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>,result);
+   }
+}
+exports.runLoaders = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options,callback</span>)</span>{
+  <span class="hljs-comment">//要加载的资源的绝对路径 C:\aproject\zhufeng202009webpack\3.loader\src\index.js</span>
+  <span class="hljs-keyword">let</span> resource = options.resource||<span class="hljs-string">''</span>;
+  <span class="hljs-comment">//loaders的数组   loader的绝对路径的数组 </span>
+  <span class="hljs-keyword">let</span> loaders = options.loaders ||[];
+  <span class="hljs-comment">//loader执行时候的上下文对象 这个对象将会成为loader执行的时候的this指针</span>
+  <span class="hljs-keyword">let</span> loaderContext = {};
+  <span class="hljs-comment">//此方法用来读文件的</span>
+  <span class="hljs-keyword">let</span> readResource = options.readResource|| readFile;
+  <span class="hljs-keyword">let</span> splittedResource = parsePathQueryFragment(resource);
+  <span class="hljs-keyword">let</span> resourcePath = splittedResource.path;<span class="hljs-comment">//文件路径</span>
+  <span class="hljs-keyword">let</span> resourceQuery = splittedResource.query;<span class="hljs-comment">//查询参数</span>
+  <span class="hljs-keyword">let</span> resourceFragment = splittedResource.fragment;<span class="hljs-comment">//片段</span>
+  <span class="hljs-keyword">let</span> contextDirectory = path.dirname(resourcePath);<span class="hljs-comment">//此文件所在的上下文目录</span>
+  <span class="hljs-comment">//准备loader对象数组</span>
+  loaders=loaders.map(createLoaderObject);
+  <span class="hljs-comment">//要加载的资源的所在目录</span>
+  loaderContext.context = contextDirectory;
+  loaderContext.loaderIndex = <span class="hljs-number">0</span>;<span class="hljs-comment">//当前的 loader的索引</span>
+  loaderContext.loaders = loaders;
+  loaderContext.resourcePath = resourcePath;
+  loaderContext.resourceQuery = resourceQuery;
+  loaderContext.resourceFragment = resourceFragment;
+  loaderContext.async = <span class="hljs-literal">null</span>;<span class="hljs-comment">//是一个方法,可以loader的执行从同步改成异步</span>
+  loaderContext.callback = <span class="hljs-literal">null</span>;<span class="hljs-comment">//调用下一个loader</span>
+  <span class="hljs-comment">//loaderContext.request代表要加载的资源 ./src/index.js路径里不包含loader</span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'resource'</span>,{
+      <span class="hljs-keyword">get</span>(){
+          <span class="hljs-keyword">return</span> loaderContext.resourcePath+loaderContext.resourceQuery+loaderContext.resourceFragment;
+      }
+  });
+  <span class="hljs-comment">//request =loader1!loader2!loader3!resource.js</span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'request'</span>,{
+    <span class="hljs-keyword">get</span>(){
+        <span class="hljs-keyword">return</span> loaderContext.loaders.map(<span class="hljs-function"><span class="hljs-params">l</span>=&gt;</span>l.request).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+    }
+  });
+  <span class="hljs-comment">//剩下的loader 从当前的下一个loader开始取,加上resource</span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'remainingRequest'</span>,{
+    <span class="hljs-keyword">get</span>(){
+        <span class="hljs-keyword">return</span> loaderContext.loaders.slice(loaderContext.loaderIndex+<span class="hljs-number">1</span>).map(<span class="hljs-function"><span class="hljs-params">l</span>=&gt;</span>l.request).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+    }
+  });
+  <span class="hljs-comment">//当前loader 从当前的loader开始取,加上resource</span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'currentRequest'</span>,{
+    <span class="hljs-keyword">get</span>(){
+        <span class="hljs-keyword">return</span> loaderContext.loaders.slice(loaderContext.loaderIndex).map(<span class="hljs-function"><span class="hljs-params">l</span>=&gt;</span>l.request).concat(loaderContext.resource).join(<span class="hljs-string">'!'</span>)
+    }
+  });
+  <span class="hljs-comment">//之前loader </span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'previousRequest'</span>,{
+    <span class="hljs-keyword">get</span>(){
+        <span class="hljs-keyword">return</span> loaderContext.loaders.slice(<span class="hljs-number">0</span>,loaderContext.loaderIndex).map(<span class="hljs-function"><span class="hljs-params">l</span>=&gt;</span>l.request)
+    }
+  });
+  <span class="hljs-comment">//当前loader的query</span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'query'</span>,{
+    <span class="hljs-keyword">get</span>(){
+       <span class="hljs-keyword">let</span> loader = loaderContext.loaders[loaderContext.loaderIndex];
+       <span class="hljs-keyword">return</span> loader.options||loader.query;
+    }
+  });
+  <span class="hljs-comment">//当前loader的data</span>
+  <span class="hljs-built_in">Object</span>.defineProperty(loaderContext,<span class="hljs-string">'data'</span>,{
+    <span class="hljs-keyword">get</span>(){
+       <span class="hljs-keyword">let</span> loader = loaderContext.loaders[loaderContext.loaderIndex];
+       <span class="hljs-keyword">return</span> loader.data;
+    }
+  });
+  <span class="hljs-keyword">let</span> processOptions = {
+      <span class="hljs-attr">resourceBuffer</span> :<span class="hljs-literal">null</span>,<span class="hljs-comment">//最后我们会把loader执行的Buffer结果放在这里</span>
+      readResource
+  }
+  iteratePitchingLoaders(processOptions,loaderContext,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err,result</span>)</span>{
+    <span class="hljs-keyword">if</span>(err){
+        <span class="hljs-keyword">return</span> callback(err,{});
+    }
+    callback(<span class="hljs-literal">null</span>,{
+        result,
+        <span class="hljs-attr">resourceBuffer</span>:processOptions.resourceBuffer
+    });
+  });
+}
+</code></pre>
+
+    

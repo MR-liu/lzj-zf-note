@@ -1,0 +1,741 @@
+
+        <h2 id="t01. Redux应用场景">1. Redux应用场景 <a href="#t01. Redux应用场景"> # </a></h2>
+<ul>
+<li>随着 JavaScript 单页应用开发日趋复杂,管理不断变化的 state 非常困难</li>
+<li>Redux的出现就是为了解决state里的数据问题</li>
+<li>在React中，数据在组件中是单向流动的</li>
+<li>数据从一个方向父组件流向子组件(通过props)，由于这个特征，两个非父子关系的组件（或者称作兄弟组件）之间的通信就比较麻烦</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/redux-wrong.png" alt="redux-wrong"></p>
+<h2 id="t12. Redux设计思想">2. Redux设计思想 <a href="#t12. Redux设计思想"> # </a></h2>
+<ul>
+<li>Redux是将整个应用状态存储到到一个地方，称为store</li>
+<li>里面保存一棵状态树state tree</li>
+<li>组件可以派发dispatch行为action给store,而不是直接通知其它组件</li>
+<li>其它组件可以通过订阅store中的状态(state)来刷新自己的视图</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/redux-flow.png" alt="redux-flow"></p>
+<h2 id="t23. Redux三大原则">3. Redux三大原则 <a href="#t23. Redux三大原则"> # </a></h2>
+<ul>
+<li>整个应用的 state 被储存在一棵 object tree 中，并且这个 object tree 只存在于唯一一个 store 中</li>
+<li>State 是只读的，惟一改变 state 的方法就是触发 action，action 是一个用于描述已发生事件的普通对象 使用纯函数来执行修改，为了描述action如何改变state tree ，你需要编写 reducers</li>
+<li>单一数据源的设计让React的组件之间的通信更加方便，同时也便于状态的统一管理</li>
+</ul>
+<h2 id="t34. 原生计数器">4. 原生计数器 <a href="#t34. 原生计数器"> # </a></h2>
+<ul>
+<li><a href="https://github.com/reduxjs/redux">redux</a></li>
+<li><a href="https://gitee.com/zhufengpeixun/redux/blob/master/src/createStore.ts">createStore.ts</a></li>
+</ul>
+<pre><code class="lang-js">create-react-app zhufeng_redux_prepare
+cd zhufeng_redux_prepare
+cnpm install redux -S
+yarn start
+</code></pre>
+<h3 id="t44.1 public\index.html">4.1 public\index.html <a href="#t44.1 public\index.html"> # </a></h3>
+<p>public\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"theme-color"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"#000000"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span>
+      <span class="hljs-attr">name</span>=<span class="hljs-string">"description"</span>
+      <span class="hljs-attr">content</span>=<span class="hljs-string">"Web site created using create-react-app"</span>
+    /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>React App<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"counter"</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"counter-value"</span>&gt;</span>0<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"add-btn"</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"minus-btn"</span>&gt;</span>-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t54.2 src\index.js">4.2 src\index.js <a href="#t54.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore} <span class="hljs-keyword">from</span> <span class="hljs-string">'./redux'</span>;
+<span class="hljs-keyword">let</span> counterValue = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'counter-value'</span>);
+<span class="hljs-keyword">let</span> incrementBtn = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'add-btn'</span>);
+<span class="hljs-keyword">let</span> decrementBtn = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'minus-btn'</span>);
+
+<span class="hljs-keyword">const</span> INCREMENT = <span class="hljs-string">'INCREMENT'</span>;
+<span class="hljs-keyword">const</span> DECREMENT = <span class="hljs-string">'DECREMENT'</span>;
+<span class="hljs-keyword">let</span> initState = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> };
+
+<span class="hljs-keyword">const</span> reducer = <span class="hljs-function">(<span class="hljs-params">state = initState, action</span>) =&gt;</span> {
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> INCREMENT:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">case</span> DECREMENT:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+<span class="hljs-keyword">let</span> store = createStore(reducer);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{
+    counterValue.innerHTML = store.getState().number + <span class="hljs-string">''</span>;
+}
+store.subscribe(render);
+render();
+incrementBtn.addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    store.dispatch({ <span class="hljs-attr">type</span>: INCREMENT });
+});
+decrementBtn.addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    store.dispatch({ <span class="hljs-attr">type</span>: DECREMENT });
+});
+</code></pre>
+<h3 id="t64.3 redux\index.js">4.3 redux\index.js <a href="#t64.3 redux\index.js"> # </a></h3>
+<p>src\redux\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> createStore <span class="hljs-keyword">from</span> <span class="hljs-string">'./createStore'</span>
+<span class="hljs-keyword">export</span> {
+    createStore
+}
+</code></pre>
+<h3 id="t74.4 redux\createStore.js">4.4 redux\createStore.js <a href="#t74.4 redux\createStore.js"> # </a></h3>
+<p>src\redux\createStore.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> createStore = <span class="hljs-function">(<span class="hljs-params">reducer, preloadedState</span>) =&gt;</span> {
+  <span class="hljs-keyword">let</span> state=preloadedState;
+  <span class="hljs-keyword">let</span> listeners = [];
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getState</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> state;
+  }
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispatch</span>(<span class="hljs-params">action</span>) </span>{
+    state = reducer(state, action);
+    listeners.forEach(<span class="hljs-function"><span class="hljs-params">l</span> =&gt;</span> l());
+    <span class="hljs-keyword">return</span> action;
+  }
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">subscribe</span>(<span class="hljs-params">listener</span>) </span>{
+    listeners.push(listener);
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      listeners = listeners.filter(<span class="hljs-function"><span class="hljs-params">l</span> =&gt;</span> l !== listener);
+    }
+  }
+  dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'@@REDUX/INIT'</span> });
+  <span class="hljs-keyword">return</span> {
+    getState,
+    dispatch,
+    subscribe
+  }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> createStore;
+</code></pre>
+<h2 id="t85. React计数器">5. React计数器 <a href="#t85. React计数器"> # </a></h2>
+<h3 id="t95.1 src\index.js">5.1 src\index.js <a href="#t95.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Counter1 <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Counter1'</span>;
+
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter1</span> /&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t105.2 Counter1.js">5.2 Counter1.js <a href="#t105.2 Counter1.js"> # </a></h3>
+<p>src\components\Counter1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { createStore} <span class="hljs-keyword">from</span> <span class="hljs-string">'../redux'</span>;
+<span class="hljs-keyword">const</span> INCREMENT = <span class="hljs-string">'ADD'</span>;
+<span class="hljs-keyword">const</span> DECREMENT = <span class="hljs-string">'MINUS'</span>;
+<span class="hljs-keyword">const</span> reducer = <span class="hljs-function">(<span class="hljs-params">state = initState, action</span>) =&gt;</span> {
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> INCREMENT:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">case</span> DECREMENT:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+<span class="hljs-keyword">let</span> initState = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> };
+<span class="hljs-keyword">const</span> store = createStore(reducer, initState);
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    unsubscribe;
+    <span class="hljs-keyword">constructor</span>(props) {
+        <span class="hljs-keyword">super</span>(props);
+        <span class="hljs-keyword">this</span>.state = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> };
+    }
+    componentDidMount() {
+        <span class="hljs-keyword">this</span>.unsubscribe = store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">number</span>: store.getState().number }));
+    }
+    componentWillUnmount() {
+        <span class="hljs-keyword">this</span>.unsubscribe();
+    }
+    render() {
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{this.state.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> store.dispatch({ type: 'ADD' })}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> store.dispatch({ type: 'MINUS' })}&gt;-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{</span>
+                    () =&gt;</span> {
+                        setTimeout(() =&gt; {
+                            store.dispatch({ type: 'ADD' });
+                        }, 1000);
+                    }
+                }&gt;1秒后加1<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+</code></pre>
+<h2 id="t116. bindActionCreators">6. bindActionCreators <a href="#t116. bindActionCreators"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/redux/blob/master/src/bindActionCreators.ts">bindActionCreators</a></li>
+</ul>
+<h3 id="t126.1 Counter1.js">6.1 Counter1.js <a href="#t126.1 Counter1.js"> # </a></h3>
+<p>src\components\Counter1.js</p>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+<span class="hljs-addition">+import { createStore,bindActionCreators} from '../redux';</span>
+const INCREMENT = 'ADD';
+const DECREMENT = 'MINUS';
+const reducer = (state = initState, action) =&gt; {
+    switch (action.type) {
+        case INCREMENT:
+            return { number: state.number + 1 };
+        case DECREMENT:
+            return { number: state.number - 1 };
+        default:
+            return state;
+    }
+}
+let initState = { number: 0 };
+const store = createStore(reducer, initState);
+<span class="hljs-addition">+function add() {</span>
+<span class="hljs-addition">+    return { type: 'ADD' };</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+function minus() {</span>
+<span class="hljs-addition">+    return { type: 'MINUS' };</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+const actions = { add, minus };</span>
+<span class="hljs-addition">+const boundActions = bindActionCreators(actions, store.dispatch);</span>
+export default class Counter extends Component {
+    unsubscribe;
+    constructor(props) {
+        super(props);
+        this.state = { number: 0 };
+    }
+    componentDidMount() {
+        this.unsubscribe = store.subscribe(() =&gt; this.setState({ number: store.getState().number }));
+    }
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;p&gt;{this.state.number}&lt;/p&gt;
+<span class="hljs-addition">+               &lt;button onClick={boundActions.add}&gt;+&lt;/button&gt;</span>
+<span class="hljs-addition">+               &lt;button onClick={boundActions.minus}&gt;-&lt;/button&gt;</span>
+                &lt;button onClick={
+                    () =&gt; {
+                        setTimeout(() =&gt; {
+<span class="hljs-addition">+                         boundActions.add();</span>
+                        }, 1000);
+                    }
+                }&gt;1秒后加1&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+</code></pre>
+<h3 id="t136.2 bindActionCreators.js">6.2 bindActionCreators.js <a href="#t136.2 bindActionCreators.js"> # </a></h3>
+<p>src\redux\bindActionCreators.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bindActionCreator</span>(<span class="hljs-params">actionCreator, dispatch</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">...args</span>) </span>{
+        <span class="hljs-keyword">return</span> dispatch(actionCreator.apply(<span class="hljs-keyword">this</span>, args))
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bindActionCreators</span>(<span class="hljs-params">actionCreators, dispatch</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> actionCreators === <span class="hljs-string">'function'</span>) {
+        <span class="hljs-keyword">return</span> bindActionCreator(actionCreators, dispatch)
+    }
+    <span class="hljs-keyword">const</span> boundActionCreators = {}
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> actionCreators) {
+        <span class="hljs-keyword">const</span> actionCreator = actionCreators[key]
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> actionCreator === <span class="hljs-string">'function'</span>) {
+            boundActionCreators[key] = bindActionCreator(actionCreator, dispatch)
+        }
+    }
+    <span class="hljs-keyword">return</span> boundActionCreators
+}
+</code></pre>
+<h3 id="t146.3 src\redux\index.js">6.3 src\redux\index.js <a href="#t146.3 src\redux\index.js"> # </a></h3>
+<p>src\redux\index.js</p>
+<pre><code class="lang-diff">export {default as createStore} from './createStore'
+export {default as bindActionCreators} from './bindActionCreators'
+</code></pre>
+<h2 id="t157. combineReducers.js">7. combineReducers.js <a href="#t157. combineReducers.js"> # </a></h2>
+<p>src\redux\combineReducers.js
+-<a href="https://gitee.com/zhufengpeixun/redux/blob/master/src/combineReducers.ts">combineReducers</a></p>
+<h3 id="t167.1 src\index.js">7.1 src\index.js <a href="#t167.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Counter1 <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Counter1'</span>;
+<span class="hljs-keyword">import</span> Counter2 <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Counter2'</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Counter1</span>/&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Counter2</span>/&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t177.2 action-types.js">7.2 action-types.js <a href="#t177.2 action-types.js"> # </a></h3>
+<p>src\store\action-types.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ADD1 = <span class="hljs-string">'ADD1'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> MINUS1 = <span class="hljs-string">'MINUS1'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ADD2 = <span class="hljs-string">'ADD2'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> MINUS2 = <span class="hljs-string">'MINUS2'</span>;
+</code></pre>
+<h3 id="t187.3 counter1.js">7.3 counter1.js <a href="#t187.3 counter1.js"> # </a></h3>
+<p>src\store\reducers\counter1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+
+<span class="hljs-keyword">let</span> initialState = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> }
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state=initialState, action</span>) </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> types.ADD1:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">case</span> types.MINUS1:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+</code></pre>
+<h3 id="t197.4 counter2.js">7.4 counter2.js <a href="#t197.4 counter2.js"> # </a></h3>
+<p>src\store\reducers\counter2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+
+<span class="hljs-keyword">let</span> initialState = { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> };
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">state=initialState, action</span>) </span>{
+    <span class="hljs-keyword">switch</span> (action.type) {
+        <span class="hljs-keyword">case</span> types.ADD2:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number + <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">case</span> types.MINUS2:
+            <span class="hljs-keyword">return</span> { <span class="hljs-attr">number</span>: state.number - <span class="hljs-number">1</span> };
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> state;
+    }
+}
+</code></pre>
+<h3 id="t207.5 reducers\index.js">7.5 reducers\index.js <a href="#t207.5 reducers\index.js"> # </a></h3>
+<p>src\store\reducers\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { combineReducers} <span class="hljs-keyword">from</span> <span class="hljs-string">'../../redux'</span>;
+<span class="hljs-keyword">import</span> counter1 <span class="hljs-keyword">from</span> <span class="hljs-string">'./counter1'</span>;
+<span class="hljs-keyword">import</span> counter2 <span class="hljs-keyword">from</span> <span class="hljs-string">'./counter2'</span>;
+<span class="hljs-keyword">let</span> rootReducer = combineReducers({
+    counter1,
+    counter2
+});
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> rootReducer;
+</code></pre>
+<h3 id="t217.6 store\index.js">7.6 store\index.js <a href="#t217.6 store\index.js"> # </a></h3>
+<p>src\store\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore } <span class="hljs-keyword">from</span> <span class="hljs-string">'../redux'</span>;
+<span class="hljs-keyword">import</span> reducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">const</span> store = createStore(reducer, { <span class="hljs-attr">counter1</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> }, <span class="hljs-attr">counter2</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> } });
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h3 id="t227.7 actions\counter1.js">7.7 actions\counter1.js <a href="#t227.7 actions\counter1.js"> # </a></h3>
+<p>src\store\actions\counter1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+
+<span class="hljs-keyword">const</span> actions = {
+    add1() {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: types.ADD1 };
+    },
+    minus1() {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: types.MINUS1 };
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> actions;
+</code></pre>
+<h3 id="t237.8 actions\counter2.js">7.8 actions\counter2.js <a href="#t237.8 actions\counter2.js"> # </a></h3>
+<p>src\store\actions\counter2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> types <span class="hljs-keyword">from</span> <span class="hljs-string">'../action-types'</span>;
+
+<span class="hljs-keyword">const</span> actions = {
+    add2() {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: types.ADD2 };
+    },
+    minus2() {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">type</span>: types.MINUS2 };
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> actions;
+</code></pre>
+<h3 id="t247.9 Counter1.js">7.9 Counter1.js <a href="#t247.9 Counter1.js"> # </a></h3>
+<p>src\components\Counter1.js</p>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+<span class="hljs-addition">+import { bindActionCreators} from '../redux';</span>
+<span class="hljs-addition">+import actions from '../store/actions/counter1';</span>
+<span class="hljs-addition">+import store from '../store';</span>
+<span class="hljs-addition">+const boundActions = bindActionCreators(actions, store.dispatch);</span>
+export default class Counter extends Component {
+    unsubscribe;
+    constructor(props) {
+        super(props);
+        this.state = { number: 0 };
+    }
+    componentDidMount() {
+<span class="hljs-addition">+        this.unsubscribe = store.subscribe(() =&gt; this.setState({ number: store.getState().counter1.number }));</span>
+    }
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;p&gt;{this.state.number}&lt;/p&gt;
+<span class="hljs-addition">+                &lt;button onClick={boundActions.add1}&gt;+&lt;/button&gt;</span>
+<span class="hljs-addition">+                &lt;button onClick={boundActions.minus1}&gt;-&lt;/button&gt;</span>
+                &lt;button onClick={
+                    () =&gt; {
+                        setTimeout(() =&gt; {
+<span class="hljs-addition">+                            boundActions.add1();</span>
+                        }, 1000);
+                    }
+                }&gt;1秒后加1&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+</code></pre>
+<h3 id="t257.10 Counter2.js">7.10 Counter2.js <a href="#t257.10 Counter2.js"> # </a></h3>
+<p>src\components\Counter2.js</p>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+<span class="hljs-addition">+import { bindActionCreators} from '../redux';</span>
+<span class="hljs-addition">+import actions from '../store/actions/counter2';</span>
+<span class="hljs-addition">+import store from '../store';</span>
+<span class="hljs-addition">+const boundActions = bindActionCreators(actions, store.dispatch);</span>
+export default class Counter extends Component {
+    unsubscribe;
+    constructor(props) {
+        super(props);
+        this.state = { number: 0 };
+    }
+    componentDidMount() {
+<span class="hljs-addition">+        this.unsubscribe = store.subscribe(() =&gt; this.setState({ number: store.getState().counter2.number }));</span>
+    }
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;p&gt;{this.state.number}&lt;/p&gt;
+<span class="hljs-addition">+                &lt;button onClick={boundActions.add2}&gt;+&lt;/button&gt;</span>
+<span class="hljs-addition">+                &lt;button onClick={boundActions.minus2}&gt;-&lt;/button&gt;</span>
+                &lt;button onClick={
+                    () =&gt; {
+                        setTimeout(() =&gt; {
+<span class="hljs-addition">+                            boundActions.add2();</span>
+                        }, 1000);
+                    }
+                }&gt;1秒后加1&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+</code></pre>
+<h3 id="t267.11 combineReducers.js">7.11 combineReducers.js <a href="#t267.11 combineReducers.js"> # </a></h3>
+<p>src\redux\combineReducers.js</p>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">combineReducers</span>(<span class="hljs-params">reducers</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">combination</span>(<span class="hljs-params">state={},action</span>)</span>{
+       <span class="hljs-keyword">let</span> nextState = {};
+       <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> key <span class="hljs-keyword">in</span> reducers){<span class="hljs-comment">//key=x</span>
+         nextState[key]=reducers[key](state[key],action);
+       }
+       <span class="hljs-keyword">return</span> nextState;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> combineReducers;
+</code></pre>
+<h3 id="t277.12 redux\index.js">7.12 redux\index.js <a href="#t277.12 redux\index.js"> # </a></h3>
+<p>src\redux\index.js</p>
+<pre><code class="lang-diff">export {default as createStore} from './createStore'
+export {default as bindActionCreators} from './bindActionCreators';
+<span class="hljs-addition">+export {default as combineReducers} from './combineReducers';</span>
+</code></pre>
+<h2 id="t288. react-redux">8. react-redux <a href="#t288. react-redux"> # </a></h2>
+<ul>
+<li><a href="https://gitee.com/zhufengpeixun/react-redux/blob/master/src/components/Provider.js">Provider.js</a></li>
+<li><a href="https://gitee.com/zhufengpeixun/react-redux/blob/master/src/connect/connect.js">connect.js</a></li>
+</ul>
+<h3 id="t298.1 src\index.js">8.1 src\index.js <a href="#t298.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Counter1 <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Counter1'</span>;
+<span class="hljs-keyword">import</span> Counter2 <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Counter2'</span>;
+<span class="hljs-keyword">import</span> store <span class="hljs-keyword">from</span> <span class="hljs-string">'./store'</span>;
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'./react-redux'</span>;
+ReactDOM.render(
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">store</span>=<span class="hljs-string">{store}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Counter1</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">Counter2</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t308.2 Counter1.js">8.2 Counter1.js <a href="#t308.2 Counter1.js"> # </a></h3>
+<p>src\components\Counter1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> actions <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/actions/counter1'</span>;
+<span class="hljs-keyword">import</span> { connect } <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-redux'</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter1</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+    render() {
+        <span class="hljs-keyword">let</span> { number, add1, minus1 } = <span class="hljs-keyword">this</span>.props;
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{add1}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{minus1}</span>&gt;</span>-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{</span>
+                    () =&gt;</span> setTimeout(() =&gt; add1(), 1000)
+                }&gt;1秒后加1<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+    }
+}
+<span class="hljs-keyword">let</span> mapStateToProps = <span class="hljs-function">(<span class="hljs-params">state</span>) =&gt;</span> state.counter1;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect(
+    mapStateToProps,
+    actions
+)(Counter1)
+</code></pre>
+<h3 id="t318.3 Counter2.js">8.3 Counter2.js <a href="#t318.3 Counter2.js"> # </a></h3>
+<p>src\components\Counter2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { useSelector,useDispatch} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-redux'</span>;
+<span class="hljs-keyword">const</span> Counter2 =  <span class="hljs-function">(<span class="hljs-params">props</span>) =&gt;</span> {
+   <span class="hljs-keyword">const</span> counter2 = useSelector(<span class="hljs-function"><span class="hljs-params">state</span> =&gt;</span> state.counter2);
+   <span class="hljs-keyword">const</span> dispatch = useDispatch();
+        <span class="hljs-keyword">return</span> (
+            <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{counter2.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>dispatch({type:'ADD2'})}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>dispatch({type:'MINUS2'})}&gt;-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+        )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Counter2;
+</code></pre>
+<h3 id="t328.4 Provider.js">8.4 Provider.js <a href="#t328.4 Provider.js"> # </a></h3>
+<p>src\react-redux\Provider.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactReduxContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactReduxContext'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">props</span>)</span>{
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ReactReduxContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">store:</span> <span class="hljs-attr">props.store</span> }}&gt;</span>
+      {props.children}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ReactReduxContext.Provider</span>&gt;</span></span>
+  )
+}
+</code></pre>
+<h3 id="t338.5 ReactReduxContext.js">8.5 ReactReduxContext.js <a href="#t338.5 ReactReduxContext.js"> # </a></h3>
+<p>src\react-redux\ReactReduxContext.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ReactReduxContext = React.createContext(<span class="hljs-literal">null</span>)
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> ReactReduxContext;
+</code></pre>
+<h3 id="t348.6 connect.js">8.6 connect.js <a href="#t348.6 connect.js"> # </a></h3>
+<p>src\react-redux\connect.js</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">import</span> React, { useContext, useMemo, useReducer, useLayoutEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactReduxContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./ReactReduxContext'</span>;
+<span class="hljs-keyword">import</span> { bindActionCreators } <span class="hljs-keyword">from</span> <span class="hljs-string">'../redux'</span>;
+<span class="hljs-comment">/**
+ * PureComponent当属性和状态没有变化的时候不重新渲染
+ * 刚才做的优化是有些值只计算一次，不需要反复计算
+ * 因为函数组件没有构造函数，没有地方说只能执行一次，只能用useMemo
+ * @param {*} mapStateToProps 把仓库中状态映射为当前的组件的属性
+ * @param {*} mapDispatchToProps 把派发动作的方法映射为组件的属性
+ */</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">connect</span>(<span class="hljs-params">mapStateToProps, mapDispatchToProps</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">OldComponent</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">React</span>.<span class="hljs-title">Component</span> </span>{
+            <span class="hljs-keyword">static</span> contextType = ReactReduxContext;
+            <span class="hljs-keyword">constructor</span>(props, context) {
+                <span class="hljs-keyword">super</span>(props);
+                <span class="hljs-keyword">const</span> { store } = context;
+                <span class="hljs-keyword">const</span> { getState, subscribe, dispatch } = store;
+                <span class="hljs-keyword">this</span>.state = mapStateToProps(getState());
+                <span class="hljs-keyword">this</span>.unsubscribe = subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                    <span class="hljs-keyword">this</span>.setState(mapStateToProps(getState()));
+                });
+                <span class="hljs-keyword">let</span> dispatchProps;
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> mapDispatchToProps === <span class="hljs-string">'function'</span>) {
+                    dispatchProps = mapDispatchToProps(dispatch);
+                } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> mapDispatchToProps === <span class="hljs-string">'object'</span>) {
+                    dispatchProps = bindActionCreators(mapDispatchToProps, dispatch);
+                } <span class="hljs-keyword">else</span> {
+                    dispatchProps = { dispatch };
+                }
+                <span class="hljs-keyword">this</span>.dispatchProps = dispatchProps;
+            }
+            componentWillUnmount() {
+                <span class="hljs-keyword">this</span>.unsubscribe();
+            }
+            render() {
+                <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">OldComponent</span> {<span class="hljs-attr">...this.props</span>} {<span class="hljs-attr">...this.state</span>} {<span class="hljs-attr">...this.dispatchProps</span>} /&gt;</span></span>
+            }
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">connect</span>(<span class="hljs-params">mapStateToProps, mapDispatchToProps</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">OldComponent</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">props</span>) </span>{
+            <span class="hljs-keyword">const</span> { store } = useContext(ReactReduxContext);
+            <span class="hljs-keyword">const</span> { getState, dispatch, subscribe } = store;
+            <span class="hljs-keyword">const</span> prevState = getState();
+            <span class="hljs-keyword">const</span> stateProps = useMemo(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> mapStateToProps(prevState), [prevState]);
+            <span class="hljs-keyword">let</span> dispatchProps = useMemo(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'dispatchProps render'</span>);
+                <span class="hljs-keyword">let</span> dispatchProps;
+                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> mapDispatchToProps === <span class="hljs-string">'function'</span>) {
+                    dispatchProps = mapDispatchToProps(dispatch);
+                } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> mapDispatchToProps === <span class="hljs-string">'object'</span>) {
+                    dispatchProps = bindActionCreators(mapDispatchToProps, dispatch);
+                } <span class="hljs-keyword">else</span> {
+                    dispatchProps = { dispatch };
+                }
+                <span class="hljs-keyword">return</span> dispatchProps;
+            }, [dispatch]);
+            <span class="hljs-keyword">const</span> [, forceUpdate] = useReducer(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x + <span class="hljs-number">1</span>, <span class="hljs-number">0</span>);
+            useLayoutEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+                <span class="hljs-keyword">return</span> subscribe(forceUpdate);
+            }, [subscribe]);
+            <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">OldComponent</span> {<span class="hljs-attr">...props</span>} {<span class="hljs-attr">...stateProps</span>} {<span class="hljs-attr">...dispatchProps</span>} /&gt;</span></span>
+        }
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> connect;
+</code></pre>
+<h3 id="t358.7 hooks">8.7 hooks <a href="#t358.7 hooks"> # </a></h3>
+<h4 id="t368.7.1 useDispatch.js">8.7.1 useDispatch.js <a href="#t368.7.1 useDispatch.js"> # </a></h4>
+<p>src\react-redux\hooks\useDispatch.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {useContext} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactReduxContext <span class="hljs-keyword">from</span> <span class="hljs-string">'../ReactReduxContext'</span>;
+
+<span class="hljs-keyword">const</span>  useDispatch = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">const</span> {store} = useContext(ReactReduxContext);
+    <span class="hljs-keyword">return</span> store.dispatch;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span>  useDispatch 
+</code></pre>
+<h4 id="t378.7.2 shallowEqual.js">8.7.2 shallowEqual.js <a href="#t378.7.2 shallowEqual.js"> # </a></h4>
+<p>src\react-redux\shallowEqual.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">shallowEqual</span>(<span class="hljs-params">obj1, obj2</span>) </span>{
+    <span class="hljs-keyword">if</span> (obj1 === obj2) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> obj1 != <span class="hljs-string">"object"</span> || obj1 === <span class="hljs-literal">null</span> || <span class="hljs-keyword">typeof</span> obj2 != <span class="hljs-string">"object"</span> || obj2 === <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">let</span> keys1 = <span class="hljs-built_in">Object</span>.keys(obj1);
+    <span class="hljs-keyword">let</span> keys2 = <span class="hljs-built_in">Object</span>.keys(obj2);
+    <span class="hljs-keyword">if</span> (keys1.length !== keys2.length) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> key <span class="hljs-keyword">of</span> keys1) {
+        <span class="hljs-keyword">if</span> (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> shallowEqual;
+</code></pre>
+<h4 id="t388.7.3 useSelector.js">8.7.3 useSelector.js <a href="#t388.7.3 useSelector.js"> # </a></h4>
+<p>src\react-redux\hooks\useSelector.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> {useContext,useLayoutEffect,useReducer,useRef} <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { shallowEqual } <span class="hljs-keyword">from</span> <span class="hljs-string">'../'</span>;
+<span class="hljs-keyword">import</span> ReactReduxContext <span class="hljs-keyword">from</span> <span class="hljs-string">"../ReactReduxContext"</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useSelector</span>(<span class="hljs-params">selector,equalityFn=shallowEqual</span>)</span>{
+    <span class="hljs-keyword">const</span> {store} = useContext(ReactReduxContext);
+    <span class="hljs-keyword">let</span> lastSelectedState = useRef(<span class="hljs-literal">null</span>);
+    <span class="hljs-comment">//获取仓库中的最新的状态</span>
+    <span class="hljs-keyword">let</span> state = store.getState();
+    <span class="hljs-keyword">let</span> selectedState = selector(state);
+    <span class="hljs-comment">//每次计算完selectedState之后会判断状态变化了没有，如果变化 了，组件会刷新，如果没变化组件不刷新</span>
+    <span class="hljs-keyword">let</span> [,forceUpdate] = useReducer(<span class="hljs-function"><span class="hljs-params">x</span>=&gt;</span>x+<span class="hljs-number">1</span>,<span class="hljs-number">0</span>);
+    useLayoutEffect(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+        <span class="hljs-comment">//比较老状态和新选中状态是否相等，如果相等，不刷新</span>
+        <span class="hljs-keyword">let</span> selectedState = selector(store.getState());
+        <span class="hljs-keyword">if</span>(!equalityFn(lastSelectedState.current,selectedState)){
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'重新渲染'</span>);
+            forceUpdate();
+            lastSelectedState.current = selectedState;
+        }
+    }),[]);
+    <span class="hljs-comment">//如何获取 最新的状态值  定义useEffect,然后给lastSelectedState.current赋值，可以在任何地方通过lastSelectedState.current取到新的值</span>
+    <span class="hljs-keyword">return</span> selectedState;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useSelector;
+</code></pre>
+<h4 id="t398.7.4 useBoundDispatch.js">8.7.4 useBoundDispatch.js <a href="#t398.7.4 useBoundDispatch.js"> # </a></h4>
+<p>src\react-redux\hooks\useBoundDispatch.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> { bindActionCreators } <span class="hljs-keyword">from</span> <span class="hljs-string">'../../redux'</span>;
+<span class="hljs-keyword">import</span> ReactReduxContext <span class="hljs-keyword">from</span> <span class="hljs-string">'../ReactReduxContext'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useBoundDispatch</span>(<span class="hljs-params">actions</span>)</span>{
+    <span class="hljs-keyword">const</span> {store} = React.useContext(ReactReduxContext);
+    <span class="hljs-keyword">let</span> boundActions = bindActionCreators(actions,store.dispatch);
+    <span class="hljs-keyword">return</span> boundActions;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> useBoundDispatch;
+</code></pre>
+<h4 id="t408.7.5 hooks\index.js">8.7.5 hooks\index.js <a href="#t408.7.5 hooks\index.js"> # </a></h4>
+<p>src\react-redux\hooks\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> useDispatch} <span class="hljs-keyword">from</span> <span class="hljs-string">'./useDispatch'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> useSelector} <span class="hljs-keyword">from</span> <span class="hljs-string">'./useSelector'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> useBoundDispatch} <span class="hljs-keyword">from</span> <span class="hljs-string">'./useBoundDispatch'</span>;
+</code></pre>
+<h4 id="t418.7.6 react-redux\index.js">8.7.6 react-redux\index.js <a href="#t418.7.6 react-redux\index.js"> # </a></h4>
+<p>src\react-redux\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> Provider} <span class="hljs-keyword">from</span> <span class="hljs-string">'./Provider'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> connect} <span class="hljs-keyword">from</span> <span class="hljs-string">'./connect'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> shallowEqual} <span class="hljs-keyword">from</span> <span class="hljs-string">'./shallowEqual'</span>;
+<span class="hljs-keyword">export</span> {useDispatch,useSelector} <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks'</span>;
+</code></pre>
+<h4 id="t428.7.7 Counter1.js">8.7.7 Counter1.js <a href="#t428.7.7 Counter1.js"> # </a></h4>
+<p>src\components\Counter1.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {useDispatch,useSelector} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-redux'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Counter1</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">let</span> state = useSelector(<span class="hljs-function"><span class="hljs-params">state</span>=&gt;</span>state.counter1);<span class="hljs-comment">//状态映射函数 connect(mapStateToProps)</span>
+    <span class="hljs-keyword">let</span> dispatch = useDispatch();
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+               <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{state.number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+               <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>dispatch({type:'ADD1'})}&gt;+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+           <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Counter1;
+</code></pre>
+<h4 id="t438.7.8 Counter3.js">8.7.8 Counter3.js <a href="#t438.7.8 Counter3.js"> # </a></h4>
+<p>src\components\Counter6.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> actions <span class="hljs-keyword">from</span> <span class="hljs-string">'../store/actions/counter2'</span>;
+<span class="hljs-keyword">import</span> {useSelector,useBoundDispatch} <span class="hljs-keyword">from</span> <span class="hljs-string">'../react-redux'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Counter3</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">let</span> {number} = useSelector(<span class="hljs-function">(<span class="hljs-params">state</span>)=&gt;</span>state.counter2);
+    <span class="hljs-keyword">let</span> boundActions = useBoundDispatch(actions);
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{number}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{boundActions.add2}</span>&gt;</span>+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{boundActions.minus2}</span>&gt;</span>-<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Counter3;
+</code></pre>
+
+    

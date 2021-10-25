@@ -1,0 +1,615 @@
+
+        <h2 id="t01. webpack代码分割方式">1. webpack代码分割方式 <a href="#t01. webpack代码分割方式"> # </a></h2>
+<ul>
+<li>entry配置：通过多个 entry 文件来实现</li>
+<li>动态加载(按需加载)：通过主动使用import来动态加载</li>
+<li>抽取公共代码：使用<code>splitChunks</code>配置来抽取公共代码</li>
+</ul>
+<h2 id="t12. 基础概念">2. 基础概念 <a href="#t12. 基础概念"> # </a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">概念</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Entry</td>
+<td style="text-align:left">入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。</td>
+</tr>
+<tr>
+<td style="text-align:left">module</td>
+<td style="text-align:left">模块，在 Webpack 里一切皆模块，一个模块对应着一个文件。Webpack 会从配置的 Entry 开始递归找出所有依赖的模块。</td>
+</tr>
+<tr>
+<td style="text-align:left">chunk</td>
+<td style="text-align:left">代码块，一个 Chunk 由多个模块组合而成，用于代码合并与分割</td>
+</tr>
+<tr>
+<td style="text-align:left">bundle</td>
+<td style="text-align:left">bundle就是webpack打包后的各个文件，一般和chunk是一对一的关系,bundle是由chunk 编译打包后产出的</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t23.项目初始化">3.项目初始化 <a href="#t23.项目初始化"> # </a></h2>
+<pre><code class="lang-js">mkdir zhufeng_webpack
+cd zhufeng_webpack
+cnpm init -y
+cnpm i webpack@next -D
+</code></pre>
+<h2 id="t34. webpack5初体验">4. webpack5初体验 <a href="#t34. webpack5初体验"> # </a></h2>
+<h3 id="t44.1 webpack.config.js">4.1 webpack.config.js <a href="#t44.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>:<span class="hljs-string">'none'</span>,
+    <span class="hljs-attr">entry</span>:<span class="hljs-string">'./src/index.js'</span>,
+    <span class="hljs-attr">output</span>:{
+        <span class="hljs-attr">path</span>:path.join(__dirname,<span class="hljs-string">'./dist'</span>),
+        <span class="hljs-attr">filename</span>:<span class="hljs-string">'main.js'</span>
+    }
+}
+</code></pre>
+<h3 id="t54.2 index.js">4.2 index.js <a href="#t54.2 index.js"> # </a></h3>
+<p>index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack.config'</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions,(err,stats)=&gt;{
+    <span class="hljs-keyword">if</span>(err){
+        <span class="hljs-built_in">console</span>.log(err);
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-built_in">console</span>.log(stats.toJson({
+          <span class="hljs-attr">assets</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">hash</span>: <span class="hljs-literal">true</span>
+        }));
+    }
+});
+</code></pre>
+<h3 id="t64.3 hello.js">4.3 hello.js <a href="#t64.3 hello.js"> # </a></h3>
+<p>src\hello.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'hello'</span>;
+</code></pre>
+<h3 id="t74.4 index.js">4.4 index.js <a href="#t74.4 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> hello = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./hello'</span>);
+<span class="hljs-built_in">console</span>.log(hello);
+</code></pre>
+<h3 id="t84.4 main.js">4.4 main.js <a href="#t84.4 main.js"> # </a></h3>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">modules, runtime</span>) </span>{
+  <span class="hljs-comment">// webpackBootstrap</span>
+  <span class="hljs-string">"use strict"</span>;
+  <span class="hljs-comment">// The module cache</span>
+  <span class="hljs-keyword">var</span> installedModules = {};
+
+  <span class="hljs-comment">// The require function</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-comment">// Check if module is in cache</span>
+    <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+      <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+    }
+    <span class="hljs-comment">// Create a new module (and put it into the cache)</span>
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = (installedModules[moduleId] = {
+      <span class="hljs-attr">i</span>: moduleId,
+      <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">exports</span>: {}
+    });
+
+    <span class="hljs-comment">// Execute the module function</span>
+    modules[moduleId].call(
+      <span class="hljs-built_in">module</span>.exports,
+      <span class="hljs-built_in">module</span>,
+      <span class="hljs-built_in">module</span>.exports,
+      __webpack_require__
+    );
+
+    <span class="hljs-comment">// Flag the module as loaded</span>
+    <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+
+    <span class="hljs-comment">// Return the exports of the module</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-comment">// the startup function</span>
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">startup</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Load entry module and return exports</span>
+    <span class="hljs-keyword">return</span> __webpack_require__(<span class="hljs-string">"./src/index.js"</span>);
+  }
+
+  <span class="hljs-comment">// run startup</span>
+  <span class="hljs-keyword">return</span> startup();
+})({
+  <span class="hljs-string">"./src/hello.js"</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module</span>) </span>{
+    <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">"hello"</span>;
+  },
+
+  <span class="hljs-string">"./src/index.js"</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">
+    __unusedmodule,
+    __unusedexports,
+    __webpack_require__
+  </span>) </span>{
+    <span class="hljs-keyword">let</span> hello = __webpack_require__(<span class="hljs-string">"./src/hello.js"</span>);
+    <span class="hljs-built_in">console</span>.log(hello);
+  }
+});
+</code></pre>
+<h2 id="t95. entry分割">5. entry分割 <a href="#t95. entry分割"> # </a></h2>
+<h3 id="t105.1 webpack.config.js">5.1 webpack.config.js <a href="#t105.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-diff">let path = require('path');
+module.exports = {
+    mode:'development',
+    devtool:'none',
+<span class="hljs-addition">+    entry:{</span>
+<span class="hljs-addition">+        main:path.join(__dirname,'./src/index.js'),</span>
+<span class="hljs-addition">+        login:path.join(__dirname,'./src/login.js')</span>
+<span class="hljs-addition">+    },</span>
+    output:{
+        path:path.join(__dirname,'./dist'),
+        filename:'[name].js'
+    }
+}
+</code></pre>
+<h2 id="t116. 按需加载">6. 按需加载 <a href="#t116. 按需加载"> # </a></h2>
+<h3 id="t126.1  webpack.config.js">6.1  webpack.config.js <a href="#t126.1  webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">mode</span>:<span class="hljs-string">'development'</span>,
+    <span class="hljs-attr">devtool</span>:<span class="hljs-string">'none'</span>,
+    <span class="hljs-attr">entry</span>:path.join(__dirname,<span class="hljs-string">'./src/index.js'</span>),
+    <span class="hljs-attr">output</span>:{
+        <span class="hljs-attr">path</span>:path.join(__dirname,<span class="hljs-string">'./dist'</span>),
+        <span class="hljs-attr">filename</span>:<span class="hljs-string">'[name].js'</span>
+    }
+}
+</code></pre>
+<h3 id="t136.2 index.js">6.2 index.js <a href="#t136.2 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'button'</span>);
+button.innerHTML = <span class="hljs-string">'点我'</span>;
+button.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;{
+    <span class="hljs-keyword">import</span>(<span class="hljs-string">'./hello.js'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span>=&gt;</span>{
+        alert(result.default);
+    })
+});
+<span class="hljs-built_in">document</span>.body.appendChild(button);
+</code></pre>
+<h3 id="t146.3 hello.js">6.3 hello.js <a href="#t146.3 hello.js"> # </a></h3>
+<p>src\hello.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'hello'</span>;
+</code></pre>
+<h3 id="t156.4 main.js">6.4 main.js <a href="#t156.4 main.js"> # </a></h3>
+<p>dist\main.js</p>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">modules, runtime</span>) </span>{
+    <span class="hljs-keyword">var</span> installedModules = {};
+    <span class="hljs-keyword">var</span> installedChunks = {
+        <span class="hljs-attr">main</span>: <span class="hljs-number">0</span>
+    };
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+        <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+            <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+        }
+        <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+            <span class="hljs-attr">i</span>: moduleId,
+            <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+            <span class="hljs-attr">exports</span>: {}
+        };
+        modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+        <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+    }
+    __webpack_require__.e = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">chunkId</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resovle, reject</span>) =&gt;</span> {
+            installedChunks[chunkId] = resovle;
+            <span class="hljs-keyword">let</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+            script.src = chunkId;
+            <span class="hljs-built_in">document</span>.body.appendChild(script);
+        }).catch(<span class="hljs-function"><span class="hljs-params">error</span>=&gt;</span>{
+            alert(<span class="hljs-string">'异步加载失败'</span>);
+        });
+    }
+    __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">value</span>) </span>{
+        value = __webpack_require__(value);
+        <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">default</span>:
+            value
+        };
+    }
+    <span class="hljs-built_in">window</span>.webpackJsonp = <span class="hljs-function">(<span class="hljs-params">chunkId, moreModules</span>) =&gt;</span> {
+        <span class="hljs-keyword">for</span> (moduleId <span class="hljs-keyword">in</span> moreModules) {
+            modules[moduleId] = moreModules[moduleId];
+        }
+        installedChunks[chunkId]();
+        installedChunks[chunkId] = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">startup</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> __webpack_require__(<span class="hljs-string">"./src/index.js"</span>);
+    };
+    <span class="hljs-keyword">return</span> startup();
+  })({
+            <span class="hljs-string">"./src/index.js"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+                <span class="hljs-keyword">let</span> button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'button'</span>);
+        button.innerHTML = <span class="hljs-string">'点我点我'</span>;
+        button.addEventListener(<span class="hljs-string">'click'</span>, event =&gt; {
+          __webpack_require__.e(<span class="hljs-string">"src_hello_js.js"</span>).then(__webpack_require__.t.bind(__webpack_require__, <span class="hljs-string">"./src/hello.js"</span>)).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+            alert(result.default);
+          });
+        });
+        <span class="hljs-built_in">document</span>.body.appendChild(button);
+             }),
+  });
+</code></pre>
+<h3 id="t166.5 src_hello_js.js">6.5 src_hello_js.js <a href="#t166.5 src_hello_js.js"> # </a></h3>
+<p>dist\src_hello_js.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.webpackJsonp(<span class="hljs-string">"src_hello_js.js"</span>, {
+<span class="hljs-string">"./src/hello.js"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+     <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'hello'</span>;
+ })
+});
+</code></pre>
+<h2 id="t177. splitChunks">7. splitChunks <a href="#t177. splitChunks"> # </a></h2>
+<ul>
+<li>webpack将会基于以下条件自动分割代码块:<ul>
+<li>新的代码块被共享或者来自node_modules文件夹</li>
+<li>新的代码块大于30kb(在min+giz之前)</li>
+<li>按需加载代码块的请求数量应该&lt;=5</li>
+<li>页面初始化时加载代码块的请求数量应该&lt;=3</li>
+</ul>
+</li>
+</ul>
+<h2 id="t187.1 webpack.config.js">7.1 webpack.config.js <a href="#t187.1 webpack.config.js"> # </a></h2>
+<pre><code class="lang-js">  optimization:{
+      <span class="hljs-attr">splitChunks</span>: {
+       <span class="hljs-attr">cacheGroups</span>: { <span class="hljs-comment">//设置缓存组用来抽取满足不同规则的chunk,下面以生成common为例</span>
+            <span class="hljs-attr">vendors</span>: {
+              <span class="hljs-attr">chunks</span>: <span class="hljs-string">"initial"</span>,
+              <span class="hljs-attr">name</span>: <span class="hljs-string">'vendors'</span>,  <span class="hljs-comment">//可以通过'name'配置项来控制切割之后代码块的命名,给多个分割之后的代码块分配相同的名称,所有的vendor 模块被放进一个共享的代码块中,不过这会导致多余的代码被下载所以并不推荐</span>
+              <span class="hljs-attr">test</span>: <span class="hljs-regexp">/node_modules/</span>,<span class="hljs-comment">//条件</span>
+              <span class="hljs-attr">priority</span>: <span class="hljs-number">-10</span> <span class="hljs-comment">///优先级，一个chunk很可能满足多个缓存组，会被抽取到优先级高的缓存组中,为了能够让自定义缓存组有更高的优先级(默认0),默认缓存组的priority属性为负值.</span>
+            },
+             <span class="hljs-attr">commons</span>: {
+              <span class="hljs-attr">chunks</span>: <span class="hljs-string">"initial"</span>,
+              <span class="hljs-attr">name</span>: <span class="hljs-string">'commons'</span>,
+              <span class="hljs-attr">minSize</span>: <span class="hljs-number">0</span>,<span class="hljs-comment">//最小提取字节数</span>
+              <span class="hljs-attr">minChunks</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">//最少被几个chunk引用</span>
+              <span class="hljs-attr">priority</span>: <span class="hljs-number">-20</span>,
+              <span class="hljs-attr">reuseExistingChunk</span>: <span class="hljs-literal">true</span><span class="hljs-comment">//    如果该chunk中引用了已经被抽取的chunk，直接引用该chunk，不会重复打包代码</span>
+            }
+      }
+    }
+  }
+</code></pre>
+<h3 id="t197.2 index.js">7.2 index.js <a href="#t197.2 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> $ <span class="hljs-keyword">from</span> <span class="hljs-string">'jquery'</span>;
+<span class="hljs-keyword">let</span> button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'button'</span>);
+button.innerHTML = <span class="hljs-string">'点我'</span>;
+button.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;{
+    <span class="hljs-keyword">import</span>(<span class="hljs-string">'./hello.js'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span>=&gt;</span>{
+        alert(result.default);
+    })
+});
+<span class="hljs-built_in">document</span>.body.appendChild(button);
+<span class="hljs-built_in">console</span>.log($)
+</code></pre>
+<h3 id="t207.3 dist\index.html">7.3 dist\index.html <a href="#t207.3 dist\index.html"> # </a></h3>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"ie=edge"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Document<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"src_hello_js.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"commons.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"vendors.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"main.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<ul>
+<li>dist\commons.js</li>
+<li>dist\main.js</li>
+<li>dist\src_hello_js.js</li>
+<li>dist\vendors.js</li>
+</ul>
+<h2 id="t218. 实现webpack">8. 实现webpack <a href="#t218. 实现webpack"> # </a></h2>
+<h3 id="t228.1 AST">8.1 AST <a href="#t228.1 AST"> # </a></h3>
+<ul>
+<li><a href="https://astexplorer.net/">astexplorer</a></li>
+<li>JavaScript Parser把代码转化为一颗抽象语法树（AST），这颗树定义了代码的结构，通过操纵这颗树，我们可以精准的定位到声明语句、赋值语句、运算语句等等，实现对代码的分析、优化、变更等操作</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/ast.jpg" alt="ast"></p>
+<h3 id="t238.2 工具">8.2 工具 <a href="#t238.2 工具"> # </a></h3>
+<ul>
+<li><a href="https://www.npmjs.com/package/babylon">babylon</a>  is a JavaScript parser used in Babel.</li>
+<li><a href="https://www.npmjs.com/package/babel-types">babel-types</a> contains methods for building ASTs manually and for checking the types of AST nodes.</li>
+<li><a href="https://www.npmjs.com/package/babel-generator">babel-generator</a> Turns an AST into code.</li>
+<li><a href="https://www.npmjs.com/package/babel-traverse">babel-traverse</a>  maintains the overall tree state, and is responsible for replacing, removing, and adding nodes.</li>
+</ul>
+<h3 id="t248.3 index.js">8.3 index.js <a href="#t248.3 index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">//const webpack = require('webpack');</span>
+<span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./zfpack'</span>);
+<span class="hljs-keyword">const</span> webpackOptions = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./webpack.config'</span>);
+<span class="hljs-keyword">const</span> compiler = webpack(webpackOptions,(err,stats)=&gt;{
+    <span class="hljs-keyword">if</span>(err){
+        <span class="hljs-built_in">console</span>.log(err);
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-built_in">console</span>.log(stats.toJson({
+          <span class="hljs-attr">assets</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">hash</span>: <span class="hljs-literal">true</span>
+        }));
+    }
+});
+</code></pre>
+<h3 id="t258.4 zfpack.js">8.4 zfpack.js <a href="#t258.4 zfpack.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">const</span> ejs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ejs'</span>);
+<span class="hljs-keyword">const</span> babylon = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babylon'</span>);
+<span class="hljs-keyword">const</span> t = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-types'</span>);
+<span class="hljs-keyword">const</span> generate = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-generator'</span>).default;
+<span class="hljs-keyword">const</span> traverse = <span class="hljs-built_in">require</span>(<span class="hljs-string">'babel-traverse'</span>).default;
+<span class="hljs-keyword">let</span> mainTemplate = fs.readFileSync(path.join(__dirname, <span class="hljs-string">'main.ejs'</span>), <span class="hljs-string">'utf8'</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compiler</span></span>{
+    <span class="hljs-keyword">constructor</span>(config){
+        <span class="hljs-keyword">this</span>.config = config;
+    }
+    run(){
+        <span class="hljs-keyword">let</span> {entry} = <span class="hljs-keyword">this</span>.config;
+        <span class="hljs-keyword">this</span>.entry = entry;
+        <span class="hljs-keyword">this</span>.modules = {};
+        <span class="hljs-keyword">this</span>.buildModule(entry);
+        <span class="hljs-keyword">this</span>.emitFiles();
+    }
+    buildModule(moduleId){
+        <span class="hljs-keyword">const</span> originalSource = fs.readFileSync(moduleId,<span class="hljs-string">'utf8'</span>);
+        <span class="hljs-keyword">const</span> ast = babylon.parse(originalSource);
+        <span class="hljs-keyword">let</span> dependencies = [];
+        traverse(ast,{
+            <span class="hljs-attr">CallExpression</span>:<span class="hljs-function">(<span class="hljs-params">nodePath</span>)=&gt;</span>{
+                <span class="hljs-keyword">if</span> (nodePath.node.callee.name == <span class="hljs-string">'require'</span>) {
+                    <span class="hljs-keyword">let</span> node = nodePath.node;
+                    node.callee.name = <span class="hljs-string">'__webpack_require__'</span>;
+                    <span class="hljs-keyword">let</span> moduleName = node.arguments[<span class="hljs-number">0</span>].value;
+                    <span class="hljs-keyword">let</span> dependencyModuleId = <span class="hljs-string">"./"</span>+path.posix.join(path.posix.dirname(moduleId),moduleName);
+                    dependencies.push(dependencyModuleId);
+                    node.arguments = [t.stringLiteral(dependencyModuleId)];
+                }
+            }
+        });
+        <span class="hljs-keyword">let</span> {code} = generate(ast);
+        <span class="hljs-keyword">this</span>.modules[moduleId] = code;
+        dependencies.forEach(<span class="hljs-function"><span class="hljs-params">dependencyModuleId</span> =&gt;</span> <span class="hljs-keyword">this</span>.buildModule(dependencyModuleId));
+    }
+    emitFiles(){
+        <span class="hljs-keyword">let</span> {output} = <span class="hljs-keyword">this</span>.config;
+        <span class="hljs-keyword">let</span> outputFile = path.posix.join(output.path,output.filename);
+        <span class="hljs-keyword">let</span> bundle = ejs.compile(mainTemplate)({ <span class="hljs-attr">entry</span>:<span class="hljs-keyword">this</span>.entry, <span class="hljs-attr">modules</span>:<span class="hljs-keyword">this</span>.modules});
+        fs.writeFileSync(outputFile, bundle);
+    }   
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">webpack</span>(<span class="hljs-params">config</span>)</span>{
+    <span class="hljs-keyword">let</span> compiler = <span class="hljs-keyword">new</span> Compiler(config);
+    compiler.run();
+}
+
+<span class="hljs-built_in">module</span>.exports = webpack;
+</code></pre>
+<h3 id="t268.5 main.ejs">8.5 main.ejs <a href="#t268.5 main.ejs"> # </a></h3>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">modules, runtime</span>) </span>{
+  <span class="hljs-keyword">var</span> installedModules = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+      <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+          <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+      }
+      <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+          <span class="hljs-attr">i</span>: moduleId,
+          <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">exports</span>: {}
+      };
+      modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+      <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">startup</span>(<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">return</span> __webpack_require__(<span class="hljs-string">"&lt;%=entry%&gt;"</span>);
+  };
+  <span class="hljs-keyword">return</span> startup();
+})({
+  &lt;%<span class="hljs-keyword">for</span>(moduleId <span class="hljs-keyword">in</span> modules){%&gt;
+          <span class="hljs-string">"&lt;%-moduleId%&gt;"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+              &lt;%-modules[moduleId]%&gt;
+           }),
+  &lt;%}%&gt;
+});
+</code></pre>
+<h3 id="t278.6 main.js">8.6 main.js <a href="#t278.6 main.js"> # </a></h3>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">modules, runtime</span>) </span>{
+    <span class="hljs-keyword">var</span> installedModules = {};
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+      <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+        <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+      }
+      <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = (installedModules[moduleId] = {
+        <span class="hljs-attr">i</span>: moduleId,
+        <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">exports</span>: {}
+      });
+      modules[moduleId].call(
+        <span class="hljs-built_in">module</span>.exports,
+        <span class="hljs-built_in">module</span>,
+        <span class="hljs-built_in">module</span>.exports,
+        __webpack_require__
+      );
+      <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">startup</span>(<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">return</span> __webpack_require__(<span class="hljs-string">"./src/index.js"</span>);
+    }
+    <span class="hljs-keyword">return</span> startup();
+  })({
+
+        <span class="hljs-string">"./src/index.js"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+            <span class="hljs-keyword">let</span> hello = __webpack_require__(<span class="hljs-string">"./src/hello.js"</span>);
+<span class="hljs-built_in">console</span>.log(hello);
+         }),
+
+        <span class="hljs-string">"./src/hello.js"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+            <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">'hello'</span>;
+         }),
+
+  });
+
+</code></pre>
+<h2 id="t289. 实现懒加载">9. 实现懒加载 <a href="#t289. 实现懒加载"> # </a></h2>
+<h3 id="t299.1 src\index.js">9.1 src\index.js <a href="#t299.1 src\index.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> button = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'button'</span>);
+button.innerHTML = <span class="hljs-string">'点我'</span>;
+button.addEventListener(<span class="hljs-string">'click'</span>,event=&gt;{
+    <span class="hljs-keyword">import</span>(<span class="hljs-string">'./hello.js'</span>).then(<span class="hljs-function"><span class="hljs-params">result</span>=&gt;</span>{
+        alert(result.default);
+    })
+});
+<span class="hljs-built_in">document</span>.body.appendChild(button);
+</code></pre>
+<h3 id="t309.2 zfpack.js">9.2 zfpack.js <a href="#t309.2 zfpack.js"> # </a></h3>
+<pre><code class="lang-diff">const path = require('path');
+const fs = require('fs');
+const ejs = require('ejs');
+const babylon = require('babylon');
+const t = require('babel-types');
+const generate = require('babel-generator').default;
+const traverse = require('babel-traverse').default;
+<span class="hljs-addition">+ let mainTemplate = fs.readFileSync(path.join(__dirname, 'main.ejs'), 'utf8');</span>
+<span class="hljs-addition">+ let chunkTemplate = fs.readFileSync(path.join(__dirname, 'chunk.ejs'), 'utf8');</span>
+class Compiler{
+    constructor(config){
+        this.config = config;
+    }
+    run(){
+        let {entry} = this.config;
+        this.entry = entry;
+<span class="hljs-addition">+         this.chunks={</span>
+<span class="hljs-addition">+             main:{}</span>
+<span class="hljs-addition">+         };</span>
+<span class="hljs-addition">+         this.buildModule(entry,'main');</span>
+        this.emitFiles();
+    }
+<span class="hljs-addition">+     buildModule(moduleId,chunkId){</span>
+        const originalSource = fs.readFileSync(moduleId,'utf8');
+        const ast = babylon.parse(originalSource,{
+<span class="hljs-addition">+             plugins: ['dynamicImport']</span>
+        });
+        let dependencies = [];
+        traverse(ast,{
+  +           CallExpression:(nodePath)=&gt;{
+                if (nodePath.node.callee.name == 'require') {
+                    let node = nodePath.node;
+                    node.callee.name = '__webpack_require__';
+                    let moduleName = node.arguments[0].value;
+                    let dependencyModuleId = "./"+path.posix.join(path.posix.dirname(moduleId),moduleName);
+                    dependencies.push(dependencyModuleId);
+                    node.arguments = [t.stringLiteral(dependencyModuleId)];
+  +               }else if (t.isImport(nodePath.node.callee)) {
+  +                     let node = nodePath.node;
+  +                     let moduleName = node.arguments[0].value;
+  +                     let dependencyModuleId = "./"+path.posix.join(path.posix.dirname(moduleId),moduleName);
+<span class="hljs-addition">+                       let dependencyChunkId = dependencyModuleId.slice(2).replace(/(\/|\.)/g,'_')+'.js';</span>
+<span class="hljs-addition">+                       nodePath.replaceWithSourceString(`__webpack_require__.e("${dependencyChunkId}").then(__webpack_require__.t.bind(__webpack_require__,"${dependencyModuleId}"))`);</span>
+<span class="hljs-addition">+                       this.buildModule(dependencyModuleId,dependencyChunkId);</span>
+<span class="hljs-addition">+                 }</span>
+<span class="hljs-addition">+             }</span>
+<span class="hljs-addition">+         });</span>
+        let {code} = generate(ast);
+<span class="hljs-addition">+         (this.chunks[chunkId]=this.chunks[chunkId]||{})[moduleId] = code;</span>
+        dependencies.forEach(dependencyModuleId =&gt; this.buildModule(dependencyModuleId,chunkId));
+    }
+    emitFiles(){
+        let {output} = this.config;
+<span class="hljs-addition">+         let chunks = Object.keys(this.chunks).forEach(chunkId=&gt;{</span>
+<span class="hljs-addition">+              if(chunkId === 'main'){</span>
+<span class="hljs-addition">+                 let outputFile = path.posix.join(output.path,output.filename);</span>
+<span class="hljs-addition">+                 let mainContent = ejs.compile(mainTemplate)({ entry:this.entry, modules:this.chunks[chunkId] });</span>
+<span class="hljs-addition">+                 fs.writeFileSync(outputFile, mainContent);</span>
+<span class="hljs-addition">+              }else{</span>
+<span class="hljs-addition">+                 let chunkContent = ejs.compile(chunkTemplate)({chunkId,modules:this.chunks[chunkId]});</span>
+<span class="hljs-addition">+                 let outputFile = path.join(output.path,chunkId);</span>
+<span class="hljs-addition">+                 fs.writeFileSync(outputFile, chunkContent);</span>
+<span class="hljs-addition">+              }</span>
+<span class="hljs-addition">+         });</span>
+    }   
+}
+
+function webpack(config){
+    let compiler = new Compiler(config);
+    compiler.run();
+}
+
+module.exports = webpack;
+</code></pre>
+<h3 id="t319.3 main.ejs">9.3 main.ejs <a href="#t319.3 main.ejs"> # </a></h3>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">modules, runtime</span>) </span>{
+  <span class="hljs-keyword">var</span> installedModules = {};
+  <span class="hljs-keyword">var</span> installedChunks = {
+      <span class="hljs-attr">main</span>: <span class="hljs-number">0</span>
+  };
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__webpack_require__</span>(<span class="hljs-params">moduleId</span>) </span>{
+      <span class="hljs-keyword">if</span> (installedModules[moduleId]) {
+          <span class="hljs-keyword">return</span> installedModules[moduleId].exports;
+      }
+      <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = installedModules[moduleId] = {
+          <span class="hljs-attr">i</span>: moduleId,
+          <span class="hljs-attr">l</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">exports</span>: {}
+      };
+      modules[moduleId].call(<span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, __webpack_require__);
+      <span class="hljs-built_in">module</span>.l = <span class="hljs-literal">true</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  __webpack_require__.e = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">chunkId</span>) </span>{
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resovle, reject</span>) =&gt;</span> {
+          installedChunks[chunkId] = resovle;
+          <span class="hljs-keyword">let</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+          script.src = chunkId;
+          <span class="hljs-built_in">document</span>.body.appendChild(script);
+      });
+  }
+  __webpack_require__.t = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">value</span>) </span>{
+      value = __webpack_require__(value);
+      <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">default</span>:
+          value
+      };
+  }
+  <span class="hljs-built_in">window</span>.webpackJsonp = <span class="hljs-function">(<span class="hljs-params">chunkId, moreModules</span>) =&gt;</span> {
+      <span class="hljs-keyword">for</span> (moduleId <span class="hljs-keyword">in</span> moreModules) {
+          modules[moduleId] = moreModules[moduleId];
+      }
+      installedChunks[chunkId]();
+      installedChunks[chunkId] = <span class="hljs-number">0</span>;
+  }
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">startup</span>(<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">return</span> __webpack_require__(<span class="hljs-string">"&lt;%=entry%&gt;"</span>);
+  };
+  <span class="hljs-keyword">return</span> startup();
+})({
+  &lt;%<span class="hljs-keyword">for</span>(moduleId <span class="hljs-keyword">in</span> modules){%&gt;
+          <span class="hljs-string">"&lt;%-moduleId%&gt;"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+              &lt;%-modules[moduleId]%&gt;
+           }),
+  &lt;%}%&gt;
+});
+</code></pre>
+<h3 id="t329.4 chunk.ejs">9.4 chunk.ejs <a href="#t329.4 chunk.ejs"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">window</span>.webpackJsonp([<span class="hljs-string">"&lt;%-chunkId%&gt;"</span>], {
+    &lt;%<span class="hljs-keyword">for</span>(moduleId <span class="hljs-keyword">in</span> modules){%&gt;
+            <span class="hljs-string">"&lt;%-moduleId%&gt;"</span>: (<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">module, exports, __webpack_require__</span>) </span>{
+                &lt;%-modules[moduleId]%&gt;
+             }),
+    &lt;%}%&gt;
+});
+</code></pre>
+
+    

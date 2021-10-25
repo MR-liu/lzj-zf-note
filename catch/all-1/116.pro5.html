@@ -1,0 +1,967 @@
+
+        <p><img src="../C:\Users\83687\Desktop\temp\下载.png" alt=""></p>
+<h2 id="t01.Ant Design Pro">1.Ant Design Pro <a href="#t01.Ant Design Pro"> # </a></h2>
+<ul>
+<li><code>Ant Design Pro</code> 是一个企业级中后台前端/设计解决方案，我们秉承 Ant Design 的设计价值观，致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。</li>
+<li><a href="https://pro.ant.design">pro.ant.design</a></li>
+<li><a href="https://beta-pro.ant.design/index-cn/">beta-pro.ant.design</a></li>
+<li><a href="https://procomponents.ant.design/components/table/">procomponents.ant.design</a></li>
+<li><a href="https://beta-pro.ant.design/docs/getting-started-cn">getting-started-cn</a></li>
+</ul>
+<h3 id="t11.1 启动项目">1.1 启动项目 <a href="#t11.1 启动项目"> # </a></h3>
+<h4 id="t21.1.1 安装">1.1.1 安装 <a href="#t21.1.1 安装"> # </a></h4>
+<ul>
+<li>新建一个空的文件夹作为项目目录，并在目录下执行</li>
+<li><a href="https://www.python.org/downloads/release/python-380/">python-380</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">//npm config set python "C:/Python38/python.exe"</span>
+yarn create umi
+</code></pre>
+<h4 id="t31.1.2 目录结构">1.1.2 目录结构 <a href="#t31.1.2 目录结构"> # </a></h4>
+<ul>
+<li>我们已经为你生成了一个完整的开发框架，提供了涵盖中后台开发的各类功能和坑位，下面是整个项目的目录结构。</li>
+</ul>
+<pre><code class="lang-js">├─config # umi 配置，包含路由，构建等配置
+├─mock   # 本地模拟数据
+├─public
+│  └─icons
+├─src
+│  ├─components # 业务通用组件
+│  │  ├─Footer
+│  │  ├─HeaderDropdown
+│  │  ├─HeaderSearch
+│  │  ├─NoticeIcon
+│  │  └─RightContent
+│  ├─e2e       # 集成测试用例
+│  ├─locales   # 国际化资源
+│  │  ├─en-US
+│  │  ├─id-ID
+│  │  ├─pt-BR
+│  │  ├─zh-CN
+│  │  └─zh-TW
+│  ├─pages    # 业务页面入口和常用模板
+│  │  ├─ListTableList
+│  │  │  └─components
+│  │  └─user
+│  │      └─login
+│  ├─services # 后台接口服务
+│  └─utils    # 工具库
+└─tests       # 测试工具
+</code></pre>
+<h4 id="t41.1.3 本地开发">1.1.3 本地开发 <a href="#t41.1.3 本地开发"> # </a></h4>
+<pre><code class="lang-js">npm install
+npm run dev
+</code></pre>
+<h2 id="t52. 用户登录">2. 用户登录 <a href="#t52. 用户登录"> # </a></h2>
+<ul>
+<li><a href="https://umijs.org/zh-CN/plugins/plugin-access">plugin-access</a></li>
+</ul>
+<h4 id="t62.2.1 config\proxy.ts">2.2.1 config\proxy.ts <a href="#t62.2.1 config\proxy.ts"> # </a></h4>
+<p>config\proxy.ts</p>
+<pre><code class="lang-diff">export default {
+  dev: {
+    '/api/': {
+<span class="hljs-addition">+      target: 'http://localhost:3000/',</span>
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+    },
+  },
+</code></pre>
+<h4 id="t72.2.2 src\services\API.d.ts">2.2.2 src\services\API.d.ts <a href="#t72.2.2 src\services\API.d.ts"> # </a></h4>
+<p>src\services\API.d.ts</p>
+<pre><code class="lang-diff">  export interface LoginStateType {
+    status?: 'ok' | 'error';
+    type?: string;
+<span class="hljs-addition">+    token?:string;</span>
+  }
+</code></pre>
+<h4 id="t82.2.3 login\index.tsx">2.2.3 login\index.tsx <a href="#t82.2.3 login\index.tsx"> # </a></h4>
+<p>src\pages\user\login\index.tsx</p>
+<pre><code class="lang-diff">  const handleSubmit = async (values: LoginParamsType) =&gt; {
+    setSubmitting(true);
+    try {
+      // 登录
+      const msg = await fakeAccountLogin({ ...values, type });
+<span class="hljs-addition">+      if (msg.status === 'ok' &amp;&amp; msg.token) {</span>
+<span class="hljs-addition">+        localStorage.setItem('token',msg.token);</span>
+        message.success('登录成功！');
+        await fetchUserInfo();
+        goto();
+        return;
+      }
+      // 如果失败去设置用户错误信息
+      setUserLoginState(msg);
+    } catch (error) {
+      message.error('登录失败，请重试！');
+    }
+    setSubmitting(false);
+  };
+</code></pre>
+<h4 id="t92.2.4 app.tsx">2.2.4 app.tsx <a href="#t92.2.4 app.tsx"> # </a></h4>
+<p>src\app.tsx</p>
+<pre><code class="lang-diff">export const request: RequestConfig = {
+  errorHandler,
+<span class="hljs-addition">+   headers: {</span>
+<span class="hljs-addition">+    Authorization: `Bearer ${localStorage.getItem('token')}`,</span>
+<span class="hljs-addition">+  },</span>
+};
+</code></pre>
+<h4 id="t102.2.5 user.ts">2.2.5 user.ts <a href="#t102.2.5 user.ts"> # </a></h4>
+<p>src\services\user.ts</p>
+<pre><code class="lang-diff">export async function queryCurrent() {
+  return request&lt;API.CurrentUser&gt;('/api/currentUser',
+<span class="hljs-addition">+  {</span>
+<span class="hljs-addition">+    headers: {</span>
+<span class="hljs-addition">+      Authorization: `Bearer ${localStorage.getItem('token')}`,</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+  }</span>
+ );
+}
+</code></pre>
+<h4 id="t112.2.6 API.d.ts">2.2.6 API.d.ts <a href="#t112.2.6 API.d.ts"> # </a></h4>
+<p>src\services\API.d.ts</p>
+<pre><code class="lang-diff">  export interface CurrentUser {
+    avatar?: string;
+<span class="hljs-addition">+    username?: string;</span>
+    title?: string;
+    group?: string;
+    signature?: string;
+    tags?: {
+      key: string;
+      label: string;
+    }[];
+    userid?: string;
+    access?: 'user' | 'guest' | 'admin';
+    unreadCount?: number;
+  }
+</code></pre>
+<h4 id="t122.2.7 AvatarDropdown.tsx">2.2.7 AvatarDropdown.tsx <a href="#t122.2.7 AvatarDropdown.tsx"> # </a></h4>
+<p>src\components\RightContent\AvatarDropdown.tsx</p>
+<pre><code class="lang-diff">/**
+ * 退出登录，并且将当前的 url 保存
+ */
+const loginOut = async () =&gt; {
+  await outLogin();
+<span class="hljs-addition">+ localStorage.removeItem('token');</span>
+  const { query, pathname } = history.location;
+  const { redirect } = query;
+  // Note: There may be security issues, please note
+  if (window.location.pathname !== '/user/login' &amp;&amp; !redirect) {
+    history.replace({
+      pathname: '/user/login',
+      search: stringify({
+        redirect: pathname,
+      }),
+    });
+  }
+};
+
+const AvatarDropdown: React.FC&lt;GlobalHeaderRightProps&gt; = ({ menu }) =&gt; {
+  const { initialState, setInitialState } = useModel('@@initialState');
+  const { currentUser } = initialState;
+<span class="hljs-addition">+  if (!currentUser || !currentUser.username) {</span>
+    return loading;
+  }
+  return (
+    &lt;HeaderDropdown overlay={menuHeaderDropdown}&gt;
+      &lt;span className={`${styles.action} ${styles.account}`}&gt;
+        &lt;Avatar size="small" className={styles.avatar} src={currentUser.avatar} alt="avatar" /&gt;
+<span class="hljs-addition">+        &lt;span className={`${styles.name} anticon`}&gt;{currentUser.username}&lt;/span&gt;</span>
+      &lt;/span&gt;
+    &lt;/HeaderDropdown&gt;
+  );
+};
+
+export default AvatarDropdown;
+</code></pre>
+<h2 id="t133. 新增用户和用户列表">3. 新增用户和用户列表 <a href="#t133. 新增用户和用户列表"> # </a></h2>
+<h3 id="t143.1 config\routes.ts">3.1 config\routes.ts <a href="#t143.1 config\routes.ts"> # </a></h3>
+<p>config\routes.ts</p>
+<pre><code class="lang-diff">  {
+    path: '/admin',
+    name: 'admin',
+    icon: 'crown',
+    access: 'canAdmin',
+    routes: [
+      {
+<span class="hljs-addition">+        path: '/admin/user',</span>
+<span class="hljs-addition">+        name: 'user',</span>
+<span class="hljs-addition">+        icon: 'smile',</span>
+<span class="hljs-addition">+        component: './admin/User',</span>
+      },
+    ],
+  },
+</code></pre>
+<h3 id="t153.2 menu.ts">3.2 menu.ts <a href="#t153.2 menu.ts"> # </a></h3>
+<p>src\locales\zh-CN\menu.ts</p>
+<pre><code class="lang-diff">export default {
+  'menu.welcome': '欢迎',
+  'menu.more-blocks': '更多区块',
+  'menu.home': '首页',
+  'menu.admin': '管理页',
+<span class="hljs-addition">+ 'menu.admin.user': '用户管理',</span>
+</code></pre>
+<h3 id="t163.3 data.d.ts">3.3 data.d.ts <a href="#t163.3 data.d.ts"> # </a></h3>
+<p>src\pages\admin\user\data.d.ts</p>
+<pre><code class="lang-diff">export interface TableListItem {
+<span class="hljs-addition">+  id?:string;</span>
+<span class="hljs-addition">+  username?:string;</span>
+<span class="hljs-addition">+  email?:string;</span>
+<span class="hljs-addition">+  password?: string;</span>
+<span class="hljs-addition">+  avatar?: string;</span>
+<span class="hljs-addition">+  updatedAt?: Date;</span>
+<span class="hljs-addition">+  createdAt?: Date;</span>
+}
+
+export interface TableListParams {
+<span class="hljs-addition">+  id?:string;</span>
+<span class="hljs-addition">+  username?:string;</span>
+<span class="hljs-addition">+  password?: string;</span>
+<span class="hljs-addition">+  email?:string;</span>
+<span class="hljs-addition">+  avatar?: string;</span>
+<span class="hljs-addition">+  updatedAt?: Date;</span>
+<span class="hljs-addition">+  createdAt?: Date;</span>
+  pageSize?: number;
+  currentPage?: number;
+  filter?: { [key: string]: any[] };
+  sorter?: { [key: string]: any };
+}
+</code></pre>
+<h3 id="t173.4 service.ts">3.4 service.ts <a href="#t173.4 service.ts"> # </a></h3>
+<p>src\pages\admin\user\service.ts</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+export async function removeUser(params: { key: string[] }) {</span>
+  return request('/api/user', {
+<span class="hljs-addition">+   method: 'DELETE',</span>
+    data: {
+      ...params
+    },
+  });
+}
+
+<span class="hljs-addition">+export async function addUser(params: TableListItem) {</span>
+  return request('/api/user', {
+    method: 'POST',
+    data: {
+      ...params
+    },
+  });
+}
+
+<span class="hljs-addition">+export async function updateUser(params: TableListParams) {</span>
+  return request('/api/user', {
+<span class="hljs-addition">+    method: 'PUT',</span>
+    data: {
+      ...params
+    },
+  });
+}
+</code></pre>
+<h3 id="t183.5 user\index.tsx">3.5 user\index.tsx <a href="#t183.5 user\index.tsx"> # </a></h3>
+<p>src\pages\admin\user\index.tsx</p>
+<pre><code class="lang-diff">import { PlusOutlined } from '@ant-design/icons';
+<span class="hljs-addition">+import { Button, message, Drawer ,Avatar} from 'antd';</span>
+import React, { useState, useRef } from 'react';
+import { PageContainer, FooterToolbar } from '@ant-design/pro-layout';
+import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
+import ProDescriptions from '@ant-design/pro-descriptions';
+import CreateForm from './components/CreateForm';
+import UpdateForm, { FormValueType } from './components/UpdateForm';
+import { TableListItem } from './data.d';
+<span class="hljs-addition">+import { queryUser, updateUser, addUser, removeUser } from './service';</span>
+<span class="hljs-addition">+import moment from 'moment';</span>
+/**
+ * 添加节点
+ * @param fields
+ */
+const handleAdd = async (fields: TableListItem) =&gt; {
+  const hide = message.loading('正在添加');
+  try {
+<span class="hljs-addition">+    await addUser({ ...fields });</span>
+    hide();
+    message.success('添加成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('添加失败请重试！');
+    return false;
+  }
+};
+
+/**
+ * 更新节点
+ * @param fields
+ */
+<span class="hljs-addition">+const handleUpdate = async (id:string,fields: FormValueType) =&gt; {</span>
+  const hide = message.loading('正在配置');
+  try {
+    await updateUser({
+<span class="hljs-addition">+      id,</span>
+<span class="hljs-addition">+      username: fields.username,</span>
+<span class="hljs-addition">+      password: fields.password,</span>
+<span class="hljs-addition">+      email: fields.email</span>
+    });
+    hide();
+
+    message.success('配置成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('配置失败请重试！');
+    return false;
+  }
+};
+
+/**
+ *  删除节点
+ * @param selectedRows
+ */
+const handleRemove = async (selectedRows: TableListItem[]) =&gt; {
+  const hide = message.loading('正在删除');
+  if (!selectedRows) return true;
+  try {
+<span class="hljs-addition">+    await removeUser({</span>
+      key: selectedRows.map((row:TableListItem) =&gt; row.id!),
+    });
+    hide();
+    message.success('删除成功，即将刷新');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('删除失败，请重试');
+    return false;
+  }
+};
+
+const TableList: React.FC&lt;{}&gt; = () =&gt; {
+  const [createModalVisible, handleModalVisible] = useState&lt;boolean&gt;(false);
+  const [updateModalVisible, handleUpdateModalVisible] = useState&lt;boolean&gt;(false);
+<span class="hljs-addition">+  const [stepFormValues, setStepFormValues] = useState&lt;TableListItem&gt;({});</span>
+  const actionRef = useRef&lt;ActionType&gt;();
+  const [row, setRow] = useState&lt;TableListItem&gt;();
+  const [selectedRowsState, setSelectedRows] = useState&lt;TableListItem[]&gt;([]);
+<span class="hljs-addition">+  const columns: ProColumns&lt;TableListItem&gt;[] = [</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '用户名',</span>
+<span class="hljs-addition">+      dataIndex: 'username',</span>
+<span class="hljs-addition">+      tip: '用户名是唯一的',</span>
+<span class="hljs-addition">+      render: (dom, entity) =&gt; {</span>
+<span class="hljs-addition">+        return &lt;a onClick={() =&gt; setRow(entity)}&gt;{dom}&lt;/a&gt;;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '密码',</span>
+<span class="hljs-addition">+      dataIndex: 'password',</span>
+<span class="hljs-addition">+      hideInDescriptions:true,</span>
+<span class="hljs-addition">+      tip: '密码',</span>
+<span class="hljs-addition">+      hideInTable:true</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '角色',</span>
+<span class="hljs-addition">+      dataIndex: 'access',</span>
+<span class="hljs-addition">+      search: false,</span>
+<span class="hljs-addition">+      filters: [</span>
+<span class="hljs-addition">+        { text: '普通用户', value: 'user' },</span>
+<span class="hljs-addition">+        { text: '管理员', value: 'admin' },</span>
+<span class="hljs-addition">+      ],</span>
+<span class="hljs-addition">+      valueEnum: {</span>
+<span class="hljs-addition">+        'user': { text: '普通用户'},</span>
+<span class="hljs-addition">+        'admin': { text: '管理员'},</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '邮箱',</span>
+<span class="hljs-addition">+      dataIndex: 'email',</span>
+<span class="hljs-addition">+      hideInTable:true</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '头像',</span>
+<span class="hljs-addition">+      dataIndex: 'avatar',</span>
+<span class="hljs-addition">+      search: false,</span>
+<span class="hljs-addition">+      hideInForm: true,</span>
+<span class="hljs-addition">+      render: (dom,entity) =&gt; {</span>
+<span class="hljs-addition">+        return &lt;Avatar src={entity.avatar}/&gt;</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '更新时间',</span>
+<span class="hljs-addition">+      dataIndex: 'updatedAt',</span>
+<span class="hljs-addition">+      sorter: true,</span>
+<span class="hljs-addition">+      hideInForm: true,</span>
+<span class="hljs-addition">+      search: false,</span>
+<span class="hljs-addition">+      renderText: (val: string) =&gt; {</span>
+<span class="hljs-addition">+        if(!val) return '';</span>
+<span class="hljs-addition">+        return  moment(val).fromNow();</span>
+<span class="hljs-addition">+      }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '创建时间',</span>
+<span class="hljs-addition">+      dataIndex: 'createdAt',</span>
+<span class="hljs-addition">+      sorter: true,</span>
+<span class="hljs-addition">+      hideInForm: true,</span>
+<span class="hljs-addition">+      valueType: 'dateTime'</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    {</span>
+<span class="hljs-addition">+      title: '操作',</span>
+<span class="hljs-addition">+      dataIndex: 'option',</span>
+<span class="hljs-addition">+      valueType: 'option',</span>
+<span class="hljs-addition">+      render: (_, record) =&gt; (</span>
+<span class="hljs-addition">+        &lt;&gt;</span>
+<span class="hljs-addition">+          &lt;a</span>
+<span class="hljs-addition">+            onClick={() =&gt; {</span>
+<span class="hljs-addition">+              handleUpdateModalVisible(true);</span>
+<span class="hljs-addition">+              setStepFormValues(record);</span>
+<span class="hljs-addition">+            }}</span>
+<span class="hljs-addition">+          &gt;</span>
+<span class="hljs-addition">+            修改</span>
+<span class="hljs-addition">+          &lt;/a&gt;</span>
+<span class="hljs-addition">+        &lt;/&gt;</span>
+<span class="hljs-addition">+      ),</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+  ];</span>
+
+  return (
+    &lt;PageContainer&gt;
+      &lt;ProTable&lt;TableListItem&gt;
+        headerTitle={'用户管理'}
+        actionRef={actionRef}
+<span class="hljs-addition">+        rowKey="id"</span>
+        search={{
+          labelWidth: 120,
+        }}
+<span class="hljs-addition">+        pagination={{defaultPageSize:5}}</span>
+        toolBarRender={() =&gt; [
+          &lt;Button type="primary" onClick={() =&gt; handleModalVisible(true)}&gt;
+            &lt;PlusOutlined /&gt; 新建
+          &lt;/Button&gt;,
+        ]}
+        request={(params, sorter, filter) =&gt; queryUser({ ...params, sorter, filter })}
+        columns={columns}
+        rowSelection={{
+          onChange: (_, selectedRows) =&gt; setSelectedRows(selectedRows),
+        }}
+      /&gt;
+      {selectedRowsState?.length &gt; 0 &amp;&amp; (
+        &lt;FooterToolbar
+          extra={
+            &lt;div&gt;
+              已选择{' '}
+              &lt;a style={{ fontWeight: 600 }}&gt;{selectedRowsState.length}&lt;/a&gt;{' '}
+              项
+            &lt;/div&gt;
+          }
+        &gt;
+          &lt;Button
+            onClick={async () =&gt; {
+              await handleRemove(selectedRowsState);
+              setSelectedRows([]);
+              actionRef.current?.reloadAndRest?.();
+            }}
+          &gt;
+            批量删除
+          &lt;/Button&gt;
+        &lt;/FooterToolbar&gt;
+      )}
+      &lt;CreateForm onCancel={() =&gt; handleModalVisible(false)} modalVisible={createModalVisible}&gt;
+        &lt;ProTable&lt;TableListItem, TableListItem&gt;
+          onSubmit={async (value) =&gt; {
+            const success = await handleAdd(value);
+            if (success) {
+              handleModalVisible(false);
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+            }
+          }}
+<span class="hljs-addition">+         rowKey="id"</span>
+          type="form"
+          columns={columns}
+        /&gt;
+      &lt;/CreateForm&gt;
+      {stepFormValues &amp;&amp; Object.keys(stepFormValues).length ? (
+        &lt;UpdateForm
+          onSubmit={async (value) =&gt; {
+<span class="hljs-addition">+            const success = await handleUpdate(stepFormValues.id!,value);</span>
+            if (success) {
+              handleUpdateModalVisible(false);
+              setStepFormValues({});
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+            }
+          }}
+          onCancel={() =&gt; {
+            handleUpdateModalVisible(false);
+            setStepFormValues({});
+          }}
+          updateModalVisible={updateModalVisible}
+          values={stepFormValues}
+        /&gt;
+      ) : null}
+
+      &lt;Drawer
+        width={600}
+        visible={!!row}
+        onClose={() =&gt; {
+          setRow(undefined);
+        }}
+        closable={false}
+      &gt;
+        {row?.username &amp;&amp; (
+          &lt;ProDescriptions&lt;TableListItem&gt;
+            column={2}
+<span class="hljs-addition">+            title={row?.username}</span>
+            request={async () =&gt; ({
+              data: row || {},
+            })}
+            params={{
+<span class="hljs-addition">+              id: row?.username,</span>
+            }}
+            columns={columns}
+          /&gt;
+        )}
+      &lt;/Drawer&gt;
+    &lt;/PageContainer&gt;
+  );
+};
+
+export default TableList;
+</code></pre>
+<h3 id="t193.6 pages.ts">3.6 pages.ts <a href="#t193.6 pages.ts"> # </a></h3>
+<p>src\locales\zh-CN\pages.ts</p>
+<pre><code class="lang-diff">  'pages.admin.subPage.title': ' 这个页面只有 admin 权限才能查看',
+<span class="hljs-addition">+ 'pages.admin.user.createForm.newUser': '增加用户',</span>
+</code></pre>
+<h3 id="t203.7 CreateForm.tsx">3.7 CreateForm.tsx <a href="#t203.7 CreateForm.tsx"> # </a></h3>
+<p>src\pages\admin\user\components\CreateForm.tsx</p>
+<pre><code class="lang-diff">const CreateForm: React.FC&lt;CreateFormProps&gt; = (props) =&gt; {
+  const { modalVisible, onCancel } = props;
+  const intl = useIntl();
+  return (
+    &lt;Modal
+      destroyOnClose
+      title={intl.formatMessage({
+<span class="hljs-addition">+        id: 'pages.searchTable.createForm.newUser',</span>
+<span class="hljs-addition">+        defaultMessage: '增加用户',</span>
+      })}
+      visible={modalVisible}
+      onCancel={() =&gt; onCancel()}
+      footer={null}
+    &gt;
+      {props.children}
+    &lt;/Modal&gt;
+  );
+};
+</code></pre>
+<h2 id="t214. 修改用户">4. 修改用户 <a href="#t214. 修改用户"> # </a></h2>
+<h3 id="t224.1 UpdateForm.tsx">4.1 UpdateForm.tsx <a href="#t224.1 UpdateForm.tsx"> # </a></h3>
+<p>src\pages\admin\user\components\UpdateForm.tsx</p>
+<pre><code class="lang-diff">import React from 'react';
+import { Modal } from 'antd';
+<span class="hljs-addition">+import ProForm,{ProFormText} from '@ant-design/pro-form';</span>
+import { TableListItem } from '../data.d';
+
+<span class="hljs-addition">+export interface FormValueType extends Partial&lt;TableListItem&gt; {}</span>
+
+export interface UpdateFormProps {
+  onCancel: (flag?: boolean, formVals?: FormValueType) =&gt; void;
+  onSubmit: (values: FormValueType) =&gt; Promise&lt;void&gt;;
+  updateModalVisible: boolean;
+  values: Partial&lt;TableListItem&gt;;
+}
+
+const UpdateForm: React.FC&lt;UpdateFormProps&gt; = (props) =&gt; {
+  return (
+<span class="hljs-addition">+    &lt;Modal</span>
+<span class="hljs-addition">+    destroyOnClose</span>
+<span class="hljs-addition">+    title="更新用户"</span>
+<span class="hljs-addition">+    width={420}</span>
+<span class="hljs-addition">+    visible={props.updateModalVisible}</span>
+<span class="hljs-addition">+    onCancel={() =&gt; props.onCancel()}</span>
+<span class="hljs-addition">+    footer={null}</span>
+<span class="hljs-addition">+  &gt;</span>
+<span class="hljs-addition">+    &lt;ProForm</span>
+<span class="hljs-addition">+      initialValues={props.values}</span>
+<span class="hljs-addition">+      onFinish={async (values: any) =&gt; {</span>
+<span class="hljs-addition">+        props.onSubmit(values);</span>
+<span class="hljs-addition">+      }}</span>
+<span class="hljs-addition">+    &gt;</span>
+<span class="hljs-addition">+      &lt;ProFormText</span>
+<span class="hljs-addition">+        label="用户名"</span>
+<span class="hljs-addition">+        name="username"</span>
+<span class="hljs-addition">+      /&gt;</span>
+<span class="hljs-addition">+      &lt;ProFormText</span>
+<span class="hljs-addition">+        label="密码"</span>
+<span class="hljs-addition">+        name="password"</span>
+<span class="hljs-addition">+      /&gt;</span>
+<span class="hljs-addition">+      &lt;ProFormText</span>
+<span class="hljs-addition">+        label="邮箱"</span>
+<span class="hljs-addition">+        name="email"</span>
+<span class="hljs-addition">+      /&gt;</span>
+<span class="hljs-addition">+    &lt;/ProForm&gt;</span>
+<span class="hljs-addition">+  &lt;/Modal&gt;</span>
+  );
+};
+
+export default UpdateForm;
+
+</code></pre>
+<h2 id="t231.初始化项目">1.初始化项目 <a href="#t231.初始化项目"> # </a></h2>
+<ul>
+<li><a href="https://www.mongodb.com/try/download/community">下载mongodb</a></li>
+</ul>
+<h3 id="t241.1 安装">1.1 安装 <a href="#t241.1 安装"> # </a></h3>
+<pre><code class="lang-js">cnpm i express body-parser mongoose jsonwebtoken http-status-codes -S
+</code></pre>
+<h2 id="t252.用户注册登录">2.用户注册登录 <a href="#t252.用户注册登录"> # </a></h2>
+<h3 id="t262.1 app.js">2.1 app.js <a href="#t262.1 app.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">"express"</span>);
+<span class="hljs-keyword">let</span> bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">"body-parser"</span>);
+<span class="hljs-keyword">let</span> user = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./routes/user"</span>);
+<span class="hljs-keyword">let</span> app = express();
+app.use(bodyParser.urlencoded({ <span class="hljs-attr">extended</span>: <span class="hljs-literal">false</span> }));
+app.use(bodyParser.json());
+app.use(<span class="hljs-string">"/api"</span>, user);
+app.listen(<span class="hljs-number">3000</span>, () =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'服务器在3000端口启动!'</span>);
+});
+</code></pre>
+<h3 id="t272.2 config.js">2.2 config.js <a href="#t272.2 config.js"> # </a></h3>
+<p>config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">secret</span>: <span class="hljs-string">'pro5'</span>,
+    <span class="hljs-attr">dbUrl</span>: <span class="hljs-string">"mongodb://localhost:27017/pro5"</span>
+}
+</code></pre>
+<h3 id="t282.3 model.js">2.3 model.js <a href="#t282.3 model.js"> # </a></h3>
+<p>model.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> mongoose = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongoose'</span>);
+<span class="hljs-keyword">const</span> Schema = mongoose.Schema;
+<span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+<span class="hljs-keyword">const</span> conn = mongoose.createConnection(config.dbUrl, { <span class="hljs-attr">useNewUrlParser</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">useUnifiedTopology</span>: <span class="hljs-literal">true</span> });
+
+<span class="hljs-keyword">let</span> UserSchema = <span class="hljs-keyword">new</span> Schema({
+    <span class="hljs-attr">email</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },<span class="hljs-comment">//邮箱</span>
+    <span class="hljs-attr">username</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span> },<span class="hljs-comment">//用户名</span>
+    <span class="hljs-attr">password</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//密码</span>
+    <span class="hljs-attr">avatar</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span> },<span class="hljs-comment">//头像</span>
+    <span class="hljs-attr">access</span>: { <span class="hljs-attr">type</span>: <span class="hljs-built_in">String</span>, <span class="hljs-attr">required</span>: <span class="hljs-literal">true</span>,<span class="hljs-attr">default</span>:<span class="hljs-string">'user'</span> }<span class="hljs-comment">//当前用户的权限</span>
+},{<span class="hljs-attr">timestamps</span>:<span class="hljs-literal">true</span>,<span class="hljs-attr">toJSON</span>:{
+    transform(doc,ret){
+        ret.id=ret._id;
+        <span class="hljs-keyword">delete</span> ret._id;
+        <span class="hljs-keyword">delete</span> ret.__v;
+        <span class="hljs-keyword">delete</span> ret.password;
+        <span class="hljs-keyword">return</span> ret;
+    }
+}});
+
+<span class="hljs-keyword">const</span> UserModel = conn.model(<span class="hljs-string">'User'</span>, UserSchema);
+
+<span class="hljs-built_in">module</span>.exports = {
+    UserModel
+}
+</code></pre>
+<h3 id="t292.4 routes\user.js">2.4 routes\user.js <a href="#t292.4 routes\user.js"> # </a></h3>
+<p>routes\user.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> express=<span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">let</span> {UserModel} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../model'</span>);
+<span class="hljs-keyword">let</span> jwt = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jsonwebtoken'</span>);
+<span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config'</span>);
+<span class="hljs-keyword">const</span> router = express.Router();
+router.post(<span class="hljs-string">'/register'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> user = req.body;
+    <span class="hljs-keyword">let</span> hash = <span class="hljs-built_in">require</span>(<span class="hljs-string">'crypto'</span>).createHash(<span class="hljs-string">'md5'</span>).update(user.email).digest(<span class="hljs-string">'hex'</span>);
+    user.avatar = <span class="hljs-string">`https://secure.gravatar.com/avatar/<span class="hljs-subst">${hash}</span>?s=48`</span>;
+    user = <span class="hljs-keyword">await</span> UserModel.create(user);
+    res.send({ <span class="hljs-attr">status</span>: <span class="hljs-string">'ok'</span>,<span class="hljs-attr">access</span>: user.toJSON().access});
+});
+router.get(<span class="hljs-string">'/user'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> users = <span class="hljs-keyword">await</span> UserModel.find();
+    <span class="hljs-keyword">let</span> dataSource = users.map(<span class="hljs-function"><span class="hljs-params">item</span>=&gt;</span>item.toJSON());
+    res.send({ <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span>,<span class="hljs-attr">data</span>:dataSource});
+});
+
+router.post(<span class="hljs-string">'/login/account'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> query = {<span class="hljs-attr">username</span>:req.body.username,<span class="hljs-attr">password</span>:req.body.password};
+    <span class="hljs-keyword">let</span> dbUser = <span class="hljs-keyword">await</span> UserModel.findOne(query);
+    <span class="hljs-keyword">if</span> (dbUser) {
+        <span class="hljs-keyword">let</span> user = dbUser.toJSON();
+        <span class="hljs-keyword">let</span> token = jwt.sign(user, config.secret,{<span class="hljs-attr">expiresIn</span>:<span class="hljs-string">'5d'</span>});
+        <span class="hljs-keyword">return</span> res.send({ <span class="hljs-attr">status</span>: <span class="hljs-string">'ok'</span>, token, <span class="hljs-attr">type</span>: <span class="hljs-string">'account'</span>, <span class="hljs-attr">access</span>: user.access });
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> res.send({
+            <span class="hljs-attr">status</span>: <span class="hljs-string">'error'</span>,
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'account'</span>,
+            <span class="hljs-attr">access</span>: <span class="hljs-string">'guest'</span>
+        });
+    }
+});
+
+router.get(<span class="hljs-string">'/currentUser'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    <span class="hljs-keyword">let</span> authorization = req.headers[<span class="hljs-string">'authorization'</span>];
+    <span class="hljs-keyword">if</span> (authorization) {
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-keyword">let</span> user = jwt.verify(authorization.split(<span class="hljs-string">' '</span>)[<span class="hljs-number">1</span>], config.secret);
+            res.json(user);
+        } <span class="hljs-keyword">catch</span> (err) {
+            res.status(<span class="hljs-number">401</span>).send({});
+        }
+    } <span class="hljs-keyword">else</span> {
+        res.status(<span class="hljs-number">401</span>).send({});
+    }
+});
+router.get(<span class="hljs-string">'/login/outLogin'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; {
+    res.send({ <span class="hljs-attr">data</span>: {}, <span class="hljs-attr">success</span>: <span class="hljs-literal">true</span> });
+});
+<span class="hljs-built_in">module</span>.exports = router;
+</code></pre>
+<h2 id="t303.增加用户">3.增加用户 <a href="#t303.增加用户"> # </a></h2>
+<h3 id="t313.1 routes\user.js">3.1 routes\user.js <a href="#t313.1 routes\user.js"> # </a></h3>
+<p>routes\user.js</p>
+<pre><code class="lang-diff">let express=require('express');
+let {UserModel} = require('../model');
+let jwt = require('jsonwebtoken');
+let config = require('../config');
+const router = express.Router();
+<span class="hljs-addition">+//增加</span>
+<span class="hljs-addition">+router.post('/user', async (req, res) =&gt; {</span>
+<span class="hljs-addition">+    let user = req.body;</span>
+<span class="hljs-addition">+    let hash = require('crypto').createHash('md5').update(user.email).digest('hex');</span>
+<span class="hljs-addition">+    user.avatar = `https://secure.gravatar.com/avatar/${hash}?s=48`;</span>
+<span class="hljs-addition">+    user = await UserModel.create(user);</span>
+<span class="hljs-addition">+    res.send({ status: 'ok',access: user.toJSON().access});</span>
+<span class="hljs-addition">+});</span>
+<span class="hljs-addition">+//删除</span>
+<span class="hljs-addition">+router.delete('/user',async (req, res) =&gt; {</span>
+<span class="hljs-addition">+    console.log('req.body',req.body);</span>
+<span class="hljs-addition">+    await UserModel.remove({_id:req.body.key});</span>
+<span class="hljs-addition">+    return res.json({success:true});</span>
+<span class="hljs-addition">+});</span>
+<span class="hljs-addition">+//修改</span>
+<span class="hljs-addition">+router.put('/user', async (req, res) =&gt; {</span>
+<span class="hljs-addition">+    let user = req.body;</span>
+<span class="hljs-addition">+    let hash = require('crypto').createHash('md5').update(user.email).digest('hex');</span>
+<span class="hljs-addition">+    user.avatar = `https://secure.gravatar.com/avatar/${hash}?s=48`;</span>
+<span class="hljs-addition">+    user = await UserModel.findByIdAndUpdate(user.id,user,{useFindAndModify:false});</span>
+<span class="hljs-addition">+    res.send({ status: 'ok',access: user.toJSON().access});</span>
+<span class="hljs-addition">+});</span>
+<span class="hljs-addition">+//查询</span>
+<span class="hljs-addition">+router.get('/user',async (req, res) =&gt; {</span>
+<span class="hljs-addition">+    let { current = 1, pageSize = 10,sorter,filter={},...query} = req.query;</span>
+<span class="hljs-addition">+    if(sorter){</span>
+<span class="hljs-addition">+        sorter = sorter?JSON.parse(sorter):{};</span>
+<span class="hljs-addition">+        for(let key in sorter){</span>
+<span class="hljs-addition">+            sorter[key]= sorter[key]==='ascend'?1:-1;</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    if(filter){</span>
+<span class="hljs-addition">+        filter = filter?JSON.parse(filter):{};</span>
+<span class="hljs-addition">+        for(let key in filter){</span>
+<span class="hljs-addition">+            if(filter[key])</span>
+<span class="hljs-addition">+             query[key]=filter[key];</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    let total = await UserModel.countDocuments(query);</span>
+<span class="hljs-addition">+    let users = await UserModel.find(query)</span>
+<span class="hljs-addition">+    .sort(sorter).skip((current-1)*pageSize).limit(pageSize);</span>
+<span class="hljs-addition">+    let dataSource = users.map(item=&gt;item.toJSON());</span>
+<span class="hljs-addition">+    const result = {</span>
+<span class="hljs-addition">+        data: dataSource,</span>
+<span class="hljs-addition">+        total,</span>
+<span class="hljs-addition">+        success: true,</span>
+<span class="hljs-addition">+        pageSize,</span>
+<span class="hljs-addition">+        current,</span>
+<span class="hljs-addition">+    };</span>
+<span class="hljs-addition">+    return res.json(result);</span>
+<span class="hljs-addition">+});</span>
+
+router.post('/register', async (req, res) =&gt; {
+    let user = req.body;
+    let hash = require('crypto').createHash('md5').update(user.email).digest('hex');
+    user.avatar = `https://secure.gravatar.com/avatar/${hash}?s=48`;
+    user = await UserModel.create(user);
+    res.send({ status: 'ok',access: user.toJSON().access});
+});
+
+
+router.post('/login/account', async (req, res) =&gt; {
+    let query = {username:req.body.username,password:req.body.password};
+    let dbUser = await UserModel.findOne(query);
+    if (dbUser) {
+        let user = dbUser.toJSON();
+        let token = jwt.sign(user, config.secret,{expiresIn:'5d'});
+        return res.send({ status: 'ok', token, type: 'account', access: user.access });
+    } else {
+        return res.send({
+            status: 'error',
+            type: 'account',
+            access: 'guest'
+        });
+    }
+});
+
+router.get('/currentUser', async (req, res) =&gt; {
+    let authorization = req.headers['authorization'];
+    if (authorization) {
+        try {
+            let user = jwt.verify(authorization.split(' ')[1], config.secret);
+            res.json(user);
+        } catch (err) {
+            res.status(401).send({});
+        }
+    } else {
+        res.status(401).send({});
+    }
+});
+router.get('/login/outLogin', async (req, res) =&gt; {
+    res.send({ data: {}, success: true });
+});
+module.exports = router;
+</code></pre>
+<h2 id="t324.权限中间件">4.权限中间件 <a href="#t324.权限中间件"> # </a></h2>
+<h3 id="t334.1 checkLogin.js">4.1 checkLogin.js <a href="#t334.1 checkLogin.js"> # </a></h3>
+<p>checkLogin.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+<span class="hljs-keyword">let</span> jwt = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jsonwebtoken'</span>);
+<span class="hljs-keyword">let</span> { UNAUTHORIZED } = <span class="hljs-built_in">require</span>( <span class="hljs-string">"http-status-codes"</span>);
+<span class="hljs-keyword">const</span> checkLogin = <span class="hljs-keyword">async</span> (req,res,next) =&gt; {
+    <span class="hljs-keyword">let</span> authorization = req.headers[<span class="hljs-string">'authorization'</span>];
+    <span class="hljs-keyword">if</span> (authorization) {
+        <span class="hljs-keyword">try</span> {
+            <span class="hljs-built_in">console</span>.log(authorization);
+            <span class="hljs-keyword">let</span> user = jwt.verify(authorization.split(<span class="hljs-string">' '</span>)[<span class="hljs-number">1</span>], config.secret);
+            <span class="hljs-built_in">console</span>.log(user);
+            req.user = user;
+            <span class="hljs-keyword">return</span> next();
+        } <span class="hljs-keyword">catch</span> (err) {
+            <span class="hljs-keyword">return</span> res.status(UNAUTHORIZED).send({});
+        }
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> res.status(UNAUTHORIZED).send({});
+    }
+};
+<span class="hljs-built_in">module</span>.exports = checkLogin;
+</code></pre>
+<h3 id="t344.2 checkPermission.js">4.2 checkPermission.js <a href="#t344.2 checkPermission.js"> # </a></h3>
+<p>checkPermission.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> config = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./config'</span>);
+<span class="hljs-keyword">let</span> jwt = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jsonwebtoken'</span>);
+<span class="hljs-keyword">let</span> { FORBIDDEN } = <span class="hljs-built_in">require</span>( <span class="hljs-string">"http-status-codes"</span>);
+<span class="hljs-keyword">const</span> checkPermission = <span class="hljs-function">(<span class="hljs-params">...allowed</span>)=&gt;</span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">async</span> (req,res,next) =&gt; {
+    <span class="hljs-built_in">console</span>.log(req.user,allowed);
+    <span class="hljs-keyword">if</span>(req.user &amp;&amp; allowed.indexOf(req.user.access)!=<span class="hljs-number">-1</span>){
+        next();
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">return</span> res.status(FORBIDDEN).send({});
+    }     
+  };
+}
+
+<span class="hljs-built_in">module</span>.exports = checkPermission;
+</code></pre>
+<h3 id="t354.3 routes\user.js">4.3 routes\user.js <a href="#t354.3 routes\user.js"> # </a></h3>
+<pre><code class="lang-diff">let express=require('express');
+let {UserModel} = require('../model');
+let jwt = require('jsonwebtoken');
+let config = require('../config');
+<span class="hljs-addition">+let checkLogin = require('../checkLogin');</span>
+<span class="hljs-addition">+let checkPermission = require('../checkPermission');</span>
+const router = express.Router();
+//增加
+<span class="hljs-addition">+router.post('/user', checkLogin,checkPermission('admin'),async (req, res) =&gt; {</span>
+    let user = req.body;
+    let hash = require('crypto').createHash('md5').update(user.email).digest('hex');
+    user.avatar = `https://secure.gravatar.com/avatar/${hash}?s=48`;
+    user = await UserModel.create(user);
+    res.send({ status: 'ok',access: user.toJSON().access});
+});
+//删除
+<span class="hljs-addition">+router.delete('/user', checkLogin,checkPermission('admin'),async (req, res) =&gt; {</span>
+    console.log('req.body',req.body);
+    await UserModel.remove({_id:req.body.key});
+    return res.json({success:true});
+});
+//修改
+<span class="hljs-addition">+router.put('/user', checkLogin,checkPermission('admin'), async (req, res) =&gt; {</span>
+    let user = req.body;
+    let hash = require('crypto').createHash('md5').update(user.email).digest('hex');
+    user.avatar = `https://secure.gravatar.com/avatar/${hash}?s=48`;
+    user = await UserModel.findByIdAndUpdate(user.id,user,{useFindAndModify:false});
+    res.send({ status: 'ok',access: user.toJSON().access});
+});
+//查询
+<span class="hljs-addition">+router.get('/user', checkLogin,checkPermission('admin'),async (req, res) =&gt; {</span>
+    let { current = 1, pageSize = 10,sorter,filter={},...query} = req.query;
+    if(sorter){
+        sorter = sorter?JSON.parse(sorter):{};
+        for(let key in sorter){
+            sorter[key]= sorter[key]<span class="hljs-comment">==='ascend'?1:-1;</span>
+        }
+    }
+    if(filter){
+        filter = filter?JSON.parse(filter):{};
+        for(let key in filter){
+            if(filter[key])
+             query[key]=filter[key];
+        }
+    }
+    let total = await UserModel.countDocuments(query);
+    let users = await UserModel.find(query)
+    .sort(sorter).skip((current-1)*pageSize).limit(pageSize);
+    let dataSource = users.map(item=&gt;item.toJSON());
+    const result = {
+        data: dataSource,
+        total,
+        success: true,
+        pageSize,
+        current,
+    };
+    return res.json(result);
+});
+
+router.post('/register', async (req, res) =&gt; {
+    let user = req.body;
+    let hash = require('crypto').createHash('md5').update(user.email).digest('hex');
+    user.avatar = `https://secure.gravatar.com/avatar/${hash}?s=48`;
+    user = await UserModel.create(user);
+    res.send({ status: 'ok',access: user.toJSON().access});
+});
+
+
+router.post('/login/account', async (req, res) =&gt; {
+    let query = {username:req.body.username,password:req.body.password};
+    let dbUser = await UserModel.findOne(query);
+    if (dbUser) {
+        let user = dbUser.toJSON();
+        let token = jwt.sign(user, config.secret,{expiresIn:'5d'});
+        return res.send({ status: 'ok', token, type: 'account', access: user.access });
+    } else {
+        return res.send({
+            status: 'error',
+            type: 'account',
+            access: 'guest'
+        });
+    }
+});
+
+router.get('/currentUser', async (req, res) =&gt; {
+    let authorization = req.headers['authorization'];
+    if (authorization) {
+        try {
+            let user = jwt.verify(authorization.split(' ')[1], config.secret);
+            res.json(user);
+        } catch (err) {
+            res.status(401).send({});
+        }
+    } else {
+        res.status(401).send({});
+    }
+});
+router.get('/login/outLogin', async (req, res) =&gt; {
+    res.send({ data: {}, success: true });
+});
+module.exports = router;
+</code></pre>
+
+    

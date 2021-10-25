@@ -1,0 +1,469 @@
+
+        <h2 id="t01. webpack 介绍">1. webpack 介绍 <a href="#t01. webpack 介绍"> # </a></h2>
+<ul>
+<li><code>Webpack</code>是一个前端资源加载/打包工具。它将根据模块的依赖关系进行静态分析，然后将这些模块按照指定的规则生成对应的静态资源。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/webpack_intro.gif" alt="webpack_intro"></p>
+<h2 id="t12. 预备知识">2. 预备知识 <a href="#t12. 预备知识"> # </a></h2>
+<h3 id="t22.1 toStringTag">2.1 toStringTag <a href="#t22.1 toStringTag"> # </a></h3>
+<ul>
+<li><code>Symbol.toStringTag</code> 是一个内置 symbol，它通常作为对象的属性键使用，对应的属性值应该为字符串类型，这个字符串用来表示该对象的自定义类型标签</li>
+<li>通常只有内置的 <code>Object.prototype.toString()</code> 方法会去读取这个标签并把它包含在自己的返回值里。</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call(<span class="hljs-string">"foo"</span>)); <span class="hljs-comment">// "[object String]"</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>])); <span class="hljs-comment">// "[object Array]"</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call(<span class="hljs-number">3</span>)); <span class="hljs-comment">// "[object Number]"</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call(<span class="hljs-literal">true</span>)); <span class="hljs-comment">// "[object Boolean]"</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call(<span class="hljs-literal">undefined</span>)); <span class="hljs-comment">// "[object Undefined]"</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call(<span class="hljs-literal">null</span>)); <span class="hljs-comment">// "[object Null]"</span>
+<span class="hljs-keyword">let</span> myExports = {};
+<span class="hljs-built_in">Object</span>.defineProperty(myExports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">"Module"</span> });
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.prototype.toString.call(myExports)); <span class="hljs-comment">//[object Module]</span>
+</code></pre>
+<pre><code class="lang-js">[object <span class="hljs-built_in">String</span>]
+[object <span class="hljs-built_in">Array</span>]
+[object <span class="hljs-built_in">Number</span>]
+[object <span class="hljs-built_in">Boolean</span>]
+[object Undefined]
+[object Null]
+[object Module]
+</code></pre>
+<h3 id="t32.2 defineProperty">2.2 defineProperty <a href="#t32.2 defineProperty"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty">defineProperty</a> 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。<ul>
+<li>obj 要在其上定义属性的对象。</li>
+<li>prop 要定义或修改的属性的名称。</li>
+<li>descriptor 将被定义或修改的属性描述符。</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {};
+<span class="hljs-keyword">var</span> ageValue = <span class="hljs-number">10</span>;
+
+<span class="hljs-built_in">Object</span>.defineProperty(obj, <span class="hljs-string">"age"</span>, {
+  <span class="hljs-comment">//writable: true, //是否可修改</span>
+  <span class="hljs-comment">//value: 10, //writeable 和 set不能混用</span>
+  <span class="hljs-keyword">get</span>() {
+    <span class="hljs-keyword">return</span> ageValue;
+  },
+  <span class="hljs-keyword">set</span>(newValue) {
+    ageValue = newValue;
+  },
+
+  <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">//是否可枚举</span>
+  <span class="hljs-attr">configurable</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">//是否可配置可删除</span>
+});
+
+<span class="hljs-built_in">console</span>.log(obj.age);
+obj.age = <span class="hljs-number">20</span>;
+<span class="hljs-built_in">console</span>.log(obj.age);
+</code></pre>
+<h2 id="t43. 同步加载">3. 同步加载 <a href="#t43. 同步加载"> # </a></h2>
+<h3 id="t53.1 安装模块">3.1 安装模块 <a href="#t53.1 安装模块"> # </a></h3>
+<pre><code class="lang-js">cnpm i webpack webpack-cli html-webpack-plugin clean-webpack-plugin -D
+</code></pre>
+<h3 id="t63.2 webpack.config.js">3.2 webpack.config.js <a href="#t63.2 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> { CleanWebpackPlugin } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"clean-webpack-plugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">devtool</span>: <span class="hljs-string">"source-map"</span>,
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"main.js"</span>,
+  },
+  <span class="hljs-attr">module</span>: {},
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> CleanWebpackPlugin({ <span class="hljs-attr">cleanOnceBeforeBuildPatterns</span>: [<span class="hljs-string">"**/*"</span>] }),
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+      <span class="hljs-attr">template</span>: <span class="hljs-string">"./src/index.html"</span>,
+      <span class="hljs-attr">filename</span>: <span class="hljs-string">"index.html"</span>,
+    }),
+  ],
+  <span class="hljs-attr">devServer</span>: {},
+};
+</code></pre>
+<h3 id="t73.2 index.js">3.2 index.js <a href="#t73.2 index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./title.js"</span>);
+<span class="hljs-built_in">console</span>.log(title);
+</code></pre>
+<h3 id="t83.3 title.js">3.3 title.js <a href="#t83.3 title.js"> # </a></h3>
+<p>src\title.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-string">"title"</span>;
+</code></pre>
+<h3 id="t93.4 index.html">3.4 index.html <a href="#t93.4 index.html"> # </a></h3>
+<p>src\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>webpack<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h3 id="t103.5 package.json">3.5 package.json <a href="#t103.5 package.json"> # </a></h3>
+<p>package.json</p>
+<pre><code class="lang-json">  "scripts": {
+    "build": "webpack"
+  }
+</code></pre>
+<h3 id="t113.6 打包文件">3.6 打包文件 <a href="#t113.6 打包文件"> # </a></h3>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = ({
+    <span class="hljs-string">"./src/title.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span></span>) =&gt;</span> {
+        <span class="hljs-built_in">module</span>.exports = <span class="hljs-string">"title"</span>;
+      })
+  });
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = cache[moduleId] = {
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  (<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/title.js"</span>);
+    <span class="hljs-built_in">console</span>.log(title);
+  })();
+})();
+</code></pre>
+<h2 id="t124. 兼容性实现">4. 兼容性实现 <a href="#t124. 兼容性实现"> # </a></h2>
+<h3 id="t134.1 common.js 加载 common.js">4.1 common.js 加载 common.js <a href="#t134.1 common.js 加载 common.js"> # </a></h3>
+<h4 id="t144.1.1 index.js">4.1.1 index.js <a href="#t144.1.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./title"</span>);
+<span class="hljs-built_in">console</span>.log(title.name);
+<span class="hljs-built_in">console</span>.log(title.age);
+</code></pre>
+<h4 id="t154.1.2 title.js">4.1.2 title.js <a href="#t154.1.2 title.js"> # </a></h4>
+<pre><code class="lang-js">exports.name = <span class="hljs-string">"title_name"</span>;
+exports.age = <span class="hljs-string">"title_age"</span>;
+</code></pre>
+<h4 id="t164.1.3 main.js">4.1.3 main.js <a href="#t164.1.3 main.js"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = ({
+    <span class="hljs-string">"./src/title.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span>, exports</span>) =&gt;</span> {
+        exports.name = <span class="hljs-string">"title_name"</span>;
+        exports.age = <span class="hljs-string">"title_age"</span>;
+      })
+  });
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = cache[moduleId] = {
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  (<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/title.js"</span>);
+    <span class="hljs-built_in">console</span>.log(title.name);
+    <span class="hljs-built_in">console</span>.log(title.age);
+  })();
+})();
+</code></pre>
+<h3 id="t174.2 common.js 加载 ES6 modules">4.2 common.js 加载 ES6 modules <a href="#t174.2 common.js 加载 ES6 modules"> # </a></h3>
+<h4 id="t184.2.1 index.js">4.2.1 index.js <a href="#t184.2.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./title"</span>);
+<span class="hljs-built_in">console</span>.log(title);
+<span class="hljs-built_in">console</span>.log(title.age);
+</code></pre>
+<h4 id="t194.2.2 title.js">4.2.2 title.js <a href="#t194.2.2 title.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-string">"title_name"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> age = <span class="hljs-string">"title_age"</span>;
+</code></pre>
+<h4 id="t204.2.3 main.js">4.2.3 main.js <a href="#t204.2.3 main.js"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = ({
+    <span class="hljs-string">"./src/title.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+        <span class="hljs-built_in">require</span>.renderEsModule(exports);
+        <span class="hljs-built_in">require</span>.defineProperties(exports, {
+          <span class="hljs-string">"default"</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> DEFAULT_EXPORT,
+          <span class="hljs-string">"age"</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> age
+        });
+        <span class="hljs-keyword">const</span> DEFAULT_EXPORT = <span class="hljs-string">"title_name"</span>;
+        <span class="hljs-keyword">const</span> age = <span class="hljs-string">"title_age"</span>;
+      })
+  });
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = cache[moduleId] = {
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-built_in">require</span>.defineProperties = <span class="hljs-function">(<span class="hljs-params">exports, definition</span>) =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> definition) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, key, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: definition[key] });
+    }
+  };
+  <span class="hljs-built_in">require</span>.renderEsModule = <span class="hljs-function">(<span class="hljs-params">exports</span>) =&gt;</span> {
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  <span class="hljs-function">(<span class="hljs-params">(</span>) =&gt;</span> {
+    <span class="hljs-keyword">let</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/title.js"</span>);
+    <span class="hljs-built_in">console</span>.log(title);
+    <span class="hljs-built_in">console</span>.log(title.age);
+  })();
+})();
+</code></pre>
+<h3 id="t214.3 ES6 modules 加载 ES6 modules">4.3 ES6 modules 加载 ES6 modules <a href="#t214.3 ES6 modules 加载 ES6 modules"> # </a></h3>
+<h4 id="t224.3.1 index.js">4.3.1 index.js <a href="#t224.3.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> name, { age } <span class="hljs-keyword">from</span> <span class="hljs-string">"./title"</span>;
+<span class="hljs-built_in">console</span>.log(name);
+<span class="hljs-built_in">console</span>.log(age);
+</code></pre>
+<h4 id="t234.3.2 title.js">4.3.2 title.js <a href="#t234.3.2 title.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> name = <span class="hljs-string">"title_name"</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> age = <span class="hljs-string">"title_age"</span>;
+</code></pre>
+<h4 id="t244.3.3 main.js">4.3.3 main.js <a href="#t244.3.3 main.js"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = ({
+    <span class="hljs-string">"./src/index.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+        <span class="hljs-built_in">require</span>.renderEsModule(exports);
+        <span class="hljs-keyword">var</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/title.js"</span>);
+        <span class="hljs-built_in">console</span>.log(title.default);
+        <span class="hljs-built_in">console</span>.log(title.age);
+      }),
+    <span class="hljs-string">"./src/title.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+        <span class="hljs-built_in">require</span>.renderEsModule(exports);
+        <span class="hljs-built_in">require</span>.defineProperties(exports, {
+          <span class="hljs-string">"default"</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> DEFAULT_EXPORT,
+          <span class="hljs-string">"age"</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> age
+        });
+        <span class="hljs-keyword">const</span> DEFAULT_EXPORT = (name = <span class="hljs-string">"title_name"</span>);
+        <span class="hljs-keyword">const</span> age = <span class="hljs-string">"title_age"</span>;
+      })
+  });
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = cache[moduleId] = {
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-built_in">require</span>.defineProperties = <span class="hljs-function">(<span class="hljs-params">exports, definition</span>) =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> definition) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, key, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: definition[key] });
+    }
+  };
+  <span class="hljs-built_in">require</span>.renderEsModule = <span class="hljs-function">(<span class="hljs-params">exports</span>) =&gt;</span> {
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/index.js"</span>);
+})();
+</code></pre>
+<h3 id="t254.4 ES6 modules 加载 common.js">4.4 ES6 modules 加载 common.js <a href="#t254.4 ES6 modules 加载 common.js"> # </a></h3>
+<h4 id="t264.4.1 index.js">4.4.1 index.js <a href="#t264.4.1 index.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> name, { age } <span class="hljs-keyword">from</span> <span class="hljs-string">"./title"</span>;
+<span class="hljs-built_in">console</span>.log(name);
+<span class="hljs-built_in">console</span>.log(age);
+</code></pre>
+<h4 id="t274.4.2 title.js">4.4.2 title.js <a href="#t274.4.2 title.js"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">"title_name"</span>,
+  <span class="hljs-attr">age</span>: <span class="hljs-string">"title_age"</span>,
+};
+</code></pre>
+<h4 id="t284.4.3 main.js">4.4.3 main.js <a href="#t284.4.3 main.js"> # </a></h4>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = ({
+    <span class="hljs-string">"./src/index.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span>, exports, <span class="hljs-built_in">require</span></span>) =&gt;</span> {
+        <span class="hljs-built_in">require</span>.renderEsModule(exports);
+        <span class="hljs-keyword">var</span> title = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/title.js"</span>);
+        <span class="hljs-keyword">var</span> title_default = <span class="hljs-built_in">require</span>.n(title);
+        <span class="hljs-built_in">console</span>.log((title_default()));
+        <span class="hljs-built_in">console</span>.log(title.age);
+      }),
+    <span class="hljs-string">"./src/title.js"</span>:
+      <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span></span>) =&gt;</span> {
+        <span class="hljs-built_in">module</span>.exports = {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">"title_name"</span>,
+          <span class="hljs-attr">age</span>: <span class="hljs-string">"title_age"</span>,
+        };
+      })
+  });
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = cache[moduleId] = {
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-built_in">require</span>.n = <span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">module</span></span>) =&gt;</span> {
+    <span class="hljs-keyword">var</span> getter = <span class="hljs-built_in">module</span> &amp;&amp; <span class="hljs-built_in">module</span>.__esModule ?
+      <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">module</span>[<span class="hljs-string">'default'</span>] :
+      <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">module</span>;
+    <span class="hljs-keyword">return</span> getter;
+  };;
+  <span class="hljs-built_in">require</span>.defineProperties = <span class="hljs-function">(<span class="hljs-params">exports, definition</span>) =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> definition) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, key, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: definition[key] });
+    }
+  };
+  <span class="hljs-built_in">require</span>.renderEsModule = <span class="hljs-function">(<span class="hljs-params">exports</span>) =&gt;</span> {
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  <span class="hljs-built_in">require</span>(<span class="hljs-string">"./src/index.js"</span>);
+})();
+</code></pre>
+<h2 id="t295.异步加载">5.异步加载 <a href="#t295.异步加载"> # </a></h2>
+<h3 id="t305.1 webpack.config.js">5.1 webpack.config.js <a href="#t305.1 webpack.config.js"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">"path"</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"html-webpack-plugin"</span>);
+<span class="hljs-keyword">const</span> { CleanWebpackPlugin } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"clean-webpack-plugin"</span>);
+<span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">"development"</span>,
+  <span class="hljs-attr">devtool</span>: <span class="hljs-string">"source-map"</span>,
+  <span class="hljs-attr">entry</span>: <span class="hljs-string">"./src/index.js"</span>,
+  <span class="hljs-attr">output</span>: {
+    <span class="hljs-attr">path</span>: path.resolve(__dirname, <span class="hljs-string">"dist"</span>),
+    <span class="hljs-attr">filename</span>: <span class="hljs-string">"main.js"</span>,
+  },
+  <span class="hljs-attr">module</span>: {},
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> CleanWebpackPlugin({ <span class="hljs-attr">cleanOnceBeforeBuildPatterns</span>: [<span class="hljs-string">"**/*"</span>] }),
+    <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+      <span class="hljs-attr">template</span>: <span class="hljs-string">"./src/index.html"</span>,
+      <span class="hljs-attr">filename</span>: <span class="hljs-string">"index.html"</span>,
+    }),
+  ],
+  <span class="hljs-attr">devServer</span>: {},
+};
+</code></pre>
+<h3 id="t315.2 src\index.js">5.2 src\index.js <a href="#t315.2 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span>(<span class="hljs-comment">/* webpackChunkName: "hello" */</span> <span class="hljs-string">"./hello"</span>).then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(result.default);
+});
+</code></pre>
+<h3 id="t325.3 hello.js">5.3 hello.js <a href="#t325.3 hello.js"> # </a></h3>
+<p>src\hello.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-string">'hello'</span>;
+</code></pre>
+<h3 id="t335.4 dist\main.js">5.4 dist\main.js <a href="#t335.4 dist\main.js"> # </a></h3>
+<pre><code class="lang-js">(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">var</span> modules = ({});
+  <span class="hljs-keyword">var</span> cache = {};
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">require</span>(<span class="hljs-params">moduleId</span>) </span>{
+    <span class="hljs-keyword">if</span> (cache[moduleId]) {
+      <span class="hljs-keyword">return</span> cache[moduleId].exports;
+    }
+    <span class="hljs-keyword">var</span> <span class="hljs-built_in">module</span> = cache[moduleId] = {
+      <span class="hljs-attr">exports</span>: {}
+    };
+    modules[moduleId](<span class="hljs-built_in">module</span>, <span class="hljs-built_in">module</span>.exports, <span class="hljs-built_in">require</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">module</span>.exports;
+  }
+  <span class="hljs-built_in">require</span>.m = modules;
+  <span class="hljs-built_in">require</span>.defineProperties = <span class="hljs-function">(<span class="hljs-params">exports, definition</span>) =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> key <span class="hljs-keyword">in</span> definition) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-built_in">require</span>.ownProperty(definition, key) &amp;&amp; !<span class="hljs-built_in">require</span>.ownProperty(exports, key)) {
+        <span class="hljs-built_in">Object</span>.defineProperty(exports, key, { <span class="hljs-attr">enumerable</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">get</span>: definition[key] });
+      }
+    }
+  };
+  <span class="hljs-built_in">require</span>.find = {};
+  <span class="hljs-built_in">require</span>.ensure = <span class="hljs-function">(<span class="hljs-params">chunkId</span>) =&gt;</span> {
+    <span class="hljs-keyword">let</span> promises = [];
+    <span class="hljs-built_in">require</span>.find.jsonp(chunkId, promises);
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(promises);
+  };
+  <span class="hljs-built_in">require</span>.unionFileName = <span class="hljs-function">(<span class="hljs-params">chunkId</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">""</span> + chunkId + <span class="hljs-string">".main.js"</span>;
+  };
+  <span class="hljs-built_in">require</span>.ownProperty = <span class="hljs-function">(<span class="hljs-params">obj, prop</span>) =&gt;</span> <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(obj, prop)
+  <span class="hljs-built_in">require</span>.load = <span class="hljs-function">(<span class="hljs-params">url</span>) =&gt;</span> {
+    <span class="hljs-keyword">var</span> script = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'script'</span>);
+    script.src = url;
+    <span class="hljs-built_in">document</span>.head.appendChild(script);
+  };
+  <span class="hljs-built_in">require</span>.renderEsModule = <span class="hljs-function">(<span class="hljs-params">exports</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span> !== <span class="hljs-string">'undefined'</span> &amp;&amp; <span class="hljs-built_in">Symbol</span>.toStringTag) {
+      <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-built_in">Symbol</span>.toStringTag, { <span class="hljs-attr">value</span>: <span class="hljs-string">'Module'</span> });
+    }
+    <span class="hljs-built_in">Object</span>.defineProperty(exports, <span class="hljs-string">'__esModule'</span>, { <span class="hljs-attr">value</span>: <span class="hljs-literal">true</span> });
+  };
+  <span class="hljs-built_in">require</span>.publicPath = <span class="hljs-string">''</span>;
+  <span class="hljs-keyword">var</span> installedChunks = {
+    <span class="hljs-string">"main"</span>: <span class="hljs-number">0</span>
+  };
+  <span class="hljs-built_in">require</span>.find.jsonp = <span class="hljs-function">(<span class="hljs-params">chunkId, promises</span>) =&gt;</span> {
+    <span class="hljs-keyword">var</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+      installedChunkData = installedChunks[chunkId] = [resolve, reject];
+    });
+    promises.push(installedChunkData[<span class="hljs-number">2</span>] = promise);
+    <span class="hljs-keyword">var</span> url = <span class="hljs-built_in">require</span>.publicPath + <span class="hljs-built_in">require</span>.unionFileName(chunkId);
+    <span class="hljs-built_in">require</span>.load(url);
+  };
+  <span class="hljs-keyword">var</span> webpackJsonpCallback = <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-keyword">var</span> [chunkIds, moreModules] = data;
+    <span class="hljs-keyword">var</span> moduleId, chunkId, i = <span class="hljs-number">0</span>, resolves = [];
+    <span class="hljs-keyword">for</span> (; i &lt; chunkIds.length; i++) {
+      chunkId = chunkIds[i];
+      resolves.push(installedChunks[chunkId][<span class="hljs-number">0</span>]);
+      installedChunks[chunkId] = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">for</span> (moduleId <span class="hljs-keyword">in</span> moreModules) {
+      <span class="hljs-built_in">require</span>.m[moduleId] = moreModules[moduleId];
+    }
+    <span class="hljs-keyword">while</span> (resolves.length) {
+      resolves.shift()();
+    }
+  }
+  <span class="hljs-keyword">var</span> chunkLoadingGlobal = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpack5"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpack5"</span>] || [];
+  chunkLoadingGlobal.push = webpackJsonpCallback;
+  <span class="hljs-built_in">require</span>.ensure(<span class="hljs-string">"hello"</span>).then(<span class="hljs-built_in">require</span>.bind(<span class="hljs-built_in">require</span>, <span class="hljs-string">"./src/hello.js"</span>)).then(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(result.default);
+  });
+})();
+</code></pre>
+<h3 id="t345.5 hello.main.js">5.5 hello.main.js <a href="#t345.5 hello.main.js"> # </a></h3>
+<p>hello.main.js</p>
+<pre><code class="lang-js">(<span class="hljs-built_in">window</span>[<span class="hljs-string">"webpack5"</span>] = <span class="hljs-built_in">window</span>[<span class="hljs-string">"webpack5"</span>] || []).push([[<span class="hljs-string">"hello"</span>], {
+  <span class="hljs-string">"./src/hello.js"</span>:
+    <span class="hljs-function">(<span class="hljs-params">(<span class="hljs-built_in">module</span>, exports, __webpack_require__</span>) =&gt;</span> {
+      <span class="hljs-string">"use strict"</span>;
+      __webpack_require__.renderEsModule(exports);
+      __webpack_require__.defineProperties(exports, {
+        <span class="hljs-string">"default"</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> DEFAULT_EXPORT
+      });
+      <span class="hljs-keyword">const</span> DEFAULT_EXPORT = (<span class="hljs-string">'hello'</span>);
+    })
+}]);
+</code></pre>
+
+    

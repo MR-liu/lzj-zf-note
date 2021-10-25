@@ -1,0 +1,1286 @@
+
+        <h2 id="t01.栈">1.栈 <a href="#t01.栈"> # </a></h2>
+<ul>
+<li><code>栈</code>者,存储货物或供旅客住宿的地方,可引申为仓库</li>
+</ul>
+<h3 id="t11.1 数据结构中的栈">1.1 数据结构中的栈 <a href="#t11.1 数据结构中的栈"> # </a></h3>
+<ul>
+<li>栈是一组数据的存放方式,特点是先进后出，后进先出</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/instack.png" alt="instack"></p>
+<p><img src="http://img.zhufengpeixun.cn/outstack.png" alt="outstack"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">方法名</th>
+<th style="text-align:left">操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">push()</td>
+<td style="text-align:left">添加新元素到栈顶</td>
+</tr>
+<tr>
+<td style="text-align:left">pop()</td>
+<td style="text-align:left">移除栈顶的元素，同时返回被移除的元素</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Stack</span> </span>{
+    private items: number[] = [];
+    <span class="hljs-comment">// 添加元素到栈顶，也就是栈的末尾</span>
+    push(element: number) {
+        <span class="hljs-keyword">this</span>.items.push(element);
+    }
+    <span class="hljs-comment">// 栈的后进先出原则，从栈顶出栈</span>
+    pop(): number {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.items.pop();
+    }
+}
+
+<span class="hljs-keyword">let</span> stack = <span class="hljs-keyword">new</span> Stack();
+stack.push(<span class="hljs-number">1</span>);
+stack.push(<span class="hljs-number">2</span>);
+stack.push(<span class="hljs-number">3</span>);
+<span class="hljs-built_in">console</span>.log(stack.pop());
+</code></pre>
+<h3 id="t21.2 代码的运行方式">1.2 代码的运行方式 <a href="#t21.2 代码的运行方式"> # </a></h3>
+<ul>
+<li>表示函数的一层层调用</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">debugger</span>;
+        }
+        three();
+    }
+    two();
+}
+one();
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/callbackstack.png" alt="callbackstack"></p>
+<h3 id="t31.3 内存区域">1.3 内存区域 <a href="#t31.3 内存区域"> # </a></h3>
+<ul>
+<li>栈也是是存放数据的一种内存区域</li>
+<li>程序运行的时候，需要内存空间存放数据。一般来说,系统会划分出两种不同的内存空间：一种叫做stack(栈)，另一种叫做heap(堆)<ul>
+<li>stack是有结构的，每个区块按照一定次序存放，可以明确知道每个区块的大小</li>
+<li>heap是没有结构的，数据可以任意存放。因此，stack的寻址速度要快于heap</li>
+</ul>
+</li>
+<li>只要是局部的、占用空间确定的数据，一般都存放在stack里面，否则就放在heap里面,所有的对象都存放在heap</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">task</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">var</span> c = {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+        <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>
+    }
+}
+task();
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/memoryposition.jpg" alt="memoryposition"></p>
+<h2 id="t42. 队列">2. 队列 <a href="#t42. 队列"> # </a></h2>
+<ul>
+<li>队列是一种操作受限制的线性表</li>
+<li>特殊之处在于它只允许在表的前端进行删除操作，而在表的后端进行插入操作</li>
+<li>进行插入操作的端称为队尾，进行删除操作的端称为队头</li>
+<li>因为队列只允许在一端插入,在另一端删除，所以只有最早进入队列的元素才能最先从队列中删除,故队列又称为先进先出线性表</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/inqueue.png" alt="inqueue.png"></p>
+<p><img src="http://img.zhufengpeixun.cn/outqueue.png" alt="outqueue.png"></p>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Queue</span> </span>{
+    private items: number[] = [];
+    <span class="hljs-comment">// 添加元素到栈顶，也就是栈的末尾</span>
+    enqueue(element: number) {
+        <span class="hljs-keyword">this</span>.items.push(element);
+    }
+    dequeue() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.items.shift();
+    }
+}
+
+<span class="hljs-keyword">let</span> queue = <span class="hljs-keyword">new</span> Queue();
+queue.enqueue(<span class="hljs-number">1</span>);
+queue.enqueue(<span class="hljs-number">2</span>);
+queue.enqueue(<span class="hljs-number">3</span>);
+<span class="hljs-built_in">console</span>.log(queue.dequeue());<span class="hljs-comment">//1</span>
+</code></pre>
+<h2 id="t53. 数据类型">3. 数据类型 <a href="#t53. 数据类型"> # </a></h2>
+<ul>
+<li>JS中有七种基本数据类型<ul>
+<li>六种基本数据类型 Boolean Null Undefined Number String Symbol</li>
+<li>一种引用类型 object {} [] /^$/ new Date() Math</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">true或false</td>
+</tr>
+<tr>
+<td style="text-align:left">Null</td>
+<td style="text-align:left">null</td>
+</tr>
+<tr>
+<td style="text-align:left">Undefined</td>
+<td style="text-align:left">undefined</td>
+</tr>
+<tr>
+<td style="text-align:left">Number</td>
+<td style="text-align:left">数字</td>
+</tr>
+<tr>
+<td style="text-align:left">String</td>
+<td style="text-align:left">字符串</td>
+</tr>
+<tr>
+<td style="text-align:left">Symbol</td>
+<td style="text-align:left">符号类型</td>
+</tr>
+</tbody>
+</table>
+<h2 id="t64. 执行上下文">4. 执行上下文 <a href="#t64. 执行上下文"> # </a></h2>
+<h3 id="t74.1  如何存储">4.1  如何存储 <a href="#t74.1  如何存储"> # </a></h3>
+<ul>
+<li>当函数运行时，会创建一个执行环境，这个执行环境就叫执行上下文(Execution Context)</li>
+<li>执行上下文中会创建一个对象叫作变量对象(Value Object),基础数据类型都保存在变量对象中</li>
+<li>引用数据类型的值保存在堆里，我们通过操作对象的引用地址来操作对象</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">task</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">var</span> b = {
+        <span class="hljs-attr">name</span>:<span class="hljs-string">'zhufeng'</span>
+    }
+    <span class="hljs-keyword">var</span> c = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>];
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> ExecuteContext = {
+    <span class="hljs-attr">VO</span>:{
+        <span class="hljs-attr">a</span>:<span class="hljs-number">1</span>,
+        <span class="hljs-attr">b</span>:<span class="hljs-string">'XO1'</span>,
+        <span class="hljs-attr">c</span>:<span class="hljs-string">'XA1'</span>
+    }
+};
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/valueobject.png" alt="valueobject"></p>
+<h3 id="t84.2  如何复制">4.2  如何复制 <a href="#t84.2  如何复制"> # </a></h3>
+<h4 id="t94.2.1 基本数据">4.2.1 基本数据 <a href="#t94.2.1 基本数据"> # </a></h4>
+<ul>
+<li>基本数据类型复制的是值本身</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">var</span> b = a;
+b = <span class="hljs-number">2</span>;
+<span class="hljs-built_in">console</span>.log(a);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> ExecuteContext = {
+    <span class="hljs-attr">VO</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }
+};
+
+ExecuteContext.VO.b = ExecuteContext.VO.a;
+ExecuteContext.VO.b = <span class="hljs-number">2</span>;
+<span class="hljs-built_in">console</span>.log(ExecuteContext.VO.a);
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/changebasictype.png" alt="changebasictype"></p>
+<h4 id="t104.2.2 引用数据">4.2.2 引用数据 <a href="#t104.2.2 引用数据"> # </a></h4>
+<ul>
+<li>引用数据类型复制的是引用地址指针</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> m = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> };
+<span class="hljs-keyword">var</span> n = m;
+n.a = <span class="hljs-number">10</span>;
+<span class="hljs-built_in">console</span>.log(m.a);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> ExecuteContext = {
+    <span class="hljs-attr">VO</span>: { <span class="hljs-attr">m</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> } }
+};
+
+ExecuteContext.VO.b = ExecuteContext.VO.a;
+ExecuteContext.VO.a = <span class="hljs-number">10</span>;
+<span class="hljs-built_in">console</span>.log(ExecuteContext.VO.a);
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/copyrefer.png" alt="copyrefer"></p>
+<h2 id="t115. 多个执行上下文栈">5. 多个执行上下文栈 <a href="#t115. 多个执行上下文栈"> # </a></h2>
+<h3 id="t125.1 执行上下文分类">5.1 执行上下文分类 <a href="#t125.1 执行上下文分类"> # </a></h3>
+<ul>
+<li>JS代码在执行的时候会进入一个执行上下文，可以理解为当前代码的运行环境 </li>
+<li>在JS中运行环境主要分为全局执行上下文环境和函数环执行上下文环境<ul>
+<li>全局执行上下文只有一个，在客户端中一般由浏览器创建，也就是我们熟知的window对象，我们能通过this直接访问到它</li>
+<li>window对象还是var声明的全局变量的载体。我们通过var创建的全局对象，都可以通过window直接访问</li>
+</ul>
+</li>
+</ul>
+<h3 id="t135.2 多个执行上下文">5.2 多个执行上下文 <a href="#t135.2 多个执行上下文"> # </a></h3>
+<ul>
+<li>在JS执行过程会产出多个执行上下文,JS引擎会有栈来管理这些执行上下文</li>
+<li>执行上下文栈(下文简称执行栈)也叫调用栈，执行栈用于存储代码执行期间创建的所有上下文，具有LIFO（Last In First Out后进先出，也就是先进后出）的特性</li>
+<li>栈底永远是全局上下文，栈顶为当前正在执行的上下文</li>
+<li>当开启一个函数执行时会生成一个新的执行上下文并放入调用栈，执行完毕后会自动出栈</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">debugger</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> b = <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">debugger</span>;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">var</span> c = <span class="hljs-number">1</span>;
+            <span class="hljs-keyword">debugger</span>;
+        }
+        three();
+        <span class="hljs-keyword">debugger</span>;
+    }
+    two();
+    <span class="hljs-keyword">debugger</span>;
+}
+one();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> globalExecuteContext = {
+    <span class="hljs-attr">VO</span>: { <span class="hljs-attr">setTimeout</span>: <span class="hljs-string">'setTimeout'</span> }
+}
+<span class="hljs-keyword">var</span> executeContextStack = [globalExecuteContext];
+<span class="hljs-keyword">var</span> oneExecuteContext = {
+    <span class="hljs-attr">VO</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }
+}
+executeContextStack.push(oneExecuteContext);
+<span class="hljs-keyword">var</span> twoExecuteContext = {
+    <span class="hljs-attr">VO</span>: { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }
+}
+executeContextStack.push(twoExecuteContext);
+<span class="hljs-keyword">var</span> threeExecuteContext = {
+    <span class="hljs-attr">VO</span>: { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }
+}
+executeContextStack.push(threeExecuteContext);
+<span class="hljs-built_in">console</span>.log(executeContextStack);
+
+executeContextStack.pop();
+executeContextStack.pop();
+executeContextStack.pop();
+</code></pre>
+<h2 id="t146. 执行上下文生命周期">6. 执行上下文生命周期 <a href="#t146. 执行上下文生命周期"> # </a></h2>
+<h3 id="t156.1 生命周期有两个阶段">6.1 生命周期有两个阶段 <a href="#t156.1 生命周期有两个阶段"> # </a></h3>
+<ul>
+<li>一个新的执行上下文的生命周期有两个阶段<ul>
+<li>创建阶段<ul>
+<li>创建变量对象</li>
+<li>确定作用域链</li>
+<li>确定<code>this</code>指向</li>
+</ul>
+</li>
+<li>执行阶段<ul>
+<li>变量赋值</li>
+<li>函数赋值</li>
+<li>代码执行</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="t166.2 变量对象">6.2 变量对象 <a href="#t166.2 变量对象"> # </a></h3>
+<ul>
+<li>变量对象会保存变量声明(var)、函数参数(arguments)、函数定义(function)<ul>
+<li>变量对象会首先获得函数的参数变量和值</li>
+<li>获取所有用<code>function</code>进行的函数声明，函数名为变量对象的属性名，值为函数对象,如果属性已经存在，值会用新值覆盖</li>
+<li>再依次所有的var关键字进行的变量声明，每找到一个变量声明，就会在变量对象上建一个属性，值为<code>undefined</code>,如果变量名已经存在，则会跳过，并不会修改原属性值,<code>let</code>声明的变量并不会在此阶段进行处理</li>
+</ul>
+</li>
+<li>函数声明优先级更高，同名的函数会覆盖函数和变量，但同名<code>var</code>变量并不会覆盖函数.执行阶段重新赋值可以改变原有的值</li>
+</ul>
+<h4 id="t176.2.1 基本类型">6.2.1 基本类型 <a href="#t176.2.1 基本类型"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(a);
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+</code></pre>
+<pre><code>```js
+</code></pre><p>var a = undefined;//变量提升
+console.log(a);
+a = 1;</p>
+<pre><code>
+#### 6.2.2 变量提升
+- 正常编写
+
+```js
+var a = 1;
+function fn(m) { console.log('fn'); }
+function fn(m) { console.log('new_fn'); }
+function a() { console.log('fn_a'); }
+console.log(a);
+fn(1);
+var fn = 'var_fn';
+console.log(fn);
+//1
+//new_fn
+//var_fn
+</code></pre><ul>
+<li>真正执行</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// 创建阶段</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params">m</span>) </span>{ <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'fn'</span>); }
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params">m</span>) </span>{ <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'new_fn'</span>); }
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">a</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'fn_a'</span>); }
+<span class="hljs-keyword">var</span> a = <span class="hljs-literal">undefined</span>;
+<span class="hljs-keyword">var</span> fn = <span class="hljs-literal">undefined</span>;
+<span class="hljs-comment">//执行阶段</span>
+a = <span class="hljs-number">1</span>;
+<span class="hljs-built_in">console</span>.log(a);
+fn();
+fn = <span class="hljs-string">'var_fn'</span>;
+<span class="hljs-built_in">console</span>.log(fn);
+</code></pre>
+<ul>
+<li>上下文</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// 创建阶段</span>
+<span class="hljs-keyword">var</span> globalEC = {
+    <span class="hljs-attr">VO</span>: {
+        ...arguments,
+        <span class="hljs-attr">a</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'fn_a'</span>); },
+        <span class="hljs-attr">fn</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'new_fn'</span>); }
+    }
+}
+<span class="hljs-keyword">var</span> ECStack = [globalEC];
+<span class="hljs-comment">//执行阶段</span>
+globalEC.VO.a = <span class="hljs-number">1</span>;
+<span class="hljs-built_in">console</span>.log(globalEC.VO.a);
+globalEC.VO.fn();
+globalEC.VO.fn = <span class="hljs-string">'var_fn'</span>;
+<span class="hljs-built_in">console</span>.log(globalEC.VO.fn);
+</code></pre>
+<h4 id="t186.2.3 激活对象">6.2.3 激活对象 <a href="#t186.2.3 激活对象"> # </a></h4>
+<ul>
+<li>在函数的调用栈中，如果当前执行上下文处于函数调用栈的顶端，则意味着当前上下文处于激活状态，此时变量对象称为活动对象(AO,Activation Object)  VO=&gt;AO</li>
+<li>活动变量包含变量对象所有的属性，并有包含<code>this</code>指针</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params">m</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'two'</span>);
+    }
+}
+one(<span class="hljs-number">1</span>);
+
+<span class="hljs-comment">//执行阶段 VO=&gt;AO</span>
+<span class="hljs-keyword">let</span> VO = AO = {
+    <span class="hljs-attr">m</span>:<span class="hljs-number">1</span>,
+    <span class="hljs-attr">two</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'two'</span>); },
+
+}
+<span class="hljs-keyword">let</span> oneEC={
+    VO,
+    <span class="hljs-attr">this</span>: <span class="hljs-built_in">window</span>,
+    <span class="hljs-attr">scopeChain</span>:[VO,globalVO]
+}
+</code></pre>
+<h4 id="t196.2.4 全局上下文的变量对象">6.2.4 全局上下文的变量对象 <a href="#t196.2.4 全局上下文的变量对象"> # </a></h4>
+<ul>
+<li>在浏览器里，全局对象为<code>window</code></li>
+<li>全局上下文的变量对象为<code>window</code>,而且这个变量对象不能激活变成活动对象</li>
+<li>只在窗口打开，全局上下文会一直存在，所有的上下文都可以直接访问全局上下文变量对象上的属性</li>
+<li>只有全局上下文的变量对象允许通过VO的属性名称来间接访问，在函数上下文中是不能直接访问VO对象的</li>
+<li>未进入执行阶段前，变量对象中的属性都不能访问！但是进入到执行阶段之后，变量对象转变成了活动对象，里面的属性都能被访问了,对于函数上下文来讲，活动对象与变量对象其实都是同一个对象,只是处于执行上下文的不同生命周期</li>
+</ul>
+<h2 id="t207. 作用域">7. 作用域 <a href="#t207. 作用域"> # </a></h2>
+<h3 id="t217.1 作用域">7.1 作用域 <a href="#t217.1 作用域"> # </a></h3>
+<ul>
+<li>在JS中，作用域是用来规定变量访问范围的规则</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+}
+<span class="hljs-built_in">console</span>.log(a);
+</code></pre>
+<h3 id="t227.2 作用域链">7.2 作用域链 <a href="#t227.2 作用域链"> # </a></h3>
+<ul>
+<li>作用域链是由当前执行环境与上层执行环境的一系列变量对象组成的，它保证了当前执行环境对符合访问权限的变量和函数的有序访问</li>
+</ul>
+<h4 id="t237.2.1 作用域链">7.2.1 作用域链 <a href="#t237.2.1 作用域链"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">var</span> c = <span class="hljs-number">3</span>;
+            <span class="hljs-built_in">console</span>.log(a, b, c);
+        }
+        three();
+    }
+    two();
+}
+one(); 
+</code></pre>
+<pre><code class="lang-js">
+
+<span class="hljs-comment">// 1.创建全局上下文</span>
+<span class="hljs-keyword">var</span> globalExecuteContextVO = { <span class="hljs-attr">one</span>: <span class="hljs-string">`()=&gt;{var a = 1;}`</span> }
+<span class="hljs-keyword">var</span> globalExecuteContext = {
+    <span class="hljs-attr">VO</span>: globalExecuteContextVO,
+    <span class="hljs-attr">scopeChain</span>: [globalExecuteContextVO]
+}
+<span class="hljs-keyword">var</span> executeContextStack = [globalExecuteContext];
+<span class="hljs-comment">//2.执行one，创建one执行上下文</span>
+<span class="hljs-keyword">var</span> oneExecuteContextVO = {
+    <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">two</span>: <span class="hljs-string">`()=&gt;{var b = 2 ;}`</span>
+}
+<span class="hljs-keyword">var</span> oneExecuteContext = {
+    <span class="hljs-attr">VO</span>: oneExecuteContextVO,
+    <span class="hljs-attr">scopeChain</span>: [oneExecuteContextVO, globalExecuteContext.VO]
+}
+<span class="hljs-comment">//2.执行two，创建two执行上下文</span>
+<span class="hljs-keyword">var</span> twoExecuteContextVO = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">three</span>: <span class="hljs-string">`()=&gt;{var c = 3 ;}`</span>
+}
+<span class="hljs-keyword">var</span> twoExecuteContext = {
+    <span class="hljs-attr">VO</span>: twoExecuteContextVO,
+    <span class="hljs-attr">scopeChain</span>: [twoExecuteContextVO, oneExecuteContext.VO, globalExecuteContext.VO]
+}
+<span class="hljs-comment">//3.执行three，创建three执行上下文</span>
+<span class="hljs-keyword">var</span> threeExecuteContextVO = {
+    <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>
+}
+<span class="hljs-keyword">var</span> threeExecuteContext = {
+    <span class="hljs-attr">VO</span>: threeExecuteContextVO,
+    <span class="hljs-attr">scopeChain</span>: [threeExecuteContextVO, twoExecuteContext.VO, oneExecuteContext.VO, globalExecuteContext.VO]
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getValue</span>(<span class="hljs-params">varName</span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; threeExecuteContext.scopeChain.length; i++) {
+        <span class="hljs-keyword">if</span> (varName <span class="hljs-keyword">in</span> threeExecuteContext.scopeChain[i]) {
+            <span class="hljs-keyword">return</span> threeExecuteContext.scopeChain[i][varName];
+        }
+    }
+}
+<span class="hljs-comment">//console.log(a, b, c);</span>
+<span class="hljs-built_in">console</span>.log(
+    getValue(<span class="hljs-string">'a'</span>),
+    getValue(<span class="hljs-string">'b'</span>),
+    getValue(<span class="hljs-string">'c'</span>),
+);
+</code></pre>
+<h4 id="t247.2.2 作用域链">7.2.2 作用域链 <a href="#t247.2.2 作用域链"> # </a></h4>
+<ul>
+<li><code>scopeChain</code>其实是在创建函数的时候确定的</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(a);
+    }
+    <span class="hljs-keyword">return</span> two;
+}
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">var</span> two = one();
+two();
+</code></pre>
+<pre><code class="lang-js">
+<span class="hljs-comment">// 1.创建全局上下文</span>
+<span class="hljs-keyword">var</span> globalExecuteContextVO = { <span class="hljs-attr">one</span>: <span class="hljs-string">`()=&gt;{var a = 1;}`</span>, <span class="hljs-attr">a</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">two</span>: <span class="hljs-literal">undefined</span> }
+<span class="hljs-keyword">var</span> globalExecuteContext = {
+    <span class="hljs-attr">VO</span>: globalExecuteContextVO,
+    <span class="hljs-attr">scopeChain</span>: [globalExecuteContextVO]
+}
+<span class="hljs-comment">//2.开始执行</span>
+globalExecuteContextVO.a = <span class="hljs-number">2</span>;
+<span class="hljs-comment">//3.开始执行one</span>
+<span class="hljs-keyword">var</span> oneExecuteContextVO = { <span class="hljs-attr">a</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">two</span>: <span class="hljs-string">`()=&gt;{console.log(a)}`</span> }
+<span class="hljs-keyword">var</span> oneExecuteContext = {
+    <span class="hljs-attr">VO</span>: oneExecuteContextVO,
+    <span class="hljs-attr">scopeChain</span>: [oneExecuteContextVO, globalExecuteContextVO]
+}
+oneExecuteContextVO.a = <span class="hljs-number">1</span>;
+<span class="hljs-comment">//4.给two赋值</span>
+globalExecuteContextVO.two = oneExecuteContextVO.two;
+<span class="hljs-comment">//5.执行two</span>
+<span class="hljs-keyword">var</span> twoExecuteContextVO = {}
+<span class="hljs-keyword">var</span> twoExecuteContext = {
+    <span class="hljs-attr">VO</span>: twoExecuteContextVO,
+    <span class="hljs-comment">//scopeChain是在创建此函数据的时候就决定了,跟在哪里执行无关</span>
+    <span class="hljs-attr">scopeChain</span>: [twoExecuteContextVO, oneExecuteContextVO, globalExecuteContextVO]
+}
+</code></pre>
+<h2 id="t258. 闭包">8. 闭包 <a href="#t258. 闭包"> # </a></h2>
+<ul>
+<li>闭包有两部分组成，一个是当前的执行上下文A，一个是在该执行上下文中创建的函数B</li>
+<li>当B执行的时候引用了当前执行上下文A中的变量就会产出闭包</li>
+<li>当一个值失去引用的时候就会会标记，被垃圾收集回收机回收并释放空间</li>
+<li>闭包的本质就是在函数外部保持内部变量的引用，从而阻止垃圾回收</li>
+<li>调用栈的并不会影响作用域链,函数调用栈是在执行时才确定，而作用域规则是在代码编译阶段就已经确定了</li>
+<li>MDN定义:闭包是指这样的作用域<code>foo</code>,它包含了一个函数<code>fn</code>，这个函数<code>fn1</code>可以调用被这个作用域所封闭的变量<code>a</code>、函数等内容</li>
+</ul>
+<h3 id="t268.1 闭包">8.1 闭包 <a href="#t268.1 闭包"> # </a></h3>
+<ul>
+<li><code>Call Stack</code>为当前的函数调用栈</li>
+<li><code>Scope</code>为当前正在被执行函数的作用域链 </li>
+<li><code>Local</code>为当前的活动对象</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> c = <span class="hljs-number">3</span>;
+        <span class="hljs-keyword">debugger</span>;
+        <span class="hljs-built_in">console</span>.log(a,c);
+    }
+    <span class="hljs-keyword">return</span> two;
+}
+<span class="hljs-keyword">let</span> two = one();
+two();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">debugger</span>;
+        <span class="hljs-built_in">console</span>.log(a);
+    }
+    two();
+}
+one();
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/closure2.png" alt="closure2"></p>
+<h3 id="t278.2 闭包优化">8.2 闭包优化 <a href="#t278.2 闭包优化"> # </a></h3>
+<ul>
+<li>中间没用到的变量闭包会被忽略 </li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">var</span> c = <span class="hljs-number">3</span>;
+            <span class="hljs-keyword">debugger</span>;
+            <span class="hljs-built_in">console</span>.log(a, b, c);
+        }
+        three();
+    }
+    two();
+}
+one();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">var</span> c = <span class="hljs-number">3</span>;
+            <span class="hljs-keyword">debugger</span>;
+            <span class="hljs-built_in">console</span>.log(a, c);
+        }
+        three();
+    }
+    two();
+}
+one();
+</code></pre>
+<h3 id="t288.3 arguments">8.3 arguments <a href="#t288.3 arguments"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">log</span>(<span class="hljs-params">a, b</span>) </span>{
+    <span class="hljs-keyword">debugger</span>;
+    <span class="hljs-built_in">console</span>.log(a, b);
+}
+log(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>);
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/arguments.png" alt="arguments"></p>
+<h2 id="t299. var和let">9. var和let <a href="#t299. var和let"> # </a></h2>
+<ul>
+<li>JS中作用域有：全局作用域、函数作用域。没有块作用域的概念。ECMAScript 6(简称ES6)中新增了块级作用域</li>
+<li>块作用域由 <code>{ }</code> 包括,<code>if</code>语句和<code>for</code>语句里面的<code>{ }</code>也属于块作用域</li>
+</ul>
+<h3 id="t309.1 ES5问题">9.1 ES5问题 <a href="#t309.1 ES5问题"> # </a></h3>
+<h4 id="t319.1.1 全局变量">9.1.1 全局变量 <a href="#t319.1.1 全局变量"> # </a></h4>
+<ul>
+<li>在if或者for循环中声明的变量会变成全局变量<pre><code class="lang-js"><span class="hljs-keyword">for</span>(<span class="hljs-keyword">var</span> i=<span class="hljs-number">0</span>;i&lt;=<span class="hljs-number">5</span>;i++){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"hello"</span>);
+}
+<span class="hljs-built_in">console</span>.log(i); <span class="hljs-comment">//5</span>
+</code></pre>
+<h4 id="t329.1.2 内层变量可能会覆盖外层变量">9.1.2 内层变量可能会覆盖外层变量 <a href="#t329.1.2 内层变量可能会覆盖外层变量"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(a);
+  <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span>) {
+      <span class="hljs-keyword">var</span> a = <span class="hljs-number">2</span>;
+  }
+}
+fn(); <span class="hljs-comment">//undefined</span>
+</code></pre>
+</li>
+</ul>
+<h3 id="t339.2 let">9.2 let <a href="#t339.2 let"> # </a></h3>
+<ul>
+<li>允许块级作用域任意嵌套</li>
+<li>外层作用域无法读取内层作用域的变量</li>
+<li>内层作用域可以定义外层作用域的同名变量</li>
+<li>函数本身的作用域在其所在的块级作用域之内</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-meta">
+'use strict'</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"out"</span>);
+}
+(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span>) {
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"in"</span>);
+        }
+    }
+    fn();
+}());
+</code></pre>
+<h3 id="t349.3 var&amp;let&amp;const">9.3 var&amp;let&amp;const <a href="#t349.3 var&amp;let&amp;const"> # </a></h3>
+<ul>
+<li>var定义的变量没有块的概念,可以跨块访问,不能跨函数访问,有变量提升,可重复声明</li>
+<li>let定义的变量，只能在块作用域里访问，不能跨块访问，也不能跨函数访问，无变量提升，不可以重复声明</li>
+<li>let 声明的变量只在块级作用域内有效,不存在变量提升，而是<strong>绑定</strong>在暂时性死区</li>
+<li>或者说let变量提升了，但是在let声明变量前不能使用该变量，这特性叫暂时性死区(temporal dead zone)</li>
+<li>如果有重复变量<code>let</code>会在编译阶段报错</li>
+</ul>
+<h3 id="t359.3.1 暂时性死区">9.3.1 暂时性死区 <a href="#t359.3.1 暂时性死区"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">// 不存在变量提升</span>
+<span class="hljs-meta">'use strict'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">func</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(i);
+    <span class="hljs-keyword">let</span> i;
+};
+func(); <span class="hljs-comment">// 报错</span>
+</code></pre>
+<h3 id="t369.3.2 全局变量">9.3.2 全局变量 <a href="#t369.3.2 全局变量"> # </a></h3>
+<ul>
+<li>ES5声明变量只有两种方式：var和function</li>
+<li>ES6有let、const、import、class再加上ES5的var、function共有六种声明变量的方式</li>
+<li>浏览器环境中顶层对象是window，Node中是global对象</li>
+<li>ES5中 顶层对象的属性等价于全局变量</li>
+<li>ES6中var、function声明的全局变量，依然是顶层对象的属性；let、const、class声明的全局变量不属于顶层对象的属性</li>
+</ul>
+<h3 id="t379.3.3 题目">9.3.3 题目 <a href="#t379.3.3 题目"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Strict_mode">Strict_mode</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-meta">'use strict'</span> 
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+<span class="hljs-built_in">console</span>.log(a);<span class="hljs-comment">//1</span>
+{
+    <span class="hljs-built_in">console</span>.log(a);<span class="hljs-comment">// f 1</span>
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">a</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+    }
+}
+<span class="hljs-built_in">console</span>.log(a);<span class="hljs-comment">// f 1</span>
+</code></pre>
+<h2 id="t3810. this">10. this <a href="#t3810. this"> # </a></h2>
+<ul>
+<li>当前函数的this是在被调用的时候才能确定的</li>
+<li>如果当前的执行上下文处于调用栈的栈顶，这个时候变量对象变成了活动对象，THIS指针才能确定</li>
+</ul>
+<h3 id="t3910.1 全局对象">10.1 全局对象 <a href="#t3910.1 全局对象"> # </a></h3>
+<ul>
+<li>全局对象this指向本身</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> a=<span class="hljs-number">1</span>;<span class="hljs-comment">//声明绑定变量对象，但在全局环境中，变量对象就是全局对象</span>
+<span class="hljs-keyword">this</span>.b=<span class="hljs-number">2</span>;<span class="hljs-comment">//this绑定全局对象</span>
+c=<span class="hljs-number">3</span>;<span class="hljs-comment">//赋值操作 隐式绑定</span>
+</code></pre>
+<h3 id="t4010.1 用点调用">10.1 用点调用 <a href="#t4010.1 用点调用"> # </a></h3>
+<ul>
+<li>在一个函数上下文中，this由函数的调用者提供，由调用函数的方式来决定指向</li>
+<li>如果是函数执行,如果前面有点，那么点前面是谁<code>this</code>就是谁</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {
+    getName(){
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>);
+    }
+};
+obj.getName();
+</code></pre>
+<h3 id="t4110.2 直接调用">10.2 直接调用 <a href="#t4110.2 直接调用"> # </a></h3>
+<ul>
+<li>如果没有,this就是window(严格模式下是undefined),自执行函数中的this一般都是window</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Strict_mode">Strict_mode</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {
+    getName(){
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>);
+    }
+};
+<span class="hljs-keyword">let</span> getName = obj.getName;
+getName();
+</code></pre>
+<h3 id="t4210.3 绑定事件">10.3 绑定事件 <a href="#t4210.3 绑定事件"> # </a></h3>
+<ul>
+<li>给元素绑定事件的时候，绑定的方法中的this一般是元素本身</li>
+</ul>
+<pre><code class="lang-js">container.addEventListener(<span class="hljs-string">'click'</span>,<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>);
+});
+</code></pre>
+<h3 id="t4310.4 箭头函数">10.4 箭头函数 <a href="#t4310.4 箭头函数"> # </a></h3>
+<ul>
+<li>箭头函数没有自己的this</li>
+<li>也没有prototype</li>
+<li>也没有arguments</li>
+<li>无法创建箭头函数的实例</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> fn = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>);
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">arguments</span>);<span class="hljs-comment">//Uncaught ReferenceError: arguments is not defined</span>
+}
+<span class="hljs-built_in">console</span>.log(fn.prototype);<span class="hljs-comment">//undefined</span>
+fn();
+<span class="hljs-keyword">new</span> fn();<span class="hljs-comment">//VM4416:8 Uncaught TypeError: fn is not a constructor</span>
+</code></pre>
+<h3 id="t4410.5 构造函数">10.5 构造函数 <a href="#t4410.5 构造函数"> # </a></h3>
+<ul>
+<li>构造函数中的THIS是当前类的实例</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params"></span>)</span>{
+
+}
+<span class="hljs-keyword">let</span> obj = <span class="hljs-keyword">new</span> fn();
+</code></pre>
+<h3 id="t4510.6  call/apply/bind">10.6  call/apply/bind <a href="#t4510.6  call/apply/bind"> # </a></h3>
+<ul>
+<li>call/apply/bind可以改变函数中this的指向</li>
+<li>第一个参数是改变this指向(非严格模式下，传递null/undefined指向也是window)</li>
+<li>call参数是依次传递，apply是以数组的方式传递</li>
+</ul>
+<pre><code class="lang-js">!<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">proto</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getContext</span>(<span class="hljs-params">context</span>) </span>{
+        context = context || <span class="hljs-built_in">window</span>;
+        <span class="hljs-keyword">var</span> type = <span class="hljs-keyword">typeof</span> context;
+        <span class="hljs-keyword">if</span> ([<span class="hljs-string">'number'</span>, <span class="hljs-string">'string'</span>, <span class="hljs-string">'boolean'</span>, <span class="hljs-string">'null'</span>].includes(type)) {
+            context = <span class="hljs-keyword">new</span> context.constructor(context);
+        }
+        <span class="hljs-keyword">return</span> context;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">call</span>(<span class="hljs-params">context, ...args</span>) </span>{
+        context = getContext(context);
+        context._fn = <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">let</span> result = context._fn(...args);
+        <span class="hljs-keyword">delete</span> context._fn;
+        <span class="hljs-keyword">return</span> result;
+    }
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">apply</span>(<span class="hljs-params">context, args</span>) </span>{
+        context = getContext(context);
+        context._fn = <span class="hljs-keyword">this</span>;
+        <span class="hljs-keyword">let</span> result = context._fn(...args);
+        <span class="hljs-keyword">delete</span> context._fn;
+        <span class="hljs-keyword">return</span> result;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bind</span>(<span class="hljs-params">context, ...bindArgs</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(context, ...bindArgs, ...args);
+    }
+    proto.call = call;
+    proto.apply = apply;
+    proto.bind = bind;
+}(<span class="hljs-built_in">Function</span>.prototype)
+</code></pre>
+<h2 id="t4611. 面向对象">11. 面向对象 <a href="#t4611. 面向对象"> # </a></h2>
+<ul>
+<li>对象为无序属性的集合，其属性可以包含基本值、对象和函数</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Inheritance_and_the_prototype_chain">Inheritance_and_the_prototype_chain</a></li>
+</ul>
+<h3 id="t4711.1 原型链">11.1 原型链 <a href="#t4711.1 原型链"> # </a></h3>
+<ul>
+<li><a href="http://www.ibm.com/developerworks/cn/web/1306_jiangjj_jsinstanceof/figure1.jpg">jsinstanceof</a></li>
+</ul>
+<h4 id="t4811.1.1 一切皆对象">11.1.1 一切皆对象 <a href="#t4811.1.1 一切皆对象"> # </a></h4>
+<ul>
+<li>对象就是一些属性的集合</li>
+<li>方法也是一种属性</li>
+<li>一切（引用类型）都是对象，对象是属性的集合</li>
+<li>函数和数组也是对象</li>
+<li>为什么 <code>typeof function='function'</code></li>
+</ul>
+<h4 id="t4911.1.1.1 typeof">11.1.1.1 typeof <a href="#t4911.1.1.1 typeof"> # </a></h4>
+<ul>
+<li>检测数据类型 <code>typeof</code>返回的都是字符串</li>
+<li>基本数据类型 number  string boolean undefined symbol</li>
+<li>引用类型 null {} [] /&amp;$/ Date =&gt;  object</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> a);    <span class="hljs-comment">// undefined</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-number">1</span>);   <span class="hljs-comment">// number</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-string">'zhufeng'</span>); <span class="hljs-comment">// string</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-literal">true</span>);  <span class="hljs-comment">// boolean</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">'a'</span>));  <span class="hljs-comment">// symbol</span>
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{ });  <span class="hljs-comment">//function</span>
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]);  <span class="hljs-comment">//object</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> { <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> });  <span class="hljs-comment">//object</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-literal">null</span>);  <span class="hljs-comment">//object</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">typeof</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Number</span>(<span class="hljs-number">1</span>));  <span class="hljs-comment">//object</span>
+</code></pre>
+<h4 id="t5011.1.2 函数">11.1.2 函数 <a href="#t5011.1.2 函数"> # </a></h4>
+<ul>
+<li>对象是通过函数创建的</li>
+<li>批量生产对象的函数<code>Object</code></li>
+<li>实现私有和公有属性的封装</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Object</span>();
+obj.name=<span class="hljs-string">'zhufeng'</span>;
+obj.age = <span class="hljs-number">10</span>;
+</code></pre>
+<h4 id="t5111.1.3 隐式原型">11.1.3 隐式原型 <a href="#t5111.1.3 隐式原型"> # </a></h4>
+<h5 id="t5211.1.3.1 proto">11.1.3.1 proto <a href="#t5211.1.3.1 proto"> # </a></h5>
+<ul>
+<li>每个对象都有一个<strong>proto</strong>属性，指向创建该对象的函数的prototype</li>
+<li>Object.prototype<code>__proto__</code>指向的是<code>null</code></li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/objectprototype.png" alt="objectprototype"></p>
+<p><img src="http://img.zhufengpeixun.cn/object_prototypes.png" alt="object_prototypes"></p>
+<h5 id="t5311.1.3.2 自定义函数的prototype">11.1.3.2 自定义函数的prototype <a href="#t5311.1.3.2 自定义函数的prototype"> # </a></h5>
+<ul>
+<li>自定义函数的<code>prototype</code>的<strong>proto</strong>指向的就是Object.prototype</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/customefuntionprototype.png" alt="customefuntionprototype"></p>
+<h5 id="t5411.1.3.3 自定义函数">11.1.3.3 自定义函数 <a href="#t5411.1.3.3 自定义函数"> # </a></h5>
+<ul>
+<li>自定义函数Foo.<strong>proto</strong>指向Function.prototype</li>
+<li>Function的prototype和<strong>proto</strong>都指向<code>Function.prototype</code></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> add = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Function</span>(<span class="hljs-string">'a'</span>,<span class="hljs-string">'b'</span>,<span class="hljs-string">'return a+b'</span>);
+<span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>));
+</code></pre>
+<p><img src="http://img.zhufengpeixun.cn/2functionprotype.png" alt="2functionprotype"></p>
+<p><img src="http://img.zhufengpeixun.cn/3functionprotype.png" alt="3functionprotype"></p>
+<h4 id="t5511.1.4 instanceof">11.1.4 instanceof <a href="#t5511.1.4 instanceof"> # </a></h4>
+<ul>
+<li>instanceof运算符的第一个参数是一个对象，第二个参数一般是一个函数</li>
+<li>instanceof的判断规则是: 沿着对象的<code>__proto__</code>这条链来向上查找找,如果能找到函数的prototype则返回true,否则 返回false</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/prototypechain.jpg" alt="prototypechain"></p>
+<h3 id="t5611.2 批量创建对象">11.2 批量创建对象 <a href="#t5611.2 批量创建对象"> # </a></h3>
+<ul>
+<li>通过<code>new</code>来调用一个函数，这个函数就成为了构造函数,构造函数里可以对例对象的私有属性赋值</li>
+<li>每个函数会有一个<code>prototype</code>属性，此原型对象上存放所有实例的公有方法</li>
+<li>若new的构造函数自己返回引用值，则以自己返回的为主，否则 返回创建的实例</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/create">create</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Person</span>(<span class="hljs-params">name</span>) </span>{
+    <span class="hljs-keyword">this</span>.name = name;
+}
+Person.prototype.getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+}
+<span class="hljs-keyword">let</span> person = <span class="hljs-keyword">new</span> Person(<span class="hljs-string">'zhufeng'</span>);
+person.getName();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-built_in">Object</span>.create = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">proto</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">F</span>(<span class="hljs-params"></span>) </span>{}
+    F.prototype = proto;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> F();
+};
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_new</span>(<span class="hljs-params">clazz, ...args</span>) </span>{
+    <span class="hljs-keyword">let</span> _this = <span class="hljs-built_in">Object</span>.create(clazz.prototype);
+    <span class="hljs-keyword">let</span> result = clazz.call(_this, ...args);
+    <span class="hljs-keyword">if</span> ((result != <span class="hljs-literal">null</span> &amp;&amp; <span class="hljs-keyword">typeof</span> result === <span class="hljs-string">'object'</span>) || <span class="hljs-keyword">typeof</span> result === <span class="hljs-string">'function'</span>) {
+        <span class="hljs-keyword">return</span> result;
+    }
+    <span class="hljs-keyword">return</span> _this;
+}
+</code></pre>
+<h3 id="t5711.3  继承">11.3  继承 <a href="#t5711.3  继承"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Father</span> </span>{
+    <span class="hljs-keyword">static</span> staticFatherName = <span class="hljs-string">"FatherName"</span>
+    <span class="hljs-keyword">static</span> staticGetFatherName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(Father.staticFatherName);
+    }
+    <span class="hljs-keyword">constructor</span>(public name) {
+        <span class="hljs-keyword">this</span>.name = name;
+    }
+    getName() {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+    }
+}
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Child</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Father</span> </span>{
+    <span class="hljs-keyword">static</span> staticChildName = <span class="hljs-string">"ChildName"</span>
+    <span class="hljs-keyword">static</span> staticGetChildName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(Child.staticChildName);
+    }
+    <span class="hljs-keyword">constructor</span>(public name, public age) {
+        <span class="hljs-keyword">super</span>(name);
+        <span class="hljs-keyword">this</span>.age = age;
+    }
+    getAge() {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.age);
+    }
+}
+<span class="hljs-keyword">let</span> child = <span class="hljs-keyword">new</span> Child(<span class="hljs-string">'zhufeng'</span>, <span class="hljs-number">10</span>);
+child.getName();
+child.getAge();
+Child.staticGetFatherName();
+Child.staticGetChildName();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> _extends = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> extendStatics = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">Child, Father</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.setPrototypeOf(Child, Father);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">Child, Father</span>) </span>{
+        extendStatics(Child, Father);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Temp</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">this</span>.constructor = Child;
+        }
+        Temp.prototype = Father.prototype;
+        Child.prototype = <span class="hljs-keyword">new</span> Temp();
+    };
+})();
+
+<span class="hljs-keyword">var</span> Father = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Father</span>(<span class="hljs-params">name</span>) </span>{
+        <span class="hljs-keyword">this</span>.name = name;
+    }
+    Father.prototype.getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+    };
+    Father.staticFatherName = <span class="hljs-string">"FatherName"</span>;
+    Father.staticGetFatherName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(Father.staticFatherName);
+    };
+    <span class="hljs-keyword">return</span> Father;
+}());
+<span class="hljs-comment">//_super父类构造函数</span>
+<span class="hljs-keyword">var</span> Child = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_super</span>) </span>{
+    _extends(Child, _super);
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Child</span>(<span class="hljs-params">name, age</span>) </span>{
+        _super.call(<span class="hljs-keyword">this</span>, name);<span class="hljs-comment">//继承父类的实例私有属性</span>
+        <span class="hljs-keyword">this</span>.age = age;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+    Child.prototype.getAge = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.age);
+    };
+    Child.staticChildName = <span class="hljs-string">"ChildName"</span>;
+    Child.staticGetChildName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(Child.staticChildName);
+    };
+    <span class="hljs-keyword">return</span> Child;
+}(Father));
+
+<span class="hljs-keyword">let</span> child = <span class="hljs-keyword">new</span> Child(<span class="hljs-string">'zhufeng'</span>, <span class="hljs-number">10</span>);
+<span class="hljs-built_in">console</span>.log(child);
+
+child.getName();
+child.getAge();
+Child.staticGetFatherName();
+Child.staticGetChildName();
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> __extends = (<span class="hljs-keyword">this</span> &amp;&amp; <span class="hljs-keyword">this</span>.__extends) || (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> extendStatics = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, b</span>) </span>{
+        extendStatics = <span class="hljs-built_in">Object</span>.setPrototypeOf ||
+            ({ <span class="hljs-attr">__proto__</span>: [] } <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Array</span> &amp;&amp; <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, b</span>) </span>{ d.__proto__ = b; }) ||
+            <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, b</span>) </span>{ <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> p <span class="hljs-keyword">in</span> b) <span class="hljs-keyword">if</span> (b.hasOwnProperty(p)) d[p] = b[p]; };
+        <span class="hljs-keyword">return</span> extendStatics(d, b);
+    };
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">d, b</span>) </span>{
+        extendStatics(d, b);
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">this</span>.constructor = d; }
+        d.prototype = b === <span class="hljs-literal">null</span> ? <span class="hljs-built_in">Object</span>.create(b) : (__.prototype = b.prototype, <span class="hljs-keyword">new</span> __());
+    };
+})();
+<span class="hljs-keyword">var</span> Father = <span class="hljs-comment">/** @class */</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Father</span>(<span class="hljs-params">name</span>) </span>{
+        <span class="hljs-keyword">this</span>.name = name;
+        <span class="hljs-keyword">this</span>.name = name;
+    }
+    Father.prototype.getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.name);
+    };
+    Father.staticFatherName = <span class="hljs-string">"FatherName"</span>;
+    Father.staticGetFatherName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(Father.staticFatherName);
+    };
+    <span class="hljs-keyword">return</span> Father;
+}());
+<span class="hljs-keyword">var</span> Child = <span class="hljs-comment">/** @class */</span> (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_super</span>) </span>{
+    __extends(Child, _super);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Child</span>(<span class="hljs-params">name, age</span>) </span>{
+        <span class="hljs-keyword">var</span> _this = _super.call(<span class="hljs-keyword">this</span>, name) || <span class="hljs-keyword">this</span>;
+        _this.name = name;
+        _this.age = age;
+        _this.age = age;
+        <span class="hljs-keyword">return</span> _this;
+    }
+    Child.prototype.getAge = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">this</span>.age);
+    };
+    Child.staticChildName = <span class="hljs-string">"ChildName"</span>;
+    Child.staticGetChildName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-built_in">console</span>.log(Child.staticChildName);
+    };
+    <span class="hljs-keyword">return</span> Child;
+}(Father));
+<span class="hljs-keyword">var</span> child = <span class="hljs-keyword">new</span> Child(<span class="hljs-string">'zhufeng'</span>, <span class="hljs-number">10</span>);
+child.getName();
+child.getAge();
+Child.staticGetFatherName();
+Child.staticGetChildName();
+</code></pre>
+<h4 id="t5811.3.6 原型链面试题">11.3.6 原型链面试题 <a href="#t5811.3.6 原型链面试题"> # </a></h4>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_Precedence">Operator_Precedence</a><pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Foo</span>(<span class="hljs-params"></span>) </span>{
+  getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+}
+Foo.getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+}
+Foo.prototype.getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+}
+<span class="hljs-keyword">var</span> getName = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">4</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getName</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-number">5</span>);
+}
+Foo.getName();
+getName();
+Foo().getName();
+getName();<span class="hljs-comment">//1</span>
+<span class="hljs-keyword">new</span> Foo.getName();
+<span class="hljs-keyword">new</span> Foo().getName();
+<span class="hljs-keyword">new</span> <span class="hljs-keyword">new</span> Foo().getName();
+<span class="hljs-comment">// 2 4 1 1 2 3 3</span>
+</code></pre>
+</li>
+</ul>
+<h4 id="t5911.3.7 异步面试题">11.3.7 异步面试题 <a href="#t5911.3.7 异步面试题"> # </a></h4>
+<pre><code class="lang-js"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">async1</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'async1 start'</span>)
+    <span class="hljs-keyword">await</span> async2()
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'async1 end'</span>)
+}
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">async2</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'async2'</span>)
+}
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'script start'</span>)
+setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setTimeout'</span>)
+})
+async1()
+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise1'</span>)
+    resolve()
+}).then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'promise2'</span>)
+})
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'script end'</span>)
+</code></pre>
+<pre><code class="lang-js">script start
+async1 start
+async2
+promise1
+script end
+async1 end
+promise2
+setTimeout
+</code></pre>
+<h2 id="t6012. ES6">12. ES6 <a href="#t6012. ES6"> # </a></h2>
+<ul>
+<li>词法环境VS静态作用域</li>
+<li>变量环境(variableEnvironment)和词法环境(Lexical Environment)</li>
+<li>闭包</li>
+</ul>
+<h3 id="t6112.1 词法环境">12.1 词法环境 <a href="#t6112.1 词法环境"> # </a></h3>
+<ul>
+<li>let 原理</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> b = <span class="hljs-number">2</span>;
+    {
+        <span class="hljs-keyword">let</span> b = <span class="hljs-number">3</span>;
+        <span class="hljs-keyword">var</span> c = <span class="hljs-number">4</span>;
+        <span class="hljs-keyword">let</span> d = <span class="hljs-number">5</span>;
+        <span class="hljs-comment">//console.log(a, b, c, d);//TODO</span>
+    }
+    {
+        <span class="hljs-keyword">let</span> b = <span class="hljs-number">6</span>;
+        <span class="hljs-keyword">let</span> d = <span class="hljs-number">7</span>;
+        <span class="hljs-comment">//console.log(a, b, c, d);</span>
+    }
+}
+fn();
+
+<span class="hljs-comment">/**
+ * 1.global编译阶段
+ */</span>
+
+<span class="hljs-keyword">let</span> globalEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: <span class="hljs-literal">null</span>,<span class="hljs-comment">//外部的执行上下文,词法作用域就是静态作用域，就是指作用域是由代码中函数声明的位置来决定的</span>
+    <span class="hljs-attr">variableEnvironment</span>: {
+        fn() { <span class="hljs-built_in">console</span>.log(a, b, c, d) }
+    },
+    <span class="hljs-attr">lexicalEnvironment</span>: {}
+}
+
+
+<span class="hljs-comment">/**
+ * 2.fn编译阶段
+ */</span>
+<span class="hljs-keyword">let</span> fnEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: globalEC,
+    <span class="hljs-attr">variableEnvironment</span>: { <span class="hljs-attr">a</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">c</span>: <span class="hljs-literal">undefined</span> },
+    <span class="hljs-attr">lexicalEnvironment</span>: [{ <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span> }]
+}
+<span class="hljs-comment">/**
+ * 3.编译代码块1
+ */</span>
+fnEC.variableEnvironment.a = <span class="hljs-number">1</span>;
+fnEC.lexicalEnvironment.b = <span class="hljs-number">2</span>;
+fnEC.lexicalEnvironment.push({
+    <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">d</span>: <span class="hljs-literal">undefined</span>
+});
+<span class="hljs-comment">/**
+ * 4.执行代码块1
+ */</span>
+
+fnEC.lexicalEnvironment[<span class="hljs-number">1</span>].b = <span class="hljs-number">3</span>;
+fnEC.variableEnvironment.c = <span class="hljs-number">4</span>;
+fnEC.lexicalEnvironment[<span class="hljs-number">1</span>].d = <span class="hljs-number">5</span>;
+
+<span class="hljs-built_in">console</span>.log(getValue(<span class="hljs-string">'a'</span>, fnEC), getValue(<span class="hljs-string">'b'</span>, fnEC), getValue(<span class="hljs-string">'c'</span>, fnEC), getValue(<span class="hljs-string">'d'</span>, fnEC));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getValue</span>(<span class="hljs-params">name, ec</span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = ec.lexicalEnvironment.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {
+        <span class="hljs-keyword">if</span> (name <span class="hljs-keyword">in</span> ec.lexicalEnvironment[i]) {
+            <span class="hljs-keyword">return</span> ec.lexicalEnvironment[i][name];
+        }
+    }
+    <span class="hljs-keyword">let</span> currentVariableEnvironment = ec.variableEnvironment;
+    <span class="hljs-keyword">while</span> (currentVariableEnvironment) {
+        <span class="hljs-keyword">if</span> (name <span class="hljs-keyword">in</span> currentVariableEnvironment) {
+            <span class="hljs-keyword">return</span> currentVariableEnvironment[name];
+        }
+        currentVariableEnvironment = currentVariableEnvironment.outer;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+}
+
+<span class="hljs-comment">/**
+ * 5.编译代码块2
+ */</span>
+fnEC.lexicalEnvironment.pop();
+fnEC.lexicalEnvironment.push({
+    <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">d</span>: <span class="hljs-literal">undefined</span>
+});
+<span class="hljs-comment">/**
+ * 5.执行代码块2
+ */</span>
+fnEC.lexicalEnvironment[<span class="hljs-number">1</span>].b = <span class="hljs-number">6</span>;
+fnEC.lexicalEnvironment[<span class="hljs-number">1</span>].d = <span class="hljs-number">7</span>;
+<span class="hljs-built_in">console</span>.log(getValue(<span class="hljs-string">'a'</span>, fnEC), getValue(<span class="hljs-string">'b'</span>, fnEC), getValue(<span class="hljs-string">'c'</span>, fnEC), getValue(<span class="hljs-string">'d'</span>, fnEC));
+</code></pre>
+<h3 id="t6212.2 静态作用域">12.2 静态作用域 <a href="#t6212.2 静态作用域"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-comment">/* let name = 'zhufeng'
+{
+    //ReferenceError: Cannot access 'name' before initialization
+    console.log(name)
+    let name = 'jiagou'
+} */</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(a);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">2</span>;
+    two();
+}
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+one();
+
+<span class="hljs-keyword">let</span> globalEC = {
+    <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+    one() { },
+    two() { }
+}
+<span class="hljs-keyword">let</span> twoEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: globalEC,
+    <span class="hljs-attr">variableEnvironment</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, two() { <span class="hljs-built_in">console</span>.log(a) } } <span class="hljs-comment">//出生的地方</span>
+}
+<span class="hljs-keyword">var</span> twoEc = { <span class="hljs-attr">outer</span>: globalEC };
+<span class="hljs-built_in">console</span>.log(twoEC.outer.a);
+</code></pre>
+<h3 id="t6312.3 闭包">12.3 闭包 <a href="#t6312.3 闭包"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">one</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">var</span> name = <span class="hljs-string">'one'</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">two</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">var</span> b = <span class="hljs-number">2</span>;
+        <span class="hljs-keyword">var</span> name = <span class="hljs-string">'two'</span>;
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">three</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">var</span> c = <span class="hljs-number">3</span>;
+            <span class="hljs-keyword">var</span> name = <span class="hljs-string">'three'</span>;
+            <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(a, b, c);
+
+        }
+        <span class="hljs-keyword">return</span> three();
+    }
+    <span class="hljs-keyword">return</span> two();
+}
+<span class="hljs-keyword">var</span> fn = one();
+fn();
+<span class="hljs-keyword">let</span> globalEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">variableEnvironment</span>: { one() { } }
+}
+<span class="hljs-keyword">let</span> oneEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: globalEC.variableEnvironment,
+    <span class="hljs-attr">variableEnvironment</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, two() { }, <span class="hljs-attr">name</span>: <span class="hljs-string">'one'</span> }
+}
+<span class="hljs-keyword">let</span> twoEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: oneEC.variableEnvironment,
+    <span class="hljs-attr">variableEnvironment</span>: { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, three() { }, <span class="hljs-attr">name</span>: <span class="hljs-string">'two'</span> }
+}
+<span class="hljs-keyword">let</span> threeEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: twoEC.variableEnvironment,
+    <span class="hljs-attr">variableEnvironment</span>: { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">'three'</span> }
+}
+<span class="hljs-keyword">let</span> fnEC = {
+    <span class="hljs-attr">this</span>: globalThis,
+    <span class="hljs-attr">outer</span>: globalEC,
+    <span class="hljs-comment">//Closure(three) Closure(two) Closure(one)</span>
+    <span class="hljs-attr">closures</span>: [{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }],
+    <span class="hljs-attr">variableEnvironment</span>: { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }
+}
+<span class="hljs-built_in">console</span>.log(getValue(<span class="hljs-string">'a'</span>, fnEC), getValue(<span class="hljs-string">'b'</span>, fnEC), getValue(<span class="hljs-string">'c'</span>, fnEC));
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getValue</span>(<span class="hljs-params">name, ec</span>) </span>{
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = ec.closures.length - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {
+        <span class="hljs-keyword">if</span> (name <span class="hljs-keyword">in</span> ec.closures[i]) {
+            <span class="hljs-keyword">return</span> ec.closures[i][name];
+        }
+    }
+    <span class="hljs-keyword">let</span> currentVariableEnvironment = ec.variableEnvironment;
+    <span class="hljs-keyword">while</span> (currentVariableEnvironment) {
+        <span class="hljs-keyword">if</span> (name <span class="hljs-keyword">in</span> currentVariableEnvironment) {
+            <span class="hljs-keyword">return</span> currentVariableEnvironment[name];
+        }
+        currentVariableEnvironment = currentVariableEnvironment.outer;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+}
+</code></pre>
+
+    

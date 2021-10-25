@@ -1,0 +1,355 @@
+
+        <h2 id="t01.create-react-app工作流">1.create-react-app工作流 <a href="#t01.create-react-app工作流"> # </a></h2>
+<pre><code class="lang-js">create-react-app react-project
+
+Creating a <span class="hljs-keyword">new</span> React app <span class="hljs-keyword">in</span> C:\aprepare\react-project.
+Installing packages. This might take a couple <span class="hljs-keyword">of</span> minutes.
+Installing react, react-dom, and react-scripts <span class="hljs-keyword">with</span> cra-template...
+yarn add v1<span class="hljs-number">.22</span><span class="hljs-number">.10</span>
+info No lockfile found.
+[<span class="hljs-number">1</span>/<span class="hljs-number">4</span>] Resolving packages...
+[<span class="hljs-number">2</span>/<span class="hljs-number">4</span>] Fetching packages...
+[<span class="hljs-number">3</span>/<span class="hljs-number">4</span>] Linking dependencies...
+[<span class="hljs-number">4</span>/<span class="hljs-number">4</span>] Building fresh packages...
+success Saved lockfile.
+success Saved <span class="hljs-number">881</span> <span class="hljs-keyword">new</span> dependencies.
+Done <span class="hljs-keyword">in</span> <span class="hljs-number">49.71</span>s.
+Removing template package using yarnpkg...
+yarn remove v1<span class="hljs-number">.22</span><span class="hljs-number">.10</span>
+[<span class="hljs-number">1</span>/<span class="hljs-number">2</span>] Removing <span class="hljs-built_in">module</span> cra-template...
+[<span class="hljs-number">2</span>/<span class="hljs-number">2</span>] Regenerating lockfile and installing missing dependencies...
+success Uninstalled packages.
+Done <span class="hljs-keyword">in</span> <span class="hljs-number">10.19</span>s.
+Created git commit.
+Success! Created react-project at C:\aprepare\react-project
+Inside that directory, you can run several commands:
+  yarn start
+    Starts the development server.
+  yarn build
+    Bundles the app into <span class="hljs-keyword">static</span> files <span class="hljs-keyword">for</span> production.    
+</code></pre>
+<h2 id="t12.初始化react-scripts2">2.初始化react-scripts2 <a href="#t12.初始化react-scripts2"> # </a></h2>
+<h3 id="t22.1 安装依赖">2.1 安装依赖 <a href="#t22.1 安装依赖"> # </a></h3>
+<pre><code class="lang-js">mkdir react-scripts2
+cd react-scripts2
+npm init -y
+yarn add react react-dom
+yarn add cross-spawn fs-extra chalk webpack webpack-dev-server babel-loader babel-preset-react-app html-webpack-plugin  open
+</code></pre>
+<h3 id="t32.2 package.json">2.2 package.json <a href="#t32.2 package.json"> # </a></h3>
+<pre><code class="lang-json">  "scripts": {
+    "build": "node ./bin/react-scripts2 build",
+    "start": "node ./bin/react-scripts2 start"
+  },
+  "bin": {
+    "react-scripts2": "./bin/react-scripts2"
+  },
+</code></pre>
+<h3 id="t42.3 执行命令">2.3 执行命令 <a href="#t42.3 执行命令"> # </a></h3>
+<pre><code class="lang-js">npm run build
+npm run start
+</code></pre>
+<h2 id="t53.实现build命令">3.实现build命令 <a href="#t53.实现build命令"> # </a></h2>
+<ul>
+<li>1.设置<code>process.env.NODE_ENV = 'production';</code></li>
+<li>2.获取<code>webpack配置</code>文件</li>
+<li>3.清空<code>build</code>目录</li>
+<li>4.拷贝<code>public</code>目录下的文件到<code>build</code>目录</li>
+<li>5.创建<code>compiler</code>并调用<code>run</code>方法进行编译</li>
+</ul>
+<h3 id="t63.1 bin\react-scripts2.js">3.1 bin\react-scripts2.js <a href="#t63.1 bin\react-scripts2.js"> # </a></h3>
+<p>bin\react-scripts2.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> spawn = <span class="hljs-built_in">require</span>(<span class="hljs-string">'cross-spawn'</span>);
+<span class="hljs-keyword">const</span> args = process.argv.slice(<span class="hljs-number">2</span>);
+<span class="hljs-keyword">const</span> script = args[<span class="hljs-number">0</span>];
+spawn.sync(
+    process.execPath,
+    [<span class="hljs-built_in">require</span>.resolve(<span class="hljs-string">'../scripts/'</span> + script)],
+    { <span class="hljs-attr">stdio</span>: <span class="hljs-string">'inherit'</span> }
+);
+</code></pre>
+<h3 id="t73.2 scripts\build.js">3.2 scripts\build.js <a href="#t73.2 scripts\build.js"> # </a></h3>
+<p>scripts\build.js</p>
+<pre><code class="lang-js">process.env.NODE_ENV = <span class="hljs-string">'production'</span>;
+<span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs-extra'</span>);
+<span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);
+<span class="hljs-keyword">const</span> configFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config/webpack.config'</span>);
+<span class="hljs-keyword">const</span> paths = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config/paths'</span>);
+<span class="hljs-keyword">const</span> config = configFactory(<span class="hljs-string">'production'</span>);
+
+fs.emptyDirSync(paths.appBuild);
+copyPublicFolder();
+build();
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">build</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> compiler = webpack(config);
+    compiler.run(<span class="hljs-function">(<span class="hljs-params">err, stats</span>) =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(err);
+        <span class="hljs-built_in">console</span>.log(chalk.green(<span class="hljs-string">'Compiled successfully.\n'</span>));
+    })
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">copyPublicFolder</span>(<span class="hljs-params"></span>) </span>{
+    fs.copySync(paths.appPublic, paths.appBuild, {
+      <span class="hljs-attr">filter</span>: <span class="hljs-function"><span class="hljs-params">file</span> =&gt;</span> file !== paths.appHtml,
+    });
+}
+</code></pre>
+<h3 id="t83.3 config\paths.js">3.3 config\paths.js <a href="#t83.3 config\paths.js"> # </a></h3>
+<p>config\paths.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> appDirectory = process.cwd();
+<span class="hljs-keyword">const</span> resolveApp = <span class="hljs-function"><span class="hljs-params">relativePath</span> =&gt;</span> path.resolve(appDirectory, relativePath);
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">appHtml</span>: resolveApp(<span class="hljs-string">'public/index.html'</span>),
+    <span class="hljs-attr">appIndexJs</span>:resolveApp(<span class="hljs-string">'src/index.js'</span>),
+    <span class="hljs-attr">appBuild</span>: resolveApp(<span class="hljs-string">'build'</span>),
+    <span class="hljs-attr">appPublic</span>: resolveApp(<span class="hljs-string">'public'</span>)
+}
+</code></pre>
+<h3 id="t93.4 config\webpack.config.js">3.4 config\webpack.config.js <a href="#t93.4 config\webpack.config.js"> # </a></h3>
+<p>config\webpack.config.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> paths = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config/paths'</span>);
+<span class="hljs-keyword">const</span> HtmlWebpackPlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">'html-webpack-plugin'</span>);
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">webpackEnv</span>) </span>{
+    <span class="hljs-keyword">const</span> isEnvDevelopment = webpackEnv === <span class="hljs-string">'development'</span>;
+    <span class="hljs-keyword">const</span> isEnvProduction = webpackEnv === <span class="hljs-string">'production'</span>;
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">mode</span>: isEnvProduction ? <span class="hljs-string">'production'</span> : isEnvDevelopment &amp;&amp; <span class="hljs-string">'development'</span>,
+        <span class="hljs-attr">output</span>: {
+            <span class="hljs-attr">path</span>: paths.appBuild
+        },
+        <span class="hljs-attr">module</span>:{
+            <span class="hljs-attr">rules</span>:[
+                {
+                    <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.(js|jsx|ts|tsx)$/</span>,
+                    <span class="hljs-attr">include</span>: paths.appSrc,
+                    <span class="hljs-attr">loader</span>: <span class="hljs-built_in">require</span>.resolve(<span class="hljs-string">'babel-loader'</span>),
+                    <span class="hljs-attr">options</span>: {
+                      <span class="hljs-attr">presets</span>: [
+                        [
+                          <span class="hljs-built_in">require</span>.resolve(<span class="hljs-string">'babel-preset-react-app'</span>)
+                        ]
+                      ]
+                    }
+                  },
+            ]
+        },
+        <span class="hljs-attr">plugins</span>:[
+            <span class="hljs-keyword">new</span> HtmlWebpackPlugin({
+                <span class="hljs-attr">inject</span>: <span class="hljs-literal">true</span>,
+                <span class="hljs-attr">template</span>: paths.appHtml
+            })
+        ]
+    }
+}
+</code></pre>
+<h3 id="t103.5 src\index.js">3.5 src\index.js <a href="#t103.5 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>hello<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>,<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t113.6 public\index.html">3.6 public\index.html <a href="#t113.6 public\index.html"> # </a></h3>
+<p>public\index.html</p>
+<pre><code class="lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"UTF-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>react<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+<h2 id="t124.实现start命令">4.实现start命令 <a href="#t124.实现start命令"> # </a></h2>
+<h3 id="t134.1 scripts\start.js">4.1 scripts\start.js <a href="#t134.1 scripts\start.js"> # </a></h3>
+<p>scripts\start.js</p>
+<pre><code class="lang-js">process.env.NODE_ENV = <span class="hljs-string">'development'</span>;
+<span class="hljs-keyword">const</span> configFactory = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config/webpack.config'</span>);
+<span class="hljs-keyword">const</span> createDevServerConfig = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../config/webpackDevServer.config'</span>);
+<span class="hljs-keyword">const</span> WebpackDevServer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack-dev-server'</span>);
+<span class="hljs-keyword">const</span> DEFAULT_PORT = <span class="hljs-built_in">parseInt</span>(process.env.PORT, <span class="hljs-number">10</span>) || <span class="hljs-number">3000</span>;
+<span class="hljs-keyword">const</span> HOST = process.env.HOST || <span class="hljs-string">'0.0.0.0'</span>;
+<span class="hljs-keyword">const</span> config = configFactory(<span class="hljs-string">'development'</span>);
+<span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);
+<span class="hljs-keyword">const</span> chalk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chalk'</span>);
+<span class="hljs-keyword">const</span> compiler = createCompiler({ config, webpack });
+<span class="hljs-keyword">const</span> serverConfig = createDevServerConfig();
+<span class="hljs-keyword">const</span> devServer = <span class="hljs-keyword">new</span> WebpackDevServer(compiler, serverConfig);
+devServer.listen(DEFAULT_PORT, HOST, err =&gt; {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">console</span>.log(err);
+    }
+    <span class="hljs-built_in">console</span>.log(chalk.cyan(<span class="hljs-string">'Starting the development server...\n'</span>));
+});
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createCompiler</span>(<span class="hljs-params">{ config, webpack }</span>) </span>{
+    <span class="hljs-keyword">let</span> compiler = webpack(config);
+    <span class="hljs-keyword">return</span> compiler;
+}
+</code></pre>
+<h3 id="t144.2 config\webpackDevServer.config.js">4.2 config\webpackDevServer.config.js <a href="#t144.2 config\webpackDevServer.config.js"> # </a></h3>
+<p>config\webpackDevServer.config.js</p>
+<pre><code class="lang-js"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">hot</span>: <span class="hljs-literal">true</span>
+    }
+};
+</code></pre>
+<h2 id="t155.知识">5.知识 <a href="#t155.知识"> # </a></h2>
+<h3 id="t165.1 dotenv">5.1 dotenv <a href="#t165.1 dotenv"> # </a></h3>
+<ul>
+<li>使用dotenv，只需要将程序的环境变量配置写在<code>.env</code>文件中</li>
+</ul>
+<p>.env</p>
+<pre><code class="lang-js">MONGODB_HOST=localhost
+MONGODB_PORT=<span class="hljs-number">27017</span>
+MONGODB_DB=test
+MONGODB_URI=mongodb:<span class="hljs-comment">//${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> dotenvFile = <span class="hljs-string">'.env'</span>;
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'dotenv-expand'</span>)(
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">'dotenv'</span>).config({
+        <span class="hljs-attr">path</span>: dotenvFile,
+    })
+);
+<span class="hljs-built_in">console</span>.log(process.env.MONGODB_HOST);
+<span class="hljs-built_in">console</span>.log(process.env.MONGODB_PORT);
+<span class="hljs-built_in">console</span>.log(process.env.MONGODB_DB);
+<span class="hljs-built_in">console</span>.log(process.env.MONGODB_URI);
+</code></pre>
+<h3 id="t175.2 NODE_PATH">5.2 NODE_PATH <a href="#t175.2 NODE_PATH"> # </a></h3>
+<ul>
+<li>NODE_PATH 就是NODE中用来寻找模块所提供的路径注册环境变量</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+<span class="hljs-keyword">const</span> appDirectory = fs.realpathSync(process.cwd());
+<span class="hljs-comment">//NODE_PATH folder1;folder2</span>
+process.env.NODE_PATH = [
+    <span class="hljs-string">'./a'</span>,
+    path.resolve(appDirectory, <span class="hljs-string">'b'</span>),
+    <span class="hljs-string">'./c'</span>,
+].join(path.delimiter);
+process.env.NODE_PATH = (process.env.NODE_PATH || <span class="hljs-string">''</span>)
+  .split(path.delimiter)<span class="hljs-comment">//windows ; mac :</span>
+  .filter(<span class="hljs-function"><span class="hljs-params">folder</span> =&gt;</span> folder &amp;&amp; !path.isAbsolute(folder))<span class="hljs-comment">//不是绝对路径的删除</span>
+  .map(<span class="hljs-function"><span class="hljs-params">folder</span> =&gt;</span> path.resolve(appDirectory, folder))<span class="hljs-comment">//只能是相对目录</span>
+  .join(path.delimiter);<span class="hljs-comment">//再连接在一起</span>
+<span class="hljs-built_in">console</span>.log(process.env.NODE_PATH);
+</code></pre>
+<h3 id="t185.3 semver-regex">5.3 semver-regex <a href="#t185.3 semver-regex"> # </a></h3>
+<ul>
+<li>匹配semver版本的正则表达式</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> semverRegex = <span class="hljs-built_in">require</span>(<span class="hljs-string">'semver-regex'</span>);
+<span class="hljs-built_in">console</span>.log(semverRegex().test(<span class="hljs-string">'v1.0.0'</span>));
+<span class="hljs-comment">//=&gt; true</span>
+<span class="hljs-built_in">console</span>.log(semverRegex().test(<span class="hljs-string">'1.2.3-alpha.10.beta.0+build.unicorn.rainbow'</span>));
+<span class="hljs-comment">//=&gt; true</span>
+<span class="hljs-built_in">console</span>.log(semverRegex().exec(<span class="hljs-string">'unicorn 1.0.0 rainbow'</span>)[<span class="hljs-number">0</span>]);
+<span class="hljs-comment">//=&gt; '1.0.0'</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'unicorn 1.0.0 and rainbow 2.1.3'</span>.match(semverRegex()));
+<span class="hljs-comment">//=&gt; ['1.0.0', '2.1.3']</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> semver = <span class="hljs-built_in">require</span>(<span class="hljs-string">'semver'</span>)
+<span class="hljs-built_in">console</span>.log(semver.valid(<span class="hljs-string">'1.2.3'</span>)); <span class="hljs-comment">// '1.2.3'</span>
+<span class="hljs-built_in">console</span>.log(semver.valid(<span class="hljs-string">'a.b.c'</span>)); <span class="hljs-comment">// null</span>
+<span class="hljs-built_in">console</span>.log(semver.clean(<span class="hljs-string">'  =v1.2.3   '</span>)); <span class="hljs-comment">// '1.2.3'</span>
+<span class="hljs-built_in">console</span>.log(semver.satisfies(<span class="hljs-string">'1.2.3'</span>, <span class="hljs-string">'1.x || &gt;=2.5.0 || 5.0.0 - 7.2.3'</span>)); <span class="hljs-comment">// true</span>
+<span class="hljs-built_in">console</span>.log(semver.gt(<span class="hljs-string">'1.2.3'</span>, <span class="hljs-string">'9.8.7'</span>)); <span class="hljs-comment">// false</span>
+<span class="hljs-built_in">console</span>.log(semver.lt(<span class="hljs-string">'1.2.3'</span>, <span class="hljs-string">'9.8.7'</span>)); <span class="hljs-comment">// true</span>
+<span class="hljs-built_in">console</span>.log(semver.valid(semver.coerce(<span class="hljs-string">'v2'</span>))); <span class="hljs-comment">// '2.0.0'</span>
+<span class="hljs-built_in">console</span>.log(semver.valid(semver.coerce(<span class="hljs-string">'42.6.7.9.3-alpha'</span>))); <span class="hljs-comment">// '42.6.7'</span>
+</code></pre>
+<h3 id="t195.4 globby">5.4 globby <a href="#t195.4 globby"> # </a></h3>
+<ul>
+<li><a href="https://github.com/sindresorhus/globby">globby</a>是基于 glob，并进一步得到了增强</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> globby = <span class="hljs-built_in">require</span>(<span class="hljs-string">'globby'</span>);
+<span class="hljs-function">(<span class="hljs-params"><span class="hljs-keyword">async</span> (</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> paths = <span class="hljs-keyword">await</span> globby([<span class="hljs-string">'images'</span>,<span class="hljs-string">'photos'</span>],{
+      <span class="hljs-attr">expandDirectories</span>: <span class="hljs-literal">true</span>
+    });
+    <span class="hljs-built_in">console</span>.log(paths);
+})();
+</code></pre>
+<h3 id="t205.5 globalThis">5.5 globalThis <a href="#t205.5 globalThis"> # </a></h3>
+<ul>
+<li>globalThis提供统一的机制来访问全局对象<ul>
+<li>Web 浏览器 window</li>
+<li>Node.js global</li>
+<li>Web Worker self</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-comment">// 浏览器环境</span>
+<span class="hljs-built_in">console</span>.log(globalThis);    <span class="hljs-comment">// =&gt; Window {...}</span>
+<span class="hljs-comment">// node.js 环境</span>
+<span class="hljs-built_in">console</span>.log(globalThis);    <span class="hljs-comment">// =&gt; Object [global] {...}</span>
+<span class="hljs-comment">// web worker 环境</span>
+<span class="hljs-built_in">console</span>.log(globalThis);    <span class="hljs-comment">// =&gt; DedicatedWorkerGlobalScope {...}</span>
+</code></pre>
+<h3 id="t215.6 bfj">5.6 bfj <a href="#t215.6 bfj"> # </a></h3>
+<ul>
+<li><a href="bfj">bfj</a>Big-Friendly JSON. Asynchronous streaming functions for large JSON data sets.</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> bfj = <span class="hljs-built_in">require</span>(<span class="hljs-string">'bfj'</span>);
+
+bfj.read(<span class="hljs-string">'big.json'</span>)
+  .then(<span class="hljs-function"><span class="hljs-params">data</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(data);
+  })
+  .catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(error)
+  });
+</code></pre>
+<h3 id="t225.7 pnp">5.7 pnp <a href="#t225.7 pnp"> # </a></h3>
+<h4 id="t235.7.1 yarn install">5.7.1 yarn install <a href="#t235.7.1 yarn install"> # </a></h4>
+<ul>
+<li>1.将依赖包的版本区间解析为某个具体的版本号</li>
+<li>2.下载对应版本依赖的 tar 包到本地离线镜像</li>
+<li>3.将依赖从离线镜像解压到本地缓存</li>
+<li>4.将依赖从缓存拷贝到当前目录的 node_modules 目录</li>
+</ul>
+<h4 id="t245.7.2 Pnp">5.7.2 Pnp <a href="#t245.7.2 Pnp"> # </a></h4>
+<ul>
+<li>PnP工作原理是作为把依赖从缓存拷贝到 node_modules 的替代方案</li>
+</ul>
+<h4 id="t255.7.3 使用">5.7.3 使用 <a href="#t255.7.3 使用"> # </a></h4>
+<h5 id="t265.7.3.1 启用">5.7.3.1 启用 <a href="#t265.7.3.1 启用"> # </a></h5>
+<pre><code class="lang-js">#create-react-app 已经集成了对 PnP 的支持。只需在创建项目时添加 --use-pnp 参数
+npx create-react-app react-project --use-pnp 
+# 在已有项目中开启 PnP
+yarn --pnp
+yarn add uuid
+</code></pre>
+<h5 id="t275.7.3.2 package.json">5.7.3.2 package.json <a href="#t275.7.3.2 package.json"> # </a></h5>
+<ul>
+<li>只要 installConfig.pnp 的值是一个真值且当前版本的 Yarn 支持，PnP 特性就会被启用</li>
+</ul>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"installConfig"</span>: {
+    <span class="hljs-attr">"pnp"</span>: <span class="hljs-literal">true</span>
+  }
+}
+</code></pre>
+<h5 id="t285.7.3.3 uuid.js">5.7.3.3 uuid.js <a href="#t285.7.3.3 uuid.js"> # </a></h5>
+<p>uuid.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'uuid'</span>);
+<span class="hljs-built_in">console</span>.log(uuid.v4());
+</code></pre>
+<h5 id="t295.7.3.4 运行">5.7.3.4 运行 <a href="#t295.7.3.4 运行"> # </a></h5>
+<ul>
+<li>由于在开启了 PnP 的项目中不再有 node_modules 目录，所有的依赖引用都必须由 .pnp.js 中的 resolver 处理</li>
+<li>因此不论是执行 script 还是用 node 直接执行一个 JS 文件，都必须经由 Yarn 处理</li>
+</ul>
+<pre><code class="lang-js">yarn run build
+yarn node uuid.js
+</code></pre>
+
+    

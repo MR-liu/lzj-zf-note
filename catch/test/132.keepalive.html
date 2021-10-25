@@ -1,0 +1,497 @@
+
+        <h2 id="t01.初始化项目">1.初始化项目 <a href="#t01.初始化项目"> # </a></h2>
+<pre><code class="lang-js">create-react-app zhufeng-keepalive
+cd zhufeng-keepalive
+npm install react-router-dom keepalive-react-component --save
+npm start
+</code></pre>
+<h2 id="t12.跑通路由">2.跑通路由 <a href="#t12.跑通路由"> # </a></h2>
+<h3 id="t22.1 src\index.js">2.1 src\index.js <a href="#t22.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> { BrowserRouter <span class="hljs-keyword">as</span> Router, Route, Link, Switch } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router-dom'</span>
+<span class="hljs-keyword">import</span> Home <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/Home'</span>;
+<span class="hljs-keyword">import</span> UserList <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/UserList'</span>;
+<span class="hljs-keyword">import</span> UserAdd <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/UserAdd'</span>;
+<span class="hljs-keyword">const</span> App = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Router</span>  &gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/"</span>&gt;</span>首页<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/list"</span>&gt;</span>用户列表<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/add"</span>&gt;</span>添加用户<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Switch</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">{</span>'/'} <span class="hljs-attr">component</span>=<span class="hljs-string">{Home}</span> <span class="hljs-attr">exact</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">{</span>'/<span class="hljs-attr">list</span>'} <span class="hljs-attr">component</span>=<span class="hljs-string">{UserList}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">{</span>'/<span class="hljs-attr">add</span>'} <span class="hljs-attr">component</span>=<span class="hljs-string">{UserAdd}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">Switch</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Router</span>&gt;</span></span>
+  )
+}
+ReactDOM.render(<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span>/&gt;</span></span>, <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>));
+</code></pre>
+<h3 id="t32.2 Home.js">2.2 Home.js <a href="#t32.2 Home.js"> # </a></h3>
+<p>src\components\Home.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">const</span> Home = <span class="hljs-function">(<span class="hljs-params">props</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> &gt;</span>重置UserAdd<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> &gt;</span>重置UserList<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> Home;
+</code></pre>
+<h3 id="t42.3 UserAdd.js">2.3 UserAdd.js <a href="#t42.3 UserAdd.js"> # </a></h3>
+<p>src\components\UserAdd.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">const</span> UserAdd = <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+    <span class="hljs-keyword">let</span> [number,setNumber]=React.useState(<span class="hljs-number">0</span>);
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            用户名:<span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">hr</span>/&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span>=&gt;</span>setNumber(number=&gt;number+1)}&gt;{number}<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserAdd;
+</code></pre>
+<h3 id="t52.4 UserList.js">2.4 UserList.js <a href="#t52.4 UserList.js"> # </a></h3>
+<p>src\components\UserList.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {Link} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-router-dom'</span>
+<span class="hljs-keyword">const</span> UserList = <span class="hljs-function">(<span class="hljs-params">props</span>)=&gt;</span>{
+    <span class="hljs-keyword">let</span> users = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Array</span>(<span class="hljs-number">100</span>).fill(<span class="hljs-number">0</span>);
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">style</span>=<span class="hljs-string">{{height:</span>'<span class="hljs-attr">200px</span>',<span class="hljs-attr">overflow:</span>'<span class="hljs-attr">scroll</span>'}}&gt;</span>
+            {
+                users.map((item,index)=&gt;(
+                    <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Link</span> <span class="hljs-attr">to</span>=<span class="hljs-string">{</span>`/<span class="hljs-attr">detail</span>/${<span class="hljs-attr">index</span>}`}&gt;</span>{index}<span class="hljs-tag">&lt;/<span class="hljs-name">Link</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                ))
+            }
+        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+    )
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> UserList;
+</code></pre>
+<h2 id="t63.实现keep-alive">3.实现keep-alive <a href="#t63.实现keep-alive"> # </a></h2>
+<h3 id="t73.1 src\index.js">3.1 src\index.js <a href="#t73.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import Home from './components/Home';
+import UserList from './components/UserList';
+import UserAdd from './components/UserAdd';
+<span class="hljs-addition">+import { KeepAliveProvider, withKeepAlive } from './keepalive-react-component';</span>
+<span class="hljs-addition">+let KeepAliveHome = withKeepAlive(Home, { cacheId: 'Home'});</span>
+<span class="hljs-addition">+let KeepAliveUserList = withKeepAlive(UserList, { cacheId: 'UserList'});</span>
+<span class="hljs-addition">+let KeepAliveUserAdd = withKeepAlive(UserAdd, { cacheId: 'UserAdd' });</span>
+const App = () =&gt; {
+  return (
+    &lt;Router  &gt;
+<span class="hljs-addition">+     &lt;KeepAliveProvider&gt;</span>
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to="/"&gt;首页&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to="/list"&gt;用户列表&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to="/add"&gt;添加用户&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;Switch&gt;
+<span class="hljs-addition">+          &lt;Route path={'/'} component={KeepAliveHome} exact /&gt;</span>
+<span class="hljs-addition">+          &lt;Route path={'/list'} component={KeepAliveUserList} /&gt;</span>
+<span class="hljs-addition">+          &lt;Route path={'/add'} component={KeepAliveUserAdd} /&gt;</span>
+        &lt;/Switch&gt;
+<span class="hljs-addition">+     &lt;/KeepAliveProvider&gt;</span>
+    &lt;/Router&gt;
+  )
+}
+ReactDOM.render(&lt;App/&gt;, document.getElementById('root'));
+</code></pre>
+<h3 id="t83.2 keepalive-react-component\index.js">3.2 keepalive-react-component\index.js <a href="#t83.2 keepalive-react-component\index.js"> # </a></h3>
+<p>src\keepalive-react-component\index.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> KeepAliveProvider} <span class="hljs-keyword">from</span> <span class="hljs-string">'./KeepAliveProvider'</span>;
+<span class="hljs-keyword">export</span> {<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> withKeepAlive} <span class="hljs-keyword">from</span> <span class="hljs-string">'./withKeepAlive'</span>;
+</code></pre>
+<h3 id="t93.3 cache-types.js">3.3 cache-types.js <a href="#t93.3 cache-types.js"> # </a></h3>
+<p>src\keepalive-react-component\cache-types.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CREATE = <span class="hljs-string">'CREATE'</span>;        <span class="hljs-comment">//创建</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> CREATED = <span class="hljs-string">'CREATED'</span>;      <span class="hljs-comment">//创建成功</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> ACTIVE = <span class="hljs-string">'ACTIVE'</span>;        <span class="hljs-comment">//激活</span>
+</code></pre>
+<h3 id="t103.4 cacheReducer.js">3.4 cacheReducer.js <a href="#t103.4 cacheReducer.js"> # </a></h3>
+<p>src\keepalive-react-component\cacheReducer.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> *  <span class="hljs-keyword">as</span> cacheTypes <span class="hljs-keyword">from</span> <span class="hljs-string">'./cache-types'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cacheReducer</span>(<span class="hljs-params">cacheStates = {}, { type, payload }</span>) </span>{
+    <span class="hljs-keyword">switch</span> (type) {
+        <span class="hljs-keyword">case</span> cacheTypes.CREATE:
+            <span class="hljs-keyword">return</span> { ...cacheStates,
+                [payload.cacheId]: {
+                    <span class="hljs-attr">cacheId</span>:payload.cacheId,
+                    <span class="hljs-attr">element</span>:payload.element,
+                    <span class="hljs-attr">status</span>:cacheTypes.CREATE
+                } };
+        <span class="hljs-keyword">case</span> cacheTypes.CREATED:
+            <span class="hljs-keyword">return</span> { ...cacheStates,
+                [payload.cacheId]: {
+                    ...cacheStates[payload.cacheId],
+                    <span class="hljs-attr">doms</span>:payload.doms,
+                    <span class="hljs-attr">status</span>:cacheTypes.CREATED
+                } };   
+        <span class="hljs-keyword">case</span> cacheTypes.ACTIVE:
+            <span class="hljs-keyword">return</span> { ...cacheStates,
+                [payload.cacheId]: {
+                    ...cacheStates[payload.cacheId],
+                    <span class="hljs-attr">status</span>:cacheTypes.ACTIVE
+                } };                
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> cacheStates;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> cacheReducer;
+</code></pre>
+<h3 id="t113.5 CacheContext.js">3.5 CacheContext.js <a href="#t113.5 CacheContext.js"> # </a></h3>
+<p>src\keepalive-react-component\CacheContext.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">const</span> CacheContext = React.createContext();
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> CacheContext;
+</code></pre>
+<h3 id="t123.6 KeepAliveProvider.js">3.6 KeepAliveProvider.js <a href="#t123.6 KeepAliveProvider.js"> # </a></h3>
+<p>src\keepalive-react-component\KeepAliveProvider.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useReducer, useCallback } <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> CacheContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./CacheContext'</span>;
+<span class="hljs-keyword">import</span> cacheReducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./cacheReducer'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> cacheTypes <span class="hljs-keyword">from</span> <span class="hljs-string">'./cache-types'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">KeepAliveProvider</span>(<span class="hljs-params">props</span>) </span>{
+    <span class="hljs-keyword">let</span> [cacheStates, dispatch] = useReducer(cacheReducer, {});
+    <span class="hljs-keyword">const</span> mount = useCallback(<span class="hljs-function">(<span class="hljs-params">{ cacheId, element }</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span>(!cacheStates[cacheId]){
+            dispatch({ <span class="hljs-attr">type</span>: cacheTypes.CREATE, <span class="hljs-attr">payload</span>: { cacheId, element } });
+        }
+    }, [cacheStates]);
+    <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">CacheContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{{</span> <span class="hljs-attr">mount</span>, <span class="hljs-attr">cacheStates</span>, <span class="hljs-attr">dispatch</span> }}&gt;</span>
+            {props.children}
+            {Object.values(cacheStates).map(({ cacheId, element }) =&gt; (
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+                    <span class="hljs-attr">id</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">cache_</span>${<span class="hljs-attr">cacheId</span>}`}
+                    <span class="hljs-attr">key</span>=<span class="hljs-string">{cacheId}</span>
+                    <span class="hljs-attr">ref</span>=<span class="hljs-string">{(dom)</span> =&gt;</span> {
+                        let cacheState = cacheStates[cacheId];
+                        if (dom &amp;&amp; (!cacheState.doms)) {
+                            let doms = Array.from(dom.childNodes);
+                            dispatch({ type: cacheTypes.CREATED, payload: { cacheId, doms } });
+                        }
+                    }}
+                &gt;{element}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            ))}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">CacheContext.Provider</span>&gt;</span></span>
+    );
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> KeepAliveProvider;
+</code></pre>
+<h3 id="t133.7 withKeepAlive.js">3.7 withKeepAlive.js <a href="#t133.7 withKeepAlive.js"> # </a></h3>
+<p>src\keepalive-react-component\withKeepAlive.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> React, { useContext, useRef,useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
+<span class="hljs-keyword">import</span> CacheContext <span class="hljs-keyword">from</span> <span class="hljs-string">'./CacheContext'</span>;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">withKeepAlive</span>(<span class="hljs-params">OldComponent, { cacheId = window.location.pathname }</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">props</span>) </span>{
+        <span class="hljs-keyword">const</span> {mount, cacheStates,dispatch } = useContext(CacheContext);
+        <span class="hljs-keyword">const</span> ref = useRef(<span class="hljs-literal">null</span>);
+        useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+            <span class="hljs-keyword">let</span> cacheState = cacheStates[cacheId];
+            <span class="hljs-keyword">if</span>(cacheState&amp;&amp;cacheState.doms){
+                 <span class="hljs-keyword">let</span> doms = cacheState.doms;
+                 doms.forEach(<span class="hljs-function"><span class="hljs-params">dom</span>=&gt;</span>ref.current.appendChild(dom));
+            }<span class="hljs-keyword">else</span>{
+                mount({ cacheId, <span class="hljs-attr">element</span>: <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">OldComponent</span> {<span class="hljs-attr">...props</span>} <span class="hljs-attr">dispatch</span>=<span class="hljs-string">{dispatch}/</span>&gt;</span></span> })
+            }
+        }, [cacheStates, dispatch, mount, props]);
+        <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">keepalive_</span>${<span class="hljs-attr">cacheId</span>}`} <span class="hljs-attr">ref</span>=<span class="hljs-string">{ref}</span> /&gt;</span></span>;
+    }
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> withKeepAlive;
+</code></pre>
+<h2 id="t144.保持滚动状态">4.保持滚动状态 <a href="#t144.保持滚动状态"> # </a></h2>
+<h3 id="t154.1 src\index.js">4.1 src\index.js <a href="#t154.1 src\index.js"> # </a></h3>
+<p>src\index.js</p>
+<pre><code class="lang-diff">import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import Home from './components/Home';
+import UserList from './components/UserList';
+import UserAdd from './components/UserAdd';
+import { KeepAliveProvider, withKeepAlive } from './keepalive-react-component';
+let KeepAliveHome = withKeepAlive(Home, { cacheId: 'Home'});
+<span class="hljs-addition">+let KeepAliveUserList = withKeepAlive(UserList, { cacheId: 'UserList',scroll:true});</span>
+let KeepAliveUserAdd = withKeepAlive(UserAdd, { cacheId: 'UserAdd' });
+const App = () =&gt; {
+  return (
+    &lt;Router  &gt;
+      &lt;KeepAliveProvider&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;Link to="/"&gt;首页&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to="/list"&gt;用户列表&lt;/Link&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;Link to="/add"&gt;添加用户&lt;/Link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;Switch&gt;
+          &lt;Route path={'/'} component={KeepAliveHome} exact /&gt;
+          &lt;Route path={'/list'} component={KeepAliveUserList} /&gt;
+          &lt;Route path={'/add'} component={KeepAliveUserAdd} /&gt;
+        &lt;/Switch&gt;
+      &lt;/KeepAliveProvider&gt;
+    &lt;/Router&gt;
+  )
+}
+ReactDOM.render(&lt;App/&gt;, document.getElementById('root'));
+</code></pre>
+<h3 id="t164.2 cacheReducer.js">4.2 cacheReducer.js <a href="#t164.2 cacheReducer.js"> # </a></h3>
+<p>src\keepalive-react-component\cacheReducer.js</p>
+<pre><code class="lang-diff">import *  as cacheTypes from './cache-types';
+function cacheReducer(cacheStates = {}, { type, payload }) {
+    switch (type) {
+        case cacheTypes.CREATE:
+            return { ...cacheStates,
+                [payload.cacheId]: {
+<span class="hljs-addition">+                   scrolls:{},</span>
+                    cacheId:payload.cacheId,
+                    element:payload.element,
+                    status:cacheTypes.CREATE
+                } };
+        case cacheTypes.CREATED:
+            return { ...cacheStates,
+                [payload.cacheId]: {
+                    ...cacheStates[payload.cacheId],
+                    doms:payload.doms,
+                    status:cacheTypes.CREATED
+                } };   
+        case cacheTypes.ACTIVE:
+            return { ...cacheStates,
+                [payload.cacheId]: {
+                    ...cacheStates[payload.cacheId],
+                    status:cacheTypes.ACTIVE
+                } };                
+        default:
+            return cacheStates;
+    }
+}
+export default cacheReducer;
+</code></pre>
+<h3 id="t174.3 KeepAliveProvider.js">4.3 KeepAliveProvider.js <a href="#t174.3 KeepAliveProvider.js"> # </a></h3>
+<p>src\keepalive-react-component\KeepAliveProvider.js</p>
+<pre><code class="lang-diff">import React, { useReducer, useCallback } from "react";
+import CacheContext from './CacheContext';
+import cacheReducer from './cacheReducer';
+import * as cacheTypes from './cache-types';
+function KeepAliveProvider(props) {
+    let [cacheStates, dispatch] = useReducer(cacheReducer, {});
+    const mount = useCallback(({ cacheId, element }) =&gt; {
+        if(!cacheStates[cacheId]){
+            dispatch({ type: cacheTypes.CREATE, payload: { cacheId, element } });
+        }
+    }, [cacheStates]);
+<span class="hljs-addition">+   let handleScroll = useCallback((cacheId, {target}) =&gt; {</span>
+<span class="hljs-addition">+       if(cacheStates[cacheId]){</span>
+<span class="hljs-addition">+           let scrolls = cacheStates[cacheId].scrolls;</span>
+<span class="hljs-addition">+           scrolls[target] = target.scrollTop;</span>
+<span class="hljs-addition">+       }</span>
+<span class="hljs-addition">+   }, [cacheStates]);</span>
+    return (
+<span class="hljs-addition">+       &lt;CacheContext.Provider value={{ mount, cacheStates, dispatch,handleScroll }}&gt;</span>
+            {props.children}
+            {Object.values(cacheStates).map(({ cacheId, element }) =&gt; (
+                &lt;div
+                    id={`cache_${cacheId}`}
+                    key={cacheId}
+                    ref={(dom) =&gt; {
+                        let cacheState = cacheStates[cacheId];
+                        if (dom &amp;&amp; (!cacheState.doms)) {
+                            let doms = Array.from(dom.childNodes);
+                            dispatch({ type: cacheTypes.CREATED, payload: { cacheId, doms } });
+                        }
+                    }}
+                &gt;{element}&lt;/div&gt;
+            ))}
+        &lt;/CacheContext.Provider&gt;
+    );
+}
+export default KeepAliveProvider;
+</code></pre>
+<h3 id="t184.4 withKeepAlive.js">4.4 withKeepAlive.js <a href="#t184.4 withKeepAlive.js"> # </a></h3>
+<p>src\keepalive-react-component\withKeepAlive.js</p>
+<pre><code class="lang-diff">import React, { useContext, useRef,useEffect } from "react";
+import CacheContext from './CacheContext';
+<span class="hljs-addition">+function withKeepAlive(OldComponent, { cacheId = window.location.pathname,scroll=false }) {</span>
+    return function (props) {
+<span class="hljs-addition">+       const {mount, cacheStates,dispatch,handleScroll } = useContext(CacheContext);</span>
+        const ref = useRef(null);
+<span class="hljs-addition">+       useEffect(()=&gt;{</span>
+<span class="hljs-addition">+           if(scroll){</span>
+<span class="hljs-addition">+               ref.current.addEventListener('scroll', handleScroll.bind(null, cacheId),true);</span>
+<span class="hljs-addition">+           }</span>
+<span class="hljs-addition">+       },[handleScroll]);</span>
+        useEffect(() =&gt; {
+            let cacheState = cacheStates[cacheId];
+            if(cacheState&amp;&amp;cacheState.doms){
+                let doms = cacheState.doms;
+                doms.forEach(dom=&gt;ref.current.appendChild(dom));
+<span class="hljs-addition">+               if(scroll){</span>
+<span class="hljs-addition">+                  doms.forEach(dom=&gt;{</span>
+<span class="hljs-addition">+                      if (cacheState.scrolls[dom])</span>
+<span class="hljs-addition">+                        dom.scrollTop = cacheState.scrolls[dom];</span>
+<span class="hljs-addition">+                  });</span>
+<span class="hljs-addition">+                 }</span>
+            }else{
+                mount({ cacheId, element: &lt;OldComponent {...props} dispatch={dispatch}/&gt; })
+            }
+        }, [cacheStates, dispatch, mount, props]);
+        return &lt;div id={`keepalive_${cacheId}`} ref={ref} /&gt;;
+    }
+}
+export default withKeepAlive;
+</code></pre>
+<h2 id="t195.销毁缓存">5.销毁缓存 <a href="#t195.销毁缓存"> # </a></h2>
+<h3 id="t205.1 Home.js">5.1 Home.js <a href="#t205.1 Home.js"> # </a></h3>
+<p>src\components\Home.js</p>
+<pre><code class="lang-diff">import React from 'react';
+const Home = (props) =&gt; {
+    return (
+        &lt;div&gt;
+<span class="hljs-addition">+            &lt;button onClick={() =&gt; props.dispatch({ type: 'DESTROY', payload: { cacheId: 'UserAdd' } })}&gt;重置UserAdd&lt;/button&gt;</span>
+<span class="hljs-addition">+            &lt;button onClick={() =&gt; props.dispatch({ type: 'DESTROY', payload: { cacheId: 'UserList' } })}&gt;重置UserList&lt;/button&gt;</span>
+        &lt;/div&gt;
+    )
+}
+export default Home;
+</code></pre>
+<h3 id="t215.2 cache-types.js">5.2 cache-types.js <a href="#t215.2 cache-types.js"> # </a></h3>
+<p>src\keepalive-react-component\cache-types.js</p>
+<pre><code class="lang-diff">export const CREATE = 'CREATE';        //创建
+export const CREATED = 'CREATED';      //创建成功
+export const ACTIVE = 'ACTIVE';        //激活
+<span class="hljs-addition">+export const DESTROY = 'DESTROY';     //销毁</span>
+</code></pre>
+<h3 id="t225.3 cacheReducer.js">5.3 cacheReducer.js <a href="#t225.3 cacheReducer.js"> # </a></h3>
+<p>src\keepalive-react-component\cacheReducer.js</p>
+<pre><code class="lang-diff">import *  as cacheTypes from './cache-types';
+function cacheReducer(cacheStates = {}, { type, payload }) {
+    switch (type) {
+        case cacheTypes.CREATE:
+            return { ...cacheStates,
+                [payload.cacheId]: {
+                    scrolls:{},
+                    cacheId:payload.cacheId,
+                    element:payload.element,
+                    status:cacheTypes.CREATE
+                } };
+        case cacheTypes.CREATED:
+            return { ...cacheStates,
+                [payload.cacheId]: {
+                    ...cacheStates[payload.cacheId],
+                    doms:payload.doms,
+                    status:cacheTypes.CREATED
+                } };   
+        case cacheTypes.ACTIVE:
+            return { ...cacheStates,
+                [payload.cacheId]: {
+                    ...cacheStates[payload.cacheId],
+                    status:cacheTypes.ACTIVE
+                } };           
+<span class="hljs-addition">+       case cacheTypes.DESTROY:</span>
+<span class="hljs-addition">+           return { ...cacheStates,</span>
+<span class="hljs-addition">+               [payload.cacheId]:{</span>
+<span class="hljs-addition">+                   ...cacheStates[payload.cacheId],</span>
+<span class="hljs-addition">+                   status:cacheTypes.DESTROY</span>
+<span class="hljs-addition">+               }};              </span>
+        default:
+            return cacheStates;
+    }
+}
+export default cacheReducer;
+</code></pre>
+<h3 id="t235.4 KeepAliveProvider.js">5.4 KeepAliveProvider.js <a href="#t235.4 KeepAliveProvider.js"> # </a></h3>
+<p>src\keepalive-react-component\KeepAliveProvider.js</p>
+<pre><code class="lang-diff">import React, { useReducer, useCallback } from "react";
+import CacheContext from './CacheContext';
+import cacheReducer from './cacheReducer';
+import * as cacheTypes from './cache-types';
+function KeepAliveProvider(props) {
+    let [cacheStates, dispatch] = useReducer(cacheReducer, {});
+    const mount = useCallback(({ cacheId, element }) =&gt; {
+<span class="hljs-addition">+      if(cacheStates[cacheId]){</span>
+<span class="hljs-addition">+          let cacheState = cacheStates[cacheId];</span>
+<span class="hljs-addition">+          if(cacheState.status === cacheTypes.DESTROY){</span>
+<span class="hljs-addition">+              let doms = cacheState.doms;</span>
+<span class="hljs-addition">+              doms.forEach(dom=&gt;dom.parentNode.removeChild(dom));</span>
+<span class="hljs-addition">+              dispatch({ type: cacheTypes.CREATE, payload: { cacheId, element } });</span>
+<span class="hljs-addition">+          }</span>
+<span class="hljs-addition">+      }else{</span>
+           dispatch({ type: cacheTypes.CREATE, payload: { cacheId, element } });
+<span class="hljs-addition">+      }</span>
+    }, [cacheStates]);
+    let handleScroll = useCallback((cacheId, {target}) =&gt; {
+        if(cacheStates[cacheId]){
+            let scrolls = cacheStates[cacheId].scrolls;
+            scrolls[target] = target.scrollTop;
+        }
+    }, [cacheStates]);
+    return (
+        &lt;CacheContext.Provider value={{ mount, cacheStates, dispatch,handleScroll }}&gt;
+            {props.children}
+<span class="hljs-addition">+           {Object.values(cacheStates).filter(cacheState=&gt;cacheState.status!==cacheTypes.DESTROY).map(({ cacheId, element }) =&gt; (</span>
+                &lt;div
+                    id={`cache_${cacheId}`}
+                    key={cacheId}
+                    ref={(dom) =&gt; {
+                        let cacheState = cacheStates[cacheId];
+<span class="hljs-addition">+                       if (dom &amp;&amp; (!cacheState.doms || cacheState.status === cacheTypes.DESTROY) ) {</span>
+                            let doms = Array.from(dom.childNodes);
+                            dispatch({ type: cacheTypes.CREATED, payload: { cacheId, doms } });
+                        }
+                    }}
+                &gt;{element}&lt;/div&gt;
+            ))}
+        &lt;/CacheContext.Provider&gt;
+    );
+}
+export default KeepAliveProvider;
+</code></pre>
+<h3 id="t245.5 withKeepAlive.js">5.5 withKeepAlive.js <a href="#t245.5 withKeepAlive.js"> # </a></h3>
+<p>src\keepalive-react-component\withKeepAlive.js</p>
+<pre><code class="lang-diff">import React, { useContext, useRef,useEffect } from "react";
+import CacheContext from './CacheContext';
+<span class="hljs-addition">+import * as cacheTypes from './cache-types';</span>
+function withKeepAlive(OldComponent, { cacheId = window.location.pathname,scroll=false }) {
+    return function (props) {
+        const {mount, cacheStates,dispatch,handleScroll } = useContext(CacheContext);
+        const ref = useRef(null);
+        useEffect(()=&gt;{
+            if(scroll){
+                ref.current.addEventListener('scroll', handleScroll.bind(null, cacheId),true);
+            }
+        },[handleScroll]);
+        useEffect(() =&gt; {
+            let cacheState = cacheStates[cacheId];
+<span class="hljs-addition">+           if(cacheState&amp;&amp;cacheState.doms &amp;&amp; cacheState.status !== cacheTypes.DESTROY){</span>
+                let doms = cacheState.doms;
+                doms.forEach(dom=&gt;ref.current.appendChild(dom));
+                if(scroll){
+                   doms.forEach(dom=&gt;{
+                       if (cacheState.scrolls[dom])
+                         dom.scrollTop = cacheState.scrolls[dom];
+                   });
+                  }
+            }else{
+                mount({ cacheId, element: &lt;OldComponent {...props} dispatch={dispatch}/&gt; })
+            }
+        }, [cacheStates, dispatch, mount, props]);
+        return &lt;div id={`keepalive_${cacheId}`} ref={ref} /&gt;;
+    }
+}
+export default withKeepAlive;
+</code></pre>
+
+    

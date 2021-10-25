@@ -1,0 +1,860 @@
+
+        <h2 id="t01. call 和 apply 的区别是什么，哪个性能更好一些">1. call 和 apply 的区别是什么，哪个性能更好一些 <a href="#t01. call 和 apply 的区别是什么，哪个性能更好一些"> # </a></h2>
+<ul>
+<li>call：第一个参数是为函数内部指定this指向，后续的参数则是函数执行时所需要的参数，一个一个传递。</li>
+<li>apply：第一个参数与call相同，为函数内部this指向，而函数的参数，则以数组的形式传递，作为apply第二参数。</li>
+<li><p>call 的性能更好</p>
+</li>
+<li><p><a href="https://tc39.es/ecma262/#sec-function.prototype.apply">apply</a></p>
+</li>
+<li><a href="https://jsperf.com/call-apply-segu">call-apply-test</a></li>
+</ul>
+<pre><code class="lang-js">Obj.prototype.target.apply(<span class="hljs-keyword">this</span>, [<span class="hljs-string">"YES"</span>]);
+Obj.prototype.target.call(<span class="hljs-keyword">this</span>, <span class="hljs-string">"YES"</span>);
+</code></pre>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call">MDN call</a></p>
+<pre><code class="lang-js"><span class="hljs-built_in">Function</span>.prototype.call = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">obj, ...arg</span>) </span>{
+    <span class="hljs-keyword">const</span> context = obj;
+    <span class="hljs-keyword">const</span> fn = <span class="hljs-built_in">Symbol</span>();
+    context[fn] = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">const</span> ret = context[fn](...arg);
+    <span class="hljs-keyword">delete</span> context[fn];
+    <span class="hljs-keyword">return</span> ret;
+}
+</code></pre>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/apply">MDN apply</a></p>
+<pre><code class="lang-js"><span class="hljs-built_in">Function</span>.prototype.apply = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">obj, arg</span>) </span>{
+      <span class="hljs-keyword">const</span> context = obj;
+      <span class="hljs-keyword">const</span> fn = <span class="hljs-built_in">Symbol</span>();
+      context[fn] = <span class="hljs-keyword">this</span>;
+      <span class="hljs-keyword">const</span> ret = context[fn](...arg);
+      <span class="hljs-keyword">delete</span> context[fn]
+      <span class="hljs-keyword">return</span> ret;
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn2</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">2</span>);
+}
+fn1.call.call(fn2);
+</code></pre>
+<h2 id="t12. ES6 代码转成 ES5 代码的实现思路是什么?">2. ES6 代码转成 ES5 代码的实现思路是什么? <a href="#t12. ES6 代码转成 ES5 代码的实现思路是什么?"> # </a></h2>
+<ul>
+<li><a href="http://www.javascriptpeixun.cn/course/12/task/345/show">AST编译解析</a></li>
+</ul>
+<h2 id="t23.数组里面有10万个数据，取第一个元素和第10万个元素的时间相差多少">3.数组里面有10万个数据，取第一个元素和第10万个元素的时间相差多少 <a href="#t23.数组里面有10万个数据，取第一个元素和第10万个元素的时间相差多少"> # </a></h2>
+<ul>
+<li>一样</li>
+</ul>
+<h2 id="t34.XHR具体底层原理和API?">4.XHR具体底层原理和API? <a href="#t34.XHR具体底层原理和API?"> # </a></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a></li>
+<li><a href="http://www.javascriptpeixun.cn/course/12/task/56919/show">axios</a></li>
+</ul>
+<h2 id="t45.prototype根本上解决的是什么问题？">5.prototype根本上解决的是什么问题？ <a href="#t45.prototype根本上解决的是什么问题？"> # </a></h2>
+<ul>
+<li><a href="http://www.javascriptpeixun.cn/course/12/task/74600/show">prototype</a></li>
+</ul>
+<h2 id="t56. 编写parse函数，实现访问对象里属性的值">6. 编写parse函数，实现访问对象里属性的值 <a href="#t56. 编写parse函数，实现访问对象里属性的值"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: { <span class="hljs-attr">c</span>: <span class="hljs-number">2</span> }, <span class="hljs-attr">d</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-attr">e</span>: [{ <span class="hljs-attr">f</span>: [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>] }] };
+<span class="hljs-keyword">let</span> r1 = parse(obj, <span class="hljs-string">'a'</span>);<span class="hljs-comment">// = 1;</span>
+<span class="hljs-keyword">let</span> r2 = parse(obj, <span class="hljs-string">'b.c'</span>);<span class="hljs-comment">// = 2;</span>
+<span class="hljs-keyword">let</span> r3 = parse(obj, <span class="hljs-string">'d[2]'</span>);<span class="hljs-comment">// = 3;</span>
+<span class="hljs-keyword">let</span> r4 = parse(obj, <span class="hljs-string">'e[0].f[0]'</span>);<span class="hljs-comment">// = 4;</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">parse</span>(<span class="hljs-params">obj, str</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Function</span>(<span class="hljs-string">'obj'</span>, <span class="hljs-string">'return obj.'</span> + str.replace(<span class="hljs-regexp">/\.(\d+)/g</span>, <span class="hljs-string">'\[$1\]'</span>))(obj);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">parse</span>(<span class="hljs-params">obj, str</span>) </span>{
+    str = str.replace(<span class="hljs-regexp">/\[(\d+)\]/g</span>, <span class="hljs-string">'.$1'</span>);
+    arr = str.split(<span class="hljs-string">'.'</span>);
+    arr.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
+        obj = obj[item];
+    })
+    <span class="hljs-keyword">return</span> obj;
+}
+
+<span class="hljs-built_in">console</span>.log(r1, r2, r3, r4);
+</code></pre>
+<h2 id="t67.数组扁平化flat方法的多种实现？">7.数组扁平化flat方法的多种实现？ <a href="#t67.数组扁平化flat方法的多种实现？"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> arr = [
+    [<span class="hljs-number">1</span>],
+    [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+    [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, [<span class="hljs-number">7</span>, <span class="hljs-number">8</span>, [<span class="hljs-number">9</span>, <span class="hljs-number">10</span>, [<span class="hljs-number">11</span>]]]],
+    <span class="hljs-number">12</span>
+];
+
+flat
+<span class="hljs-comment">// let flattedArr = arr.flat(Infinity);</span>
+<span class="hljs-comment">// console.log(flattedArr);</span>
+
+
+<span class="hljs-comment">//toString</span>
+<span class="hljs-built_in">console</span>.log(arr.toString().split(<span class="hljs-string">','</span>).map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-built_in">Number</span>(item)));
+
+<span class="hljs-comment">//stringify</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.stringify(arr).replace(<span class="hljs-regexp">/\[|\]/g</span>, <span class="hljs-string">''</span>).split(<span class="hljs-string">','</span>).map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-built_in">Number</span>(item)));
+
+<span class="hljs-comment">//while</span>
+<span class="hljs-keyword">while</span> (arr.some(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-built_in">Array</span>.isArray(item))) {
+    arr = [].concat(...arr);
+}
+<span class="hljs-built_in">console</span>.log(arr);
+
+<span class="hljs-comment">//prototype</span>
+<span class="hljs-built_in">Array</span>.prototype.flat = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">let</span> result = [];
+    <span class="hljs-keyword">let</span> _this = <span class="hljs-keyword">this</span>;
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_flat</span>(<span class="hljs-params">arr</span>) </span>{
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; arr.length; i++) {
+            <span class="hljs-keyword">let</span> item = arr[i];
+            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(item)) {
+                _flat(item);
+            } <span class="hljs-keyword">else</span> {
+                result.push(item);
+            }
+        }
+    }
+    _flat(_this);
+    <span class="hljs-keyword">return</span> result;
+}
+<span class="hljs-built_in">console</span>.log(arr.flat());
+</code></pre>
+<h2 id="t78.实现一个不可变对象">8.实现一个不可变对象 <a href="#t78.实现一个不可变对象"> # </a></h2>
+<ul>
+<li>无论是不可扩展，密封，还是冻结，都是浅层控制的，即只控制对象本身属性的增删改。如果对象属性是一个引用类型，比如数组 subArr 或对象 subObj等，虽然subArr、subObj 的不可被删改，但subArr、subObj 的属性仍然可增删改</li>
+<li>由于每个对象都有一个属性<code>__proto__</code>,该属性的值是该对象的原型对象，也是引用类型，由于冻结是浅层的所以原型对象并不会被连着冻结，仍然可以通过给对象的原型对象加属性达到给当前对象新增属性的效果。所以如果想进一步冻结还需要把原型对象也冻结上</li>
+</ul>
+<h3 id="t88.1 不可扩展">8.1 不可扩展 <a href="#t88.1 不可扩展"> # </a></h3>
+<ul>
+<li><code>Object.preventExtensions()</code>可以使一个对象不可再添加新的属性，参数为目标对象，返回修改后的对象</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> obj = <span class="hljs-built_in">Object</span>.preventExtensions({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>
+});
+<span class="hljs-keyword">var</span> obj = { <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> };
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.isExtensible(obj));<span class="hljs-comment">// true</span>
+<span class="hljs-built_in">Object</span>.preventExtensions(obj);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.isExtensible(obj)); <span class="hljs-comment">// false</span>
+
+<span class="hljs-comment">//Object.defineProperty(obj, 'age', {value: 10});</span>
+<span class="hljs-comment">//TypeError: Cannot define property age, object is not extensible</span>
+obj.age = <span class="hljs-number">10</span>;
+<span class="hljs-built_in">console</span>.log(obj.age); <span class="hljs-comment">// undefined</span>
+</code></pre>
+<h3 id="t98.2 密封">8.2 密封 <a href="#t98.2 密封"> # </a></h3>
+<ul>
+<li><code>Object.seal()</code> 可以使一个对象无法添加新属性的同时，也无法删除旧属性。参数是目标对象，返回修改后的对象</li>
+<li>其本质是通过修改属性的 <code>configurable</code> 为 <code>false</code> 来实现的</li>
+<li><code>configurable</code> 为 <code>false</code> 时，其他配置不可改变，<code>writable</code> 只能 <code>true</code> 变 <code>false</code>，且属性无法被删除。而由于只要 <code>writable</code> 或 <code>configurable</code> 其中之一为 <code>true</code>，则 <code>value</code> 可改，所以密封之后的对象还是可以改属性值的</li>
+<li><code>Object.isSealed()</code> 可以检测一个对象是否密封，即是否可以增删属性。参数是目标对象，返回布尔值，true 代表被密封不可增删属性，false 代表没被密封可增删属性</li>
+</ul>
+<pre><code class="lang-js">
+<span class="hljs-keyword">var</span> obj = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Object</span>();
+<span class="hljs-built_in">Object</span>.isExtensible(obj); <span class="hljs-comment">// true</span>
+<span class="hljs-built_in">Object</span>.isSealed(obj); <span class="hljs-comment">// false</span>
+<span class="hljs-built_in">Object</span>.seal(obj);
+<span class="hljs-built_in">Object</span>.isExtensible(obj); <span class="hljs-comment">// false，注意 seal 后对象的 isExtensible() 也随之改变</span>
+<span class="hljs-built_in">Object</span>.isSealed(obj); <span class="hljs-comment">// true</span>
+
+<span class="hljs-keyword">var</span> obj = { <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> };
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.getOwnPropertyDescriptor(obj, <span class="hljs-string">'name'</span>));
+<span class="hljs-comment">/**
+{
+  value: 'zhufeng',
+  writable: true,
+  enumerable: true,
+  configurable: true
+}
+*/</span>
+<span class="hljs-built_in">Object</span>.seal(obj);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Object</span>.getOwnPropertyDescriptor(obj, <span class="hljs-string">'name'</span>)); <span class="hljs-comment">// seal 后 configurable 变为 false</span>
+<span class="hljs-comment">/**
+{
+  value: 'zhufeng',
+  writable: true,
+  enumerable: true,
+  configurable: false
+}
+*/</span>
+</code></pre>
+<h3 id="t108.3 冻结">8.3 冻结 <a href="#t108.3 冻结"> # </a></h3>
+<ul>
+<li><code>Object.freeze()</code> 可以使对象一个对象不能再添加新属性，也不可以删除旧属性，且不能修改属性的值。参数是目标对象，返回修改后的对象。</li>
+<li><code>Object.isFrozen()</code> 可以检测一个对象是否冻结，即是否可以增删改。参数是目标对象，返回布尔值，true 表示已经冻结不可再增删改，false 反之</li>
+</ul>
+<pre><code class="lang-js">
+<span class="hljs-keyword">var</span> obj = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Object</span>();
+<span class="hljs-built_in">Object</span>.isExtensible(obj); <span class="hljs-comment">// true</span>
+<span class="hljs-built_in">Object</span>.isSealed(obj); <span class="hljs-comment">// false</span>
+<span class="hljs-built_in">Object</span>.isFrozen(obj); <span class="hljs-comment">// false</span>
+<span class="hljs-built_in">Object</span>.freeze(obj);
+<span class="hljs-built_in">Object</span>.isExtensible(obj); <span class="hljs-comment">// false，注意 freeze 后对象的 isExtensible() 也随之改变</span>
+<span class="hljs-built_in">Object</span>.isSealed(obj); <span class="hljs-comment">// true，注意 freeze 后对象的 isSealed() 也随之改变</span>
+<span class="hljs-built_in">Object</span>.isFrozen(obj); <span class="hljs-comment">// true</span>
+<span class="hljs-keyword">var</span> obj = <span class="hljs-built_in">Object</span>.freeze({ <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span> });
+
+<span class="hljs-comment">// 直接定义新的属性会报错</span>
+<span class="hljs-built_in">Object</span>.defineProperty(obj, <span class="hljs-string">'name'</span>, {
+    <span class="hljs-attr">value</span>: <span class="hljs-string">'zhufeng'</span>
+});
+
+obj.name = <span class="hljs-string">'zhufeng'</span>;
+obj.name; <span class="hljs-comment">// undefined</span>
+
+<span class="hljs-keyword">delete</span> obj.name; <span class="hljs-comment">// 删除失败，返回 false</span>
+
+obj.name = <span class="hljs-string">'jiagou'</span>;
+obj.name; <span class="hljs-comment">// 仍然是 "zhufeng"</span>
+</code></pre>
+<h2 id="t119.给定一组url，利用js的异步实现并发请求，并按顺序输出结果">9.给定一组url，利用js的异步实现并发请求，并按顺序输出结果 <a href="#t119.给定一组url，利用js的异步实现并发请求，并按顺序输出结果"> # </a></h2>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">printOrder</span>(<span class="hljs-params">urlArr</span>) </span>{
+    <span class="hljs-built_in">Promise</span>.all(urlArr.map(<span class="hljs-function"><span class="hljs-params">url</span> =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">resolve, reject</span>) </span>{
+        <span class="hljs-keyword">let</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest;
+        xhr.open(<span class="hljs-string">'GET'</span>, url, <span class="hljs-literal">true</span>);
+        xhr.responseType = <span class="hljs-string">'json'</span>;
+        xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">if</span> (xhr.readyState === <span class="hljs-number">4</span> &amp;&amp; xhr.status === <span class="hljs-number">200</span>) {
+                resolve(xhr.response);
+            }
+        }
+        xhr.send();
+    }))).then(<span class="hljs-function"><span class="hljs-params">result</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(result);
+    });
+}
+printOrder([<span class="hljs-string">'/1.json?ts='</span> + <span class="hljs-built_in">Date</span>.now(), <span class="hljs-string">'/2.json?ts='</span> + <span class="hljs-built_in">Date</span>.now()]);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">printOrder</span>(<span class="hljs-params">urlArr, callback</span>) </span>{
+    <span class="hljs-keyword">let</span> result = {};
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sendRequest</span>(<span class="hljs-params">url, index</span>) </span>{
+        <span class="hljs-keyword">let</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest;
+        xhr.open(<span class="hljs-string">'GET'</span>, url, <span class="hljs-literal">true</span>);
+        xhr.responseType = <span class="hljs-string">'json'</span>;
+        xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">if</span> (xhr.readyState === <span class="hljs-number">4</span> &amp;&amp; xhr.status === <span class="hljs-number">200</span>) {
+                result[index] = xhr.response;
+                <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Object</span>.keys(result).length == urlArr.length) {
+                    result.length = <span class="hljs-built_in">Object</span>.keys(result).length;
+                    callback(<span class="hljs-literal">null</span>, <span class="hljs-built_in">Array</span>.from(result));
+                }
+            }
+        }
+        xhr.send();
+    }
+    urlArr.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">url, index</span>) </span>{
+        sendRequest(url, index);
+    });
+}
+
+printOrder([<span class="hljs-string">'/1.json?ts='</span> + <span class="hljs-built_in">Date</span>.now(), <span class="hljs-string">'/2.json?ts='</span> + <span class="hljs-built_in">Date</span>.now()], (err, result) =&gt; {
+    <span class="hljs-built_in">console</span>.log(result);
+});
+</code></pre>
+<h2 id="t1210.说下防抖和节流,能实现么?">10.说下防抖和节流,能实现么? <a href="#t1210.说下防抖和节流,能实现么?"> # </a></h2>
+<ul>
+<li><a href="http://www.javascriptpeixun.cn/course/12/task/1608/show">防抖和节流</a></li>
+</ul>
+<h2 id="t1311.说下 Reflect Proxy">11.说下 Reflect Proxy <a href="#t1311.说下 Reflect Proxy"> # </a></h2>
+<ul>
+<li>Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。Proxy 这个词的原意是代理，用在这里表示由它来<code>代理</code>某些操作，可以译为<code>“</code>代理器`</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> target = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>
+}
+<span class="hljs-keyword">let</span> handler = {
+    <span class="hljs-attr">get</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, key</span>) </span>{
+        <span class="hljs-keyword">return</span> target[key];
+    },
+    <span class="hljs-attr">set</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">target, key, value</span>) </span>{
+        target[key] = value;
+    }
+}
+<span class="hljs-keyword">let</span> proxy = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Proxy</span>(target, handler)
+<span class="hljs-built_in">console</span>.log(proxy.name);
+proxy.age = <span class="hljs-number">25</span>;
+<span class="hljs-built_in">console</span>.log(proxy.age);
+</code></pre>
+<ul>
+<li>将Object对象的一些明显属于语言内部的方法（比如Object.defineProperty），放到Reflect对象上</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect">Reflect</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> target = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>
+}
+<span class="hljs-comment">//Object.defineProperty();</span>
+<span class="hljs-built_in">Reflect</span>.defineProperty(target, <span class="hljs-string">'home'</span>, {
+    <span class="hljs-attr">value</span>: <span class="hljs-string">'北京'</span>
+})
+<span class="hljs-built_in">console</span>.log(target.home);
+<span class="hljs-comment">// 'home' in target</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Reflect</span>.has(target, <span class="hljs-string">'home'</span>));
+</code></pre>
+<ul>
+<li><a href="http://www.javascriptpeixun.cn/course/12/task/49302/show">Vue3.0中的应用</a></li>
+</ul>
+<h2 id="t1412.写一个函数，可以控制最大并发数">12.写一个函数，可以控制最大并发数 <a href="#t1412.写一个函数，可以控制最大并发数"> # </a></h2>
+<ul>
+<li><a href="https://www.npmjs.com/package/semaphore">semaphore</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> Semaphore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'semaphore'</span>);
+<span class="hljs-keyword">let</span> semaphore = <span class="hljs-keyword">new</span> Semaphore(<span class="hljs-number">2</span>);
+<span class="hljs-built_in">console</span>.time(<span class="hljs-string">'cost'</span>);
+semaphore.take(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+        semaphore.leave();
+    }, <span class="hljs-number">1000</span>);
+});
+semaphore.take(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-number">1</span>);
+        semaphore.leave();
+    }, <span class="hljs-number">2000</span>);
+});
+semaphore.take(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-number">3</span>);
+    semaphore.leave();
+    <span class="hljs-built_in">console</span>.timeEnd(<span class="hljs-string">'cost'</span>);
+});
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Semaphore</span> </span>{
+    <span class="hljs-keyword">constructor</span>(available) {
+        <span class="hljs-keyword">this</span>.available = available;
+        <span class="hljs-keyword">this</span>.waiters = [];
+        <span class="hljs-keyword">this</span>._continue = <span class="hljs-keyword">this</span>._continue.bind(<span class="hljs-keyword">this</span>);
+    }
+
+    take(callback) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.available &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">this</span>.available--;
+            callback();
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">this</span>.waiters.push(callback);
+        }
+    }
+
+    leave() {
+        <span class="hljs-keyword">this</span>.available++;
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.waiters.length &gt; <span class="hljs-number">0</span>) {
+            process.nextTick(<span class="hljs-keyword">this</span>._continue);
+        }
+    }
+
+    _continue() {
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.available &gt; <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.waiters.length &gt; <span class="hljs-number">0</span>) {
+                <span class="hljs-keyword">this</span>.available--;
+                <span class="hljs-keyword">const</span> callback = <span class="hljs-keyword">this</span>.waiters.pop();
+                callback();
+            }
+        }
+    }
+}
+</code></pre>
+<h2 id="t1513.说下 js模块化（commonjs/AMD/CMD/ES6）">13.说下 js模块化（commonjs/AMD/CMD/ES6） <a href="#t1513.说下 js模块化（commonjs/AMD/CMD/ES6）"> # </a></h2>
+<ul>
+<li>使用过哪些模块化？说说对模块化和组件化的理解</li>
+</ul>
+<h2 id="t1614. promise、async await、Generator的区别">14. promise、async await、Generator的区别 <a href="#t1614. promise、async await、Generator的区别"> # </a></h2>
+<h2 id="t1715. 如何让 (a == 1 &amp;&amp; a == 2 &amp;&amp; a == 3) 的值为true?">15. 如何让 (a == 1 &amp;&amp; a == 2 &amp;&amp; a == 3) 的值为true? <a href="#t1715. 如何让 (a == 1 &amp;&amp; a == 2 &amp;&amp; a == 3) 的值为true?"> # </a></h2>
+<h4 id="t1815.1 valueOf和toString">15.1 valueOf和toString <a href="#t1815.1 valueOf和toString"> # </a></h4>
+<ul>
+<li><code>==</code>的时候会涉及到类型转换，如果双等号两边数据类型不同会尝试将他们转化为同一类型</li>
+<li><code>valueOf</code>和<code>toString</code>这两个方法是每个对象都自带的(继承自Object原型)</li>
+<li>toString返回一个字符串"[object Object]",valueOf则是直接返回对象本身</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> obj = {<span class="hljs-attr">a</span>:<span class="hljs-number">1</span>};
+<span class="hljs-comment">//在隐式转换的过程中，调用了`toString`方法</span>
+<span class="hljs-built_in">console</span>.log(obj == <span class="hljs-string">"[object Object]"</span>);<span class="hljs-comment">//true</span>
+</code></pre>
+<h4 id="t1915.2 类型转换">15.2 类型转换 <a href="#t1915.2 类型转换"> # </a></h4>
+<ul>
+<li>三个等号不转数据类型,二个等号不转数据类型,直接返回false 值一样,类型需要一样</li>
+<li>NaN和谁都不相等,包括NaN自己</li>
+<li>null==undefined null和undefined两个等号相等，三个等号不相等</li>
+<li>对象 == 字符串 会把对象转成字符串再比较</li>
+<li>剩余的都转换为数字进行比较</li>
+</ul>
+<h4 id="t2015.2.1 对象转原始类型步骤">15.2.1 对象转原始类型步骤 <a href="#t2015.2.1 对象转原始类型步骤"> # </a></h4>
+<ul>
+<li>如果部署了[Symbol.toPrimitive] 接口，那么调用此接口，若返回的不是基本数据类型，抛出错误</li>
+<li>如果没有部署 [Symbol.toPrimitive] 接口，那么根据要转换的类型，先调用 valueOf / toString<ul>
+<li>如果hint是number,调用顺序为 valueOf=&gt;toString</li>
+<li>如果hint是string(针对Date),调用顺序为toString=&gt;valueOf</li>
+<li>如果hint是default,调用顺序为valueOf=&gt;toString</li>
+</ul>
+</li>
+<li>执行<code>a==1</code>时,js引擎会尝试把对象类型a转化为数字类型，首先调用a的<code>valueOf</code>方法来判断，不行则继续调用<code>toString</code>方法</li>
+<li>然后再把<code>toString</code>返回的字符串转化为数字类型再去和a作比较</li>
+<li><p>重写<code>valueOf</code>方法也可以实现，而且转化时会优先调用valueOf方法</p>
+</li>
+<li><p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive">toPrimitive</a></p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> a = {
+  [<span class="hljs-built_in">Symbol</span>.toPrimitive]: (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">let</span> i = <span class="hljs-number">1</span>;
+      <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> i++;
+  })()
+}
+<span class="hljs-keyword">if</span> (a == <span class="hljs-number">1</span> &amp;&amp; a == <span class="hljs-number">2</span> &amp;&amp; a == <span class="hljs-number">3</span>) {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'成功'</span>);
+}
+</code></pre>
+</li>
+<li><p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a></p>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> a = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Proxy</span>({}, {
+    <span class="hljs-attr">i</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-keyword">get</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-keyword">this</span>.i++;
+    }
+});
+<span class="hljs-keyword">if</span> (a == <span class="hljs-number">1</span> &amp;&amp; a == <span class="hljs-number">2</span> &amp;&amp; a == <span class="hljs-number">3</span>) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'成功'</span>);
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> a = {
+    <span class="hljs-attr">count</span>:<span class="hljs-number">1</span>,
+    toString(){
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.count++;
+    },
+    <span class="hljs-comment">/* valueOf(){
+        return this.count++;
+    } */</span>
+};
+<span class="hljs-keyword">if</span>(a == <span class="hljs-number">1</span> &amp;&amp; a ==<span class="hljs-number">2</span> &amp;&amp; a == <span class="hljs-number">3</span>){
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'成功'</span>);
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-built_in">Object</span>.defineProperty(<span class="hljs-built_in">window</span>,<span class="hljs-string">'a'</span>,{
+    <span class="hljs-keyword">get</span>(){
+        <span class="hljs-keyword">return</span> i++;
+    }
+})
+<span class="hljs-keyword">if</span>(a == <span class="hljs-number">1</span> &amp;&amp; a ==<span class="hljs-number">2</span> &amp;&amp; a ==<span class="hljs-number">3</span> ){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'相等'</span>);
+}
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> a = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>];
+a.toString = a.shift;
+<span class="hljs-comment">//a.join = a.shift;</span>
+<span class="hljs-keyword">if</span>(a == <span class="hljs-number">1</span> &amp;&amp; a ==<span class="hljs-number">2</span> &amp;&amp; a ==<span class="hljs-number">3</span> ){
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'相等'</span>);
+}
+</code></pre>
+<h2 id="t2116. console.log([]==![]);//true">16. console.log([]==![]);//true <a href="#t2116. console.log([]==![]);//true"> # </a></h2>
+<ul>
+<li>比较的时候要转成数字进行比较<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log([]==![]);<span class="hljs-comment">//true</span>
+[]..toString() 得到空字符串=&gt;<span class="hljs-built_in">Number</span>(<span class="hljs-string">''</span>)=<span class="hljs-number">0</span>
+![] = <span class="hljs-function"><span class="hljs-params">false</span> =&gt;</span><span class="hljs-built_in">Number</span>(<span class="hljs-literal">false</span>)=&gt;<span class="hljs-number">0</span>
+</code></pre>
+</li>
+</ul>
+<h2 id="t2217. +号">17. +号 <a href="#t2217. +号"> # </a></h2>
+<ul>
+<li>两个操作数如果是<code>number</code>则直接相加出结果</li>
+<li>如果其中有一个操作数为string，则将另一个操作数隐式的转换为string，然后进行字符串拼接得出结果</li>
+<li>如果操作数为对象或者是数组这种复杂的数据类型，那么就将两个操作数都转换为字符串，进行拼接</li>
+<li>如果操作数是像boolean这种的简单数据类型，那么就将操作数转换为number相加得出结果</li>
+<li><code>[ ] + { }</code> 因为[]会被强制转换为"", 然后+运算符 链接一个{ }, { }强制转换为字符串就是"[object Object]"</li>
+<li>{ } 当作一个空代码块,+[]是强制将[]转换为number,转换的过程是 +[] =&gt; +"" =&gt;0 最终的结果就是0</li>
+</ul>
+<pre><code class="lang-js">[]+{}  <span class="hljs-comment">//"[object Object]"</span>
+{}+[]  <span class="hljs-comment">//0</span>
+{}+<span class="hljs-number">0</span>   <span class="hljs-comment">//0</span>
+[]+<span class="hljs-number">0</span>   <span class="hljs-comment">//"0"</span>
+</code></pre>
+<h2 id="t2318. 说一下arrayBuffer 和 Buffer 的区别 以及应用场景">18. 说一下arrayBuffer 和 Buffer 的区别 以及应用场景 <a href="#t2318. 说一下arrayBuffer 和 Buffer 的区别 以及应用场景"> # </a></h2>
+<ul>
+<li><a href="http://www.zhufengpeixun.cn/2020/html/9.Buffer.html#t01.%20%E4%BB%80%E4%B9%88%E6%98%AFBuffer">Buffer</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest/responseType">responseType</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">TypedArray</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/DataView">DataView</a></li>
+</ul>
+<h3 id="t2418.1 1.server.js">18.1 1.server.js <a href="#t2418.1 1.server.js"> # </a></h3>
+<p>node\1.server.js</p>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">'http'</span>);
+<span class="hljs-keyword">let</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);
+<span class="hljs-keyword">let</span> path = <span class="hljs-built_in">require</span>(<span class="hljs-string">'path'</span>);
+http.createServer(<span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (req.url === <span class="hljs-string">'/'</span>) {
+        <span class="hljs-keyword">let</span> content = fs.readFileSync(path.join(__dirname, <span class="hljs-string">'index.html'</span>));
+        res.setHeader(<span class="hljs-string">'Content-Type'</span>, <span class="hljs-string">'text/html'</span>);
+        res.end(content);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (req.url === <span class="hljs-string">'/data'</span>) {
+        <span class="hljs-keyword">let</span> buffer1 = Buffer.from(<span class="hljs-string">'abc'</span>);<span class="hljs-comment">// 97 98 99</span>
+        <span class="hljs-keyword">let</span> buffer2 = Buffer.from(<span class="hljs-string">'def'</span>);<span class="hljs-comment">// 97 98 99</span>
+        <span class="hljs-keyword">let</span> buffer = Buffer.concat([buffer1, buffer2]);
+        res.end(buffer);
+    } <span class="hljs-keyword">else</span> {
+        res.end(<span class="hljs-string">''</span>);
+    }
+}).listen(<span class="hljs-number">8000</span>);;
+</code></pre>
+<h3 id="t2518.2 index.html">18.2 index.html <a href="#t2518.2 index.html"> # </a></h3>
+<pre><code class="lang-html"> <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+        <span class="hljs-keyword">var</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+        xhr.open(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/data'</span>, <span class="hljs-literal">true</span>);
+        xhr.responseType = <span class="hljs-string">'arraybuffer'</span>;
+        xhr.onload = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) </span>{
+            buffer = xhr.response;
+            <span class="hljs-comment">//console.log(buffer);</span>
+            <span class="hljs-comment">//单一类型数据可用对应的类型化数组直接进行解析</span>
+            <span class="hljs-comment">/* var array = new Uint8Array(buffer);
+            for (var i = 0; i &lt; array.length; ++i) {
+                console.log(array[i]);
+            } */</span>
+            <span class="hljs-comment">/* var array = new Uint8Array(buffer, 3, 3);
+            for (var i = 0; i &lt; array.length; ++i) {
+                console.log(array[i]);
+            } */</span>
+            <span class="hljs-keyword">var</span> dataView = <span class="hljs-keyword">new</span> <span class="hljs-built_in">DataView</span>(buffer);
+            <span class="hljs-built_in">console</span>.log(dataView.getInt8(<span class="hljs-number">0</span>));
+            <span class="hljs-built_in">console</span>.log(dataView.getInt8(<span class="hljs-number">1</span>));
+            <span class="hljs-built_in">console</span>.log(dataView.getInt8(<span class="hljs-number">2</span>));
+        };
+        xhr.send();
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-number">97.</span>.toString(<span class="hljs-number">2</span>));<span class="hljs-comment">//01100001</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">98.</span>.toString(<span class="hljs-number">2</span>));<span class="hljs-comment">//01100010</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-number">98.</span>.toString(<span class="hljs-number">2</span>) + <span class="hljs-number">97.</span>.toString(<span class="hljs-number">2</span>));
+<span class="hljs-comment">//parseInt就是把一个字符串，转成十进制</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">parseInt</span>(<span class="hljs-string">'0110001001100001'</span>, <span class="hljs-number">2</span>));
+
+<span class="hljs-comment">//两个字节组成一个数，10000000   00000001</span>
+<span class="hljs-comment">//高位在前和高位两各种方式  大头在前， 小头在前</span>
+
+<span class="hljs-keyword">let</span> buffer = Buffer.from(<span class="hljs-string">'ab'</span>);
+<span class="hljs-comment">//61=&gt;97  6*16+1=97</span>
+<span class="hljs-built_in">console</span>.log(buffer);
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">parseInt</span>(<span class="hljs-string">'0X61'</span>, <span class="hljs-number">16</span>));
+</code></pre>
+<h2 id="t2619. 柯理化">19. 柯理化 <a href="#t2619. 柯理化"> # </a></h2>
+<h3 id="t2719.1 bind">19.1 bind <a href="#t2719.1 bind"> # </a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">bind</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create">create</a></li>
+</ul>
+<pre><code class="lang-js">~<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">prototype</span>) </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bind</span>(<span class="hljs-params">context = global, ...outerArgs</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">...innerArgs</span>) =&gt;</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.call(context, ...outerArgs, ...innerArgs);
+        }
+    }
+    prototype.bind = bind;
+}(<span class="hljs-built_in">Function</span>.prototype);
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">sum</span>(<span class="hljs-params">...args</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.prefix + args.reduce(<span class="hljs-function">(<span class="hljs-params">acc, curr</span>) =&gt;</span> acc + curr, <span class="hljs-number">0</span>);
+}
+<span class="hljs-keyword">let</span> obj = { <span class="hljs-attr">prefix</span>: <span class="hljs-string">'$'</span> };
+<span class="hljs-keyword">let</span> bindSum = sum.bind(obj, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>);
+<span class="hljs-built_in">console</span>.log(bindSum(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>));
+</code></pre>
+<pre><code class="lang-js">~(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">Object</span>.create = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">proto</span>) </span>{
+        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">F</span>(<span class="hljs-params"></span>) </span>{ }
+        F.prototype = proto;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> F();
+    };
+
+    <span class="hljs-built_in">Function</span>.prototype.bind = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">oThis, ...outerArgs</span>) </span>{
+        <span class="hljs-keyword">var</span> thatFunc = <span class="hljs-keyword">this</span>,
+            fBound = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">...innerArgs</span>) </span>{
+                <span class="hljs-keyword">return</span> thatFunc.apply(
+                    <span class="hljs-keyword">this</span> <span class="hljs-keyword">instanceof</span> thatFunc ? <span class="hljs-keyword">this</span> : oThis, [...outerArgs, ...innerArgs])
+            };
+        fBound.prototype = <span class="hljs-built_in">Object</span>.create(thatFunc.prototype);
+        <span class="hljs-keyword">return</span> fBound;
+    }
+})();
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Point</span>(<span class="hljs-params">x, y</span>) </span>{
+    <span class="hljs-keyword">this</span>.x = x;
+    <span class="hljs-keyword">this</span>.y = y;
+}
+
+Point.prototype.toString = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.x + <span class="hljs-string">','</span> + <span class="hljs-keyword">this</span>.y;
+};
+<span class="hljs-keyword">var</span> emptyObj = {};
+<span class="hljs-keyword">var</span> YAxisPoint = Point.bind(<span class="hljs-literal">null</span>, <span class="hljs-number">1</span><span class="hljs-comment">/*x*/</span>);
+<span class="hljs-keyword">var</span> axisPoint = <span class="hljs-keyword">new</span> YAxisPoint(<span class="hljs-number">2</span>);
+<span class="hljs-built_in">console</span>.log(axisPoint.toString()); <span class="hljs-comment">// '1,2'</span>
+
+<span class="hljs-built_in">console</span>.log(axisPoint <span class="hljs-keyword">instanceof</span> Point); <span class="hljs-comment">// true</span>
+<span class="hljs-built_in">console</span>.log(axisPoint <span class="hljs-keyword">instanceof</span> YAxisPoint); <span class="hljs-comment">// true</span>
+</code></pre>
+<h3 id="t2819.2 add">19.2 add <a href="#t2819.2 add"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+<span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>)(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+<span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>)(<span class="hljs-number">3</span>)(<span class="hljs-number">4</span>)(<span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">const</span> add = (<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">length</span>) </span>{
+    <span class="hljs-keyword">let</span> allArgs = [];
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">_add</span>(<span class="hljs-params">...args</span>) </span>{
+        allArgs = [...allArgs, ...args];
+        <span class="hljs-keyword">if</span> (allArgs.length &gt;= length) {
+            <span class="hljs-keyword">let</span> sum = allArgs.reduce(<span class="hljs-function">(<span class="hljs-params">acc, curr</span>) =&gt;</span> acc + curr, <span class="hljs-number">0</span>);
+            allArgs.length = <span class="hljs-number">0</span>;
+            <span class="hljs-keyword">return</span> sum;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> _add;
+        }
+    }
+    <span class="hljs-keyword">return</span> _add;
+})(<span class="hljs-number">5</span>);
+</code></pre>
+<pre><code class="lang-js">alert(add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+alert(add(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>)(<span class="hljs-number">4</span>));<span class="hljs-comment">//15</span>
+alert(add(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>)(<span class="hljs-number">3</span>));<span class="hljs-comment">//15</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">...args</span>) </span>{
+    <span class="hljs-keyword">var</span> _add = add.bind(<span class="hljs-literal">null</span>, ...args);
+    _add.toString = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">return</span> args.reduce(<span class="hljs-function">(<span class="hljs-params">sum, item</span>) =&gt;</span> sum + item, <span class="hljs-number">0</span>);
+    }
+    <span class="hljs-keyword">return</span> _add;
+}
+</code></pre>
+<ul>
+<li>函数柯里化就是把接受多个参数的函数变换成接受一个单一参数的函数，并且返回接受余下参数返回结果的技术</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">curry</span>(<span class="hljs-params">fn, ...args</span>) </span>{
+    <span class="hljs-keyword">return</span> args.length &lt; fn.length ? <span class="hljs-function">(<span class="hljs-params">...extraArgs</span>) =&gt;</span> curry(fn, ...args, ...extraArgs) : fn(...args)
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addFn</span>(<span class="hljs-params">a, b, c, d, e</span>) </span>{
+    <span class="hljs-keyword">return</span> a + b + c + d + e;
+}
+<span class="hljs-keyword">let</span> add = curry(addFn);
+<span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+<span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>)(<span class="hljs-number">4</span>, <span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+<span class="hljs-built_in">console</span>.log(add(<span class="hljs-number">1</span>)(<span class="hljs-number">2</span>)(<span class="hljs-number">3</span>)(<span class="hljs-number">4</span>)(<span class="hljs-number">5</span>));<span class="hljs-comment">//15</span>
+</code></pre>
+<h2 id="t2920. 拷贝">20. 拷贝 <a href="#t2920. 拷贝"> # </a></h2>
+<h3 id="t3020.1 JSON.parse">20.1 JSON.parse <a href="#t3020.1 JSON.parse"> # </a></h3>
+<ul>
+<li>无法支持所有类型,比如函数</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = { <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">10</span> };
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(obj)));
+</code></pre>
+<h3 id="t3120.2 浅拷贝">20.2 浅拷贝 <a href="#t3120.2 浅拷贝"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clone</span>(<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">let</span> target = {};
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> source) {
+        target[key] = source[key];
+    }
+    <span class="hljs-keyword">return</span> target;
+};
+</code></pre>
+<h3 id="t3220.3 深拷贝">20.3 深拷贝 <a href="#t3220.3 深拷贝"> # </a></h3>
+<ul>
+<li>支持对象和数组</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">home</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">'北京'</span> },
+    <span class="hljs-attr">hobbies</span>: [<span class="hljs-string">'抽烟'</span>, <span class="hljs-string">'喝酒'</span>, <span class="hljs-string">'烫头'</span>]
+};
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clone</span>(<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> source === <span class="hljs-string">'object'</span>) {
+        <span class="hljs-keyword">let</span> target = <span class="hljs-built_in">Array</span>.isArray(source) ? [] : {};
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> source) {
+            target[key] = clone(source[key]);
+        }
+        <span class="hljs-keyword">return</span> target;
+    }
+    <span class="hljs-keyword">return</span> source;
+
+};
+<span class="hljs-keyword">let</span> cloned = clone(obj);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-built_in">Array</span>.isArray(cloned.hobbies));
+</code></pre>
+<h3 id="t3320.4 循环引用">20.4 循环引用 <a href="#t3320.4 循环引用"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">home</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">'北京'</span> },
+    <span class="hljs-attr">hobbies</span>: [<span class="hljs-string">'抽烟'</span>, <span class="hljs-string">'喝酒'</span>, <span class="hljs-string">'烫头'</span>]
+};
+obj.obj = obj;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clone</span>(<span class="hljs-params">source, map = new Map(</span>)) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> source === <span class="hljs-string">'object'</span>) {
+        <span class="hljs-keyword">if</span> (map.get(source)) {
+            <span class="hljs-keyword">return</span> map.get(source);
+        }
+        <span class="hljs-keyword">let</span> target = <span class="hljs-built_in">Array</span>.isArray(source) ? [] : {};
+        map.set(source, target);
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> source) {
+            target[key] = clone(source[key], map);
+        }
+        <span class="hljs-keyword">return</span> target;
+    }
+    <span class="hljs-keyword">return</span> source;
+
+};
+
+<span class="hljs-keyword">let</span> cloned = clone(obj);
+<span class="hljs-built_in">console</span>.log(cloned.obj);
+</code></pre>
+<h3 id="t3420.5 while">20.5 while <a href="#t3420.5 while"> # </a></h3>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">home</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">'北京'</span> },
+    <span class="hljs-attr">hobbies</span>: [<span class="hljs-string">'抽烟'</span>, <span class="hljs-string">'喝酒'</span>, <span class="hljs-string">'烫头'</span>]
+};
+obj.obj = obj;
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clone</span>(<span class="hljs-params">source, map = new Map(</span>)) </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> source === <span class="hljs-string">'object'</span>) {
+        <span class="hljs-keyword">if</span> (map.get(source)) {
+            <span class="hljs-keyword">return</span> map.get(source);
+        }
+        <span class="hljs-keyword">let</span> target = <span class="hljs-built_in">Array</span>.isArray(source) ? [] : {};
+        map.set(source, target);
+        <span class="hljs-keyword">let</span> keys = <span class="hljs-built_in">Object</span>.keys(source);
+        <span class="hljs-keyword">let</span> length = keys.length;
+        <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">while</span> (index &lt; length) {
+            target[keys[index]] = clone(source[keys[index]], map);
+            index++;
+        }
+        <span class="hljs-keyword">return</span> target;
+    }
+    <span class="hljs-keyword">return</span> source;
+};
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getType</span>(<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.toString.call(source);
+}
+</code></pre>
+<h3 id="t3520.6 精确类型">20.6 精确类型 <a href="#t3520.6 精确类型"> # </a></h3>
+<h4 id="t3620.6.1 判断类型方式">20.6.1 判断类型方式 <a href="#t3620.6.1 判断类型方式"> # </a></h4>
+<ul>
+<li>typeof <ul>
+<li>返回结果都是字符串</li>
+<li>字符串中包含了对应的数据类型 number  string boolean undefined symbol </li>
+<li>typeof null == 'object'</li>
+<li>typeof {} [] /&amp;$/ Date== 'object'</li>
+</ul>
+</li>
+<li>instanceof </li>
+<li>Object.prototype.toString.call</li>
+</ul>
+<h4 id="t3720.6.2 判断类型">20.6.2 判断类型 <a href="#t3720.6.2 判断类型"> # </a></h4>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/flags">flags</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-keyword">let</span> obj = {
+    <span class="hljs-attr">married</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">age</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'zhufeng'</span>,
+    <span class="hljs-attr">girlfriend</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">boyfriend</span>: <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">flag</span>: <span class="hljs-built_in">Symbol</span>(<span class="hljs-string">'man'</span>),
+    <span class="hljs-attr">home</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">'北京'</span> },
+    <span class="hljs-attr">set</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(),
+    <span class="hljs-attr">map</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>(),
+    <span class="hljs-attr">getName</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{ },
+    <span class="hljs-attr">hobbies</span>: [<span class="hljs-string">'抽烟'</span>, <span class="hljs-string">'喝酒'</span>, <span class="hljs-string">'烫头'</span>],
+    <span class="hljs-attr">error</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'error'</span>),
+    <span class="hljs-attr">pattern</span>: <span class="hljs-regexp">/^regexp$/ig</span>,
+    <span class="hljs-attr">math</span>: <span class="hljs-built_in">Math</span>,
+    <span class="hljs-attr">json</span>: <span class="hljs-built_in">JSON</span>,
+    <span class="hljs-attr">document</span>: <span class="hljs-built_in">document</span>,
+    <span class="hljs-attr">window</span>: <span class="hljs-built_in">window</span>
+};
+obj.set.add(<span class="hljs-number">1</span>);
+obj.map.set(<span class="hljs-string">'name'</span>, <span class="hljs-string">'value'</span>);
+obj.obj = obj;
+
+<span class="hljs-keyword">let</span> OBJECT_TYPES = [{}, [], <span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>(), <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>(), <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(), <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(), /^$/].map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> getType(item));
+<span class="hljs-keyword">const</span> MAP_TYPE = getType(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Map</span>());
+<span class="hljs-keyword">const</span> SET_TYPE = getType(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>());
+<span class="hljs-keyword">const</span> CONSTRUCT_TYPE = [<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(), <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>()].map(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> getType(item));
+<span class="hljs-keyword">const</span> SYMBOL_TYPE = getType(<span class="hljs-built_in">Symbol</span>(<span class="hljs-string">'1'</span>));
+<span class="hljs-keyword">const</span> REGEXP_TYPE = getType(<span class="hljs-regexp">/^$/</span>);
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">clone</span>(<span class="hljs-params">source, map = new Map(</span>)) </span>{
+    <span class="hljs-keyword">let</span> type = getType(source);
+    <span class="hljs-keyword">if</span> (!OBJECT_TYPES.includes(type)) {<span class="hljs-comment">//基本数据类型</span>
+        <span class="hljs-keyword">return</span> source;
+    }
+    <span class="hljs-keyword">if</span> (map.get(source)) {
+        <span class="hljs-keyword">return</span> map.get(source);
+    }
+    <span class="hljs-keyword">if</span> (CONSTRUCT_TYPE.includes(type)) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> source.constructor(source);
+    }
+    <span class="hljs-keyword">let</span> target = <span class="hljs-keyword">new</span> source.constructor();
+    map.set(source, target);
+
+    <span class="hljs-keyword">if</span> (SYMBOL_TYPE === type) {
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>(<span class="hljs-built_in">Symbol</span>.prototype.valueOf.call(source));
+    }
+    <span class="hljs-keyword">if</span> (REGEXP_TYPE === type) {
+        <span class="hljs-keyword">const</span> flags = <span class="hljs-regexp">/\w*$/</span>;
+        <span class="hljs-keyword">const</span> target = <span class="hljs-keyword">new</span> source.constructor(source.source, flags.exec(source));
+        target.lastIndex = source.lastIndex;
+        <span class="hljs-keyword">return</span> target;
+    }
+    <span class="hljs-keyword">if</span> (SET_TYPE === type) {
+        source.forEach(<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> {
+            target.add(clone(value, map));
+        });
+        <span class="hljs-keyword">return</span> target;
+    }
+    <span class="hljs-keyword">if</span> (MAP_TYPE === type) {
+        source.forEach(<span class="hljs-function">(<span class="hljs-params">value, key</span>) =&gt;</span> {
+            target.set(key, clone(value, map));
+        });
+        <span class="hljs-keyword">return</span> target;
+    }
+    <span class="hljs-keyword">let</span> keys = <span class="hljs-built_in">Object</span>.keys(source);
+    <span class="hljs-keyword">let</span> length = keys.length;
+    <span class="hljs-keyword">let</span> index = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">while</span> (index &lt; length) {
+        target[keys[index]] = clone(source[keys[index]], map);
+        index++;
+    }
+    <span class="hljs-keyword">return</span> target;
+};
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getType</span>(<span class="hljs-params">source</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.prototype.toString.call(source);
+}
+<span class="hljs-keyword">let</span> cloned = clone(obj);
+<span class="hljs-built_in">console</span>.log(cloned);
+<span class="hljs-built_in">console</span>.log(obj.home === cloned.home);
+<span class="hljs-built_in">console</span>.log(obj.set === cloned.set);
+<span class="hljs-built_in">console</span>.log(obj.map === cloned.map);
+<span class="hljs-comment">/*
+[object Boolean]
+[object Number]
+[object String]
+[object Null]
+[object Undefined]
+[object Symbol]
+[object Object]
+[object Function]
+[object Array]
+[object Error]
+[object RegExp]
+[object Math]
+[object JSON]
+[object HTMLDocument]
+[object Window]"
+*/</span>
+</code></pre>
+
+    

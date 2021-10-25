@@ -1,0 +1,414 @@
+
+        <h2 id="t01. Redux中间件">1. Redux中间件 <a href="#t01. Redux中间件"> # </a></h2>
+<ul>
+<li>如果没有中间件的运用,redux 的工作流程是这样 <code>action -&gt; reducer</code>，这是相当于同步操作，由dispatch 触发action后，直接去reducer执行相应的动作</li>
+<li>但是在某些比较复杂的业务逻辑中，这种同步的实现方式并不能很好的解决我们的问题。比如我们有一个这样的需求，点击按钮 -&gt; 获取服务器数据 -&gt; 渲染视图，因为获取服务器数据是需要异步实现，所以这时候我就需要引入中间件改变redux同步执行的流程，形成异步流程来实现我们所要的逻辑，有了中间件，redux 的工作流程就变成这样 action -&gt; middlewares -&gt; reducer，点击按钮就相当于dispatch 触发action，接下去获取服务器数据 middlewares 的执行，当 middlewares 成功获取到服务器就去触发reducer对应的动作，更新需要渲染视图的数据</li>
+<li>中间件的机制可以让我们改变数据流，实现如异步 action ，action 过滤，日志输出，异常报告等功能。</li>
+</ul>
+<p><img src="http://img.zhufengpeixun.cn/reduxmiddleware.jpg" alt="reduxmiddleware"></p>
+<h2 id="t12. 日志中间件">2. 日志中间件 <a href="#t12. 日志中间件"> # </a></h2>
+<ul>
+<li>我们改写了<code>dispatch</code>方法,实现了在更改状态时打印前后的状态</li>
+<li>但是这种方案并不好。所以我们可以采用中间的方式</li>
+</ul>
+<h3 id="t22.1 实现日志">2.1 实现日志 <a href="#t22.1 实现日志"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore, Store, AnyAction } <span class="hljs-keyword">from</span> <span class="hljs-string">'../redux'</span>;
+<span class="hljs-keyword">import</span> reducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">import</span> { CombinedState } <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">const</span> store: Store&lt;CombinedState, AnyAction&gt; = createStore&lt;CombinedState, AnyAction, {}, {}&gt;(reducer, { <span class="hljs-attr">counter1</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> }, <span class="hljs-attr">counter2</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> } });
+<span class="hljs-keyword">let</span> dispatch = store.dispatch;
+store.dispatch = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">action: AnyAction</span>): <span class="hljs-title">AnyAction</span> </span>{
+    <span class="hljs-built_in">console</span>.log(store.getState());
+    dispatch(action);
+    <span class="hljs-built_in">console</span>.log(store.getState());
+    <span class="hljs-keyword">return</span> action;
+};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h3 id="t32.2 实现异步">2.2 实现异步 <a href="#t32.2 实现异步"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> { createStore, Store, AnyAction } <span class="hljs-keyword">from</span> <span class="hljs-string">'../redux'</span>;
+<span class="hljs-keyword">import</span> reducer <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">import</span> { CombinedState } <span class="hljs-keyword">from</span> <span class="hljs-string">'./reducers'</span>;
+<span class="hljs-keyword">const</span> store: Store&lt;CombinedState, AnyAction&gt; = createStore&lt;CombinedState, AnyAction, {}, {}&gt;(reducer, { <span class="hljs-attr">counter1</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> }, <span class="hljs-attr">counter2</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">0</span> } });
+<span class="hljs-keyword">let</span> dispatch = store.dispatch;
+store.dispatch = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">action: AnyAction</span>): <span class="hljs-title">AnyAction</span> </span>{
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        dispatch(action);
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-keyword">return</span> action;
+};
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> store;
+</code></pre>
+<h2 id="t43. 日志中间件">3. 日志中间件 <a href="#t43. 日志中间件"> # </a></h2>
+<h3 id="t53.1 store\index.tsx">3.1 store\index.tsx <a href="#t53.1 store\index.tsx"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+import { createStore, Store, AnyAction, Middleware, MiddlewareAPI, StoreEnhancer, StoreEnhancerStoreCreator, applyMiddleware } from '../redux';</span>
+import reducer from './reducers';
+import { CombinedState } from './reducers';
+<span class="hljs-addition">+//const store: Store&lt;CombinedState, AnyAction&gt; = createStore&lt;CombinedState, AnyAction, {}, {}&gt;(reducer, { counter1: { number: 0 }, counter2: { number: 0 } });</span>
+<span class="hljs-addition">+let logger: Middleware = (api: MiddlewareAPI) =&gt; (next: any) =&gt; (action: any) =&gt; {</span>
+<span class="hljs-addition">+    console.log(api.getState());</span>
+<span class="hljs-addition">+    next(action);</span>
+<span class="hljs-addition">+    console.log(api.getState());</span>
+<span class="hljs-addition">+    return action;</span>
+<span class="hljs-addition">+};</span>
+<span class="hljs-addition">+let storeEnhancer: StoreEnhancer = applyMiddleware(logger);</span>
+<span class="hljs-addition">+let storeEnhancerStoreCreator: StoreEnhancerStoreCreator = storeEnhancer(createStore);</span>
+<span class="hljs-addition">+let store: Store = storeEnhancerStoreCreator(reducer);</span>
+<span class="hljs-addition">+export default store;</span>
+</code></pre>
+<h3 id="t63.2 redux\types.tsx">3.2 redux\types.tsx <a href="#t63.2 redux\types.tsx"> # </a></h3>
+<p>src\redux\types.tsx</p>
+<pre><code class="lang-diff">export interface Action&lt;T = any&gt; {
+    type: T
+}
+
+export interface AnyAction extends Action {
+    [extraProps: string]: any
+}
+
+export type Reducer&lt;S = any, A extends Action = AnyAction&gt; = (
+    state: S | undefined,
+    action: A
+) =&gt; S
+
+<span class="hljs-addition">+export interface Dispatch&lt;A extends Action = AnyAction&gt; {</span>
+<span class="hljs-addition">+    &lt;T extends A&gt;(action: T): T</span>
+<span class="hljs-addition">+}</span>
+
+export interface Unsubscribe {
+    (): void
+}
+export interface Store&lt;S = any, A extends Action = AnyAction&gt; {
+    dispatch: Dispatch&lt;A&gt;;
+    getState(): S;
+    subscribe(listener: () =&gt; void): Unsubscribe;
+}
+
+<span class="hljs-addition">+export interface Middleware&lt;</span>
+<span class="hljs-addition">+    DispatchExt = {},</span>
+<span class="hljs-addition">+    S = any,</span>
+<span class="hljs-addition">+    D extends Dispatch = Dispatch</span>
+<span class="hljs-addition">+    &gt; {</span>
+<span class="hljs-addition">+    (api: MiddlewareAPI&lt;D, S&gt;): (</span>
+<span class="hljs-addition">+        next: Dispatch&lt;AnyAction&gt;</span>
+<span class="hljs-addition">+    ) =&gt; (action: any) =&gt; any</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export interface MiddlewareAPI&lt;D extends Dispatch = Dispatch, S = any&gt; {</span>
+<span class="hljs-addition">+    dispatch: D</span>
+<span class="hljs-addition">+    getState(): S</span>
+<span class="hljs-addition">+}</span>
+
+<span class="hljs-addition">+export type StoreEnhancer = (</span>
+<span class="hljs-addition">+    next: StoreEnhancerStoreCreator</span>
+<span class="hljs-addition">+) =&gt; StoreEnhancerStoreCreator</span>
+<span class="hljs-addition">+export type StoreEnhancerStoreCreator = &lt;</span>
+<span class="hljs-addition">+    S = any,</span>
+<span class="hljs-addition">+    A extends Action = AnyAction</span>
+<span class="hljs-addition">+    &gt;(</span>
+<span class="hljs-addition">+    reducer: Reducer&lt;S, A&gt;,</span>
+<span class="hljs-addition">+    preloadedState?: S</span>
+<span class="hljs-addition">+) =&gt; Store&lt;S, A&gt;</span>
+</code></pre>
+<h3 id="t73.3 redux\index.tsx">3.3 redux\index.tsx <a href="#t73.3 redux\index.tsx"> # </a></h3>
+<p>src\redux\index.tsx</p>
+<pre><code class="lang-diff">import createStore from './createStore';
+import bindActionCreators from './bindActionCreators';
+import combineReducers from './combineReducers';
+<span class="hljs-addition">+import applyMiddleware from './applyMiddleware'</span>
+export {
+    createStore,
+    bindActionCreators,
+    combineReducers,
+<span class="hljs-addition">+    applyMiddleware</span>
+}
+export * from './types';
+export * from './bindActionCreators';
+export * from './combineReducers';
+<span class="hljs-addition">+export * from './applyMiddleware';</span>
+</code></pre>
+<h3 id="t83.4 redux\compose.tsx">3.4 redux\compose.tsx <a href="#t83.4 redux\compose.tsx"> # </a></h3>
+<p>src\redux\compose.tsx</p>
+<ul>
+<li><a href="https://github.com/reduxjs/redux/blob/master/src/compose.ts">compose</a></li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add1</span>(<span class="hljs-params">str</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'1'</span>+str;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add2</span>(<span class="hljs-params">str</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'2'</span>+str;
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add3</span>(<span class="hljs-params">str</span>)</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'3'</span>+str;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">compose</span>(<span class="hljs-params">...funcs</span>)</span>{
+    <span class="hljs-keyword">return</span> funcs.reduce(<span class="hljs-function">(<span class="hljs-params">a,b</span>)=&gt;</span><span class="hljs-function">(<span class="hljs-params">...args</span>)=&gt;</span>a(b(...args)));
+}
+
+<span class="hljs-keyword">let</span> result = compose(add3,add2,add1)(<span class="hljs-string">'zhufeng'</span>);
+<span class="hljs-built_in">console</span>.log(result);
+</code></pre>
+<pre><code class="lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">compose</span>(<span class="hljs-params">...funcs: Function[]</span>) </span>{
+    <span class="hljs-keyword">return</span> funcs.reduce(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> <span class="hljs-function">(<span class="hljs-params">...args: any</span>) =&gt;</span> a(b(...args)))
+}
+</code></pre>
+<h3 id="t93.5 applyMiddleware.tsx">3.5 applyMiddleware.tsx <a href="#t93.5 applyMiddleware.tsx"> # </a></h3>
+<p>src\redux\applyMiddleware.tsx</p>
+<pre><code class="lang-js"><span class="hljs-keyword">import</span> compose <span class="hljs-keyword">from</span> <span class="hljs-string">'./compose'</span>;
+<span class="hljs-keyword">import</span> { Middleware, Store, StoreEnhancer, Dispatch, MiddlewareAPI, StoreCreator, Action, AnyAction, Reducer } <span class="hljs-keyword">from</span> <span class="hljs-string">'./'</span>
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">applyMiddleware</span>(<span class="hljs-params">
+    ...middlewares: Middleware[]
+</span>): <span class="hljs-title">StoreEnhancer</span>
+<span class="hljs-title">export</span> <span class="hljs-title">default</span> <span class="hljs-title">function</span> <span class="hljs-title">applyMiddleware</span>(<span class="hljs-params">
+    ...middlewares: Middleware[]
+</span>): <span class="hljs-title">StoreEnhancer</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">createStore: StoreCreator</span>) =&gt;</span> &lt;S, A extends Action&gt;(
+        reducer: Reducer&lt;S, A&gt;
+    ): Store&lt;S, A&gt; =&gt; {
+        const store = createStore(reducer)
+        let dispatch: Dispatch;
+
+        const middlewareAPI: MiddlewareAPI = {
+            getState: store.getState,
+            dispatch: (action) =&gt; dispatch(action)
+        }
+        const chain = middlewares.map(middleware =&gt; middleware(middlewareAPI))
+        dispatch = compose(...chain)(store.dispatch)
+        return {
+            ...store,
+            dispatch
+        }
+    }
+}
+</code></pre>
+<p>函数兼容性判断</p>
+<pre><code class="lang-js">
+<span class="hljs-keyword">let</span> x: string | number;
+<span class="hljs-keyword">let</span> y: string;
+y = x;
+x = y;
+
+==========================
+
+<span class="hljs-keyword">export</span> interface Action {
+    <span class="hljs-attr">type</span>: string
+}
+<span class="hljs-keyword">export</span> interface NameAction extends Action {
+    <span class="hljs-attr">name</span>: string;
+}
+<span class="hljs-keyword">export</span> interface AgeAction extends Action {
+    <span class="hljs-attr">age</span>: number;
+}
+<span class="hljs-keyword">export</span> interface AllAction extends Action {
+    <span class="hljs-attr">name</span>: string;
+    age: number;
+}
+<span class="hljs-keyword">export</span> interface Dispatch&lt;A extends Action&gt; {
+    &lt;T extends A&gt;(action: T): T
+}
+<span class="hljs-keyword">let</span> dispatchNameAction: Dispatch&lt;NameAction&gt; = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> dispatchAgeAction: Dispatch&lt;AgeAction&gt; = <span class="hljs-literal">null</span>;
+<span class="hljs-keyword">let</span> dispatchAllAction: Dispatch&lt;AllAction&gt; = <span class="hljs-literal">null</span>;
+dispatchNameAction = dispatchAgeAction;<span class="hljs-comment">//处理少的能赋值给处理多的</span>
+dispatchAgeAction = dispatchNameAction;<span class="hljs-comment">//处理多的不能赋值给处理少的</span>
+dispatchAllAction = dispatchNameAction;
+dispatchAllAction = dispatchAgeAction;
+
+</code></pre>
+<h2 id="t104. 级联中间件">4. 级联中间件 <a href="#t104. 级联中间件"> # </a></h2>
+<p><img src="http://img.zhufengpeixun.cn/reduxmiddleware.png" alt="applyMiddleware"></p>
+<h3 id="t114.1 store\index.tsx">4.1 store\index.tsx <a href="#t114.1 store\index.tsx"> # </a></h3>
+<p>src\store\index.tsx</p>
+<pre><code class="lang-diff">import { createStore, Store, AnyAction, Middleware, MiddlewareAPI, StoreEnhancer, StoreEnhancerStoreCreator, applyMiddleware } from '../redux';
+import reducer from './reducers';
+import { CombinedState } from './reducers';
+//const store: Store&lt;CombinedState, AnyAction&gt; = createStore&lt;CombinedState, AnyAction, {}, {}&gt;(reducer, { counter1: { number: 0 }, counter2: { number: 0 } });
+let logger: Middleware = (api: MiddlewareAPI) =&gt; (next: any) =&gt; (action: any) =&gt; {
+    console.log(api.getState());
+    next(action);
+    console.log(api.getState());
+    return action;
+};
+<span class="hljs-addition">+let thunk: Middleware = (api: MiddlewareAPI) =&gt; (next: any) =&gt; (action: any) =&gt; {</span>
+<span class="hljs-addition">+    if (typeof action == 'function') {</span>
+<span class="hljs-addition">+        return action(api.dispatch, api.getState);</span>
+<span class="hljs-addition">+    }</span>
+<span class="hljs-addition">+    return next(action);</span>
+<span class="hljs-addition">+};</span>
+<span class="hljs-addition">+function isPromise(obj: any) {</span>
+<span class="hljs-addition">+    return !!obj &amp;&amp; (typeof obj === 'object' || typeof obj === 'function') &amp;&amp; typeof obj.then === 'function';</span>
+<span class="hljs-addition">+}</span>
+<span class="hljs-addition">+let promise: Middleware = (api: MiddlewareAPI) =&gt; (next: any) =&gt; (action: any) =&gt; {</span>
+<span class="hljs-addition">+    return isPromise(action.payload)</span>
+<span class="hljs-addition">+        ? action.payload</span>
+<span class="hljs-addition">+            .then((result: any) =&gt; api.dispatch({ ...action, payload: result }))</span>
+<span class="hljs-addition">+            .catch((error: any) =&gt; {</span>
+<span class="hljs-addition">+                api.dispatch({ ...action, payload: error, error: true });</span>
+<span class="hljs-addition">+                return Promise.reject(error);</span>
+<span class="hljs-addition">+            })</span>
+<span class="hljs-addition">+        : next(action);</span>
+<span class="hljs-addition">+};</span>
+<span class="hljs-addition">+let storeEnhancer: StoreEnhancer = applyMiddleware(thunk, promise, logger);</span>
+let storeEnhancerStoreCreator: StoreEnhancerStoreCreator = storeEnhancer(createStore);
+let store: Store = storeEnhancerStoreCreator(reducer);
+export default store;
+</code></pre>
+<h3 id="t124.2 actions\counter1.tsx">4.2 actions\counter1.tsx <a href="#t124.2 actions\counter1.tsx"> # </a></h3>
+<p>src\store\actions\counter1.tsx</p>
+<pre><code class="lang-diff">import * as types from '../action-types';
+<span class="hljs-addition">+import { AnyAction, Dispatch } from '../../redux';</span>
+const actions = {
+    increment1(): AnyAction {
+        return { type: types.INCREMENT1 };
+    },
+<span class="hljs-addition">+    increment1Async() {</span>
+<span class="hljs-addition">+        return function (dispatch: Dispatch) {</span>
+<span class="hljs-addition">+            setTimeout(() =&gt; {</span>
+<span class="hljs-addition">+                dispatch({ type: types.INCREMENT1 });</span>
+<span class="hljs-addition">+            }, 1000);</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    },</span>
+<span class="hljs-addition">+    increment1Promise() {</span>
+<span class="hljs-addition">+        return {</span>
+<span class="hljs-addition">+            type: types.INCREMENT1,</span>
+<span class="hljs-addition">+            payload: new Promise((resolve: any, reject: any) =&gt; {</span>
+<span class="hljs-addition">+                setTimeout(() =&gt; {</span>
+<span class="hljs-addition">+                    let result = Math.random();</span>
+<span class="hljs-addition">+                    if (result &gt; .5) {</span>
+<span class="hljs-addition">+                        resolve(result);</span>
+<span class="hljs-addition">+                    } else {</span>
+<span class="hljs-addition">+                        reject(result);</span>
+<span class="hljs-addition">+                    }</span>
+<span class="hljs-addition">+                }, 1000);</span>
+<span class="hljs-addition">+            })</span>
+<span class="hljs-addition">+        }</span>
+<span class="hljs-addition">+    },</span>
+    decrement1(): AnyAction {
+        return { type: types.DECREMENT1 };
+    }
+}
+export default actions;
+</code></pre>
+<h3 id="t134.3 Counter1.tsx">4.3 Counter1.tsx <a href="#t134.3 Counter1.tsx"> # </a></h3>
+<p>src\components\Counter1.tsx</p>
+<pre><code class="lang-diff">import React, { Component } from 'react';
+import actions from '../store/actions/counter1';
+import { CombinedState } from '../store/reducers';
+import { Counter1State } from '../store/reducers/counter1';
+import { connect } from '../react-redux';
+<span class="hljs-addition">+import { ActionCreatorsMapObject, AnyAction } from '../redux';</span>
+type Props = Counter1State &amp; typeof actions;
+class Counter1 extends Component&lt;Props&gt; {
+    render() {
+        let { number, increment1, decrement1 } = this.props;
+        return (
+            &lt;div&gt;
+                &lt;p&gt;{number}&lt;/p&gt;
+                &lt;button onClick={increment1}&gt;+&lt;/button&gt;
+<span class="hljs-addition">+                &lt;button onClick={this.props.increment1Async}&gt;异步+1&lt;/button&gt;</span>
+<span class="hljs-addition">+                &lt;button onClick={this.props.increment1Promise}&gt;promise异步+1&lt;/button&gt;</span>
+            &lt;/div&gt;
+        )
+    }
+}
+let mapStateToProps = (state: CombinedState): Counter1State =&gt; state.counter1;
+<span class="hljs-addition">+export default connect&lt;any&gt;(</span>
+    mapStateToProps,
+    actions
+)(Counter1)
+</code></pre>
+<h3 id="t144.4 connect.tsx">4.4 connect.tsx <a href="#t144.4 connect.tsx"> # </a></h3>
+<p>src\react-redux\connect.tsx</p>
+<pre><code class="lang-diff">import React from "react";
+import { bindActionCreators, Unsubscribe, AnyAction, ActionCreatorsMapObject } from "../redux";
+import ReactReduxContext from "./context";
+import { CombinedState } from '../store/reducers';
+import { ContextValue } from './types';
+interface MapStateToProps {
+    (state: CombinedState): any;
+}
+interface MapDispatchToProps {
+    [method: string]: void
+}
+<span class="hljs-addition">+export default function &lt;Action = AnyAction&gt;(mapStateToProps: MapStateToProps, mapDispatchToProps: ActionCreatorsMapObject&lt;Action&gt;) {</span>
+    return function wrapWithConnect(WrappedComponent: React.ComponentType&lt;any&gt;) {
+        return class extends React.Component {
+            static contextType = ReactReduxContext;
+            unsubscribe: Unsubscribe;
+            constructor(props: any, context: ContextValue) {
+                super(props);
+                this.state = mapStateToProps(context.store.getState());
+            }
+            componentDidMount() {
+                this.unsubscribe = this.context.store.subscribe(() =&gt;
+                    this.setState(mapStateToProps(this.context.store.getState()))
+                );
+            }
+            shouldComponentUpdate() {
+                if (this.state <span class="hljs-comment">=== mapStateToProps(this.context.store.getState())) {</span>
+                    return false;
+                }
+                return true;
+            }
+            componentWillUnmount() {
+                this.unsubscribe();
+            }
+            render() {
+<span class="hljs-addition">+                let actions = bindActionCreators&lt;Action, ActionCreatorsMapObject&lt;Action&gt;&gt;(</span>
+                    mapDispatchToProps,
+                    this.context.store.dispatch
+                );
+                return &lt;WrappedComponent {...this.state} {...actions} /&gt;;
+            }
+        };
+    };
+}
+</code></pre>
+<h3 id="t154.5 bindActionCreators.tsx">4.5 bindActionCreators.tsx <a href="#t154.5 bindActionCreators.tsx"> # </a></h3>
+<p>src\redux\bindActionCreators.tsx</p>
+<pre><code class="lang-diff">
+import { Dispatch, AnyAction } from './';
+<span class="hljs-addition">+export interface ActionCreator&lt;A&gt; {</span>
+    (...args: any[]): A
+}
+<span class="hljs-addition">+export interface ActionCreatorsMapObject&lt;A&gt; {</span>
+    [key: string]: ActionCreator&lt;A&gt;
+}
+<span class="hljs-addition">+export default function bindActionCreators&lt;A, M extends ActionCreatorsMapObject&lt;A&gt;&gt;(</span>
+    actionCreators: M,
+    dispatch: Dispatch&lt;A&gt;
+): M
+<span class="hljs-addition">+export default function bindActionCreators&lt;A, M extends ActionCreatorsMapObject&lt;A&gt;&gt;(</span>
+    actionCreators: M,
+<span class="hljs-addition">+    dispatch: Dispatch&lt;A&gt;</span>
+): M {
+<span class="hljs-addition">+    const boundActionCreators: ActionCreatorsMapObject&lt;A&gt; = {};</span>
+    for (const key in actionCreators) {
+        const actionCreator = actionCreators[key]
+        if (typeof actionCreator <span class="hljs-comment">=== 'function') {</span>
+            boundActionCreators[key] = bindActionCreator&lt;A&gt;(actionCreator, dispatch)
+        }
+    }
+    return boundActionCreators as M;
+}
+<span class="hljs-addition">+function bindActionCreator&lt;A&gt;(</span>
+    actionCreator: ActionCreator&lt;A&gt;,
+<span class="hljs-addition">+    dispatch: Dispatch&lt;A&gt;</span>
+) {
+    return function (this: any, ...args: any[]) {
+        return dispatch(actionCreator.apply(this, args));
+    }
+}
+</code></pre>
+<h3 id="t164.6 redux\types.tsx">4.6 redux\types.tsx <a href="#t164.6 redux\types.tsx"> # </a></h3>
+<p>src\redux\types.tsx</p>
+<pre><code class="lang-diff"><span class="hljs-addition">+export interface Dispatch&lt;A = AnyAction&gt; {</span>
+    &lt;T extends A&gt;(action: T): T
+}
+</code></pre>
+
+    
