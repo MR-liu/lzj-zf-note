@@ -1,0 +1,8 @@
+{
+  "name": "lzj-js-libs",
+  "version": "0.1.3",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": "https://github.com/MR-liu/lzj-js-libs.git",
+  "author": "刘泽锦 <best_liuzejin@sina.com>"
+}

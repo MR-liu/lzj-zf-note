@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isBoolean = exports.isString = exports.isNumber = exports.isRegExp = exports.isDate = exports.isObject = exports.isArray = exports.isFunction = void 0;
+var checktypes_1 = require("./checktypes");
+Object.defineProperty(exports, "isFunction", { enumerable: true, get: function () { return checktypes_1.isFunction; } });
+Object.defineProperty(exports, "isArray", { enumerable: true, get: function () { return checktypes_1.isArray; } });
+Object.defineProperty(exports, "isObject", { enumerable: true, get: function () { return checktypes_1.isObject; } });
+Object.defineProperty(exports, "isDate", { enumerable: true, get: function () { return checktypes_1.isDate; } });
+Object.defineProperty(exports, "isRegExp", { enumerable: true, get: function () { return checktypes_1.isRegExp; } });
+Object.defineProperty(exports, "isNumber", { enumerable: true, get: function () { return checktypes_1.isNumber; } });
+Object.defineProperty(exports, "isString", { enumerable: true, get: function () { return checktypes_1.isString; } });
+Object.defineProperty(exports, "isBoolean", { enumerable: true, get: function () { return checktypes_1.isBoolean; } });
