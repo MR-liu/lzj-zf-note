@@ -439,7 +439,7 @@ const getdom = (html, name) => {
   const content = mainContent.html();
   all[name] = content;
 
-  emit(content, name);
+  // emit(content, name);
 }
 
 function emit(content, name) {
