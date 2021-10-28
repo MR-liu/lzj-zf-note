@@ -1,5 +1,6 @@
 import React from 'react';
-import objectC from './template/z.js';
+// import objectC from './template/z.js';
+import objectC from './template/html.js';
 
 function App() {
   const T = [];
