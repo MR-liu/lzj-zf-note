@@ -4,6 +4,8 @@ var cheerio = require('cheerio');
 
 const all = {};
 const allImage = [];
+const imageType = ['jpg', 'jpeg', 'png', 'gif'];
+const END_TYPE = '.jpeg';
 
 const config_ = {
   "0.Async": "http://www.zhufengpeixun.com/plan/index.html",
@@ -333,6 +335,55 @@ function optionsConfig(url) {
 const keys = Object.keys(config_);
 let i = 0;
 
+const getType = (url) => {
+  if (!url) return '__NO'
+  const list = url.split('.');
+
+  const type = list.pop();
+
+  return type ? type : '__NO'
+}
+
+const getName = (url) => {
+  if (!url) return ''
+  const is = isImage(url);
+
+  if (is) {
+    return url.split('/').pop();
+  }
+
+  return url.split('/').pop() + END_TYPE;
+}
+
+const isImage = (url) => {
+  if (!url) return false;
+  const type = getType(url);
+
+  const is = imageType.includes(type);
+
+  return is;
+}
+
+const streamImg = (imgURL, fn) => {
+  try {
+    request(imgURL, () => {
+      i += 1;
+      fn && fn()
+    })
+      .pipe(
+        fs.createWriteStream('./' + getName(imgURL))).on('finish', function() {
+          console.error('写入已完成');
+
+          fn && fn();
+        }).catch(e => {
+          console.log('xxxxx', e);
+        });
+  } catch (error) {
+    console.log('xxxxxxxx', imgURL);
+    // console.log(error);
+  }
+}
+
 function getListHtml() {
   const name = keys[i];
   const url = config_[name]
@@ -340,12 +391,12 @@ function getListHtml() {
   const options = optionsConfig(url);
 
   if (!name) {
-    // fs.writeFile(`./all/all.config.js`, JSON.stringify(all), (err) => {
-    //   if (err) {
-    //     console.error(err)
-    //     return
-    //   }
-    // })
+    fs.writeFile(`./all/all.config.js`, JSON.stringify(all), (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+    })
 
     fs.writeFile(`./all/all.images.js`, JSON.stringify(allImage), (err) => {
       if (err) {
@@ -354,10 +405,7 @@ function getListHtml() {
       }
     })
     return console.log('over');
-    return;
   }
-
-  console.log('xxxxxxxx', name);
 
   request(options, function (error, response, body) {
     if (error) {
@@ -370,49 +418,20 @@ function getListHtml() {
   if (keys.length >= i) {
     i += 1
     // setTimeout(getListHtml, 1000 * 1)
+
+    console.log( i / keys.length * 100 +  '%');
     setTimeout(getListHtml, 100 * 4)
   }
 }
 
-function getdom(html, name){
+const getdom = (html, name) => {
   var $ = cheerio.load(html);
   const mainContent = $('.content');
 
   mainContent.find('img').each(function (index, el) {
     var imgurl = $(this).attr("src");
-    var newUrl = '';
 
-    // console.log('imgurl', imgurl);
-
-    if (imgurl && (imgurl.endsWith('jpg') || imgurl.endsWith('png'))) {
-      newUrl = imgurl.split('http://img.zhufengpeixun.cn/')[1];
-
-      // request(imgurl).pipe(fs.createWriteStream('./img/' + newUrl));
-      // $(this).attr('src', './img/' + newUrl);
-
-      // allImage.push({
-      //   newUrl: imgurl
-      // })
-    }
-
-    if (imgurl && imgurl.endsWith('gif')) {
-      newUrl = imgurl.split('http://nimit.io/images/n/')[1];
-      // request(imgurl).pipe(fs.createWriteStream('./img/' + newUrl));
-      // $(this).attr('src', './img/' + newUrl);
-
-      // allImage.push({
-      //   newUrl: imgurl
-      // })
-    }
-
-    // const newUrl = imgurl.split('http://img.zhufengpeixun.cn/')[1];
-    // console.log('imgurl', imgurl);
-    // request(imgurl).pipe(fs.createWriteStream('./img/' + newUrl));
-    // console.log('newUrl', newUrl);
-    $(this).attr('src', './img/' + newUrl);
-    // allImage.push({
-    //   newUrl: imgurl
-    // })
+    $(this).attr('src', './img/' + getName(imgurl));
 
     allImage.push(imgurl);
   });
